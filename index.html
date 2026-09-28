@@ -1,1 +1,54 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Assistente Fazenda São José</title><style>body{font-family:system-ui;margin:0;background:#f4f6f1;color:#172019}header{background:#275d38;color:#fff;padding:20px}main{max-width:760px;margin:auto;padding:18px}.card{background:#fff;border-radius:14px;padding:18px;margin:12px 0;border:1px solid #dfe5dc}button{background:#275d38;color:#fff;border:0;border-radius:10px;padding:12px 16px;font-weight:700}small{color:#687269}</style></head><body><header><h2>Fazenda São José</h2><div>Painel do Gestor</div></header><main><div class="card"><h3>Assistente FSJ</h3><p>Aplicação publicada no repositório oficial do Assistente Fazenda São José.</p><small>Estrutura inicial de publicação. A versão operacional do painel será atualizada preservando a base de dados definida para o projeto.</small></div></main></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FSJ • Painel do Gestor</title>
+<style>
+:root{--bg:#f4f6f1;--card:#fff;--ink:#172019;--muted:#687269;--line:#dfe5dc;--accent:#275d38;--soft:#e8f0e9;--warn:#8a5a13}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--accent);color:white;padding:18px 16px 15px;position:sticky;top:0;z-index:3}
+header h1{font-size:20px;margin:0} header small{opacity:.85}
+main{max-width:920px;margin:auto;padding:14px 14px 88px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px #00000008}
+.metric b{display:block;font-size:24px}.metric span{font-size:12px;color:var(--muted)}
+h2{font-size:17px;margin:0 0 12px}label{font-size:12px;color:var(--muted);display:block;margin:8px 0 4px}
+input,select,textarea,button{font:inherit;width:100%;border-radius:10px;border:1px solid #cfd7ce;padding:11px;background:white}
+textarea{min-height:72px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{border:0;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}.secondary{background:#eef2ed;color:var(--ink);border:1px solid var(--line)}
+.task{padding:11px 0;border-top:1px solid var(--line)}.task:first-of-type{border-top:0}.task-top{display:flex;gap:8px;justify-content:space-between;align-items:flex-start}
+.badge{white-space:nowrap;font-size:11px;padding:4px 7px;border-radius:999px;background:#f2eee4;color:var(--warn)}.done{background:#e3efe6;color:#275d38}
+.meta{font-size:12px;color:var(--muted);margin-top:4px}.actions{display:flex;gap:6px;margin-top:8px}.actions button{width:auto;padding:7px 10px;font-size:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:flex;z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+nav button{border-radius:0;background:white;color:#536057;padding:12px 4px;font-size:12px}nav button.active{color:var(--accent);font-weight:800}
+section.page{display:none}section.page.active{display:block}.empty{color:var(--muted);font-size:13px;text-align:center;padding:15px}
+@media(max-width:520px){.grid{grid-template-columns:repeat(3,1fr)}.row{grid-template-columns:1fr}.metric b{font-size:20px}}
+</style></head><body>
+<header><h1>Fazenda São José</h1><small>Painel do Gestor • versão móvel 1.1</small></header>
+<main>
+<section id="inicio" class="page active"><div class="grid"><div class="card metric"><b id="mOpen">0</b><span>Em aberto</span></div><div class="card metric"><b id="mDone">0</b><span>Concluídas</span></div><div class="card metric"><b id="mPeople">0</b><span>Pessoas</span></div></div><div class="card"><h2>Atividades de hoje</h2><div id="today"></div></div></section>
+<section id="nova" class="page"><div class="card"><h2>Nova tarefa</h2><label>Atividade</label><textarea id="desc" placeholder="Ex.: Inspecionar cerca do piquete"></textarea><div class="row"><div><label>Tipo</label><select id="type"><option value="pontual">Pontual</option><option value="diaria">Diária</option></select></div><div><label>Responsabilidade</label><select id="respType"><option value="pessoa">Pessoa</option><option value="grupo">Grupo</option></select></div></div><label>Responsável</label><select id="responsible"></select><button onclick="addTask()" style="margin-top:12px">Cadastrar tarefa</button></div></section>
+<section id="pessoas" class="page"><div class="card"><h2>Pessoas</h2><div id="peopleList"></div><label>Nome completo</label><input id="fullName"><label>Nome de identificação</label><input id="shortName"><label>WhatsApp (DDD + número)</label><input id="phone" inputmode="tel" placeholder="81 99999-9999"><label>Tipo</label><select id="personType"><option>Funcionário</option><option>Prestador de serviço</option><option>Outro</option></select><button onclick="addPerson()" style="margin-top:12px">Cadastrar pessoa</button></div></section>
+<section id="grupos" class="page"><div class="card"><h2>Grupos de trabalho</h2><div id="groupList"></div><label>Nome do grupo</label><input id="groupName" placeholder="Ex.: Campo"><label>Integrantes</label><div id="memberChecks"></div><button onclick="addGroup()" style="margin-top:12px">Criar grupo</button></div></section>
+<section id="mais" class="page"><div class="card"><h2>Gestão</h2><button class="secondary" onclick="exportData()">Backup dos dados</button><p class="meta">Os dados desta versão são armazenados neste navegador. Use o backup para preservar ou transferir os registros. A sincronização automática entre celular e computador será implantada na etapa de banco de dados central.</p></div></section>
+</main>
+<nav><button class="active" onclick="go('inicio',this)">Início</button><button onclick="go('nova',this)">+ Tarefa</button><button onclick="go('pessoas',this)">Pessoas</button><button onclick="go('grupos',this)">Grupos</button><button onclick="go('mais',this)">Mais</button></nav>
+<script>
+const K='fsj_fazenda_sao_jose';let db;
+function load(){try{db=JSON.parse(localStorage.getItem(K))||{}}catch(e){db={}};db.people=db.people||[];db.groups=db.groups||[];db.tasks=db.tasks||[]}
+function save(){localStorage.setItem(K,JSON.stringify(db));render()}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function today(){return new Date().toISOString().slice(0,10)}
+function go(x,b){document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));document.getElementById(x).classList.add('active');document.querySelectorAll('nav button').forEach(e=>e.classList.remove('active'));b.classList.add('active');render()}
+function taskOpen(t){if(t.type==='diaria')return t.lastDone!==today();return !t.done}
+function addPerson(){let f=fullName.value.trim(),s=shortName.value.trim(),p=phone.value.trim();if(!f||!s)return alert('Informe nome completo e nome de identificação.');db.people.push({id:id(),fullName:f,shortName:s,phone:p,type:personType.value});fullName.value=shortName.value=phone.value='';save()}
+function addGroup(){let members=[...document.querySelectorAll('.mcheck:checked')].map(x=>x.value);if(!groupName.value.trim()||!members.length)return alert('Informe o nome e pelo menos um integrante.');db.groups.push({id:id(),name:groupName.value.trim(),members});groupName.value='';save()}
+function addTask(){if(!desc.value.trim()||!responsible.value)return alert('Informe a atividade e o responsável.');db.tasks.push({id:id(),desc:desc.value.trim(),type:type.value,respType:respType.value,responsible:responsible.value,created:new Date().toISOString(),done:false,lastDone:null,doneBy:null});desc.value='';save();alert('Tarefa cadastrada.')}
+function conclude(tid){let t=db.tasks.find(x=>x.id===tid);if(!t)return;if(!taskOpen(t))return alert('Esta tarefa já foi concluída.');t.doneBy='Gestor';if(t.type==='diaria')t.lastDone=today();else t.done=true;save()}
+function respName(t){if(t.respType==='grupo'){let g=db.groups.find(x=>x.id===t.responsible);return g?'Grupo: '+g.name:'Grupo'}let p=db.people.find(x=>x.id===t.responsible);return p?p.shortName:'Pessoa'}
+function render(){let open=db.tasks.filter(taskOpen),done=db.tasks.filter(x=>!taskOpen(x));mOpen.textContent=open.length;mDone.textContent=done.length;mPeople.textContent=db.people.length;let te=document.getElementById('today');te.innerHTML=db.tasks.length?db.tasks.map(t=>`<div class="task"><div class="task-top"><div><b>${esc(t.desc)}</b><div class="meta">${esc(respName(t))} • ${t.type==='diaria'?'Diária':'Pontual'}</div></div><span class="badge ${taskOpen(t)?'':'done'}">${taskOpen(t)?'ABERTA':'CONCLUÍDA'}</span></div>${taskOpen(t)?`<div class="actions"><button onclick="conclude('${t.id}')">Concluir</button></div>`:''}</div>`).join(''):'<div class="empty">Nenhuma tarefa cadastrada.</div>';peopleList.innerHTML=db.people.length?db.people.map(p=>`<div class="task"><b>${esc(p.shortName)}</b><div class="meta">${esc(p.fullName)} • ${esc(p.type)} • ${esc(p.phone||'sem WhatsApp')}</div></div>`).join(''):'<div class="empty">Nenhuma pessoa cadastrada.</div>';groupList.innerHTML=db.groups.length?db.groups.map(g=>`<div class="task"><b>${esc(g.name)}</b><div class="meta">${g.members.map(mid=>{let p=db.people.find(x=>x.id===mid);return p?esc(p.shortName):''}).filter(Boolean).join(', ')}</div></div>`).join(''):'<div class="empty">Nenhum grupo cadastrado.</div>';memberChecks.innerHTML=db.people.map(p=>`<label style="font-size:14px;color:var(--ink)"><input class="mcheck" type="checkbox" value="${p.id}" style="width:auto;margin-right:7px">${esc(p.shortName)}</label>`).join('');updateResponsible()}
+function updateResponsible(){let r=document.getElementById('responsible'),rt=document.getElementById('respType');if(!r||!rt)return;let arr=rt.value==='grupo'?db.groups:db.people;r.innerHTML=arr.map(x=>`<option value="${x.id}">${esc(x.name||x.shortName)}</option>`).join('')}
+respType.addEventListener('change',updateResponsible);
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fsj-backup-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+load();render();
+</script></body></html>
