@@ -21,6 +21,19 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 .muted{color:var(--muted);font-size:13px}.pill{display:inline-block;background:#edf2ee;border-radius:999px;padding:3px 8px;font-size:12px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px}.kpi b{display:block;font-size:22px}
 .table{overflow:auto}table{width:100%;border-collapse:collapse;min-width:800px}th,td{padding:8px;border-bottom:1px solid #e3e7e4;text-align:left;vertical-align:top}.hidden{display:none}.msg{white-space:pre-wrap;background:#f8faf8;border:1px solid var(--line);padding:10px;border-radius:8px}
 @media(max-width:700px){header{position:sticky;top:0}.topnav{top:62px}.grid{grid-template-columns:1fr 1fr}.actions button{padding:6px;font-size:12px}.topnav .inner{padding:6px 8px}}
+
+/* Brisa — assistente lateral */
+.brisa-fab{position:fixed;right:22px;bottom:22px;width:68px;height:68px;border-radius:50%;border:3px solid #fff;background:var(--g);color:#fff;box-shadow:0 6px 22px #0004;z-index:60;font-weight:700;font-size:24px;padding:0}
+.brisa-fab:hover{transform:scale(1.04)}
+.brisa-panel{position:fixed;right:0;top:0;height:100vh;width:min(390px,92vw);background:#fff;box-shadow:-8px 0 28px #0003;z-index:70;transform:translateX(105%);transition:transform .22s ease;display:flex;flex-direction:column}
+.brisa-panel.open{transform:translateX(0)}
+.brisa-head{background:var(--g);color:#fff;padding:14px;display:flex;align-items:center;gap:10px}
+.brisa-avatar{width:52px;height:52px;border-radius:50%;background:#f4f2e9;color:var(--g);display:grid;place-items:center;font-size:24px;font-weight:800;border:2px solid #fff}
+.brisa-head .close{margin-left:auto;background:transparent;color:#fff;border-color:#ffffff88;font-size:20px}
+.brisa-body{padding:18px;overflow:auto;flex:1}
+.brisa-body h2{margin-bottom:6px}.brisa-status{padding:10px;border-radius:10px;background:#f4f2e9;margin:12px 0}
+.brisa-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){.brisa-fab{right:14px;bottom:14px;width:60px;height:60px}.brisa-panel{width:100vw}}
 </style></head><body>
 <header><h1>Assistente Fazenda São José</h1><div>Gestor Web v1.8 • Armazenagem central • funcionários exclusivamente pelo WhatsApp</div><div id="today"></div></header>
 <nav class="topnav"><div class="inner"><button id="backBtn" onclick="voltarPagina()" disabled>← Voltar</button><button class="active" onclick="navTo('dashboard',this)">Início</button><button onclick="navTo('cadPessoas',this)">Pessoas</button><button onclick="navTo('cadGrupos',this)">Grupos</button><button onclick="navTo('novaTarefa',this)">Tarefas</button><button onclick="navTo('demandas',this)">Demandas</button><button onclick="navTo('whatsapp',this)">WhatsApp</button><button onclick="navTo('relatorios',this)">Relatórios</button><button onclick="navTo('seguranca',this)">Armazenagem</button></div></nav>
@@ -35,6 +48,18 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 <div id="relatorios" class="card"><h2>Relatório mensal consolidado</h2><div class="row"><input id="month" type="month" style="max-width:220px"><button onclick="monthly()">Gerar</button></div><div id="report" class="table"></div></div>
 </section>
 </main>
+
+<button id="brisaFab" class="brisa-fab" type="button" onclick="abrirBrisa()" aria-label="Abrir Brisa" title="Brisa">B</button>
+<aside id="brisaPanel" class="brisa-panel" aria-hidden="true">
+  <div class="brisa-head"><div class="brisa-avatar">B</div><div><b>Brisa</b><div style="font-size:12px">Assistente • Fazenda São José</div></div><button class="close" onclick="fecharBrisa()" aria-label="Fechar">×</button></div>
+  <div class="brisa-body">
+    <h2>Olá, sou Brisa</h2>
+    <div class="muted">Posso ficar ao seu lado enquanto você trabalha no sistema.</div>
+    <div id="brisaContexto" class="brisa-status">Você está na página Início.</div>
+    <div class="brisa-actions"><button class="primary" onclick="brisaOuvir()">🎙 Falar com Brisa</button><button onclick="fecharBrisa()">Minimizar</button></div>
+    <p id="brisaResposta" class="msg" style="margin-top:14px">Estou pronta para ajudar. A conversa inteligente por voz será conectada na próxima etapa.</p>
+  </div>
+</aside>
 <script>
 const K='fsj_fazenda_sao_jose';const ARMAZ_URL='https://awrxnzbfrsaurzpunuko.supabase.co';const ARMAZ_KEY='sb_publishable_IU8K4qN5LLWSmr8Z4vYxMA_NiEY9gu3';
 function validState(x){return x&&typeof x==='object'&&Array.isArray(x.people)&&Array.isArray(x.groups)&&Array.isArray(x.tasks)}
@@ -44,7 +69,13 @@ let S=migrateState();const save=()=>localStorage.setItem(K,JSON.stringify(S)),ui
 function rollover(){let d=dateKey();if(S.day&&S.day!==d)S.tasks.forEach(t=>{if(t.daily&&t.status==='Concluída'){t.status='Em aberto';t.response='';t.question='';t.completedBy='';t.created=new Date().toISOString()}});S.day=d;save()}
 function view(v){gestor.classList.remove('hidden');window.scrollTo({top:0,behavior:'auto'})}
 let currentPage='dashboard',pageHistory=[];
-function navTo(id,b,record=true){if(record&&id!==currentPage)pageHistory.push(currentPage);currentPage=id;view('gestor');document.querySelectorAll('.topnav button').forEach(x=>x.classList.remove('active'));let selected=b||[...document.querySelectorAll('.topnav button')].find(x=>x.getAttribute('onclick')==="navTo('"+id+"',this)");if(selected)selected.classList.add('active');backBtn.disabled=pageHistory.length===0;document.querySelectorAll('#gestor>div').forEach(x=>x.classList.add('hidden'));let el=document.getElementById(id);if(el)el.classList.remove('hidden');if(id==='novaTarefa')carregarHistoricoTarefas();window.scrollTo({top:0,left:0,behavior:'auto'})}
+function navTo(id,b,record=true){if(record&&id!==currentPage)pageHistory.push(currentPage);currentPage=id;view('gestor');setTimeout(brisaContextoAtual,0);document.querySelectorAll('.topnav button').forEach(x=>x.classList.remove('active'));let selected=b||[...document.querySelectorAll('.topnav button')].find(x=>x.getAttribute('onclick')==="navTo('"+id+"',this)");if(selected)selected.classList.add('active');backBtn.disabled=pageHistory.length===0;document.querySelectorAll('#gestor>div').forEach(x=>x.classList.add('hidden'));let el=document.getElementById(id);if(el)el.classList.remove('hidden');if(id==='novaTarefa')carregarHistoricoTarefas();window.scrollTo({top:0,left:0,behavior:'auto'})}
+
+function abrirBrisa(){brisaPanel.classList.add('open');brisaPanel.setAttribute('aria-hidden','false')}
+function fecharBrisa(){brisaPanel.classList.remove('open');brisaPanel.setAttribute('aria-hidden','true')}
+function brisaContextoAtual(){const nomes={dashboard:'Início',cadPessoas:'Pessoas',cadGrupos:'Grupos',novaTarefa:'Tarefas',demandas:'Demandas',whatsapp:'WhatsApp',relatorios:'Relatórios',seguranca:'Armazenagem'};if(window.brisaContexto)brisaContexto.textContent='Você está na página '+(nomes[currentPage]||currentPage)+'.'}
+function brisaOuvir(){let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){brisaResposta.textContent='O reconhecimento de voz não está disponível neste navegador.';return}let r=new R();r.lang='pt-BR';brisaResposta.textContent='Estou ouvindo...';r.onresult=e=>{let t=e.results[0][0].transcript;brisaResposta.textContent='Você disse: “'+t+'”. A integração das minhas respostas com o assistente será a próxima etapa.'};r.onerror=()=>brisaResposta.textContent='Não consegui ouvir. Tente novamente.';r.start()}
+
 function voltarPagina(){if(!pageHistory.length)return;let id=pageHistory.pop();navTo(id,null,false)}
 function normalizePhone(v){let d=String(v||'').replace(/\D/g,'');if(!d)return'';if(d.startsWith('00'))d=d.slice(2);if(d.length===10||d.length===11)d='55'+d;return d}
 async function savePerson(){let n=pname.value.trim(),nick=pnick.value.trim()||n;if(!n)return alert('Informe o nome.');let old=S.people.find(p=>p.id===pid.value),p={id:old?old.id:uid(),name:n,nick,phone:normalizePhone(pphone.value),type:ptype.value};try{await api('/rest/v1/pessoas?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,nome:p.name,identificacao:p.nick,whatsapp:p.phone,tipo:p.type})});if(old)Object.assign(old,p);else S.people.push(p);save();clearPerson();render();alert(old?'Cadastro atualizado na Armazenagem.':'Pessoa cadastrada na Armazenagem.')}catch(e){alert('Não foi possível salvar na Armazenagem: '+e.message)}}
