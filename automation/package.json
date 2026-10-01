@@ -1,0 +1,1 @@
+{"name":"fsj-rotina-whatsapp","version":"1.0.0","private":true,"type":"module","engines":{"node":">=22"},"scripts":{"start":"node run.mjs","link":"node link.mjs","test":"node --test test.mjs"},"dependencies":{"whatsapp-web.js":"1.34.7"}}

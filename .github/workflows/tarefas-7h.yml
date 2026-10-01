@@ -1,0 +1,41 @@
+name: Tarefas de Menininha às 7h
+on:
+  schedule:
+    - cron: '0 10 * * *' # 07:00 America/Fortaleza (UTC-3)
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fsj-whatsapp-menininha
+  cancel-in-progress: false
+jobs:
+  configuracao:
+    runs-on: ubuntu-latest
+    outputs:
+      ativo: ${{ steps.config.outputs.ativo }}
+    steps:
+      - id: config
+        env:
+          ATIVO: ${{ vars.FSJ_ROTINA_ATIVA }}
+        run: |
+          if [ "$ATIVO" = "true" ]; then
+            echo 'ativo=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ativo=false' >> "$GITHUB_OUTPUT"
+            echo 'Rotina preparada. Pendente: computador executor, vínculo WhatsApp e acesso à Armazenagem.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+  envio:
+    needs: configuracao
+    if: needs.configuracao.outputs.ativo == 'true'
+    runs-on: [self-hosted, fsj-whatsapp]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Instalar dependências fixadas
+        working-directory: automation
+        run: npm ci --no-audit --no-fund
+      - name: Apagar anterior, enviar quadro do dia e registrar
+        working-directory: automation
+        run: node run.mjs
