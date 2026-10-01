@@ -22,18 +22,27 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 .table{overflow:auto}table{width:100%;border-collapse:collapse;min-width:800px}th,td{padding:8px;border-bottom:1px solid #e3e7e4;text-align:left;vertical-align:top}.hidden{display:none}.msg{white-space:pre-wrap;background:#f8faf8;border:1px solid var(--line);padding:10px;border-radius:8px}
 @media(max-width:700px){header{position:sticky;top:0}.topnav{top:62px}.grid{grid-template-columns:1fr 1fr}.actions button{padding:6px;font-size:12px}.topnav .inner{padding:6px 8px}}
 
-/* Brisa — assistente lateral */
-.brisa-fab{position:fixed;right:22px;bottom:22px;width:68px;height:68px;border-radius:50%;border:3px solid #fff;background:var(--g);color:#fff;box-shadow:0 6px 22px #0004;z-index:60;font-weight:700;font-size:24px;padding:0}
-.brisa-fab:hover{transform:scale(1.04)}
-.brisa-panel{position:fixed;right:0;top:0;height:100vh;width:min(390px,92vw);background:#fff;box-shadow:-8px 0 28px #0003;z-index:70;transform:translateX(105%);transition:transform .22s ease;display:flex;flex-direction:column}
-.brisa-panel.open{transform:translateX(0)}
-.brisa-head{background:var(--g);color:#fff;padding:14px;display:flex;align-items:center;gap:10px}
-.brisa-avatar{width:52px;height:52px;border-radius:50%;background:#f4f2e9;color:var(--g);display:grid;place-items:center;font-size:24px;font-weight:800;border:2px solid #fff}
+/* Brisa — retrato com movimento */
+.brisa-fab{position:fixed;right:22px;bottom:22px;width:72px;height:72px;border-radius:50%;border:3px solid #fff;background:var(--g);box-shadow:0 6px 22px #0004;z-index:60;padding:0;overflow:hidden;animation:brisaHalo 4s ease-in-out infinite}
+.brisa-fab img,.brisa-avatar img{position:absolute;width:220%;max-width:none;height:auto;left:-60%;top:-55%}
+.brisa-fab img{animation:brisaFace 6s ease-in-out infinite}
+.brisa-panel{position:fixed;right:0;top:0;height:100vh;height:100dvh;width:min(500px,100vw);background:#f6f4ed;box-shadow:-8px 0 28px #0003;z-index:70;transform:translateX(105%);visibility:hidden;transition:transform .22s ease,visibility .22s;display:flex;flex-direction:column}
+.brisa-panel.open{transform:translateX(0);visibility:visible}.brisa-panel.expanded{width:100vw}
+.brisa-head{background:var(--g);color:#fff;padding:12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.brisa-avatar{position:relative;overflow:hidden;width:44px;height:44px;flex-shrink:0;border-radius:50%;border:2px solid #fff}
 .brisa-head .close{margin-left:auto;background:transparent;color:#fff;border-color:#ffffff88;font-size:20px}
-.brisa-body{padding:18px;overflow:auto;flex:1}
-.brisa-body h2{margin-bottom:6px}.brisa-status{padding:10px;border-radius:10px;background:#f4f2e9;margin:12px 0}
-.brisa-actions{display:flex;gap:8px;flex-wrap:wrap}
-@media(max-width:700px){.brisa-fab{right:14px;bottom:14px;width:60px;height:60px}.brisa-panel{width:100vw}}
+.brisa-body{padding:16px;overflow:auto;flex:1}.brisa-body h2{margin:12px 0 6px}
+.brisa-portrait{position:relative;overflow:hidden;aspect-ratio:7/8;width:100%;max-width:460px;margin:auto;border-radius:18px;background:#b2b99c;box-shadow:0 5px 18px #0002}
+.brisa-portrait img{position:absolute;width:160%;max-width:none;height:auto;left:-30%;top:-14%;transform-origin:50% 40%}
+.brisa-panel.open .brisa-portrait img{animation:brisaFace 6s ease-in-out infinite}
+.brisa-state{position:absolute;bottom:14px;left:14px;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:30px;background:#ffffffed;color:#285b3a;font-size:13px}
+.brisa-dot{width:9px;height:9px;background:#558746;border-radius:50%}.brisa-panel[data-state="ouvindo"] .brisa-dot,.brisa-panel[data-state="falando"] .brisa-dot{animation:brisaHalo 1s ease-in-out infinite}
+.brisa-panel[data-state="falando"] .brisa-portrait img{animation:brisaFace 2.5s ease-in-out infinite}
+.brisa-status{padding:10px;border-radius:10px;background:#e9ecdf;margin:12px 0}.brisa-actions{display:flex;gap:8px;flex-wrap:wrap}.brisa-actions button{min-height:42px}
+@keyframes brisaFace{0%,100%{transform:translateY(0) rotate(-.35deg) scale(1.015)}50%{transform:translateY(-3px) rotate(.35deg) scale(1.03)}}
+@keyframes brisaHalo{0%,100%{box-shadow:0 0 0 0 #71995644,0 6px 22px #0003}50%{box-shadow:0 0 0 7px #71995618,0 6px 22px #0003}}
+@media(max-width:700px){.brisa-fab{right:14px;bottom:14px;width:64px;height:64px}.brisa-panel{width:100vw}.brisa-portrait{max-width:350px}.brisa-body{padding:12px}}
+@media(prefers-reduced-motion:reduce){.brisa-fab,.brisa-fab img,.brisa-panel.open .brisa-portrait img,.brisa-dot{animation:none!important}.brisa-panel{transition:none}}
 </style></head><body>
 <header><h1>Assistente Fazenda São José</h1><div>Gestor Web v1.8 • Armazenagem central • funcionários exclusivamente pelo WhatsApp</div><div id="today"></div></header>
 <nav class="topnav"><div class="inner"><button id="backBtn" onclick="voltarPagina()" disabled>← Voltar</button><button class="active" onclick="navTo('dashboard',this)">Início</button><button onclick="navTo('cadPessoas',this)">Pessoas</button><button onclick="navTo('cadGrupos',this)">Grupos</button><button onclick="navTo('novaTarefa',this)">Tarefas</button><button onclick="navTo('demandas',this)">Demandas</button><button onclick="navTo('whatsapp',this)">WhatsApp</button><button onclick="navTo('relatorios',this)">Relatórios</button><button onclick="navTo('seguranca',this)">Armazenagem</button></div></nav>
@@ -49,17 +58,16 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 </section>
 </main>
 
-<button id="brisaFab" class="brisa-fab" type="button" onclick="abrirBrisa()" aria-label="Abrir Brisa" title="Brisa">B</button>
-<aside id="brisaPanel" class="brisa-panel" aria-hidden="true">
-  <div class="brisa-head"><div class="brisa-avatar">B</div><div><b>Brisa</b><div style="font-size:12px">Assistente • Fazenda São José</div></div><button class="close" onclick="fecharBrisa()" aria-label="Fechar">×</button></div>
-  <div class="brisa-body">
-    <h2>Olá, sou Brisa</h2>
-    <div class="muted">Posso ficar ao seu lado enquanto você trabalha no sistema.</div>
-    <div id="brisaContexto" class="brisa-status">Você está na página Início.</div>
-    <div class="brisa-actions"><button class="primary" onclick="brisaOuvir()">🎙 Falar com Brisa</button><button onclick="fecharBrisa()">Minimizar</button></div>
-    <p id="brisaResposta" class="msg" style="margin-top:14px">Estou pronta para ajudar. A conversa inteligente por voz será conectada na próxima etapa.</p>
-  </div>
-</aside>
+<button id="brisaFab" class="brisa-fab" type="button" onclick="abrirBrisa()" aria-label="Abrir Brisa" title="Brisa"><img src="brisa-avatar.webp" alt="Brisa"></button>
+<aside id="brisaPanel" class="brisa-panel" aria-hidden="true" inert data-state="pronta" aria-label="Assistente Brisa">
+<div class="brisa-head"><div class="brisa-avatar"><img src="brisa-avatar.webp" alt=""></div><div><b>Brisa</b><div style="font-size:12px">Assistente • Fazenda São José</div></div><button id="brisaClose" class="close" onclick="fecharBrisa()" aria-label="Minimizar Brisa">×</button></div>
+<div class="brisa-body">
+<div class="brisa-portrait"><img src="brisa-avatar.webp" alt="Brisa, de camisa jeans, na Fazenda São José"><div class="brisa-state" role="status"><span class="brisa-dot"></span><span id="brisaEstado">Pronta para ouvir</span></div></div>
+<h2>Olá, sou Brisa</h2><div class="muted">Estou ao seu lado enquanto você trabalha.</div>
+<div id="brisaContexto" class="brisa-status">Você está na página Início.</div>
+<div class="brisa-actions"><button class="primary" onclick="brisaOuvir()">🎙 Falar com Brisa</button><button onclick="brisaApresentar()">Ouvir apresentação</button><button onclick="brisaParar()">Parar</button><button id="brisaExpand" onclick="brisaExpandir()" aria-pressed="false">Ampliar</button><button onclick="fecharBrisa()">Minimizar</button></div>
+<p id="brisaResposta" class="msg" style="margin-top:14px">O avatar já está em movimento. Você pode ouvir minha apresentação ou usar o microfone. As respostas inteligentes ainda não estão conectadas.</p>
+</div></aside>
 <script>
 const K='fsj_fazenda_sao_jose';const ARMAZ_URL='https://awrxnzbfrsaurzpunuko.supabase.co';const ARMAZ_KEY='sb_publishable_IU8K4qN5LLWSmr8Z4vYxMA_NiEY9gu3';
 function validState(x){return x&&typeof x==='object'&&Array.isArray(x.people)&&Array.isArray(x.groups)&&Array.isArray(x.tasks)}
@@ -71,10 +79,17 @@ function view(v){gestor.classList.remove('hidden');window.scrollTo({top:0,behavi
 let currentPage='dashboard',pageHistory=[];
 function navTo(id,b,record=true){if(record&&id!==currentPage)pageHistory.push(currentPage);currentPage=id;view('gestor');setTimeout(brisaContextoAtual,0);document.querySelectorAll('.topnav button').forEach(x=>x.classList.remove('active'));let selected=b||[...document.querySelectorAll('.topnav button')].find(x=>x.getAttribute('onclick')==="navTo('"+id+"',this)");if(selected)selected.classList.add('active');backBtn.disabled=pageHistory.length===0;document.querySelectorAll('#gestor>div').forEach(x=>x.classList.add('hidden'));let el=document.getElementById(id);if(el)el.classList.remove('hidden');if(id==='novaTarefa')carregarHistoricoTarefas();window.scrollTo({top:0,left:0,behavior:'auto'})}
 
-function abrirBrisa(){brisaPanel.classList.add('open');brisaPanel.setAttribute('aria-hidden','false')}
-function fecharBrisa(){brisaPanel.classList.remove('open');brisaPanel.setAttribute('aria-hidden','true')}
+let brisaReconhecimento=null,brisaVoz=null;
+function brisaEstadoAtual(estado){brisaPanel.dataset.state=estado;brisaEstado.textContent={pronta:'Pronta para ouvir',ouvindo:'Ouvindo você…',falando:'Falando…'}[estado]||'Pronta para ouvir'}
+function abrirBrisa(){brisaPanel.inert=false;brisaPanel.classList.add('open');brisaPanel.setAttribute('aria-hidden','false');brisaClose.focus()}
+function brisaParar(){if(brisaReconhecimento){let r=brisaReconhecimento;brisaReconhecimento=null;r.abort()}if(window.speechSynthesis)window.speechSynthesis.cancel();brisaVoz=null;brisaEstadoAtual('pronta')}
+function fecharBrisa(){brisaParar();brisaPanel.classList.remove('open');brisaPanel.setAttribute('aria-hidden','true');brisaPanel.inert=true;brisaFab.focus()}
+function brisaExpandir(){let grande=brisaPanel.classList.toggle('expanded');brisaExpand.textContent=grande?'Reduzir':'Ampliar';brisaExpand.setAttribute('aria-pressed',String(grande))}
 function brisaContextoAtual(){const nomes={dashboard:'Início',cadPessoas:'Pessoas',cadGrupos:'Grupos',novaTarefa:'Tarefas',demandas:'Demandas',whatsapp:'WhatsApp',relatorios:'Relatórios',seguranca:'Armazenagem'};if(window.brisaContexto)brisaContexto.textContent='Você está na página '+(nomes[currentPage]||currentPage)+'.'}
-function brisaOuvir(){let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){brisaResposta.textContent='O reconhecimento de voz não está disponível neste navegador.';return}let r=new R();r.lang='pt-BR';brisaResposta.textContent='Estou ouvindo...';r.onresult=e=>{let t=e.results[0][0].transcript;brisaResposta.textContent='Você disse: “'+t+'”. A integração das minhas respostas com o assistente será a próxima etapa.'};r.onerror=()=>brisaResposta.textContent='Não consegui ouvir. Tente novamente.';r.start()}
+function brisaApresentar(){brisaParar();if(!window.speechSynthesis){brisaResposta.textContent='A leitura por voz não está disponível neste navegador.';return}let u=new SpeechSynthesisUtterance('Olá, sou a Brisa, assistente da Fazenda São José. Estou aqui ao seu lado para acompanhar suas tarefas.');u.lang='pt-BR';u.rate=.9;let voz=speechSynthesis.getVoices().find(v=>v.lang==='pt-BR');if(voz)u.voice=voz;brisaVoz=u;u.onstart=()=>{if(brisaVoz===u)brisaEstadoAtual('falando')};u.onend=u.onerror=()=>{if(brisaVoz===u){brisaVoz=null;brisaEstadoAtual('pronta')}};speechSynthesis.speak(u)}
+function brisaOuvir(){brisaParar();let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){brisaResposta.textContent='O reconhecimento de voz não está disponível neste navegador.';return}let r=new R();brisaReconhecimento=r;r.lang='pt-BR';r.onstart=()=>{if(brisaReconhecimento===r){brisaEstadoAtual('ouvindo');brisaResposta.textContent='Estou ouvindo…'}};r.onresult=e=>{if(brisaReconhecimento===r)brisaResposta.textContent='Você disse: “'+e.results[0][0].transcript+'”. As respostas inteligentes ainda não estão conectadas.'};r.onerror=e=>{if(brisaReconhecimento===r)brisaResposta.textContent=e.error==='not-allowed'?'Permita o microfone no navegador para falar com Brisa.':'Não consegui ouvir. Tente novamente.'};r.onend=()=>{if(brisaReconhecimento===r){brisaReconhecimento=null;brisaEstadoAtual('pronta')}};try{r.start()}catch(e){brisaReconhecimento=null;brisaEstadoAtual('pronta');brisaResposta.textContent='Não foi possível iniciar o microfone. Tente novamente.'}}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&brisaPanel.classList.contains('open'))fecharBrisa()});
+
 
 function voltarPagina(){if(!pageHistory.length)return;let id=pageHistory.pop();navTo(id,null,false)}
 function normalizePhone(v){let d=String(v||'').replace(/\D/g,'');if(!d)return'';if(d.startsWith('00'))d=d.slice(2);if(d.length===10||d.length===11)d='55'+d;return d}
@@ -151,3 +166,4 @@ function sairGestor(){localStorage.removeItem('fsj_access_token');localStorage.r
 async function carregarArmazenagem(){capturarSessao();let tok=localStorage.getItem('fsj_access_token');if(!tok){loginStatus.textContent='Entre como Gestor para carregar a Armazenagem.';gestor.classList.add('hidden');return}try{loginStatus.textContent='Carregando Armazenagem...';let [ps,gs,gms,ts,trs]=await Promise.all([api('/rest/v1/pessoas?select=*'),api('/rest/v1/grupos?select=*'),api('/rest/v1/grupo_membros?select=*'),api('/rest/v1/tarefas?select=*'),api('/rest/v1/tarefa_responsaveis?select=*')]);if((!ps.length&&S.people.length)||(!ts.length&&S.tasks.length))throw new Error('A Armazenagem retornou uma lista vazia. A cópia local foi preservada.');S.people=ps.map(x=>({id:x.id,name:x.nome,nick:x.identificacao,phone:x.whatsapp,type:x.tipo}));S.groups=gs.map(g=>({id:g.id,name:g.nome,members:gms.filter(m=>m.grupo_id===g.id).map(m=>m.pessoa_id)}));S.tasks=ts.map(t=>({id:t.id,text:t.descricao,personIds:trs.filter(r=>r.tarefa_id===t.id).map(r=>r.pessoa_id),groupId:t.grupo_id||'',daily:!!t.diaria,status:t.situacao,created:t.criada_em,response:'',question:'',completedBy:t.concluida_por||'',attachments:[]}));save();loginStatus.textContent='Gestor autenticado • Armazenagem conectada: '+S.people.length+' pessoas, '+S.groups.length+' grupos, '+S.tasks.length+' tarefas.';gestor.classList.remove('hidden');render();syncInfo();navTo('dashboard',document.querySelector('.topnav button'))}catch(e){loginStatus.textContent='Não foi possível carregar a Armazenagem. A cópia deste navegador foi preservada; confira o acesso do Gestor.';if(S.people.length||S.tasks.length){gestor.classList.remove('hidden');render();navTo('dashboard',document.querySelector('.topnav button'))}else gestor.classList.add('hidden')}}
 carregarArmazenagem();
 </script></body></html>
+
