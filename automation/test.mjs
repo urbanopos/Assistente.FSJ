@@ -22,3 +22,8 @@ test('crash entre envio e registro bloqueia duplicação',async()=>{
   await assert.rejects(cycle({state:{phase:'sending'},send:async()=>{sent=true;}}),/incerto/);
   assert.equal(sent,false);
 });
+test('erro de consulta da mensagem anterior não impede novo quadro com aviso',async()=>{
+  let text;
+  await cycle({state:{},previous:{messageId:'old'},persist:async()=>{},record:async()=>{},url:'URL',revoke:async()=>{throw Error('offline');},send:async t=>{text=t;return {messageId:'new'};}});
+  assert.match(text,/Aviso/);
+});

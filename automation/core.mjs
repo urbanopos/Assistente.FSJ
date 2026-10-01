@@ -18,7 +18,11 @@ export async function cycle({state, previous, persist, revoke, send, record, url
   if(state.phase==='sending')throw Error('Envio anterior com resultado incerto: conferir a conversa antes de liberar nova tentativa.');
   if(state.messageId){await record('quadro_automatico',{status:'enviado',messageId:state.messageId,ack:state.ack||0});return state;}
   if(!state.deletion){
-    state.deletion = previous?.messageId ? await revoke(previous.messageId) : {status:'sem_confirmacao',reason:'Mensagem anterior sem identificador técnico; não foi apagada.'};
+    try {
+      state.deletion = previous?.messageId ? await revoke(previous.messageId) : {status:'sem_confirmacao',reason:'Mensagem anterior sem identificador técnico; não foi apagada.'};
+    } catch {
+      state.deletion = {status:'falhou',reason:'Não foi possível consultar ou apagar a mensagem anterior.'};
+    }
     await persist(state);
   }
   await record('apagamento_automatico',state.deletion);
