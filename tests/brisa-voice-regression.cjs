@@ -1,0 +1,10 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');const html=fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8'),s=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+let recognition,answer,restarts=0;const elements={brisaPerguntaTexto:{value:''}};
+const ctx=vm.createContext({window:{SpeechRecognition:class{constructor(){recognition=this}start(){this.onstart()}stop(){this.onend()}abort(){}},speechSynthesis:{}},document:{getElementById:id=>elements[id]},brisaResposta:{textContent:''},brisaBotaoAtivo:()=>{},brisaEstadoAtual:()=>{},brisaParar:()=>{},brisaRetomarEscuta:()=>restarts++,brisaPerguntar:t=>answer=t,brisaEncerrarEscuta:()=>{},clearTimeout:()=>{},setTimeout:()=>1,localStorage:{getItem:()=>null}});
+vm.runInContext('let brisaEscutaContinua=false,brisaReconhecimento=null,brisaSilencioTimer=null,brisaFalhasEscuta=0;'+s.slice(s.indexOf('function brisaOuvir(automatico'),s.indexOf("document.addEventListener('keydown'")),ctx);
+ctx.brisaOuvir(true);recognition.onresult({results:[Object.assign([{transcript:'Brisa você está aí'}],{isFinal:false})]});recognition.onend();assert.equal(answer,'Brisa você está aí');
+ctx.brisaOuvir(true);recognition.onresult({results:[Object.assign([{transcript:'abra pessoas'}],{isFinal:true})]});recognition.onresult({results:[Object.assign([{transcript:'abra pessoas'}],{isFinal:true})]});recognition.onend();assert.equal(answer,'abra pessoas');
+ctx.brisaOuvir(true);recognition.onend();assert.equal(restarts,1);
+ctx.brisaOuvir(true);recognition.onerror({error:'network'});assert.equal(restarts,2);
+vm.runInContext("const BRISA_VOICE_KEY='test';"+s.slice(s.indexOf('function brisaVozFeminina'),s.indexOf('function brisaAjustarVoz')),ctx);assert.equal(ctx.brisaSelecionarVoz([{name:'Google português do Brasil',lang:'pt-BR',voiceURI:'google'}]).voiceURI,'google');assert.equal(ctx.brisaSelecionarVoz([{name:'English',lang:'en-US'}]),null);
+assert(html.includes('animation:brisaTalk .65s'));console.log('7 verificações aprovadas: transcrição parcial, ausência de duplicação, silêncio, erro temporário, voz Android, idioma e animação sem evento boundary.');
