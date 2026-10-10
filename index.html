@@ -37,6 +37,7 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 .brisa-photo img{display:none}
 .brisa-panel.open .brisa-photo{animation:brisaBlink 5.7s steps(1,end) infinite}
 .brisa-panel.open[data-state="falando"] .brisa-photo{animation:brisaTalk .65s steps(1,end) infinite}.brisa-panel.open[data-state="demonstrando"] .brisa-photo{animation:brisaTalk .85s steps(1,end) infinite}
+.brisa-panel.open[data-state="falando"].brisa-lip-sync .brisa-photo{animation:none;background-position:var(--brisa-mouth,0%) 50%}
 @keyframes brisaBlink{0%,92%,98%,100%{background-position:0% 50%}94%,96%{background-position:33.333333% 50%}}
 @keyframes brisaTalk{0%,100%{background-position:0% 50%}18%,68%{background-position:66.666667% 50%}38%,82%{background-position:100% 50%}55%{background-position:0% 50%}}
 .brisa-state{position:absolute;bottom:14px;left:14px;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:30px;background:#ffffffed;color:#080c5a;font-size:13px}
@@ -105,7 +106,7 @@ function brisaDemonstrar(){brisaParar();brisaEstadoAtual('demonstrando');brisaDe
 const BRISA_VOICE_KEY='fsj_brisa_voz_feminina_v1';
 const BRISA_VOICE_STYLE={rate:1,pitch:1,volume:1};
 let brisaLabiosTimers=[];
-function brisaLimparLabios(){brisaLabiosTimers.forEach(clearTimeout);brisaLabiosTimers=[];brisaPanel.style.setProperty('--brisa-mouth','0%')}
+function brisaLimparLabios(){brisaLabiosTimers.forEach(clearTimeout);brisaLabiosTimers=[];brisaPanel.classList.remove('brisa-lip-sync');brisaPanel.style.setProperty('--brisa-mouth','0%')}
 function brisaExpressaoSom(som){return /[ouóôõú]/i.test(som)?'100%':/[aáàãâeéêií]/i.test(som)?'66.666667%':'0%'}
 function brisaAnimarPalavra(u,e){
 if(brisaVoz!==u||brisaPanel.dataset.state!=='falando'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -114,9 +115,14 @@ brisaLimparLabios();
 const palavra=(u.text.slice(e.charIndex).match(/^\S+/)||[''])[0];
 if(!palavra)return;
 const duracao=Math.min(440,Math.max(140,palavra.length*42))/BRISA_VOICE_STYLE.rate;
-const abertura=/[ouóôõú]/i.test(palavra)?'100%':'66.666667%';
-brisaPanel.style.setProperty('--brisa-mouth',abertura);
-brisaLabiosTimers.push(setTimeout(()=>{if(brisaVoz===u)brisaPanel.style.setProperty('--brisa-mouth','0%')},duracao));
+brisaPanel.classList.add('brisa-lip-sync');
+const sons=Array.from(palavra);
+sons.forEach((som,i)=>brisaLabiosTimers.push(setTimeout(()=>{
+if(brisaVoz===u&&brisaPanel.dataset.state==='falando')brisaPanel.style.setProperty('--brisa-mouth',brisaExpressaoSom(som));
+},i*duracao/sons.length)));
+brisaLabiosTimers.push(setTimeout(()=>{
+if(brisaVoz===u){brisaPanel.style.setProperty('--brisa-mouth','0%');brisaPanel.classList.remove('brisa-lip-sync')}
+},duracao));
 }
 function configurarVozBrisa(u,voz){u.onboundary=e=>brisaAnimarPalavra(u,e);u.onpause=brisaLimparLabios;u.voice=voz;u.lang=voz.lang;u.rate=BRISA_VOICE_STYLE.rate;u.pitch=BRISA_VOICE_STYLE.pitch;u.volume=BRISA_VOICE_STYLE.volume;return u}
 function brisaVozFeminina(v){return /^pt[-_]BR$/i.test(v.lang)&&/\b(Maria|Francisca|Luciana|Leticia|Letícia|Heloisa|Heloísa|Vitoria|Vitória|Camila|Raquel)\b/i.test(v.name)}
