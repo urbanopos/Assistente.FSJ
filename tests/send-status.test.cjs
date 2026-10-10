@@ -1,0 +1,27 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const script=fs.readFileSync('index.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1];new vm.Script(script);
+const ctx=vm.createContext({fsjDia:d=>new Date(d).toLocaleDateString('sv-SE',{timeZone:'America/Recife'}),fsjHora:d=>new Date(d).toLocaleTimeString('pt-BR',{timeZone:'America/Recife',hour:'2-digit',minute:'2-digit'})});
+vm.runInContext(script.slice(script.indexOf('function estadoEnvioHoje'),script.indexOf('let consultandoEnvios')),ctx);
+const p={id:'p',active:true,whatsapp7h:true,datesOff:[]},date='2026-10-10';
+const e=(tipo,extra={})=>({pessoa_id:'p',criado_em:'2026-10-10T10:01:00Z',tipo,...extra});
+assert.match(ctx.estadoEnvioHoje(p,[],date).text,/Aguardando/);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico')],date).confirmed,false);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_teste',{whatsapp_message_id:'test'})],date).confirmed,false);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id',pessoa_id:'other'})],date).confirmed,false);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id',criado_em:'2026-10-09T10:01:00Z'})],date).confirmed,false);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id'})],date).confirmed,true);
+assert.match(ctx.estadoEnvioHoje(p,[e('envio_incerto')],date).text,/incerto/);
+assert.match(ctx.estadoEnvioHoje(p,[e('falha_rotina')],date).text,/Falha/);
+assert.match(ctx.estadoEnvioHoje({...p,datesOff:[date]},[],date).text,/Folga/);
+assert.match(ctx.estadoEnvioHoje({...p,active:false},[],date).text,/inativo/);
+assert.match(ctx.estadoEnvioHoje({...p,whatsapp7h:false},[],date).text,/desativado/);
+assert.equal(ctx.estadoEnvioHoje({...p,active:false},[e('quadro_automatico',{whatsapp_message_id:'id'})],date).confirmed,true);
+console.log('Confirmações: 12 cenários aprovados; sem falso envio por teste manual, outro empregado, dia anterior ou ausência de identificador.');
+
+assert.match(ctx.estadoApagamentoHoje('p',[]),/Sem confirmação/);
+assert.match(ctx.estadoApagamentoHoje('p',[e('apagamento_automatico',{conteudo:JSON.stringify({status:'confirmado'})})]),/confirmado pelo WhatsApp/);
+assert.match(ctx.estadoApagamentoHoje('p',[e('apagamento_automatico',{conteudo:JSON.stringify({status:'sem_confirmacao'})})]),/sem confirmação/);
+assert.match(ctx.estadoApagamentoHoje('p',[e('apagamento_automatico',{conteudo:JSON.stringify({status:'falhou'})})]),/Falha/);
+assert.match(ctx.estadoApagamentoHoje('p',[e('apagamento_automatico',{conteudo:'invalid'})]),/sem confirmação/);
+assert.match(ctx.estadoApagamentoHoje('p',[e('apagamento_automatico',{pessoa_id:'other',conteudo:JSON.stringify({status:'confirmado'})})]),/Sem confirmação/);
+console.log('Apagamento: confirmação, ausência, falha, dado inválido e separação por empregado aprovados.');
