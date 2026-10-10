@@ -1,6 +1,6 @@
 export const PERSON_ID = 'mul7dlmfghkq';
 export function localDay(now = new Date()) {
-  return new Intl.DateTimeFormat('sv-SE', {timeZone:'America/Fortaleza',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  return new Intl.DateTimeFormat('sv-SE', {timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
 }
 export function eligible(tasks, assignments, returns, pid, day) {
   const assigned = new Set(assignments.filter(a=>a.pessoa_id===pid).map(a=>a.tarefa_id));

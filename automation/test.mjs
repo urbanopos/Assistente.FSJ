@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {localDay,eligible,cycle} from './core.mjs';
-test('datas em Fortaleza e tarefas diárias retornam no dia seguinte',()=>{
+test('datas em Igarassu e tarefas diárias retornam no dia seguinte',()=>{
   assert.equal(localDay(new Date('2026-10-02T01:00:00Z')),'2026-10-01');
   const tasks=[{id:'a',diaria:true,situacao:'Concluída'},{id:'b',diaria:false,situacao:'Concluída'},{id:'c',diaria:false,situacao:'Em aberto'}];
   assert.deepEqual(eligible(tasks,tasks.map(t=>({pessoa_id:'p',tarefa_id:t.id})),[{tarefa_id:'a',tipo:'sim',criado_em:'2026-09-30T12:00:00Z'}],'p','2026-10-01').map(t=>t.id),['a','c']);
