@@ -36,20 +36,21 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 .brisa-photo{position:relative;width:76%;aspect-ratio:3/4;overflow:hidden;border-radius:14px;background-image:url('brisa-expressoes.webp');background-size:400% 100%;background-position:0% 50%}
 .brisa-photo img{display:none}
 .brisa-panel.open .brisa-photo{animation:brisaBlink 5.7s steps(1,end) infinite}
-.brisa-panel.open[data-state="falando"] .brisa-photo{animation:none;background-position:var(--brisa-mouth,0%) 50%}.brisa-panel.open[data-state="demonstrando"] .brisa-photo{animation:brisaTalk .85s steps(1,end) infinite}
+.brisa-panel.open[data-state="falando"] .brisa-photo{animation:brisaTalk .65s steps(1,end) infinite}.brisa-panel.open[data-state="demonstrando"] .brisa-photo{animation:brisaTalk .85s steps(1,end) infinite}
 @keyframes brisaBlink{0%,92%,98%,100%{background-position:0% 50%}94%,96%{background-position:33.333333% 50%}}
 @keyframes brisaTalk{0%,100%{background-position:0% 50%}18%,68%{background-position:66.666667% 50%}38%,82%{background-position:100% 50%}55%{background-position:0% 50%}}
 .brisa-state{position:absolute;bottom:14px;left:14px;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:30px;background:#ffffffed;color:#080c5a;font-size:13px}
 .brisa-dot{width:9px;height:9px;background:#d99d00;border-radius:50%}.brisa-panel[data-state="ouvindo"] .brisa-dot,.brisa-panel[data-state="falando"] .brisa-dot{animation:brisaHalo 1s ease-in-out infinite}
-.brisa-panel[data-state="falando"] .brisa-portrait img{animation:brisaFace 2.5s ease-in-out infinite}
+.brisa-panel.open .brisa-portrait{animation:brisaRespirar 4s ease-in-out infinite}
+@keyframes brisaRespirar{0%,100%{transform:translateY(0) rotate(-.3deg)}50%{transform:translateY(-4px) rotate(.3deg)}}
 .brisa-status{padding:10px;border-radius:10px;background:#e2f6fc;margin:12px 0}.brisa-actions{display:flex;gap:8px;flex-wrap:wrap}.brisa-actions button{min-height:42px}
 @keyframes brisaFace{0%,100%{transform:translateY(0) rotate(-.35deg) scale(1.015)}50%{transform:translateY(-3px) rotate(.35deg) scale(1.03)}}
 @keyframes brisaHalo{0%,100%{box-shadow:0 0 0 0 #d99d0044,0 6px 22px #0003}50%{box-shadow:0 0 0 7px #d99d0018,0 6px 22px #0003}}
 @media(max-width:700px){.brisa-fab{right:14px;bottom:14px;width:64px;height:64px}.brisa-panel{width:100vw}.brisa-portrait{max-width:350px}header{padding:6px 10px;gap:8px}.fsj-logo{width:200px}.header-info{font-size:10px}.brisa-body{padding:12px}}
-@media(prefers-reduced-motion:reduce){.brisa-fab,.brisa-fab img,.brisa-panel.open .brisa-portrait img,.brisa-dot,.brisa-panel.open .brisa-photo{animation:none!important}.brisa-panel{transition:none}}
+@media(prefers-reduced-motion:reduce){.brisa-fab,.brisa-fab img,.brisa-panel.open .brisa-portrait,.brisa-panel.open .brisa-portrait img,.brisa-dot,.brisa-panel.open .brisa-photo{animation:none!important}.brisa-panel{transition:none}}
 .demandas-filtros{align-items:flex-end}.demandas-filtros select,.demandas-filtros button{height:40px;box-sizing:border-box}.demandas-filtros #demandaContagem{min-height:40px;display:flex;align-items:center}
 </style></head><body>
-<header><img class="fsj-logo" src="fsj-logotipo.webp" alt="Fazenda São José — Sistema de Gestão"><div class="header-info"><div>Assistente • Gestor Web v1.8</div><div id="ultimaAtualizacao">Última atualização: 10/10/2026, 07:08 • horário de Recife</div><div>Armazenagem central • funcionários pelo WhatsApp</div><div id="today"></div></div></header>
+<header><img class="fsj-logo" src="fsj-logotipo.webp" alt="Fazenda São José — Sistema de Gestão"><div class="header-info"><div>Assistente • Gestor Web v1.8</div><div id="ultimaAtualizacao">Última atualização: 10/10/2026, 16:03 • horário de Recife</div><div>Armazenagem central • funcionários pelo WhatsApp</div><div id="today"></div></div></header>
 <nav class="topnav"><div class="inner"><button id="backBtn" onclick="voltarPagina()" disabled>← Voltar</button><button class="active" onclick="navTo('dashboard',this)">Início</button><button onclick="navTo('cadPessoas',this)">Pessoas</button><button onclick="navTo('cadGrupos',this)">Grupos</button><button onclick="navTo('novaTarefa',this)">Tarefas</button><button onclick="navTo('demandas',this)">Demandas</button><button onclick="navTo('whatsapp',this)">WhatsApp</button><button onclick="navTo('relatorios',this)">Relatórios</button><button onclick="navTo('seguranca',this)">Armazenagem</button></div></nav>
 <main><div id="loginBox" class="card"><h2>Acesso do Gestor</h2><div class="muted">Somente o gestor acessa este painel. Funcionários e prestadores operam exclusivamente pelo WhatsApp.</div><label>E-mail do Gestor</label><input id="loginEmail" type="text" value="urbanopos@yahoo.com.br" readonly><div class="row"><button class="primary" onclick="enviarAcesso()">Enviar link de acesso por e-mail</button><button onclick="sairGestor()">Sair</button></div><div id="loginStatus" class="muted">Verificando acesso...</div></div><section id="gestor" class="hidden">
 <div id="dashboard" class="grid"><div class="kpi">Em aberto<b id="ko">0</b></div><div class="kpi">Concluídas<b id="kc">0</b></div><div class="kpi">Pendentes<b id="kp">0</b></div><div class="kpi">Perguntas<b id="kq">0</b></div></div>
@@ -86,10 +87,10 @@ function navTo(id,b,record=true){if(record&&id!==currentPage)pageHistory.push(cu
 
 let brisaReconhecimento=null,brisaVoz=null,brisaDemoTimer=null;
 function brisaEstadoAtual(estado){if(estado!=='falando')brisaLimparLabios();brisaPanel.dataset.state=estado;brisaEstado.textContent={pronta:'Pronta para ouvir',ouvindo:'Ouvindo você…',falando:'Falando…',pensando:'Preparando resposta…',demonstrando:'Simulação de conversa'}[estado]||'Pronta para ouvir'}
-function abrirBrisa(){brisaPanel.inert=false;brisaPanel.classList.add('open');brisaPanel.setAttribute('aria-hidden','false');brisaClose.focus();brisaEscutaContinua=true;brisaRetomarEscuta()}
+function abrirBrisa(){brisaPanel.inert=false;brisaPanel.classList.add('open');brisaPanel.setAttribute('aria-hidden','false');brisaClose.focus();brisaEscutaContinua=true;brisaFalhasEscuta=0;brisaOuvir(true)}
 let brisaSilencioTimer=null;
-let brisaEscutaContinua=false,brisaRetomarTimer=null;
-function brisaRetomarEscuta(){clearTimeout(brisaRetomarTimer);if(!brisaEscutaContinua||document.hidden)return;brisaRetomarTimer=setTimeout(()=>{if(brisaEscutaContinua&&!document.hidden&&!brisaReconhecimento&&!brisaVoz&&brisaPanel.dataset.state!=='pensando')brisaOuvir(true)},500)}
+let brisaEscutaContinua=false,brisaRetomarTimer=null,brisaFalhasEscuta=0;
+function brisaRetomarEscuta(atraso=500){clearTimeout(brisaRetomarTimer);if(!brisaEscutaContinua||document.hidden)return;brisaRetomarTimer=setTimeout(()=>{if(brisaEscutaContinua&&!document.hidden&&!brisaReconhecimento&&!brisaVoz&&brisaPanel.dataset.state!=='pensando')brisaOuvir(true)},atraso)}
 function brisaEncerrarEscuta(){brisaEscutaContinua=false;clearTimeout(brisaRetomarTimer);brisaParar()}
 document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(brisaRetomarTimer);brisaParar()}else brisaRetomarEscuta()});
 window.addEventListener('pagehide',brisaEncerrarEscuta);
@@ -119,23 +120,25 @@ brisaLabiosTimers.push(setTimeout(()=>{if(brisaVoz===u)brisaPanel.style.setPrope
 }
 function configurarVozBrisa(u,voz){u.onboundary=e=>brisaAnimarPalavra(u,e);u.onpause=brisaLimparLabios;u.voice=voz;u.lang=voz.lang;u.rate=BRISA_VOICE_STYLE.rate;u.pitch=BRISA_VOICE_STYLE.pitch;u.volume=BRISA_VOICE_STYLE.volume;return u}
 function brisaVozFeminina(v){return /^pt[-_]BR$/i.test(v.lang)&&/\b(Maria|Francisca|Luciana|Leticia|Letícia|Heloisa|Heloísa|Vitoria|Vitória|Camila|Raquel)\b/i.test(v.name)}
+function brisaVozCompativel(v){return /^pt[-_]BR$/i.test(v.lang)}
 function brisaSelecionarVoz(vozes){
-const candidatas=vozes.filter(brisaVozFeminina);let salva=null;
+const candidatas=vozes.filter(brisaVozCompativel);let salva=null;
 try{salva=JSON.parse(localStorage.getItem(BRISA_VOICE_KEY)||'null')}catch(e){}
 const escolhida=salva&&candidatas.find(v=>v.voiceURI===salva.uri&&v.name===salva.nome);
 if(escolhida)return escolhida;
-const rank=v=>/Francisca|Natural|Neural/i.test(v.name)?0:/Luciana|Camila|Leticia|Letícia/i.test(v.name)?1:/Maria/i.test(v.name)?3:2;
+const rank=v=>/Francisca|Natural|Neural/i.test(v.name)?0:/Google/i.test(v.name)?1:/Luciana|Camila|Leticia|Letícia/i.test(v.name)?1:/Maria/i.test(v.name)?3:2;
 return candidatas.sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name))[0]||null;
 }
 function brisaAjustarVoz(){let voz=brisaSelecionarVoz(speechSynthesis.getVoices());configurarOpcoesBrisa();return voz}
-function configurarOpcoesBrisa(){const lista=document.getElementById('brisaVozEscolha');if(!lista||!window.speechSynthesis)return;const vozes=speechSynthesis.getVoices().filter(brisaVozFeminina);const atual=brisaSelecionarVoz(vozes);lista.replaceChildren();vozes.forEach(v=>{let o=document.createElement('option');o.value=v.voiceURI;o.textContent=v.name;o.selected=!!atual&&v.voiceURI===atual.voiceURI;lista.append(o)});lista.disabled=!vozes.length}
-function brisaSalvarVoz(){const v=speechSynthesis.getVoices().find(v=>v.voiceURI===document.getElementById('brisaVozEscolha').value);if(v&&brisaVozFeminina(v)){localStorage.setItem(BRISA_VOICE_KEY,JSON.stringify({uri:v.voiceURI,nome:v.name,idioma:v.lang}));brisaVozInfo()}}
+function configurarOpcoesBrisa(){const lista=document.getElementById('brisaVozEscolha');if(!lista||!window.speechSynthesis)return;const vozes=speechSynthesis.getVoices().filter(brisaVozCompativel);const atual=brisaSelecionarVoz(vozes);lista.replaceChildren();vozes.forEach(v=>{let o=document.createElement('option');o.value=v.voiceURI;o.textContent=v.name;o.selected=!!atual&&v.voiceURI===atual.voiceURI;lista.append(o)});lista.disabled=!vozes.length}
+function brisaSalvarVoz(){const v=speechSynthesis.getVoices().find(v=>v.voiceURI===document.getElementById('brisaVozEscolha').value);if(v&&brisaVozCompativel(v)){localStorage.setItem(BRISA_VOICE_KEY,JSON.stringify({uri:v.voiceURI,nome:v.name,idioma:v.lang}));brisaVozInfo()}}
 try{const ritmo=Number(localStorage.getItem('fsj_brisa_ritmo'));if(ritmo>=.85&&ritmo<=1.15)BRISA_VOICE_STYLE.rate=ritmo}catch(e){}
 function brisaSalvarRitmo(v){BRISA_VOICE_STYLE.rate=Number(v);localStorage.setItem('fsj_brisa_ritmo',v)}
-function brisaVozInfo(){let label=document.getElementById('brisaVoiceInfo');if(!label)return;let voz=window.speechSynthesis?brisaSelecionarVoz(speechSynthesis.getVoices()):null;label.textContent=voz?'Voz padrão: '+voz.name+' • ritmo ajustável':'Padrão: voz feminina, suave e pausada. Instale Microsoft Maria em Português (Brasil) se não houver voz compatível.'}
+function brisaVozInfo(){let label=document.getElementById('brisaVoiceInfo');if(!label)return;let voz=window.speechSynthesis?brisaSelecionarVoz(speechSynthesis.getVoices()):null;label.textContent=voz?'Voz padrão: '+voz.name+' • ritmo ajustável':'Nenhuma voz em Português (Brasil) disponível. Ative uma voz em português nas configurações do dispositivo; as respostas continuam por texto.'}
 async function brisaCarregarVoz(){let voz=brisaSelecionarVoz(speechSynthesis.getVoices());if(voz)return voz;await new Promise(resolve=>{const terminar=()=>{clearTimeout(timer);speechSynthesis.removeEventListener('voiceschanged',terminar);resolve()};const timer=setTimeout(terminar,1800);speechSynthesis.addEventListener('voiceschanged',terminar,{once:true})});return brisaSelecionarVoz(speechSynthesis.getVoices())}
 let brisaPedidoVoz=0;
-async function brisaApresentar(){brisaParar();let pedido=brisaPedidoVoz;if(!window.speechSynthesis){brisaResposta.textContent='A leitura por voz não está disponível neste navegador.';return}brisaResposta.textContent='Carregando a voz feminina da Brisa…';let voz=await brisaCarregarVoz();if(pedido!==brisaPedidoVoz)return;brisaVozInfo();if(!voz){brisaResposta.textContent='A voz feminina fixa da Brisa não está disponível neste navegador. A apresentação foi interrompida para não trocar por uma voz masculina. No Windows, confira se a voz Microsoft Maria em Português (Brasil) está instalada.';return}let u=new SpeechSynthesisUtterance('Olá. Sou a Brisa, assistente da Fazenda São José. Estou aqui, ao seu lado, para acompanhar suas tarefas.');configurarVozBrisa(u,voz);brisaVoz=u;u.onstart=()=>{if(brisaVoz===u){brisaEstadoAtual('falando');brisaResposta.textContent='Olá. Sou a Brisa, assistente da Fazenda São José. Estou aqui, ao seu lado, para acompanhar suas tarefas.'}};u.onend=()=>{if(brisaVoz===u){brisaVoz=null;brisaEstadoAtual('pronta');brisaRetomarEscuta()}};u.onerror=()=>{if(brisaVoz===u){brisaVoz=null;brisaEstadoAtual('pronta');brisaResposta.textContent='Não foi possível reproduzir a voz feminina da Brisa. Tente novamente.'}};speechSynthesis.speak(u)}
+async function brisaApresentarAnterior(){brisaParar();let pedido=brisaPedidoVoz;if(!window.speechSynthesis){brisaResposta.textContent='A leitura por voz não está disponível neste navegador.';return}brisaResposta.textContent='Carregando a voz feminina da Brisa…';let voz=await brisaCarregarVoz();if(pedido!==brisaPedidoVoz)return;brisaVozInfo();if(!voz){brisaResposta.textContent='A voz feminina fixa da Brisa não está disponível neste navegador. A apresentação foi interrompida para não trocar por uma voz masculina. No Windows, confira se a voz Microsoft Maria em Português (Brasil) está instalada.';return}let u=new SpeechSynthesisUtterance('Olá. Sou a Brisa, assistente da Fazenda São José. Estou aqui, ao seu lado, para acompanhar suas tarefas.');configurarVozBrisa(u,voz);brisaVoz=u;u.onstart=()=>{if(brisaVoz===u){brisaEstadoAtual('falando');brisaResposta.textContent='Olá. Sou a Brisa, assistente da Fazenda São José. Estou aqui, ao seu lado, para acompanhar suas tarefas.'}};u.onend=()=>{if(brisaVoz===u){brisaVoz=null;brisaEstadoAtual('pronta');brisaRetomarEscuta()}};u.onerror=()=>{if(brisaVoz===u){brisaVoz=null;brisaEstadoAtual('pronta');brisaResposta.textContent='Não foi possível reproduzir a voz feminina da Brisa. Tente novamente.'}};speechSynthesis.speak(u)}
+function brisaApresentar(){return speak('Olá, Urbano. Sou a Brisa, assistente da Fazenda São José. Estou pronta para ouvir você e ajudar com as tarefas.')}
 if(window.speechSynthesis){speechSynthesis.addEventListener('voiceschanged',()=>{brisaVozInfo();configurarOpcoesBrisa()});brisaVozInfo();configurarOpcoesBrisa();document.getElementById('brisaRitmo').value=String(BRISA_VOICE_STYLE.rate)}
 
 function brisaNormalizar(x){return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()}
@@ -152,6 +155,7 @@ const BRISA_ABAS=[
 let brisaUltimaPessoa=null;
 function brisaInterpretar(texto,dados){
 let q=brisaNormalizar(texto).replace(/\bbrisa\b/g,'').trim();
+if(/^(oi|ola|bom dia|boa tarde|boa noite|voce esta ai|esta ai|me escuta|voce me ouve|esta me ouvindo)?$/.test(q))return {answer:'Estou aqui, Urbano. Pode falar. Posso consultar as tarefas e ajudar você a usar o aplicativo.'};
 if(/^(volte|voltar|retorne|pagina anterior|volte para a pagina anterior)$/.test(q))return {answer:'Voltando para a página anterior.',voltar:true};
 const aba=BRISA_ABAS.find(a=>a.termos.some(t=>(' '+q+' ').includes(' '+t+' ')));
 if(/^(abra|abrir|abre|mostre|mostrar|ir|va|vai|acesse|acessar|entre|entrar|leve)/.test(q)&&aba&&!(dados.people||[]).some(p=>[p.name,p.nick].filter(Boolean).some(n=>(' '+q+' ').includes(' '+brisaNormalizar(n)+' ')))&&!/(pendente|concluida)/.test(q))return {answer:'Abrindo '+aba.nome+'. '+aba.ajuda,page:aba.id};
@@ -197,7 +201,25 @@ brisaParar();brisaResposta.textContent='Resposta trazida do ChatGPT:\n\n'+texto;
 
 function brisaEnviarTexto(){let campo=document.getElementById('brisaPerguntaTexto'),texto=campo.value.trim();if(!texto)return;brisaParar();brisaPerguntar(texto)}
 
-function brisaOuvir(automatico=false){if(!automatico&&brisaEscutaContinua){brisaEncerrarEscuta();brisaResposta.textContent='Microfone desligado.';return}brisaEscutaContinua=true;brisaParar();let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){brisaEscutaContinua=false;brisaResposta.textContent='O reconhecimento de voz não está disponível neste navegador.';return}let r=new R();brisaReconhecimento=r;r.lang='pt-BR';r.continuous=true;r.interimResults=true;let finalTexto='',recebeu=false;const aguardarSilencio=ms=>{clearTimeout(brisaSilencioTimer);brisaSilencioTimer=setTimeout(()=>{if(brisaReconhecimento===r){clearTimeout(brisaSilencioTimer);r.stop();if(!recebeu)brisaResposta.textContent='Aguardando sua fala…'}},ms)};r.onstart=()=>{if(brisaReconhecimento===r){brisaBotaoAtivo(true);brisaEstadoAtual('ouvindo');brisaResposta.textContent='Microfone ativo. Estou ouvindo…';aguardarSilencio(12000)}};r.onspeechstart=()=>{if(brisaReconhecimento===r)clearTimeout(brisaSilencioTimer)};r.onspeechend=()=>{if(brisaReconhecimento===r)aguardarSilencio(1000)};r.onresult=e=>{if(brisaReconhecimento!==r)return;let parcial='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)finalTexto+=e.results[i][0].transcript+' ';else parcial+=e.results[i][0].transcript}recebeu=true;brisaResposta.textContent='Você disse: “'+(finalTexto+parcial).trim()+'”.';aguardarSilencio(1500)};r.onerror=e=>{if(brisaReconhecimento===r){if(e.error==='no-speech'){brisaParar();brisaRetomarEscuta();return}brisaEncerrarEscuta();brisaResposta.textContent=e.error==='not-allowed'?'Permita o microfone e abra Brisa novamente.':'Escuta interrompida. Confira microfone e conexão e abra Brisa novamente.'}};r.onend=()=>{if(brisaReconhecimento===r){brisaReconhecimento=null;clearTimeout(brisaSilencioTimer);if(finalTexto.trim())brisaPerguntar(finalTexto.trim());else{brisaParar();brisaRetomarEscuta()}}};brisaBotaoAtivo(true);try{r.start()}catch(e){brisaParar();brisaResposta.textContent='Não foi possível iniciar o microfone. Tente novamente.'}}
+function brisaOuvir(automatico=false){
+if(!automatico&&brisaEscutaContinua){brisaEncerrarEscuta();brisaResposta.textContent='Microfone desligado.';return}
+brisaEscutaContinua=true;brisaParar();
+const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!R){brisaEncerrarEscuta();brisaResposta.textContent='Este navegador não oferece reconhecimento de voz. Abra o site no Chrome ou escreva sua pergunta.';return}
+const r=new R();brisaReconhecimento=r;r.lang='pt-BR';r.continuous=false;r.interimResults=true;
+let finalTexto='',parcialTexto='',falhou=false;
+const aguardarSilencio=ms=>{clearTimeout(brisaSilencioTimer);brisaSilencioTimer=setTimeout(()=>{if(brisaReconhecimento===r){try{r.stop()}catch(e){brisaParar();brisaRetomarEscuta()}}},ms)};
+r.onstart=()=>{if(brisaReconhecimento===r){brisaBotaoAtivo(true);brisaEstadoAtual('ouvindo');aguardarSilencio(15000)}};
+r.onspeechstart=()=>{if(brisaReconhecimento===r)clearTimeout(brisaSilencioTimer)};
+r.onspeechend=()=>{if(brisaReconhecimento===r)aguardarSilencio(1800)};
+r.onresult=e=>{if(brisaReconhecimento!==r)return;finalTexto='';parcialTexto='';for(let i=0;i<e.results.length;i++){const texto=e.results[i][0].transcript+' ';if(e.results[i].isFinal)finalTexto+=texto;else parcialTexto+=texto}brisaFalhasEscuta=0;brisaResposta.textContent='Você disse: “'+(finalTexto+parcialTexto).trim()+'”.';aguardarSilencio(1500)};
+r.onerror=e=>{if(brisaReconhecimento!==r)return;falhou=true;
+if(['not-allowed','service-not-allowed','audio-capture'].includes(e.error)){brisaEncerrarEscuta();brisaResposta.textContent=e.error==='audio-capture'?'Microfone indisponível. Confira se outro aplicativo está usando o microfone.':'Permita o microfone nas configurações do site e toque no ícone da Brisa novamente.';return}
+if(e.error==='no-speech'||e.error==='aborted'){brisaParar();brisaRetomarEscuta();return}
+brisaFalhasEscuta++;brisaParar();if(brisaFalhasEscuta<=3){brisaResposta.textContent='A conexão de voz falhou. Tentando retomar a escuta…';brisaRetomarEscuta(1500*brisaFalhasEscuta)}else{brisaEncerrarEscuta();brisaResposta.textContent='Não consegui manter a conexão de voz. Confira a internet e toque no ícone para tentar novamente. Você também pode escrever.'}};
+r.onend=()=>{if(brisaReconhecimento!==r||falhou)return;brisaReconhecimento=null;clearTimeout(brisaSilencioTimer);const texto=(finalTexto+parcialTexto).trim();if(texto){document.getElementById('brisaPerguntaTexto').value=texto;brisaPerguntar(texto)}else{brisaParar();brisaRetomarEscuta()}};
+brisaBotaoAtivo(true);try{r.start()}catch(e){brisaEncerrarEscuta();brisaResposta.textContent='Não foi possível iniciar o microfone. Toque no ícone novamente e confira a permissão.'}
+}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&brisaPanel.classList.contains('open'))fecharBrisa()});
 
 
@@ -228,7 +250,17 @@ function act(id,a){let t=S.tasks.find(x=>x.id===id);if(!t||t.status==='Concluíd
 function attach(id,el){let f=el.files&&el.files[0];if(!f)return;let t=S.tasks.find(x=>x.id===id);t.attachments=t.attachments||[];t.attachments.push({name:f.name,type:f.type,size:f.size});save();employeeView()}
 function listen(id){let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return alert('Voz não disponível neste navegador.');let r=new R();r.lang='pt-BR';r.onresult=e=>document.getElementById(id).value=e.results[0][0].transcript;r.start()}
 function naturalSpeechText(x){return String(x||'').replace(/[\\\/|_*#~`<>\[\]{}]+/g,' ').replace(/\s*[-–—]\s*/g,', ').replace(/\s*;\s*/g,'. ').replace(/\s+/g,' ').trim()}
-async function speak(x,manterSessao=false){if(!manterSessao)brisaParar();let pedido=brisaPedidoVoz;if(!window.speechSynthesis){brisaParar();brisaResposta.textContent+='\n\nÁudio indisponível neste navegador.';return}let voz=await brisaCarregarVoz();if(pedido!==brisaPedidoVoz)return;brisaVozInfo();if(!voz){brisaParar();brisaResposta.textContent+='\n\nÁudio indisponível: instale uma voz feminina em Português (Brasil) no dispositivo.';return}let u=configurarVozBrisa(new SpeechSynthesisUtterance(naturalSpeechText(x)),voz);brisaVoz=u;u.onstart=()=>{if(brisaVoz===u)brisaEstadoAtual('falando')};u.onend=u.onerror=()=>{if(brisaVoz===u){brisaVoz=null;brisaParar();brisaRetomarEscuta()}};try{speechSynthesis.speak(u)}catch(e){brisaParar();brisaResposta.textContent+='\n\nNão foi possível reproduzir o áudio.'}}
+async function speak(x,manterSessao=false){
+brisaParar();const pedido=brisaPedidoVoz;
+const finalizar=mensagem=>{if(pedido!==brisaPedidoVoz)return;brisaParar();if(mensagem)brisaResposta.textContent+='\n\n'+mensagem;brisaRetomarEscuta()};
+if(!window.speechSynthesis){finalizar('Áudio indisponível neste navegador.');return}
+const voz=await brisaCarregarVoz();if(pedido!==brisaPedidoVoz)return;brisaVozInfo();
+if(!voz){finalizar('Ative uma voz em Português (Brasil) nas configurações do dispositivo. A resposta está disponível por texto.');return}
+const u=configurarVozBrisa(new SpeechSynthesisUtterance(naturalSpeechText(x)),voz);brisaVoz=u;
+u.onstart=()=>{if(brisaVoz===u)brisaEstadoAtual('falando')};
+u.onend=()=>{if(brisaVoz===u)finalizar()};u.onerror=()=>{if(brisaVoz===u)finalizar('Não foi possível reproduzir o áudio. A resposta continua disponível por texto.')};
+try{speechSynthesis.speak(u)}catch(e){finalizar('Não foi possível reproduzir o áudio.')}
+}
 function dailyMessage(){let id=msgTarget.value;if(!id){msg.textContent='Cadastre uma pessoa.';return}let p=person(id),ts=S.tasks.filter(t=>ids(t).includes(id)&&t.status!=='Concluída'),nome=p.nick||p.name,h=new Date().getHours(),saud=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';let corpo=ts.length===0?'Por enquanto, não há atividades pendentes para você.':ts.length===1?'A atividade que ainda precisa ser realizada é: '+ts[0].text+'.':'As atividades que ainda precisam ser realizadas são: '+ts.map((t,i)=>(i+1)+'. '+t.text).join('. ')+'.';let data=new Date().toLocaleDateString('pt-BR',{timeZone:'America/Recife'}),hora=new Date().toLocaleTimeString('pt-BR',{timeZone:'America/Recife',hour:'2-digit',minute:'2-digit'}),x=saud+', '+nome+'.\nTarefas do dia '+data+' • '+hora+'.\n\n'+corpo+'\nSe tiver alguma dúvida, ou precisar de alguma orientação, entre em contato com o gestor.\n\nESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR';S.daily=S.daily||{};S.daily[id]={day:dateKey(),text:x};save();msg.textContent=x}
 let eventosEnvio=[],retornosDia=[];
 const fsjDia=x=>new Date(x).toLocaleDateString('sv-SE',{timeZone:'America/Recife'});
