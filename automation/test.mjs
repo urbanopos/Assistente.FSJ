@@ -49,3 +49,9 @@ test('apaga anterior antes do envio e mantém texto obrigatório mesmo sem confi
   assert.deepEqual(order,['apagar','enviar']);
   assert.ok(text.endsWith('ESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR'));
 });
+
+test('falha no envio preserva erro original e mantém bloqueio',async()=>{
+ const state={};let errorEvent;
+ await assert.rejects(cycle({state,persist:async()=>{},record:async(t,d)=>{if(t==='envio_incerto')errorEvent=d;},url:'URL',send:async()=>{throw Error('send-specific-error');}}),/Erro original: send-specific-error/);
+ assert.equal(state.phase,'sending');assert.equal(errorEvent.reason,'send-specific-error');
+});
