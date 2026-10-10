@@ -51,7 +51,7 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 @media(prefers-reduced-motion:reduce){.brisa-fab,.brisa-fab img,.brisa-panel.open .brisa-portrait,.brisa-panel.open .brisa-portrait img,.brisa-dot,.brisa-panel.open .brisa-photo{animation:none!important}.brisa-panel{transition:none}}
 .demandas-filtros{align-items:flex-end}.demandas-filtros select,.demandas-filtros button{height:40px;box-sizing:border-box}.demandas-filtros #demandaContagem{min-height:40px;display:flex;align-items:center}
 </style></head><body>
-<header><img class="fsj-logo" src="fsj-logotipo.webp" alt="Fazenda São José — Sistema de Gestão"><div class="header-info"><div>Assistente • Gestor Web v1.8</div><div id="ultimaAtualizacao">Última atualização: 10/10/2026, 16:21 • horário de Recife</div><div>Armazenagem central • funcionários pelo WhatsApp</div><div id="today"></div></div></header>
+<header><img class="fsj-logo" src="fsj-logotipo.webp" alt="Fazenda São José — Sistema de Gestão"><div class="header-info"><div>Assistente • Gestor Web v1.8</div><div id="ultimaAtualizacao">Versão do aplicativo: 10/10/2026, 19:22 • horário de Recife</div><div>Armazenagem central • funcionários pelo WhatsApp</div><div id="today"></div></div></header>
 <nav class="topnav"><div class="inner"><button id="backBtn" onclick="voltarPagina()" disabled>← Voltar</button><button class="active" onclick="navTo('dashboard',this)">Início</button><button onclick="navTo('cadPessoas',this)">Pessoas</button><button onclick="navTo('cadGrupos',this)">Grupos</button><button onclick="navTo('novaTarefa',this)">Tarefas</button><button onclick="navTo('demandas',this)">Demandas</button><button onclick="navTo('whatsapp',this)">WhatsApp</button><button onclick="navTo('relatorios',this)">Relatórios</button><button onclick="navTo('seguranca',this)">Armazenagem</button></div></nav>
 <main><div id="loginBox" class="card"><h2>Acesso do Gestor</h2><div class="muted">Este aplicativo abre sempre no painel do gestor. Após o primeiro acesso neste navegador, sua sessão fica salva para as próximas aberturas. Funcionários e prestadores operam exclusivamente pelo WhatsApp.</div><label>E-mail do Gestor</label><input id="loginEmail" type="text" value="urbanopos@yahoo.com.br" readonly><div class="row"><button class="primary" onclick="enviarAcesso()">Enviar link de acesso por e-mail</button><button onclick="sairGestor()">Sair</button></div><div id="loginStatus" class="muted">Verificando acesso...</div></div><section id="gestor" class="hidden">
 <div id="dashboard" class="grid"><div class="kpi">Em aberto<b id="ko">0</b></div><div class="kpi">Concluídas<b id="kc">0</b></div><div class="kpi">Pendentes<b id="kp">0</b></div><div class="kpi">Perguntas<b id="kq">0</b></div></div>
@@ -423,6 +423,40 @@ let brisaDadosCarregados=false;
 async function carregarArmazenagem(){capturarSessao();let tok;try{tok=await recuperarAcessoGestor()}catch(e){loginStatus.textContent='Não foi possível recuperar sua sessão. Tente novamente ou abra um novo link de acesso.';gestor.classList.add('hidden');return}if(!tok){loginStatus.textContent='Ative o acesso do gestor uma vez neste navegador pelo link de e-mail. Depois, a entrada será automática enquanto a sessão estiver válida.';gestor.classList.add('hidden');return}try{loginStatus.textContent='Carregando Armazenagem...';let [ps,gs,gms,ts,trs]=await Promise.all([api('/rest/v1/pessoas?select=*'),api('/rest/v1/grupos?select=*'),api('/rest/v1/grupo_membros?select=*'),api('/rest/v1/tarefas?select=*'),api('/rest/v1/tarefa_responsaveis?select=*')]);if((!ps.length&&S.people.length)||(!ts.length&&S.tasks.length))throw new Error('A Armazenagem retornou uma lista vazia. A cópia local foi preservada.');S.people=ps.map(x=>({id:x.id,name:x.nome,nick:x.identificacao,phone:x.whatsapp,type:x.tipo,active:x.ativo===true,whatsapp7h:x.receber_tarefas_whatsapp===true,daysOff:x.folgas_semanais||[],datesOff:x.folgas_datas||[],workStart:(x.jornada_inicio||'07:00').slice(0,5),lunchStart:x.almoco_inicio?x.almoco_inicio.slice(0,5):'12:00'}));S.groups=gs.map(g=>({id:g.id,name:g.nome,members:gms.filter(m=>m.grupo_id===g.id).map(m=>m.pessoa_id)}));S.tasks=ts.map(t=>({id:t.id,text:t.descricao,personIds:trs.filter(r=>r.tarefa_id===t.id).map(r=>r.pessoa_id),groupId:t.grupo_id||'',daily:!!t.diaria,status:t.situacao,created:t.criada_em,response:'',question:'',completedBy:t.concluida_por||'',attachments:[]}));save();brisaDadosCarregados=true;loginStatus.textContent='Gestor autenticado • Armazenagem conectada: '+S.people.length+' pessoas, '+S.groups.length+' grupos, '+S.tasks.length+' tarefas.';loginBox.classList.add('hidden');gestor.classList.remove('hidden');render();syncInfo();navTo('dashboard',document.querySelector('.topnav button'))}catch(e){loginStatus.textContent='Não foi possível carregar a Armazenagem. A cópia deste navegador foi preservada; confira o acesso do Gestor.';if(S.people.length||S.tasks.length){gestor.classList.remove('hidden');render();navTo('dashboard',document.querySelector('.topnav button'))}else gestor.classList.add('hidden')}}
 const brisaCargaInicial=carregarArmazenagem();
 brisaVerificarIA();
+
+const FSJ_RELEASE_HASH='223ae519ae954ae60f51c8c302601ab527a0897b9609925144119383ae5dcf08';
+let fsjUpdatePending=false,fsjUpdateChecking=false;
+const fsjEditedFields=new Set();
+document.addEventListener('input',event=>{if(event.target.matches('input,textarea,select'))fsjEditedFields.add(event.target)});
+function fsjCanUpdate(){
+ for(const field of fsjEditedFields){if(field.isConnected&&field.value&&field.value!==field.defaultValue)return false;}
+ return !document.hidden&&!document.activeElement?.matches('input,textarea,select')&&!window.speechSynthesis?.speaking;
+}
+function fsjApplyUpdate(){
+ if(!fsjUpdatePending||!fsjCanUpdate())return;
+ const url=new URL(location.href);url.searchParams.set('_fsj_version',Date.now().toString());location.replace(url.href);
+}
+async function fsjCheckUpdate(){
+ if(fsjUpdateChecking||document.hidden||!navigator.onLine)return;
+ fsjUpdateChecking=true;
+ try{
+  const url=new URL(location.href);url.hash='';url.searchParams.set('_fsj_check',Date.now().toString());url.searchParams.delete('_fsj_version');
+  const response=await fetch(url,{cache:'no-store'});
+  if(!response.ok)return;
+  const html=await response.text();
+  if(!html.includes("const FSJ_RELEASE_HASH=")||!html.includes('id="ultimaAtualizacao"'))return;
+  const normalized=html.replace(/const FSJ_RELEASE_HASH='[^']*'/,"const FSJ_RELEASE_HASH='__FSJ_RELEASE_HASH__'");
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(normalized));
+  const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+  if(hash!==FSJ_RELEASE_HASH){fsjUpdatePending=true;fsjApplyUpdate();}
+ }catch(e){}finally{fsjUpdateChecking=false;}
+}
+window.addEventListener('pageshow',fsjCheckUpdate);
+window.addEventListener('online',fsjCheckUpdate);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUpdate()});
+document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
+setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
+
 </script></body></html>
 
 
