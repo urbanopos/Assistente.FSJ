@@ -9,14 +9,17 @@ assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico')],date).confirmed,fals
 assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_teste',{whatsapp_message_id:'test'})],date).confirmed,false);
 assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id',pessoa_id:'other'})],date).confirmed,false);
 assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id',criado_em:'2026-10-09T10:01:00Z'})],date).confirmed,false);
-assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id'})],date).confirmed,true);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id'})],date).confirmed,false);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id',conteudo:JSON.stringify({ack:1})})],date).confirmed,true);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id',conteudo:JSON.stringify({ack:0})})],date).confirmed,false);
+assert.equal(ctx.estadoEnvioHoje(p,[e('quadro_automatico',{whatsapp_message_id:'id',conteudo:JSON.stringify({ack:-1})})],date).confirmed,false);
 assert.match(ctx.estadoEnvioHoje(p,[e('envio_incerto')],date).text,/incerto/);
 assert.match(ctx.estadoEnvioHoje(p,[e('falha_rotina')],date).text,/Falha/);
 assert.match(ctx.estadoEnvioHoje({...p,datesOff:[date]},[],date).text,/Folga/);
 assert.match(ctx.estadoEnvioHoje({...p,active:false},[],date).text,/inativo/);
 assert.match(ctx.estadoEnvioHoje({...p,whatsapp7h:false},[],date).text,/desativado/);
-assert.equal(ctx.estadoEnvioHoje({...p,active:false},[e('quadro_automatico',{whatsapp_message_id:'id'})],date).confirmed,true);
-console.log('Confirmações: 12 cenários aprovados; sem falso envio por teste manual, outro empregado, dia anterior ou ausência de identificador.');
+assert.equal(ctx.estadoEnvioHoje({...p,active:false},[e('quadro_automatico',{whatsapp_message_id:'id',conteudo:JSON.stringify({ack:1})})],date).confirmed,true);
+console.log('Confirmações: 15 cenários aprovados; sem falso envio por teste manual, outro empregado, dia anterior ou ausência de identificador.');
 
 assert.match(ctx.estadoApagamentoHoje('p',[]),/Sem confirmação/);
 assert.match(ctx.estadoApagamentoHoje('p',[e('apagamento_automatico',{conteudo:JSON.stringify({status:'confirmado'})})]),/confirmado pelo WhatsApp/);

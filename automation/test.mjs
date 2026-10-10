@@ -55,3 +55,9 @@ test('falha no envio preserva erro original e mantém bloqueio',async()=>{
  await assert.rejects(cycle({state,persist:async()=>{},record:async(t,d)=>{if(t==='envio_incerto')errorEvent=d;},url:'URL',send:async()=>{throw Error('send-specific-error');}}),/Erro original: send-specific-error/);
  assert.equal(state.phase,'sending');assert.equal(errorEvent.reason,'send-specific-error');
 });
+
+test('banco indisponível não oculta causa do erro de envio',async()=>{
+ const state={};
+ await assert.rejects(cycle({state,persist:async()=>{},record:async t=>{if(t==='envio_incerto')throw Error('db offline');},url:'URL',send:async()=>{throw Error('WhatsApp original');}}),/Erro original: WhatsApp original/);
+ assert.equal(state.phase,'sending');assert.equal(state.lastSendError,'WhatsApp original');
+});
