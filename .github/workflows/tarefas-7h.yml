@@ -1,7 +1,7 @@
 name: Tarefas de Menininha às 7h
 on:
   schedule:
-    - cron: '0 10 * * *' # 07:00 America/Fortaleza (UTC-3)
+    - cron: '0 10 * * *' # 07:00 America/Recife (UTC-3)
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
       - name: Instalar dependências fixadas
         working-directory: automation
-        run: npm ci --no-audit --no-fund
+        run: npm.cmd ci --no-audit --no-fund
       - name: Apagar anterior, enviar quadro do dia e registrar
         working-directory: automation
         run: node run.mjs
