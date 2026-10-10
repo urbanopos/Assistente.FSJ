@@ -6,13 +6,14 @@ export async function connect(interactive=false) {
   if(!dir)throw Error('Configure FSJ_STATE_DIR fora do checkout, em uma pasta privada persistente.');
   await mkdir(dir,{recursive:true,mode:0o700});
   const client=new wwebjs.Client({authStrategy:new wwebjs.LocalAuth({clientId:'fsj',dataPath:resolve(dir,'auth')}),puppeteer:{headless:!interactive}});
+  let timer;
   const ready=new Promise((resolveReady,reject)=>{
-    const timer=setTimeout(()=>reject(Error('WhatsApp não ficou pronto em 90 segundos.')),90000);
+    timer=setTimeout(()=>reject(Error('WhatsApp não ficou pronto em 90 segundos.')),90000);
     client.once('ready',()=>{clearTimeout(timer);resolveReady();});
     client.once('auth_failure',()=>{clearTimeout(timer);reject(Error('Vínculo WhatsApp expirou. Execute npm run link novamente.'));});
     client.once('qr',()=>{if(interactive)console.log('Escaneie o QR na janela aberta: WhatsApp → Aparelhos conectados.');else{clearTimeout(timer);reject(Error('WhatsApp ainda não vinculado. Execute npm run link no computador executor.'));}});
   });
-  try{await client.initialize();await ready;return client;}catch(e){await client.destroy().catch(()=>{});throw e;}
+  try{await Promise.all([Promise.resolve().then(()=>client.initialize()),ready]);return client;}catch(e){await client.destroy().catch(()=>{});throw e;}finally{clearTimeout(timer);}
 }
 export async function revoke(client,id,chatId) {
   const message=await client.getMessageById(id);
