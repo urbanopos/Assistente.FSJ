@@ -27,3 +27,18 @@ test('erro de consulta da mensagem anterior não impede novo quadro com aviso',a
   await cycle({state:{},previous:{messageId:'old'},persist:async()=>{},record:async()=>{},url:'URL',revoke:async()=>{throw Error('offline');},send:async t=>{text=t;return {messageId:'new'};}});
   assert.match(text,/Aviso/);
 });
+
+test('somente ativos selecionados recebem; folgas manuais por data bloqueiam',async()=>{
+  const {recipients}=await import('./core.mjs');
+  const p={id:'a',ativo:true,receber_tarefas_whatsapp:true};
+  const ps=[p,{...p,id:'b',ativo:false},{...p,id:'c',receber_tarefas_whatsapp:false},{...p,id:'d',folgas_datas:['2026-10-10']},{...p,id:'e',folgas_datas:['2026-10-10']}];
+  assert.deepEqual(recipients(ps,'2026-10-10').map(x=>x.id),['a']);
+  assert.deepEqual(recipients(ps,'2026-10-11').map(x=>x.id),['a','d','e']);
+});
+test('bloqueia antes das 7h no fuso de Igarassu',async()=>{
+  const {afterSeven}=await import('./core.mjs');
+  assert.equal(afterSeven(new Date('2026-10-10T09:59:59Z')),false);
+  assert.equal(afterSeven(new Date('2026-10-10T10:00:00Z')),true);
+  assert.equal(afterSeven(new Date('2026-10-11T02:59:59Z')),true);
+  assert.equal(afterSeven(new Date('2026-10-11T03:00:00Z')),false);
+});

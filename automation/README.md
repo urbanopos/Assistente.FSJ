@@ -1,7 +1,7 @@
-# Rotina de Menininha às 7h
+# Rotina da equipe às 7h
 
-Código preparado; envio desativado até a vinculação do computador executor.
-GitHub Actions agenda às 10h UTC (7h em Fortaleza). A fila do GitHub pode atrasar.
+Destinatários e folgas configurados em Pessoas no painel do gestor.
+GitHub Actions agenda às 10h UTC (7h em Igarassu/PE). A fila do GitHub pode atrasar.
 O computador executor deve permanecer ligado, conectado e sem suspensão.
 
 ## Configuração inicial no computador executor
@@ -13,7 +13,10 @@ O computador executor deve permanecer ligado, conectado e sem suspensão.
 
 ## Comportamento
 
-- Destinatária única: cadastro de Menininha `mul7dlmfghkq`, número lido da Armazenagem.
+- Recebem somente pessoas com cadastro ativo e recebimento às 7h marcado. Folgas cadastradas manualmente por data impedem o envio. Não há geração automática de folgas. Menininha permanece selecionada na migração inicial; os demais são habilitados pelo gestor.
+- Escala 6×1: 7h20 de trabalho e 2h de almoço. Horários de entrada/almoço são informações do cadastro; o disparo segue às 7h, bloqueado antes desse horário.
+- Mantém sessão compartilhada, envios sequenciais e diário separado por pessoa/dia. Falha de uma pessoa não bloqueia as demais.
+- routine.lock impede sobreposição de processos locais; após interrupção forçada, conferir processos e diário antes de remover essa pasta.
 - Gera/reutiliza quadro e links individuais do dia; tarefas pontuais concluídas saem; diárias voltam no dia seguinte, salvo conclusão naquele dia.
 - Tenta apagar para todos SOMENTE a mensagem cujo identificador foi armazenado pela rotina. Não pesquisa mensagens arbitrárias para excluir.
 - O primeiro envio não consegue apagar os testes antigos sem identificador técnico. Envia o aviso junto do link.

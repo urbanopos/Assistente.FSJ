@@ -1,4 +1,4 @@
-name: Tarefas de Menininha às 7h
+name: Tarefas da equipe às 7h
 on:
   schedule:
     - cron: '0 10 * * *' # 07:00 America/Recife (UTC-3)

@@ -1,4 +1,3 @@
-export const PERSON_ID = 'mul7dlmfghkq';
 export function localDay(now = new Date()) {
   return new Intl.DateTimeFormat('sv-SE', {timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
 }
@@ -10,7 +9,7 @@ export function eligible(tasks, assignments, returns, pid, day) {
 export function normalizePhone(value) {
   let s=String(value||'').replace(/\D/g,'');
   if(s.length===10||s.length===11)s='55'+s;
-  if(!/^55\d{10,11}$/.test(s))throw Error('Número de Menininha inválido no cadastro.');
+  if(!/^55\d{10,11}$/.test(s))throw Error('Número de WhatsApp inválido no cadastro.');
   return s;
 }
 export async function cycle({state, previous, persist, revoke, send, record, url}) {
@@ -33,4 +32,21 @@ export async function cycle({state, previous, persist, revoke, send, record, url
   state.messageId=result.messageId;state.ack=result.ack;state.phase='sent';await persist(state);
   await record('quadro_automatico',{status:'enviado',messageId:state.messageId,ack:state.ack});
   return state;
+}
+
+export function isDayOff(person, day = localDay()) {
+  return (person.folgas_datas||[]).includes(day);
+}
+export function recipients(people, day = localDay()) {
+  return people.filter(p=>p.ativo===true && p.receber_tarefas_whatsapp===true && !isDayOff(p,day));
+}
+export function afterSeven(now = new Date()) {
+  return Number(new Intl.DateTimeFormat('en-GB', {timeZone:'America/Recife',hour:'2-digit',hourCycle:'h23'}).format(now))>=7;
+}
+export async function forEachRecipient(people, run, failed, day = localDay()) {
+  let failures=0;
+  for(const person of recipients(people,day)) {
+    try { await run(person); } catch(e) { failures++; await failed(person,e); }
+  }
+  return failures;
 }
