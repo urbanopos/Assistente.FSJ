@@ -12,10 +12,10 @@ test('falha na exclusão avisa, envia e registra; repetição não duplica',asyn
   await cycle(args);await cycle(args);
   assert.equal(messages.length,1);assert.match(messages[0],/apagamento confirmado/);assert.equal(events[0][0],'apagamento_automatico');assert.equal(s.messageId,'new');
 });
-test('exclusão confirmada mantém somente o link',async()=>{
+test('exclusão confirmada envia link e aviso de substituição',async()=>{
   let text;
   await cycle({state:{},previous:{messageId:'old'},persist:async()=>{},record:async()=>{},url:'URL',revoke:async()=>({status:'confirmado'}),send:async t=>{text=t;return {messageId:'new'};}});
-  assert.equal(text,'URL');
+  assert.equal(text,'URL\n\nESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR');
 });
 test('crash entre envio e registro bloqueia duplicação',async()=>{
   let sent=false;
@@ -41,4 +41,11 @@ test('bloqueia antes das 7h no fuso de Igarassu',async()=>{
   assert.equal(afterSeven(new Date('2026-10-10T10:00:00Z')),true);
   assert.equal(afterSeven(new Date('2026-10-11T02:59:59Z')),true);
   assert.equal(afterSeven(new Date('2026-10-11T03:00:00Z')),false);
+});
+
+test('apaga anterior antes do envio e mantém texto obrigatório mesmo sem confirmação',async()=>{
+  const order=[];let text;
+  await cycle({state:{},previous:{messageId:'old'},persist:async()=>{},record:async()=>{},url:'URL',revoke:async()=>{order.push('apagar');return {status:'sem_confirmacao'};},send:async t=>{order.push('enviar');text=t;return {messageId:'new'};}});
+  assert.deepEqual(order,['apagar','enviar']);
+  assert.ok(text.endsWith('ESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR'));
 });

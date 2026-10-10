@@ -28,7 +28,7 @@ export async function cycle({state, previous, persist, revoke, send, record, url
   const notice=state.deletion.status==='confirmado'?'':'Aviso: a mensagem anterior não teve o apagamento confirmado.\n';
   state.phase='sending';await persist(state);
   let result;
-  try{result=await send(notice+url);}catch{await record('envio_incerto',{status:'sem_confirmacao'});throw Error('Sem confirmação do envio. Nova tentativa automática bloqueada para evitar duplicação.');}
+  try{result=await send(notice+url+'\n\nESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR');}catch{await record('envio_incerto',{status:'sem_confirmacao'});throw Error('Sem confirmação do envio. Nova tentativa automática bloqueada para evitar duplicação.');}
   state.messageId=result.messageId;state.ack=result.ack;state.phase='sent';await persist(state);
   await record('quadro_automatico',{status:'enviado',messageId:state.messageId,ack:state.ack});
   return state;
