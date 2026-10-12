@@ -1,0 +1,23 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+let JSDOM;try{({JSDOM}=require('jsdom'));}catch{}
+test('calendário tem sete dias, salva escolha e bloqueia edição definida pelo gestor',{skip:!JSDOM},async()=>{
+ const dom=new JSDOM('<section id="folgaSemanal"></section>',{runScripts:'outside-only'}),w=dom.window;
+ let agenda={semana:'2026-10-12',hoje:'2026-10-12',dia:null,bloqueada_gestor:false},writes=0;
+ w.token='test';w.AbortSignal=AbortSignal;w.fetch=async(url,opt)=>{const b=JSON.parse(opt.body);if(b.action==='choose'){writes++;agenda={...agenda,dia:b.dia};}return {ok:true,json:async()=>({agenda})};};
+ w.eval(fs.readFileSync('weekly-off-employee.js','utf8'));await w.carregarFolgaEmpregado();
+ assert.equal(w.document.querySelectorAll('input').length,7);w.document.querySelector('input[value="2026-10-14"]').checked=true;
+ await w.document.querySelector('button').onclick();assert.equal(writes,1);assert.match(w.document.getElementById('folgaStatus').textContent,/salva/);
+ agenda={...agenda,dia:'2026-10-15',bloqueada_gestor:true};await w.carregarFolgaEmpregado();
+ assert.equal(w.document.querySelectorAll('button').length,0);assert.ok([...w.document.querySelectorAll('input')].every(x=>x.disabled));
+ dom.window.close();
+});
+test('gestor vê pendências e decide envio por pessoa no feriado',{skip:!JSDOM},async()=>{
+ const dom=new JSDOM('<input id="folgasSemana"><p id="folgasStatus"></p><p id="folgasResumo"></p><div id="folgasLista"></div><div id="feriadosLista"></div><pre id="folgasHistorico"></pre>',{runScripts:'outside-only'}),w=dom.window;
+ w.AbortSignal=AbortSignal;w.S={people:[{id:'a',nick:'Pessoa A',active:true,whatsapp7h:true}]};w.esc=x=>String(x).replace(/</g,'&lt;');w.fsjData=x=>x;w.alert=x=>{throw Error(x)};w.recuperarAcessoGestor=async()=> 'fake-session';
+ const agenda={semana:'2026-10-12',folgas:[],feriados:[{dia:'2026-11-02',nome:'Finados',ambito:'Brasil',fonte:'https://example.invalid'}],decisoes:[],historico:[]};let decision;
+ w.fetch=async(url,opt)=>{assert.equal(opt.headers.Authorization,'Bearer fake-session');const b=JSON.parse(opt.body);if(b.action==='holiday-set'){decision=b;agenda.decisoes=[{pessoa_id:b.pessoa_id,dia:b.dia,receber:b.receber}];}return {ok:true,json:async()=>agenda};};
+ w.eval(fs.readFileSync('weekly-off-manager.js','utf8'));await w.carregarFolgas();
+ assert.match(w.document.getElementById('folgasResumo').textContent,/1 escolha/);
+ const select=w.document.querySelector('[data-feriado-pessoa]');select.value='nao';select.dispatchEvent(new w.Event('change',{bubbles:true}));
+ await new Promise(r=>setTimeout(r,0));assert.equal(decision.receber,false);assert.equal(decision.pessoa_id,'a');assert.equal(w.document.querySelector('[data-feriado-pessoa]').value,'nao');dom.window.close();
+});

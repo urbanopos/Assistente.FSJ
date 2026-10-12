@@ -6,6 +6,7 @@ import {localDay,eligible,normalizePhone,cycle,afterSeven,forEachRecipient,isDay
 export async function runRoutine({db,connect,revoke,send,stateDir,now=new Date()}) {
 const day=localDay(now),dayStart=new Date(day+'T03:00:00Z'),dayEnd=new Date(+dayStart+86400000).toISOString();
 if(!afterSeven(now)){console.log('Antes das 7h de Igarassu; nenhum envio realizado.');return {failures:0};}
+await db('rpc/fsj_preparar_calendario',{method:'POST',body:JSON.stringify({p_dia:day})});
 const [people,tasks,assignments,returns]=await Promise.all([
   db('pessoas?ativo=eq.true&receber_tarefas_whatsapp=eq.true&select=*'),db('tarefas?select=*'),
   db('tarefa_responsaveis?select=*'),db('retornos?tipo=eq.sim&select=tarefa_id,tipo,criado_em')]);
@@ -17,6 +18,7 @@ try{
 const journal=resolve(stateDir,'journal.json');
 let all={};try{all=JSON.parse(await readFile(journal,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
 async function runPerson(person){
+if(await db('rpc/fsj_pode_enviar',{method:'POST',body:JSON.stringify({p_pessoa:person.id,p_dia:day})})!==true){console.log('Sem envio: folga ou feriado sem autorizacao para '+person.id);return;}
 const events=await db('mensagens_whatsapp?pessoa_id=eq.'+encodeURIComponent(person.id)+'&tipo=eq.quadro_automatico&order=criado_em.desc&select=*');
 if(events.some(e=>e.whatsapp_message_id&&localDay(new Date(e.criado_em))===day)){console.log('Mensagem de hoje já registrada para '+person.id+'; envio não repetido.');return;}
 const journalKey=person.id+'|'+day;
@@ -42,11 +44,12 @@ try{
   // Check the saved selection again immediately before contacting WhatsApp.
   const current=await db('pessoas?id=eq.'+encodeURIComponent(person.id)+'&ativo=eq.true&receber_tarefas_whatsapp=eq.true&select=*');
   if(!current.length||isDayOff(current[0],day)){console.log('Destinatário desativado durante a execução: '+person.id);return;}
+  if(await db('rpc/fsj_pode_enviar',{method:'POST',body:JSON.stringify({p_pessoa:person.id,p_dia:day})})!==true){console.log('Envio cancelado por folga ou feriado: '+person.id);return;}
   if(current[0].whatsapp!==person.whatsapp)throw Error('WhatsApp alterado durante a execução; tentar na próxima rotina.');
   client ||= await connect();
   const number=await client.getNumberId(phone);
   if(!number?._serialized)throw Error('Número cadastrado não localizado no WhatsApp.');
-  await cycle({state,previous,persist,record,url,revoke:id=>revoke(client,id,number._serialized),send:text=>send(client,number._serialized,text)});
+  await cycle({state,previous,persist,record,url,revoke:id=>revoke(client,id,number._serialized),send:async text=>{if(await db('rpc/fsj_pode_enviar',{method:'POST',body:JSON.stringify({p_pessoa:person.id,p_dia:day})})!==true)throw Error('Envio bloqueado por folga ou feriado durante a execucao; nenhuma mensagem transmitida.');return send(client,number._serialized,text);}});
   console.log('Mensagem enviada e registrada para '+person.id+'. Entrega/leitura não presumidas.');
 }catch(e){await record('falha_rotina',{status:'falhou',reason:e.message}).catch(()=>{});throw e;}
 }
