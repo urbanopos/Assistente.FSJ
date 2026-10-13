@@ -39,6 +39,10 @@ Deno.serve(async req=>{
    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(data.semana||''))||!/^\d{4}-\d{2}-\d{2}$/.test(String(data.dia||'')))return reply({erro:'Data invalida'},400);
    return reply({agenda:await db('rpc/fsj_gestor_folga',{p_pessoa:String(data.pessoa_id||''),p_semana:data.semana,p_dia:data.dia})});
   }
+  if(data.action==='compensation-set'){
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(String(data.feriado||''))||!/^\d{4}-\d{2}-\d{2}$/.test(String(data.folga||'')))return reply({erro:'Data invalida'},400);
+   await db('rpc/fsj_gestor_compensacao',{p_pessoa:String(data.pessoa_id||''),p_feriado:data.feriado,p_folga:data.folga});return reply({ok:true});
+  }
   if(data.action==='holiday-set'){
    if(typeof data.receber!=='boolean'||!/^\d{4}-\d{2}-\d{2}$/.test(String(data.dia||'')))return reply({erro:'Informe a decisao para o feriado'},400);
    const holidays=await db('feriados_fsj?dia=eq.'+data.dia+'&select=dia');if(!holidays.length)return reply({erro:'Feriado nao cadastrado'},400);
