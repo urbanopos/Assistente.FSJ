@@ -12,6 +12,7 @@ async function carregarFolgas(){
   const holidayToday=folgaHoje(),holidayStart=folgaSomar(holidayToday,-30),holidayEnd=folgaSomar(holidayToday,30);
   folgasAgenda.feriados=folgasAgenda.feriados.filter(h=>h.dia>=holidayStart&&h.dia<=holidayEnd);
   const people=S.people.filter(p=>p.active&&p.whatsapp7h),week=folgasAgenda.semana,end=folgaSomar(week,6);
+  const period=document.getElementById('folgasPeriodo');if(period)period.textContent='Período: '+fsjData(week)+' a '+fsjData(end)+'. Independente das folgas de feriado.';
   document.getElementById('folgasLista').innerHTML=people.length?people.map((p,i)=>{
    const f=folgasAgenda.folgas.find(x=>x.pessoa_id===p.id);
    const controls='<label for="folgaGestor'+i+'">Definir ou alterar a folga desta semana</label><div class="row"><input type="date" id="folgaGestor'+i+'" min="'+week+'" max="'+end+'" value="'+(f?.dia||'')+'"><button type="button" data-folga-pessoa="'+esc(p.id)+'" data-folga-index="'+i+'">Salvar e bloquear alteração pelo empregado</button></div>';
@@ -24,7 +25,7 @@ async function carregarFolgas(){
    const compensation='<details><summary>'+(v?.folga_compensatoria?'Alterar folga compensatória':'Registrar folga compensatória')+'</summary><label>'+esc(label)+'<input type="date" data-compensacao-input="'+esc(p.id)+'|'+h.dia+'" min="'+folgaSomar(h.dia,-30)+'" max="'+folgaSomar(h.dia,30)+'" value="'+(v?.folga_compensatoria||'')+'"></label><button type="button" data-compensacao-pessoa="'+esc(p.id)+'" data-compensacao-feriado="'+h.dia+'">Salvar compensação</button><p class="muted">A folga pode ser antes, no próprio feriado ou depois. No dia marcado não há mensagem. Se a folga ocorrer em outra data, o feriado permite tarefas. A folga semanal continua separada.</p></details>';
    return '<div>'+(v?.folga_compensatoria?'<p><b>'+esc(p.nick||p.name)+' — '+esc(label)+'</b>: '+esc(fsjData(v.folga_compensatoria))+'</p>':'')+'<label>'+esc(p.nick||p.name)+'<select data-feriado-pessoa="'+esc(p.id)+'" data-feriado-dia="'+h.dia+'"><option value=""'+(!v?' selected':'')+'>Decisão pendente — não enviar</option><option value="sim"'+(v?.receber===true?' selected':'')+'>Recebe tarefas</option><option value="nao"'+(v?.receber===false?' selected':'')+'>Não recebe tarefas</option></select></label>'+compensation+'</div>';
   }).join('')+'</details>').join('');
-  document.getElementById('folgasHistorico').textContent=folgasAgenda.historico.map(h=>(S.people.find(p=>p.id===h.pessoa_id)?.nick||h.pessoa_id)+': '+(h.dia_anterior?fsjData(h.dia_anterior):'pendente')+' → '+fsjData(h.dia_novo)+' ('+h.definido_por+')').join('\n')||'Nenhuma alteração nesta semana.';
+  document.getElementById('folgasHistorico').textContent=folgasAgenda.historico.map(h=>(S.people.find(p=>p.id===h.pessoa_id)?.nick||h.pessoa_id)+': '+(h.dia_anterior?fsjData(h.dia_anterior):'pendente')+' → '+(h.dia_novo?fsjData(h.dia_novo):'pendente')+' ('+h.definido_por+')').join('\n')||'Nenhuma alteração nesta semana.';
   const pending=people.filter(p=>!folgasAgenda.folgas.find(f=>f.pessoa_id===p.id)?.dia).length;
   const nextHoliday=folgasAgenda.feriados.find(h=>h.dia>=folgaHoje());
   document.getElementById('folgasResumo').textContent=pending+' escolha(s) de folga pendente(s) nesta semana.'+(nextHoliday?' Próximo feriado: '+fsjData(nextHoliday.dia)+' — '+nextHoliday.nome+'. Confira sua decisão por empregado.':'');
