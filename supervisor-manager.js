@@ -1,8 +1,8 @@
 let fsjSupervisors=new Map(),fsjSupervisorsReady=false,fsjSupervisorPeople=[],fsjSupervisorGroups=[];
 async function fsjSupervisorPost(body){return api('/functions/v1/supervisao',{method:'POST',body:JSON.stringify(body)});}
 async function fsjLoadSupervisors(){
- const status=document.getElementById('pSupervisorStatus');fsjSupervisorsReady=false;document.getElementById('pSupervisor').disabled=true;status.textContent='Consultando atribuições de supervisão...';
- try{const data=await fsjSupervisorPost({action:'manager-list'});fsjSupervisors=new Map(data.supervisores.map(s=>[s.pessoa_id,s]));fsjSupervisorsReady=true;document.getElementById('pSupervisor').disabled=false;fsjSupervisorEdit(document.getElementById('pid').value);status.textContent='Acesso pelo link pessoal do WhatsApp. Somente consulta às demandas selecionadas.';fsjSupervisorBadges();}catch(e){status.textContent='Supervisão indisponível: '+e.message;}
+ const status=document.getElementById('pSupervisorStatus');fsjSupervisorsReady=false;document.getElementById('pSupervisor').disabled=true;const retry=document.getElementById('pSupervisorRetry');if(retry)retry.hidden=true;status.textContent='Consultando atribuições de supervisão...';
+ try{const data=await fsjSupervisorPost({action:'manager-list'});fsjSupervisors=new Map(data.supervisores.map(s=>[s.pessoa_id,s]));fsjSupervisorsReady=true;document.getElementById('pSupervisor').disabled=false;fsjSupervisorEdit(document.getElementById('pid').value);status.textContent='Acesso pelo link pessoal do WhatsApp. Somente consulta às demandas selecionadas.';fsjSupervisorBadges();}catch(e){status.textContent='Não foi possível carregar a supervisão. Clique em Tentar novamente.';if(retry)retry.hidden=false;}
 }
 function fsjSupervisorEdit(id){const c=fsjSupervisors.get(id);document.getElementById('pSupervisor').checked=c?.ativo===true;fsjSupervisorPeople=[...(c?.pessoas||[])];fsjSupervisorGroups=[...(c?.grupos||[])];fsjRenderSupervisorTargets();}
 function fsjRenderSupervisorTargets(){
