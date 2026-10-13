@@ -1,0 +1,11 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+let handler;globalThis.Deno={env:{get:n=>n==='SUPABASE_URL'?'https://test.invalid':n==='SUPABASE_SERVICE_ROLE_KEY'?'fake-key':undefined},serve:h=>handler=h};
+await import('../supabase/functions/supervisao/index.ts');
+const call=(body,auth)=>handler(new Request('https://test.invalid',{method:'POST',headers:{Origin:'https://urbanopos.github.io','Content-Type':'application/json',...(auth?{Authorization:auth}:{})},body:JSON.stringify(body)}));
+test('consulta usa apenas token, sem confiar nos supervisionados informados pelo cliente',async()=>{
+ const old=globalThis.fetch;let payload;globalThis.fetch=async(url,opt)=>{assert.match(String(url),/rpc\/fsj_supervisor_demandas$/);payload=JSON.parse(opt.body);return new Response(JSON.stringify({tarefas:[]}));};
+ try{assert.equal((await call({action:'demands',token:'00000000-0000-4000-8000-000000000002',pessoa_id:'terceiro',grupos:['secreto']})).status,200);assert.deepEqual(payload,{p_token:'00000000-0000-4000-8000-000000000002'});}finally{globalThis.fetch=old;}
+});
+test('supervisor não pode mudar atribuições usando o token do quadro',async()=>{const old=globalThis.fetch;globalThis.fetch=()=>{throw Error('Nao deveria consultar banco');};try{assert.equal((await call({action:'manager-set',token:'00000000-0000-4000-8000-000000000002',ativo:true,pessoas:['outra'],grupos:[]})).status,401);}finally{globalThis.fetch=old;}});
+test('sessão de outra pessoa não autoriza alterações de gestor',async()=>{const old=globalThis.fetch;globalThis.fetch=async url=>{assert.match(String(url),/auth\/v1\/user$/);return new Response(JSON.stringify({email:'outro@example.invalid'}));};try{assert.equal((await call({action:'manager-set',ativo:true,pessoas:['outra'],grupos:[]},'Bearer fake')).status,403);}finally{globalThis.fetch=old;}});
+test('permissão revogada ou token expirado não retorna dados',async()=>{const old=globalThis.fetch;globalThis.fetch=async()=>new Response(JSON.stringify({message:'Acesso indisponivel'}),{status:400});try{const r=await call({action:'demands',token:'00000000-0000-4000-8000-000000000002'});assert.equal(r.status,403);assert.ok(!(await r.json()).tarefas);}finally{globalThis.fetch=old;}});

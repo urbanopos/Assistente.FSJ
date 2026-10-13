@@ -9,6 +9,7 @@ function fixture(people){
  const events=[],messages=[],links=[],boards=new Map();let connects=0,destroys=0;
  const db=async(path,opt={})=>{
    if(path==='rpc/fsj_preparar_calendario')return null;
+   if(path==='rpc/fsj_link_supervisao')return null;
    if(path==='rpc/fsj_pode_enviar')return true;
    if(path.startsWith('pessoas?id=')){const id=new URLSearchParams(path).get('pessoas?id').slice(3);return people.filter(p=>p.id===id&&p.ativo&&p.receber_tarefas_whatsapp);}
    if(path.startsWith('pessoas?'))return people;
@@ -69,4 +70,11 @@ test('mudança de folga antes da transmissão bloqueia envio e preserva proteç�
  f.args.db=async(path,opt)=>path==='rpc/fsj_pode_enviar'?++checks<3:db(path,opt);
  assert.equal((await runRoutine({...f.args,stateDir})).failures,1);assert.equal(f.messages.length,0);
  const journal=JSON.parse(await readFile(join(stateDir,'journal.json'),'utf8'));assert.equal(journal['a|2026-10-10'].phase,'sending');
+}));
+test('link de supervisão entra apenas na mensagem do supervisor autorizado',()=>withDir(async stateDir=>{
+ const f=fixture([person('a'),person('b')]);const db=f.args.db;
+ f.args.db=async(path,opt)=>path==='rpc/fsj_link_supervisao'?(JSON.parse(opt.body).p_pessoa==='a'?'https://urbanopos.github.io/Assistente.FSJ/supervisor.html#token=token-a':null):db(path,opt);
+ await runRoutine({...f.args,stateDir});assert.equal(f.messages.length,2);
+ assert.match(f.messages[0].text,/SUPERVISAO: DEMANDAS DOS SUPERVISIONADOS/);assert.match(f.messages[0].text,/supervisor.html#token=token-a/);
+ assert.doesNotMatch(f.messages[1].text,/supervisor.html/);assert.match(f.messages[1].text,/quadro.html#token=token-b/);
 }));
