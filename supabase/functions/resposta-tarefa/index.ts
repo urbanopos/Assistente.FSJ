@@ -49,7 +49,7 @@ Deno.serve(async req=>{
   if(!['sim','nao'].includes(resposta)||justificativa.length>2000||(resposta==='nao'&&!justificativa))return reply({erro:'Informe SIM ou NÃO e a justificativa quando escolher NÃO.'},400);
   if(files.length>3||files.some(f=>f.size>10485760||!['image/jpeg','image/png','image/webp','video/mp4','video/webm','audio/mpeg','audio/mp4','audio/ogg','audio/webm'].includes(f.type)))return reply({erro:'Envie até 3 arquivos de foto, vídeo ou áudio, com até 10 MB cada.'},400);
   let saved:any;
-  try{saved=await db('rpc/fsj_registrar_resposta',{method:'POST',body:JSON.stringify({p_token:token,p_resposta:resposta,p_justificativa:justificativa,p_itens_faltantes:itens})});}catch(e){if(String(e).includes('23505'))return reply({erro:'Esta tarefa já recebeu resposta.'},409);if(String(e).includes('22023'))return reply({erro:'Resposta inválida ou link indisponível.'},400);throw e;}
+  try{saved=await db('rpc/fsj_registrar_resposta',{method:'POST',body:JSON.stringify({p_token:token,p_resposta:resposta,p_justificativa:justificativa,p_itens_faltantes:itens})});}catch(e){if(String(e).includes('FSJ_FORA_EXPEDIENTE'))return reply({erro:'As tarefas só podem ser respondidas no horário de expediente: das 7h às 12h e das 14h às 16h20, no horário de Pernambuco. Envio bloqueado.',codigo:'fora_expediente'},403);if(String(e).includes('23505'))return reply({erro:'Esta tarefa já recebeu resposta.'},409);if(String(e).includes('22023'))return reply({erro:'Resposta inválida ou link indisponível.'},400);throw e;}
   const id=saved.id,errors:string[]=[];
   for(const file of files){
    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-80);
