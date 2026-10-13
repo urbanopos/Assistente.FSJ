@@ -28,9 +28,11 @@ Deno.serve(async req=>{
    await db('rpc/fsj_preparar_calendario',{p_dia:today()});
    const day=String(data.semana||today());if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return reply({erro:'Semana invalida'},400);
    const date=new Date(day+'T12:00:00Z');date.setUTCDate(date.getUTCDate()-((date.getUTCDay()+6)%7));const semana=date.toISOString().slice(0,10);
+   const start=new Date(today()+'T12:00:00Z'),end=new Date(start);start.setUTCDate(start.getUTCDate()-30);end.setUTCDate(end.getUTCDate()+30);
+   const from=start.toISOString().slice(0,10),to=end.toISOString().slice(0,10);
    const [folgas,feriados,decisoes,historico]=await Promise.all([
-    db('folgas_semana?semana=eq.'+semana+'&select=*'),db('feriados_fsj?dia=gte.'+today()+'&order=dia&limit=40'),
-    db('feriados_envio?dia=gte.'+today()+'&select=*'),db('folgas_historico?semana=eq.'+semana+'&order=criado_em.desc&limit=100')]);
+    db('folgas_semana?semana=eq.'+semana+'&select=*'),db('feriados_fsj?dia=gte.'+from+'&dia=lte.'+to+'&order=dia'),
+    db('feriados_envio?dia=gte.'+from+'&dia=lte.'+to+'&select=*'),db('folgas_historico?semana=eq.'+semana+'&order=criado_em.desc&limit=100')]);
    return reply({semana,folgas,feriados,decisoes,historico});
   }
   if(data.action==='manager-set'){

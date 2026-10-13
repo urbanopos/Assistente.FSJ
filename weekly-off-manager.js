@@ -9,7 +9,7 @@ async function carregarFolgas(){
  const input=document.getElementById('folgasSemana');if(!input.value)input.value=folgaSegunda(folgaHoje());
  try{
   folgasAgenda=await folgasPost({action:'manager-calendar',semana:input.value});input.value=folgasAgenda.semana;
-  const holidayStart=folgaHoje(),holidayEnd=folgaSomar(holidayStart,30);
+  const holidayToday=folgaHoje(),holidayStart=folgaSomar(holidayToday,-30),holidayEnd=folgaSomar(holidayToday,30);
   folgasAgenda.feriados=folgasAgenda.feriados.filter(h=>h.dia>=holidayStart&&h.dia<=holidayEnd);
   const people=S.people.filter(p=>p.active&&p.whatsapp7h),week=folgasAgenda.semana,end=folgaSomar(week,6);
   document.getElementById('folgasLista').innerHTML=people.length?people.map((p,i)=>{
@@ -24,7 +24,7 @@ async function carregarFolgas(){
   }).join('')+'</details>').join('');
   document.getElementById('folgasHistorico').textContent=folgasAgenda.historico.map(h=>(S.people.find(p=>p.id===h.pessoa_id)?.nick||h.pessoa_id)+': '+(h.dia_anterior?fsjData(h.dia_anterior):'pendente')+' → '+fsjData(h.dia_novo)+' ('+h.definido_por+')').join('\n')||'Nenhuma alteração nesta semana.';
   const pending=people.filter(p=>!folgasAgenda.folgas.find(f=>f.pessoa_id===p.id)?.dia).length;
-  const nextHoliday=folgasAgenda.feriados[0];
+  const nextHoliday=folgasAgenda.feriados.find(h=>h.dia>=folgaHoje());
   document.getElementById('folgasResumo').textContent=pending+' escolha(s) de folga pendente(s) nesta semana.'+(nextHoliday?' Próximo feriado: '+fsjData(nextHoliday.dia)+' — '+nextHoliday.nome+'. Confira sua decisão por empregado.':'');
   status.textContent='Atualizado em '+new Date().toLocaleString('pt-BR',{timeZone:'America/Recife'});
  }catch(e){status.textContent='Não foi possível atualizar: '+e.message;document.getElementById('folgasResumo').textContent=status.textContent;document.getElementById('folgasLista').replaceChildren();document.getElementById('feriadosLista').replaceChildren();const holidaySection=document.getElementById('feriadosSection');if(holidaySection)holidaySection.hidden=true;}
