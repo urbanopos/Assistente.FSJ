@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {fiveAttempts} from './retry-core.mjs';
+test('encerra ao confirmar sem fazer as demais tentativas',async()=>{let calls=0,waits=[];const r=await fiveAttempts({run:async()=>++calls===2?0:1,wait:async ms=>waits.push(ms)});assert.deepEqual(r,{success:true,attempts:2});assert.deepEqual(waits,[180000]);});
+test('faz no maximo cinco tentativas com quatro intervalos',async()=>{let calls=0,waits=[];const r=await fiveAttempts({run:async()=>{calls++;return 1;},wait:async ms=>waits.push(ms)});assert.equal(calls,5);assert.equal(waits.length,4);assert.ok(waits.every(x=>x===180000));assert.equal(r.success,false);});
