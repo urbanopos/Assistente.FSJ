@@ -11,7 +11,7 @@ Deno.serve(async req=>{
  try{
   const ct=req.headers.get('content-type')||'';
   let data:any,files:File[]=[];
-  if(ct.includes('multipart/form-data')){const f=await req.formData();data={token:f.get('token'),action:f.get('action'),resposta:f.get('resposta'),justificativa:f.get('justificativa')};files=f.getAll('arquivo').filter(x=>x instanceof File) as File[]}
+  if(ct.includes('multipart/form-data')){const f=await req.formData();data={token:f.get('token'),action:f.get('action'),resposta:f.get('resposta'),justificativa:f.get('justificativa'),itens_faltantes:f.get('itens_faltantes')};files=f.getAll('arquivo').filter(x=>x instanceof File) as File[]}
   else data=await req.json();
   const token=String(data.token||'');
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token))return reply({erro:'Link inválido'},400);
@@ -43,13 +43,13 @@ Deno.serve(async req=>{
   if(data.action==='detail')return reply(detail);
   if(data.action!=='submit')return reply({erro:'Ação inválida'},400);
   if(link.respondido_em)return reply({erro:'Esta tarefa já recebeu resposta.'},409);
-  const resposta=String(data.resposta||'').toLowerCase(),justificativa=String(data.justificativa||'').trim();
+  const resposta=String(data.resposta||'').toLowerCase(),justificativa=String(data.justificativa||'').trim(),itens=String(data.itens_faltantes||'').trim();
+  if(itens.length>2000||(resposta!=='nao'&&itens))return reply({erro:'Itens Faltantes só pode ser informado na resposta NÃO, com até 2000 caracteres.'},400);
   if(!['sim','nao'].includes(resposta)||justificativa.length>2000||(resposta==='nao'&&!justificativa))return reply({erro:'Informe SIM ou NÃO e a justificativa quando escolher NÃO.'},400);
   if(files.length>3||files.some(f=>f.size>10485760||!['image/jpeg','image/png','image/webp','video/mp4','video/webm','audio/mpeg','audio/mp4','audio/ogg','audio/webm'].includes(f.type)))return reply({erro:'Envie até 3 arquivos de foto, vídeo ou áudio, com até 10 MB cada.'},400);
-  const existing=await db('retornos?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&criado_em=gte.'+encodeURIComponent(link.dia+'T03:00:00Z')+'&criado_em=lt.'+encodeURIComponent(new Date(new Date(link.dia+'T03:00:00Z').getTime()+86400000).toISOString())+'&select=id&limit=1');
-  if(existing?.length)return reply({erro:'Esta tarefa já recebeu resposta.'},409);
-  const row=await db('retornos?select=id',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({tarefa_id:link.tarefa_id,pessoa_id:link.pessoa_id,origem:'formulario',tipo:resposta,conteudo:justificativa})});
-  const id=row[0].id,errors:string[]=[];
+  let saved:any;
+  try{saved=await db('rpc/fsj_registrar_resposta',{method:'POST',body:JSON.stringify({p_token:token,p_resposta:resposta,p_justificativa:justificativa,p_itens_faltantes:itens})});}catch(e){if(String(e).includes('23505'))return reply({erro:'Esta tarefa já recebeu resposta.'},409);if(String(e).includes('22023'))return reply({erro:'Resposta inválida ou link indisponível.'},400);throw e;}
+  const id=saved.id,errors:string[]=[];
   for(const file of files){
    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-80);
    const path=link.dia+'/'+link.pessoa_id+'/'+id+'/'+crypto.randomUUID()+'-'+safe;
@@ -57,7 +57,6 @@ Deno.serve(async req=>{
    if(!up.ok){errors.push(file.name);continue}
    await db('anexos',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({retorno_id:id,nome:file.name,tipo_mime:file.type,url:path})});
   }
-  await db('links_resposta?token=eq.'+token,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({respondido_em:new Date().toISOString()})});
-  return reply({ok:true,anexos_nao_salvos:errors});
+  return reply({ok:true,tarefa_proprietario_id:saved.tarefa_proprietario_id,anexos_nao_salvos:errors});
  }catch(e){console.error('form error',String(e));return reply({erro:'Não foi possível registrar a resposta. Tente novamente.'},500)}
 });
