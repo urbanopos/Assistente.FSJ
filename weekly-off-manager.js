@@ -9,8 +9,8 @@ async function carregarFolgas(){
  const input=document.getElementById('folgasSemana');if(!input.value)input.value=folgaSegunda(folgaHoje());
  try{
   folgasAgenda=await folgasPost({action:'manager-calendar',semana:input.value});input.value=folgasAgenda.semana;
-  const currentMonth=folgaHoje().slice(0,7);
-  folgasAgenda.feriados=folgasAgenda.feriados.filter(h=>h.dia.slice(0,7)===currentMonth);
+  const holidayStart=folgaHoje(),holidayEnd=folgaSomar(holidayStart,30);
+  folgasAgenda.feriados=folgasAgenda.feriados.filter(h=>h.dia>=holidayStart&&h.dia<=holidayEnd);
   const people=S.people.filter(p=>p.active&&p.whatsapp7h),week=folgasAgenda.semana,end=folgaSomar(week,6);
   document.getElementById('folgasLista').innerHTML=people.length?people.map((p,i)=>{
    const f=folgasAgenda.folgas.find(x=>x.pessoa_id===p.id);
