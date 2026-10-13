@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261013-folgas-distintas-07">
+<meta name="fsj-build" content="20261013-iniciar-08">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -80,7 +80,7 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 </div></aside>
 <script>
 let fsjPainelPronto=false;
-const FSJ_BUILD='20261013-folgas-distintas-07';
+const FSJ_BUILD='20261013-iniciar-08';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Abertura: '+fsjDataHora(fsjAbertoEm)+' • verificando atualização';
@@ -411,7 +411,10 @@ function employeeView(){let id=employee.value;if(!id){employeeTasks.innerHTML='<
 function atualizarFiltroDemandas(){let filtro=document.getElementById('demandaFuncionario'),atual=filtro.value;filtro.innerHTML='<option value="">Todos os responsáveis</option>'+[...S.people].sort((a,b)=>(a.nick||a.name).localeCompare(b.nick||b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nick&&p.nick!==p.name?p.nick+' — '+p.name:p.name)+'</option>').join('');filtro.value=S.people.some(p=>p.id===atual)?atual:''}
 function filtrarDemandas(tarefas,responsavel){return responsavel?tarefas.filter(t=>ids(t).includes(responsavel)):tarefas}
 function abrirDemandasSituacao(situacao){document.getElementById('demandaFuncionario').value='';document.getElementById('demandaSituacao').value=situacao;renderDemandas();navTo('demandas')}
-function renderDemandas(){let responsavel=document.getElementById('demandaFuncionario').value,tarefas=filtrarDemandas(S.tasks,responsavel).filter(t=>!document.getElementById('demandaSituacao').value||t.status===document.getElementById('demandaSituacao').value);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+esc(t.text)+'</td><td>'+esc(names(t))+'</td><td>'+(t.daily?'Diária':'Pontual')+(t.groupId?' / Grupo':'')+'</td><td>'+esc(t.status)+'</td><td>'+esc(t.response||t.question||'—')+'</td><td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions"><button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button></div></td></tr>').join('');document.getElementById('demandaContagem').textContent=tarefas.length+' de '+S.tasks.length+' tarefa(s)';if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="7" class="muted">'+(responsavel?'Nenhuma tarefa atribuída a este responsável.':'Nenhuma tarefa cadastrada.')+'</td></tr>'}
+let fsjExecucoes=[];
+function fsjExecucaoTexto(e){const who=person(e.pessoa_id).nick||person(e.pessoa_id).name,stamp=value=>value?fsjDataHora(new Date(value)):'';return who+' — '+(e.estado==='em_andamento'?'Em andamento • Início: '+stamp(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+stamp(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+stamp(e.suspenso_em)+' • Início: '+stamp(e.iniciado_em):'Concluída em '+stamp(e.concluido_em));}
+function fsjExecucaoCelula(t){return fsjExecucoes.filter(e=>e.tarefa_id===t.id).map(e=>'<div class="muted">'+esc(fsjExecucaoTexto(e))+'</div>').join('');}
+function renderDemandas(){let responsavel=document.getElementById('demandaFuncionario').value,tarefas=filtrarDemandas(S.tasks,responsavel).filter(t=>!document.getElementById('demandaSituacao').value||t.status===document.getElementById('demandaSituacao').value);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+esc(t.text)+'</td><td>'+esc(names(t))+'</td><td>'+(t.daily?'Diária':'Pontual')+(t.groupId?' / Grupo':'')+'</td><td>'+esc(t.status)+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td><td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions"><button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button></div></td></tr>').join('');document.getElementById('demandaContagem').textContent=tarefas.length+' de '+S.tasks.length+' tarefa(s)';if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="7" class="muted">'+(responsavel?'Nenhuma tarefa atribuída a este responsável.':'Nenhuma tarefa cadastrada.')+'</td></tr>'}
 function limparFiltroDemandas(){document.getElementById('demandaFuncionario').value='';document.getElementById('demandaSituacao').value='';renderDemandas()}
 function render(){rollover();today.textContent='Hoje: '+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});people.innerHTML=S.people.length?S.people.map(p=>'<div style="padding:6px;border-bottom:1px solid #eee"><b>'+esc(p.nick||p.name)+'</b> — '+esc(p.name)+' — '+esc(p.type)+' — '+esc(p.phone||'sem WhatsApp')+(p.vacationStart?' <span class="pill">Férias: '+esc(fsjData(p.vacationStart))+' a '+esc(fsjData(p.vacationEnd))+'</span>':'')+' <span data-owner-person="'+esc(p.id)+'" class="pill"></span> <span data-supervisor-person="'+esc(p.id)+'" class="pill"></span> <span class="pill">'+(p.active===false?'Inativo':p.whatsapp7h===true?'WhatsApp às 7h':'Sem envio automático')+'</span> <button onclick="editPerson(\''+p.id+'\')">Editar</button> <button class="danger" onclick="delPerson(\''+p.id+'\')">Excluir</button></div>').join(''):'<p class="muted">Nenhuma pessoa cadastrada.</p>';groupChecks.innerHTML=S.people.map(p=>'<label><input class="gm" type="checkbox" value="'+p.id+'"> '+esc(p.nick||p.name)+'</label>').join('');groups.innerHTML=S.groups.map(g=>'<div style="padding:6px"><b>'+esc(g.name)+'</b>: '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+' <button onclick="editGroup(\''+g.id+'\')">Editar</button> <button onclick="delGroup(\''+g.id+'\')">Excluir</button></div>').join('');let opts=S.people.map(p=>'<option value="'+p.id+'">'+esc(p.nick||p.name)+'</option>').join(''),a=msgTarget.value;msgTarget.innerHTML=opts;if(a)msgTarget.value=a;atualizarFiltroDemandas();renderDemandas();ko.textContent=S.tasks.filter(t=>t.status==='Em aberto').length;kc.textContent=S.tasks.filter(t=>t.status==='Concluída').length;kp.textContent=S.tasks.filter(t=>t.status==='Pendente').length;kq.textContent=S.tasks.filter(t=>t.status==='Aguardando gestão').length;renderTargets();dailyMessage();save();if(typeof fsjSupervisorBadges==='function')fsjSupervisorBadges();if(typeof fsjOwnerBadges==='function')fsjOwnerBadges()}
 async function transferirArmazenagem(){try{syncStatus.textContent='Transferindo...';let payload=JSON.parse(localStorage.getItem(K)||'null');if(!validState(payload))throw new Error('Base local inválida');let res=await fetch(ARMAZ_URL+'/rest/v1/importacoes_localstorage',{method:'POST',headers:{'apikey':ARMAZ_KEY,'Authorization':'Bearer '+ARMAZ_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({dispositivo:navigator.userAgent.slice(0,180),payload})});if(!res.ok)throw new Error(await res.text());localStorage.setItem('fsj_armazenagem_transferida_em',new Date().toISOString());syncStatus.textContent='Cópia transferida para Armazenagem em '+new Date().toLocaleString('pt-BR')+'. Dados locais preservados.';alert('Transferência concluída. A cópia local foi preservada.')}catch(e){syncStatus.textContent='Transferência não concluída. Os dados locais permanecem intactos.';alert('Não foi possível transferir: '+e.message)}}
@@ -456,7 +459,9 @@ async function fsjAtualizarRetornos(updateView=true){
   if(window.fsjExited||!localStorage.getItem('fsj_access_token'))return;
   if(fsjAtualizacaoEmCurso)return fsjAtualizacaoEmCurso;
   fsjAtualizacaoEmCurso=(async()=>{
-    const [tasks,answers]=await Promise.all([api('/rest/v1/tarefas?select=id,situacao,concluida_por,concluida_em'),fsjLerRetornos()]);
+    const executionDay=fsjDia(new Date());
+    const [tasks,answers,executions]=await Promise.all([api('/rest/v1/tarefas?select=id,situacao,concluida_por,concluida_em'),fsjLerRetornos(),api('/rest/v1/execucoes_tarefa?or=(dia.eq.'+executionDay+',estado.eq.em_andamento)&select=*&order=iniciado_em.desc')]);
+    fsjExecucoes=executions;
     if(window.fsjExited)return;
     const central=new Map(tasks.map(t=>[t.id,t]));
     const day=fsjDia(new Date());
@@ -507,7 +512,7 @@ async function carregarArmazenagem(){fsjPainelPronto=false;gestor.classList.add(
 const brisaCargaInicial=carregarArmazenagem();
 brisaVerificarIA();
 
-const FSJ_RELEASE_HASH='b6ade6ec7ace8f26adb3e1e55974247760d7935324e879856a44ceb0c8612d45';
+const FSJ_RELEASE_HASH='1b78b3a182feeb18f0acd7d2df4d6521984e01d21acd47ac54ab71432bd8bae6';
 let fsjUpdatePending=false,fsjUpdateChecking=false;
 const fsjEditedFields=new Set();
 document.addEventListener('input',event=>{if(event.target.matches('input,textarea,select'))fsjEditedFields.add(event.target)});
@@ -540,7 +545,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./weekly-off-manager.js?v=20261013-folgas-distintas-07"></script><script src="./supervisor-manager.js?v=20261013-folgas-distintas-07"></script><script src="./proprietario.js?v=20261013-folgas-distintas-07"></script></body></html>
+</script><script src="./weekly-off-manager.js?v=20261013-iniciar-08"></script><script src="./supervisor-manager.js?v=20261013-iniciar-08"></script><script src="./proprietario.js?v=20261013-iniciar-08"></script></body></html>
 
 
 

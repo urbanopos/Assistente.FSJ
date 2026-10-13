@@ -40,7 +40,8 @@ Deno.serve(async req=>{
   const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return reply({erro:'Tarefa indisponível'},404);
   const detail={tarefa:tasks[0].descricao,responsavel:people[0].identificacao||people[0].nome,dia:link.dia,respondido:!!link.respondido_em};
-  if(data.action==='detail')return reply(detail);
+  if(data.action==='detail'){const executions=await db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+link.dia+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em');return reply({...detail,execucao:executions[0]||null});}
+  if(data.action==='start'){try{return reply(await db('rpc/fsj_iniciar_tarefa',{method:'POST',body:JSON.stringify({p_token:token})}));}catch{return reply({erro:'Não foi possível iniciar: confira se o link está vigente e a tarefa disponível.'},409);}}
   if(data.action!=='submit')return reply({erro:'Ação inválida'},400);
   if(link.respondido_em)return reply({erro:'Esta tarefa já recebeu resposta.'},409);
   const resposta=String(data.resposta||'').toLowerCase(),justificativa=String(data.justificativa||'').trim(),itens=String(data.itens_faltantes||'').trim();
