@@ -12,8 +12,10 @@ async function carregarFolgas(){
   const people=S.people.filter(p=>p.active&&p.whatsapp7h),week=folgasAgenda.semana,end=folgaSomar(week,6);
   document.getElementById('folgasLista').innerHTML=people.length?people.map((p,i)=>{
    const f=folgasAgenda.folgas.find(x=>x.pessoa_id===p.id);
-   return '<div class="card"><h3>'+esc(p.nick||p.name)+'</h3><p>'+(f?.dia?'Folga: <b>'+esc(fsjData(f.dia))+'</b> • '+(f.bloqueada_gestor?'Definida pelo gestor; empregado bloqueado.':'Informada pelo empregado.'):'Folga semanal pendente: empregado ainda não escolheu.')+'</p><label for="folgaGestor'+i+'">Definir ou alterar a folga desta semana</label><div class="row"><input type="date" id="folgaGestor'+i+'" min="'+week+'" max="'+end+'" value="'+(f?.dia||'')+'"><button type="button" data-folga-pessoa="'+esc(p.id)+'" data-folga-index="'+i+'">Salvar e bloquear alteração pelo empregado</button></div></div>';
+   const controls='<label for="folgaGestor'+i+'">Definir ou alterar a folga desta semana</label><div class="row"><input type="date" id="folgaGestor'+i+'" min="'+week+'" max="'+end+'" value="'+(f?.dia||'')+'"><button type="button" data-folga-pessoa="'+esc(p.id)+'" data-folga-index="'+i+'">Salvar e bloquear alteração pelo empregado</button></div>';
+   return '<div class="card"><h3>'+esc(p.nick||p.name)+'</h3><p>'+(f?.dia?'Folga: <b>'+esc(fsjData(f.dia))+'</b> • '+(f.bloqueada_gestor?'Definida pelo gestor; empregado bloqueado.':'Informada pelo empregado.'):'Folga semanal pendente: empregado ainda não escolheu.')+'</p>'+(f?.dia?'<details class="folga-alterar"><summary>Alterar folga</summary>'+controls+'</details>':controls)+'</div>';
   }).join(''):'<p>Nenhum destinatário ativo selecionado para o WhatsApp.</p>';
+  const holidaySection=document.getElementById('feriadosSection');if(holidaySection)holidaySection.hidden=folgasAgenda.feriados.length===0;
   document.getElementById('feriadosLista').innerHTML=folgasAgenda.feriados.map(h=>'<details class="card"><summary><b>'+esc(fsjData(h.dia))+' • '+esc(h.nome)+'</b> — '+esc(h.ambito)+'</summary><p><a href="'+esc(h.fonte)+'" target="_blank" rel="noopener noreferrer">Fonte do calendário</a></p>'+people.map(p=>{
    const v=folgasAgenda.decisoes.find(x=>x.pessoa_id===p.id&&x.dia===h.dia);
    return '<label>'+esc(p.nick||p.name)+'<select data-feriado-pessoa="'+esc(p.id)+'" data-feriado-dia="'+h.dia+'"><option value=""'+(!v?' selected':'')+'>Decisão pendente — não enviar</option><option value="sim"'+(v?.receber===true?' selected':'')+'>Recebe tarefas</option><option value="nao"'+(v?.receber===false?' selected':'')+'>Não recebe tarefas</option></select></label>';
@@ -23,7 +25,7 @@ async function carregarFolgas(){
   const nextHoliday=folgasAgenda.feriados[0];
   document.getElementById('folgasResumo').textContent=pending+' escolha(s) de folga pendente(s) nesta semana.'+(nextHoliday?' Próximo feriado: '+fsjData(nextHoliday.dia)+' — '+nextHoliday.nome+'. Confira sua decisão por empregado.':'');
   status.textContent='Atualizado em '+new Date().toLocaleString('pt-BR',{timeZone:'America/Recife'});
- }catch(e){status.textContent='Não foi possível atualizar: '+e.message;document.getElementById('folgasResumo').textContent=status.textContent;document.getElementById('folgasLista').replaceChildren();document.getElementById('feriadosLista').replaceChildren();}
+ }catch(e){status.textContent='Não foi possível atualizar: '+e.message;document.getElementById('folgasResumo').textContent=status.textContent;document.getElementById('folgasLista').replaceChildren();document.getElementById('feriadosLista').replaceChildren();const holidaySection=document.getElementById('feriadosSection');if(holidaySection)holidaySection.hidden=true;}
 }
 document.getElementById('folgasLista').addEventListener('click',async e=>{
  const b=e.target.closest('[data-folga-pessoa]');if(!b)return;
