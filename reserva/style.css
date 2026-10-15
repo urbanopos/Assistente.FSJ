@@ -3,3 +3,5 @@
 #viewer nav img{width:36px;height:36px;flex-shrink:0}#viewer nav{gap:8px}#viewer nav b{font-size:14px}
 
 #viewer #install{margin:0;width:auto;font-size:12px;padding:7px}#viewer #refresh{padding:6px;font-size:22px}#viewer nav b{white-space:nowrap}#viewer nav{justify-content:space-between}
+
+#closed{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:#f5fbfd}#closed img{width:80px;height:80px}#viewer #exit{padding:7px;font-size:12px}
