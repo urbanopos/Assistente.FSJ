@@ -1,0 +1,48 @@
+name: APK Android FSJ Reserva
+on:
+  push:
+    branches: [main]
+    paths: ['android-reserva/**', '.github/workflows/android-reserva.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: fsj-reserva-prototipo-signing-v1
+      - name: Instalar SDK
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Compilar e verificar
+        working-directory: android-reserva
+        run: gradle --no-daemon :app:assembleDebug :app:lintDebug
+      - name: Preparar APK
+        run: |
+          mkdir -p apk
+          cp android-reserva/app/build/outputs/apk/debug/app-debug.apk apk/FSJ-Reserva-Android.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose apk/FSJ-Reserva-Android.apk
+          cd apk
+          sha256sum FSJ-Reserva-Android.apk > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FSJ-Reserva-Android
+          path: apk/*
+      - name: Disponibilizar prototipo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view fsj-reserva-android-prototipo-v1 >/dev/null 2>&1 || gh release create fsj-reserva-android-prototipo-v1 --target "$GITHUB_SHA" --title 'FSJ Reserva Android — protótipo 0.1' --prerelease --notes 'APK de teste privado por autenticação. Principal preservado. Sair fecha a atividade Android. Notificações automáticas ainda não ativadas. Assinatura de desenvolvimento; futuras versões poderão exigir reinstalação.'
+          gh release upload fsj-reserva-android-prototipo-v1 apk/FSJ-Reserva-Android.apk apk/SHA256SUMS.txt --clobber
