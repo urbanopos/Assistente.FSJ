@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261015-folgas-por-pessoa">
+<meta name="fsj-build" content="20261015-telas-celular">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -31,33 +31,6 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 #personSettingsTitle{margin:12px 0 8px}
 
 
-/* Abas: campos próximos ao título e navegação no rodapé. */
-#dashboard h3{margin:0 0 5px}
-.person-paged [hidden]{display:none!important}
-.person-paged{display:flex;flex-direction:column;margin:0;min-height:0;gap:4px}
-.person-paged.hidden{display:none}
-main:has(.person-paged:not(.hidden)){padding-top:0;padding-bottom:0}
-.person-paged h2,#personRecordTitle{margin:0 0 2px!important}
-.person-page-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
-.person-page-body label{margin-top:3px}.person-page-body h3{margin:5px 0}.person-page-body p{margin:5px 0}.person-page-body fieldset{margin:4px 0!important}
-.person-page-body .person-page-empty,.person-page-body .person-page-hidden{display:none!important}
-.person-page-footer{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:6px 80px max(4px,env(safe-area-inset-bottom)) 0;border-top:1px solid var(--line);background:white}
-.person-page-footer span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.person-page-footer button{min-height:36px}
-#personSettingsTitle{font-size:15px;margin:4px 0}
-#personBasicFields>.muted{margin:3px 0}
-@media(max-width:700px){.person-fields{gap:4px}.person-page-footer{padding-right:60px}.person-page-footer button{padding:6px 8px;font-size:13px}}
-
-@media(min-width:701px){
- .person-paged{height:auto!important;margin:8px 0;gap:0}
- .person-page-body{overflow:visible;flex:none}
- .person-page-body .person-page-hidden,.person-page-body .person-page-empty{display:revert!important}
- .person-page-footer{display:none!important}
- .person-paged h2{margin-bottom:10px!important}
- .person-page-body label{margin-top:7px}
- .person-page-body h3{margin:1em 0}
- .person-page-body p{margin:1em 0}
-}
 /* Brisa — retrato com movimento */
 .brisa-fab{position:fixed;right:22px;bottom:22px;width:72px;height:72px;border-radius:50%;border:3px solid #fff;background:var(--g);box-shadow:0 6px 22px #0004;z-index:60;padding:0;overflow:hidden;animation:brisaHalo 4s ease-in-out infinite}
 .brisa-fab img,.brisa-avatar img{position:absolute;width:180%;max-width:none;height:auto;left:-40%;top:-42%}
@@ -86,7 +59,7 @@ main:has(.person-paged:not(.hidden)){padding-top:0;padding-bottom:0}
 @media(max-width:700px){.brisa-fab{right:14px;bottom:14px;width:64px;height:64px}.brisa-panel{width:100vw}.brisa-portrait{max-width:350px}header{padding:6px 10px;gap:8px}.fsj-logo{width:clamp(104px,34vw,140px);height:52px}.header-info{font-size:10px}.brisa-body{padding:12px}}
 @media(prefers-reduced-motion:reduce){.brisa-fab,.brisa-fab img,.brisa-panel.open .brisa-portrait,.brisa-panel.open .brisa-portrait img,.brisa-dot,.brisa-panel.open .brisa-photo{animation:none!important}.brisa-panel{transition:none}}
 .demandas-filtros{align-items:flex-end}.demandas-filtros select,.demandas-filtros button{height:40px;box-sizing:border-box}.demandas-filtros #demandaContagem{min-height:40px;display:flex;align-items:center}
-.fsj-priority{color:#b91c1c!important;font-weight:800}.fsj-urgent{animation:fsjUrgentPulse 1.8s ease-in-out infinite}@keyframes fsjUrgentPulse{50%{opacity:.45}}@media(prefers-reduced-motion:reduce){.fsj-urgent{animation:none}}</style></head><body>
+.fsj-priority{color:#b91c1c!important;font-weight:800}.fsj-urgent{animation:fsjUrgentPulse 1.8s ease-in-out infinite}@keyframes fsjUrgentPulse{50%{opacity:.45}}@media(prefers-reduced-motion:reduce){.fsj-urgent{animation:none}}</style><link rel="stylesheet" href="./mobile-pages.css?v=20261015-telas-celular"></head><body>
 <header><img class="fsj-logo" src="fsj-logotipo.webp" alt="Fazenda São José — Sistema de Gestão"><div class="header-info"><div id="ownerAccount">Proprietário: Urbano</div><div id="ultimaAtualizacao">Verificando versão e dados atuais...</div><div>Armazenagem central</div></div><button type="button" class="danger" onclick="sairGestor()" style="margin-left:auto;flex-shrink:0;font-weight:700;min-height:44px" aria-label="Sair e desligar Brisa">Sair</button></header>
 <nav class="topnav"><div class="inner"><button class="active" onclick="navTo('dashboard',this)">Início</button><button onclick="navTo('cadPessoas',this)">Pessoas</button><button onclick="navTo('folgasGestor',this)">Folgas e feriados</button><button onclick="navTo('cadGrupos',this)">Grupos</button><button onclick="navTo('novaTarefa',this)">Tarefas</button><button onclick="navTo('demandas',this)">Demandas</button><button onclick="navTo('whatsapp',this)">WhatsApp</button><button onclick="navTo('relatorios',this)">Relatórios</button><button onclick="navTo('seguranca',this)">Armazenagem</button></div></nav>
 <main><div id="loginBox" class="card"><h2>Acesso do Proprietário</h2><div class="muted">Após o primeiro acesso, sua sessão fica salva neste navegador. Funcionários respondem pelo formulário recebido no WhatsApp.</div><label>E-mail do Proprietário</label><input id="loginEmail" type="text" value="urbanopos@yahoo.com.br" readonly><div class="row"><button class="primary" onclick="enviarAcesso()">Enviar link de acesso por e-mail</button><button onclick="sairGestor()">Sair</button></div><div id="loginStatus" class="muted">Verificando acesso...</div><button type="button" onclick="carregarArmazenagem()">Tentar novamente</button></div><section id="gestor" class="hidden">
@@ -116,7 +89,7 @@ main:has(.person-paged:not(.hidden)){padding-top:0;padding-bottom:0}
 </div></aside>
 <script>
 let fsjPainelPronto=false;
-const FSJ_BUILD='20261015-folgas-por-pessoa';
+const FSJ_BUILD='20261015-telas-celular';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -654,80 +627,6 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./weekly-off-manager.js?v=20261015-folgas-por-pessoa"></script><script src="./supervisor-manager.js?v=20261015-folgas-por-pessoa"></script><script src="./proprietario.js?v=20261015-folgas-por-pessoa"></script>
-<script>
-// Keep the original controls mounted so paging never discards unsaved edits.
-const fsjPersonPages=new Map();
-let fsjPersonFrame=0;
-function fsjPersonSetup(id){
- const card=document.getElementById(id),title=card.querySelector('h2');
- if(!title)return;
- for(const label of [...card.children].filter(el=>el.tagName==='LABEL')){const control=label.nextElementSibling;if(control?.matches('input:not([type=hidden]),select,textarea')){const group=document.createElement('div');label.before(group);group.append(label,control);}}
- const body=document.createElement('div');body.className='person-page-body';
- for(const child of [...card.children])if(child!==title)body.append(child);
- const footer=document.createElement('div');footer.className='person-page-footer';
- const prev=document.createElement('button');prev.type='button';prev.textContent='Anterior';
- const status=document.createElement('span');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
- const next=document.createElement('button');next.type='button';next.textContent='Próxima';
- footer.append(prev,next,status);card.append(body,footer);card.classList.add('person-paged');
- const state={card,body,footer,title,prev,next,status,index:0,pages:[]};fsjPersonPages.set(id,state);
- prev.onclick=()=>fsjPersonTurn(state,-1);next.onclick=()=>fsjPersonTurn(state,1);
- const observer=new MutationObserver(()=>fsjPersonLayout());
- observer.observe(body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden']});
-}
-function fsjPersonTurn(state,step){state.index=Math.max(0,Math.min(state.pages.length-1,state.index+step));fsjPersonShow(state);state.title.setAttribute('tabindex','-1');state.title.focus({preventScroll:true});}
-function fsjPersonShow(state){
- state.pages.forEach((page,i)=>page.forEach(el=>el.classList.toggle('person-page-hidden',i!==state.index)));
- state.prev.hidden=state.index===0;state.next.hidden=state.index>=state.pages.length-1;state.footer.hidden=state.pages.length<2;
- state.prev.disabled=state.index===0;state.next.disabled=state.index===state.pages.length-1;
- state.status.textContent=state.pages.length>1?'Página '+(state.index+1)+' de '+state.pages.length:'';
- state.body.querySelectorAll('.table').forEach(box=>{const rows=[...box.querySelectorAll('tbody>tr')];box.classList.toggle('person-page-empty',rows.length>0&&rows.every(row=>row.classList.contains('person-page-hidden')));});
- state.body.scrollTop=0;
-}
-function fsjPersonLayout(reset=false){
- if(reset)for(const state of fsjPersonPages.values())state.index=0;
- cancelAnimationFrame(fsjPersonFrame);fsjPersonFrame=requestAnimationFrame(()=>{
- const state=fsjPersonPages.get(currentPage);if(!state||state.card.classList.contains('hidden'))return;
- state.body.querySelectorAll('.person-page-empty').forEach(el=>el.classList.remove('person-page-empty'));
- state.body.querySelectorAll('.person-page-hidden').forEach(el=>el.classList.remove('person-page-hidden'));
- if(!matchMedia('(max-width:700px)').matches){state.card.style.height='auto';state.footer.hidden=true;state.pendingTarget=null;return;}
- const nav=document.querySelector('.topnav').getBoundingClientRect();
- const available=Math.max(200,(window.visualViewport?.height||window.innerHeight)-nav.bottom-12);
- state.card.style.height=available+'px';state.footer.hidden=false;state.prev.hidden=state.next.hidden=false;
- const basic=document.getElementById('personBasicFields'),units=[];
- const add=el=>{if(el&&!el.hidden&&el.getClientRects().length)units.push(el)};
- if(currentPage==='cadPessoas'||currentPage==='fichaPessoa')for(const el of basic.children){
-  if(el.classList.contains('person-fields')&&matchMedia('(max-width:700px)').matches)[...el.children].forEach(add);
-  else add(el);
- }
- if(currentPage==='cadPessoas'){
-  for(const el of state.body.children)if(el.id!=='personBasicHome')add(el);
- }else if(currentPage==='fichaPessoa'){
-  const settings=document.getElementById('personSettings');
-  if(!settings.hidden)[...settings.children].forEach(add);
-  add(document.getElementById('people'));
- }else{
-  const collect=el=>{
-   if(el.hidden||!el.getClientRects().length)return;
-   const rows=el.querySelectorAll('tbody>tr');
-   if(rows.length){rows.forEach(add);return;}
-   if(el.matches('#groups,#folgasLista,#feriadosLista,#individualSendList,#historicoTarefas')&&el.children.length){[...el.children].forEach(collect);return;}
-   if(el.tagName==='SECTION'){[...el.children].forEach(collect);return;}
-   add(el);
-  };
-  [...state.body.children].forEach(collect);
- }
- const headHeight=Math.max(0,...[...state.body.querySelectorAll('thead')].map(el=>el.getBoundingClientRect().height));
- const budget=Math.max(100,state.body.clientHeight-8-headHeight);const pages=[];let page=[],used=0;
- for(const el of units){const style=getComputedStyle(el),height=el.getBoundingClientRect().height+(parseFloat(style.marginTop)||0)+(parseFloat(style.marginBottom)||0)+8;
-  if(page.length&&(used+height>budget||el.id==='folgasPessoaNome')){pages.push(page);page=[];used=0;}
-  page.push(el);used+=height;
- }
- if(page.length)pages.push(page);state.pages=pages.length?pages:[[]];state.index=Math.min(state.index,state.pages.length-1);if(state.pendingTarget){const targetPage=state.pages.findIndex(page=>page.includes(state.pendingTarget));if(targetPage>=0)state.index=targetPage;state.pendingTarget=null;}fsjPersonShow(state);
- });
-}
-document.querySelectorAll('#gestor>div.card').forEach(card=>fsjPersonSetup(card.id));
-window.addEventListener('resize',()=>fsjPersonLayout());
-window.visualViewport?.addEventListener('resize',()=>{if(!document.activeElement?.matches('input,select,textarea'))fsjPersonLayout()});
-</script>
+</script><script src="./weekly-off-manager.js?v=20261015-telas-celular"></script><script src="./supervisor-manager.js?v=20261015-telas-celular"></script><script src="./proprietario.js?v=20261015-telas-celular"></script>
+<script src="./mobile-pages.js?v=20261015-telas-celular"></script>
 </body></html>

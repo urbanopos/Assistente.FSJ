@@ -47,11 +47,9 @@ function fsjRenderFolgas(){
 }
 function selecionarPessoaFolgas(){
  fsjRenderFolgas();
- if(typeof fsjPersonPages!=='undefined'){
-  const state=fsjPersonPages.get('folgasGestor');
-  if(state){state.index=0;state.pendingTarget=document.getElementById('folgasPessoaSelect').value&&folgasAgenda?document.getElementById('folgasPessoaNome'):null;}
-  fsjPersonLayout();
- }
+ if(typeof fsjPersonLayout==='function')fsjPersonLayout(true);
+ const target=document.getElementById('folgasPessoaSelect').value&&folgasAgenda?document.getElementById('folgasPessoaNome'):document.getElementById('folgasPessoaSelect');
+ document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:target}));
 }
 fsjRenderFolgas();
 
