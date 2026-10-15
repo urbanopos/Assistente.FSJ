@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261015-pessoas-paginadas">
+<meta name="fsj-build" content="20261015-carregamento-estavel">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -107,7 +107,7 @@ main:has(.person-paged:not(.hidden)){padding-top:0;padding-bottom:0}
 </div></aside>
 <script>
 let fsjPainelPronto=false;
-const FSJ_BUILD='20261015-pessoas-paginadas';
+const FSJ_BUILD='20261015-carregamento-estavel';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Abertura: '+fsjDataHora(fsjAbertoEm)+' • verificando atualização';
@@ -612,11 +612,10 @@ async function fsjVerificarVersao(){
   return true;
 }
 
-async function carregarArmazenagem(){fsjPainelPronto=false;gestor.classList.add('hidden');document.querySelectorAll('.topnav button').forEach(b=>b.disabled=true);capturarSessao();loginBox.classList.remove('hidden');let tok;try{tok=await recuperarAcessoGestor()}catch(e){loginStatus.textContent='Não foi possível recuperar sua sessão. Tente novamente ou abra um novo link de acesso.';return}if(!tok){loginStatus.textContent='Entre como Gestor para carregar a Armazenagem.';gestor.classList.add('hidden');return}try{if(!(await fsjVerificarVersao()))return;loginStatus.textContent='Carregando dados atuais...';let [ps,gs,gms,ts,trs]=await Promise.all([api('/rest/v1/pessoas?select=*'),api('/rest/v1/grupos?select=*'),api('/rest/v1/grupo_membros?select=*'),api('/rest/v1/tarefas?select=*'),api('/rest/v1/tarefa_responsaveis?select=*')]);if((!ps.length&&S.people.length)||(!ts.length&&S.tasks.length))throw new Error('A Armazenagem retornou uma lista vazia. A cópia local foi preservada.');S.people=ps.map(x=>({id:x.id,name:x.nome,nick:x.identificacao,phone:x.whatsapp,type:x.tipo,active:x.ativo===true,whatsapp7h:x.receber_tarefas_whatsapp===true,daysOff:x.folgas_semanais||[],datesOff:x.folgas_datas||[],vacationStart:x.ferias_inicio||null,vacationEnd:x.ferias_fim||null,workStart:(x.jornada_inicio||'07:00').slice(0,5),lunchStart:x.almoco_inicio?x.almoco_inicio.slice(0,5):'12:00'}));S.groups=gs.map(g=>({id:g.id,name:g.nome,members:gms.filter(m=>m.grupo_id===g.id).map(m=>m.pessoa_id)}));S.tasks=ts.map(t=>({id:t.id,text:t.descricao,personIds:trs.filter(r=>r.tarefa_id===t.id).map(r=>r.pessoa_id),groupId:t.grupo_id||'',daily:!!t.diaria,priority:t.prioridade||'normal',status:t.situacao,created:t.criada_em,response:'',question:'',completedBy:t.concluida_por||'',attachments:[]}));rollover();await fsjAtualizarRetornos(false);save();loginStatus.textContent='Gestor autenticado • Armazenagem conectada: '+S.people.length+' pessoas, '+S.groups.length+' grupos, '+S.tasks.length+' tarefas.';brisaDadosCarregados=true;loginBox.classList.add('hidden');fsjPainelPronto=true;document.querySelectorAll('.topnav button').forEach(b=>b.disabled=false);gestor.classList.remove('hidden');render();syncInfo();if(typeof carregarFolgas==='function')carregarFolgas();if(typeof fsjLoadSupervisors==='function')fsjLoadSupervisors();if(typeof fsjLoadOwnership==='function')fsjLoadOwnership();navTo('dashboard',document.querySelector('.topnav button'))}catch(e){fsjPainelPronto=false;gestor.classList.add('hidden');document.querySelectorAll('.topnav button').forEach(b=>b.disabled=true);ultimaAtualizacao.textContent='Abertura: '+fsjDataHora(fsjAbertoEm)+' • atualização não concluída';loginStatus.textContent='Painel bloqueado: não foi possível verificar a versão publicada e carregar todos os dados atuais. Confira a internet e o acesso do gestor; clique em Tentar novamente. A cópia local foi preservada.'}}
+async function carregarArmazenagem(){fsjPainelPronto=false;gestor.classList.add('hidden');document.querySelectorAll('.topnav button').forEach(b=>b.disabled=true);capturarSessao();loginBox.classList.remove('hidden');let tok;try{tok=await recuperarAcessoGestor()}catch(e){loginStatus.textContent='Não foi possível recuperar sua sessão. Tente novamente ou abra um novo link de acesso.';return}if(!tok){loginStatus.textContent='Entre como Gestor para carregar a Armazenagem.';gestor.classList.add('hidden');return}let etapa='verificação da versão';try{if(!(await fsjVerificarVersao()))return;etapa='consulta dos cadastros e tarefas';loginStatus.textContent='Carregando dados atuais...';let [ps,gs,gms,ts,trs]=await Promise.all([api('/rest/v1/pessoas?select=*'),api('/rest/v1/grupos?select=*'),api('/rest/v1/grupo_membros?select=*'),api('/rest/v1/tarefas?select=*'),api('/rest/v1/tarefa_responsaveis?select=*')]);if((!ps.length&&S.people.length)||(!ts.length&&S.tasks.length))throw new Error('A Armazenagem retornou uma lista vazia. A cópia local foi preservada.');S.people=ps.map(x=>({id:x.id,name:x.nome,nick:x.identificacao,phone:x.whatsapp,type:x.tipo,active:x.ativo===true,whatsapp7h:x.receber_tarefas_whatsapp===true,daysOff:x.folgas_semanais||[],datesOff:x.folgas_datas||[],vacationStart:x.ferias_inicio||null,vacationEnd:x.ferias_fim||null,workStart:(x.jornada_inicio||'07:00').slice(0,5),lunchStart:x.almoco_inicio?x.almoco_inicio.slice(0,5):'12:00'}));S.groups=gs.map(g=>({id:g.id,name:g.nome,members:gms.filter(m=>m.grupo_id===g.id).map(m=>m.pessoa_id)}));S.tasks=ts.map(t=>({id:t.id,text:t.descricao,personIds:trs.filter(r=>r.tarefa_id===t.id).map(r=>r.pessoa_id),groupId:t.grupo_id||'',daily:!!t.diaria,priority:t.prioridade||'normal',status:t.situacao,created:t.criada_em,response:'',question:'',completedBy:t.concluida_por||'',attachments:[]}));rollover();etapa='consulta das respostas e execuções';await fsjAtualizarRetornos(false);save();loginStatus.textContent='Gestor autenticado • Armazenagem conectada: '+S.people.length+' pessoas, '+S.groups.length+' grupos, '+S.tasks.length+' tarefas.';brisaDadosCarregados=true;loginBox.classList.add('hidden');fsjPainelPronto=true;document.querySelectorAll('.topnav button').forEach(b=>b.disabled=false);gestor.classList.remove('hidden');etapa='organização das telas';render();syncInfo();if(typeof carregarFolgas==='function')carregarFolgas();if(typeof fsjLoadSupervisors==='function')fsjLoadSupervisors();if(typeof fsjLoadOwnership==='function')fsjLoadOwnership();navTo('dashboard',document.querySelector('.topnav button'))}catch(e){console.error('Falha no carregamento FSJ:',etapa,e);loginBox.classList.remove('hidden');fsjPainelPronto=false;gestor.classList.add('hidden');document.querySelectorAll('.topnav button').forEach(b=>b.disabled=true);ultimaAtualizacao.textContent='Abertura: '+fsjDataHora(fsjAbertoEm)+' • atualização não concluída';loginStatus.textContent='Carregamento interrompido na etapa: '+etapa+'. '+(e.name==='TimeoutError'||e.name==='AbortError'?'A consulta demorou além do esperado. ':e instanceof TypeError?'Não foi possível concluir a conexão ou preparar a tela. ':'Não foi possível concluir a consulta. ')+'Clique em Tentar novamente. Se o acesso tiver expirado, solicite um novo link. A cópia local foi preservada.'}}
 const brisaCargaInicial=carregarArmazenagem();
 brisaVerificarIA();
 
-const FSJ_RELEASE_HASH='bc633325af334e893eb66ca0085d930322666ca8c91d44a89ae70156e38e8ae1';
 let fsjUpdatePending=false,fsjUpdateChecking=false;
 const fsjEditedFields=new Set();
 document.addEventListener('input',event=>{if(event.target.matches('input,textarea,select'))fsjEditedFields.add(event.target)});
@@ -636,11 +635,8 @@ async function fsjCheckUpdate(){
   const response=await fetch(url,{cache:'no-store'});
   if(!response.ok)return;
   const html=await response.text();
-  if(!html.includes("const FSJ_RELEASE_HASH=")||!html.includes('id="ultimaAtualizacao"'))return;
-  const normalized=html.replace(/^const FSJ_RELEASE_HASH='[0-9a-f]{64}';$/m,"const FSJ_RELEASE_HASH='__FSJ_RELEASE_HASH__';");
-  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(normalized));
-  const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
-  if(hash!==FSJ_RELEASE_HASH){fsjUpdatePending=true;fsjApplyUpdate();}
+  const latest=new DOMParser().parseFromString(html,'text/html').querySelector('meta[name="fsj-build"]')?.content;
+  if(latest&&latest!==FSJ_BUILD){fsjUpdatePending=true;fsjApplyUpdate();}
  }catch(e){}finally{fsjUpdateChecking=false;}
 }
 window.addEventListener('pageshow',fsjCheckUpdate);
@@ -649,7 +645,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./weekly-off-manager.js?v=20261015-pessoas-paginadas"></script><script src="./supervisor-manager.js?v=20261015-pessoas-paginadas"></script><script src="./proprietario.js?v=20261015-pessoas-paginadas"></script>
+</script><script src="./weekly-off-manager.js?v=20261015-carregamento-estavel"></script><script src="./supervisor-manager.js?v=20261015-carregamento-estavel"></script><script src="./proprietario.js?v=20261015-carregamento-estavel"></script>
 <script>
 // Keep the original controls mounted so paging never discards unsaved edits.
 const fsjPersonPages=new Map();
