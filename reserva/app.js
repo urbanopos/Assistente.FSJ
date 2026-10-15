@@ -12,3 +12,5 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&$('viewer
 setInterval(()=>{if(!document.hidden&&$('viewer').hidden)refresh();},60000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
 refresh();
+
+$('frame').addEventListener('load',()=>{try{const doc=$('frame').contentDocument;if(!doc||$('frame').src==='about:blank')return;const img=doc.querySelector('.brand img');if(img){img.src=new URL('./icon-reserva-v2-192.png',location.href).href;img.alt='FSJ Reserva';}const header=doc.querySelector('header');if(header&&!header.querySelector('[data-reserva]')){const icon=doc.createElement('img');icon.dataset.reserva='1';icon.src=new URL('./icon-reserva-v2-192.png',location.href).href;icon.alt='FSJ Reserva';icon.style.cssText='width:36px;height:36px;vertical-align:middle;margin-right:8px';header.prepend(icon);}}catch{}});
