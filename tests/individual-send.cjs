@@ -9,6 +9,7 @@ function setup({email='urbanopos@yahoo.com.br',allowed=true,existing=true}={}){l
  if(url.includes('/pessoas?'))return Response.json([{nome:'Pessoa teste',whatsapp:'81999999999'}]);
  if(url.includes('/quadros_do_dia?')){if(opt.method==='POST'){creates++;existing=true;return Response.json([]);}return Response.json(existing?[{token:'test-token',expira_em:'2026-10-16T03:00:00Z'}]:[]);}
  if(url.includes('mensagens_whatsapp?'))return Response.json([]);
+ if(url.includes('fsj_envios_manuais?'))return Response.json([]);
  if(url.includes('fsj_link_supervisao'))return Response.json(null);
  throw Error('Unexpected '+url);
  }};vm.runInNewContext(source,context);
@@ -20,9 +21,24 @@ test('bloqueio de calendário impede geração',async()=>{const s=setup({allowed
 function ui(){
  const html=fs.readFileSync('index.html','utf8'),code=html.slice(html.indexOf('const fsjIndividualBusy=new Set();'),html.indexOf('function openWA(){'));
  function element(){return {children:[],style:{},dataset:{},append(...xs){this.children.push(...xs);},replaceChildren(){this.children=[];},setAttribute(k,v){this[k]=v;},addEventListener(k,v){this[k]=v;}};}
- const list=element(),people=[{id:'one',nick:'Pessoa A',active:true,whatsapp7h:true},{id:'two',nick:'Pessoa B',active:true,whatsapp7h:true}];let target='',calls=[];
- const c={S:{people},document:{createElement:element,getElementById:()=>list},window:{},fsjPainelPronto:true,location:{assign:url=>target=url},confirm:()=>true,api:async(path,opt)=>{const d=JSON.parse(opt.body);calls.push(d);return {phone:d.pessoa_id==='one'?'5581999999999':'5581888888888',text:'quadro#token='+d.pessoa_id,ja_registrado:false};}};
+ const list=element(),people=[{id:'one',nick:'Pessoa A',active:true,whatsapp7h:true},{id:'two',nick:'Pessoa B',active:true,whatsapp7h:true}];let target='',calls=[],saved=[];
+ const c={S:{people},document:{createElement:element,getElementById:()=>list,addEventListener(){}},window:{addEventListener(){}},setInterval(){},Intl,Date,fsjPainelPronto:true,location:{assign:url=>target=url},confirm:()=>true,api:async(path,opt)=>{const d=JSON.parse(opt.body);if(d.action==='individuais-status')return {envios:saved};if(d.action==='confirmar'){const envio={pessoa_id:d.pessoa_id,dia:d.dia,confirmado_em:new Date().toISOString()};saved=[envio];return {envio};}calls.push(d);return {phone:d.pessoa_id==='one'?'5581999999999':'5581888888888',text:'quadro#token='+d.pessoa_id,ja_registrado:false};}};
  vm.runInNewContext(code,c);return {c,list,people,target:()=>target,calls};
 }
 test('botão de cada pessoa abre somente seu telefone e token',async()=>{const u=ui();u.c.fsjRenderIndividualList();assert.equal(u.list.children.length,2);const button=u.list.children[1].children[1];await button.click();assert.equal(u.calls[0].pessoa_id,'two');assert.equal(u.calls[0].action,'individual');assert(u.target().startsWith('https://wa.me/5581888888888?text='));assert(decodeURIComponent(u.target()).endsWith('quadro#token=two'));assert.equal(u.list.children[1].children[3].hidden,false);});
 test('cadastro sem recebimento tem botão desabilitado',()=>{const u=ui();u.people[0].whatsapp7h=false;u.c.fsjRenderIndividualList();assert.equal(u.list.children[0].children[1].disabled,true);});
+
+test('abrir WhatsApp não confirma; declaração explícita muda botão por dia',async()=>{const u=ui();u.c.fsjRenderIndividualList();await new Promise(r=>setImmediate(r));const row=u.list.children[0],send=row.children[1],confirm=row.children[4];await send.click();assert.equal(send.textContent,'Enviar tarefas pelo WhatsApp');await confirm.click();assert.equal(send.textContent,'Envio Confirmado');assert.equal(send.disabled,true);assert.equal(confirm.hidden,true);const OriginalDate=Date;u.c.Date=class extends OriginalDate{constructor(...a){super(...(a.length?a:[OriginalDate.now()+86400000]));}};u.c.fsjApplyManualState();assert.equal(send.textContent,'Enviar tarefas pelo WhatsApp');assert.equal(send.disabled,false);});
+test('confirmação central é explícita, idempotente e não inventa ID do WhatsApp',async()=>{
+ let handler,row,event,updates=0;const fixed=new Date('2026-10-15T11:00:00Z');class Clock extends Date{constructor(...a){super(...(a.length?a:[fixed]));}}
+ vm.runInNewContext(source,{Deno:{env:{get:()=> 'test'},serve:f=>handler=f},Date:Clock,Intl,Response,AbortSignal,fetch:async(url,opt)=>{
+  if(url.endsWith('/auth/v1/user'))return Response.json({email:'urbanopos@yahoo.com.br'});
+  if(url.includes('/pessoas?'))return Response.json([{whatsapp:'5581999999999'}]);
+  if(url.includes('/quadros_do_dia?'))return Response.json([{token:'board-token'}]);
+  if(url.includes('/fsj_envios_manuais?')){const body=opt.body?JSON.parse(opt.body):null;if(opt.method==='POST'){row||={...body,id:'row-id'};}if(opt.method==='PATCH'&&!row.confirmado_em){row.confirmado_em=body.confirmado_em;updates++;}return Response.json(row?[row]:[]);}
+  if(url.includes('/mensagens_whatsapp?')){event||=JSON.parse(opt.body);return Response.json([]);}
+  throw Error(url);
+ }});
+ const req=()=>new Request('https://test.invalid',{method:'POST',headers:{origin:'https://urbanopos.github.io',authorization:'Bearer user'},body:JSON.stringify({action:'confirmar',pessoa_id:'test-person',dia:'2026-10-15'})});
+ assert.equal((await handler(req())).status,200);assert.equal((await handler(req())).status,200);assert.equal(updates,1);assert.equal(event.tipo,'quadro_manual_confirmado');assert.equal(event.whatsapp_message_id,undefined);assert.equal(row.pessoa_id,'test-person');
+});

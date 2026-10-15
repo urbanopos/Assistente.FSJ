@@ -1,13 +1,24 @@
-# Envio individual de emergência pelo celular
+# Envio individual e confirmação
 
-Nas abas **Pessoas** e **WhatsApp**, cada cadastro tem o botão **Enviar tarefas pelo WhatsApp**. Ele prepara o quadro individual de hoje e abre o WhatsApp do proprietário com a mensagem pronta. O proprietário confirma o envio no WhatsApp, uma pessoa por vez. Funciona sem o computador executor.
+Nas abas Pessoas e WhatsApp, use **Enviar tarefas pelo WhatsApp** para preparar a mensagem com o link individual. Confirme o envio no WhatsApp e, ao voltar ao FSJ, toque em **Confirmar envio** junto à pessoa correspondente. Esse botão também serve para declarar um envio que já ocorreu hoje, desde que exista o quadro do dia. O proprietário precisa confirmar cada destinatário que efetivamente recebeu sua mensagem; abrir o WhatsApp não registra um envio.
 
-O servidor valida a sessão do proprietário, o cadastro atual, o telefone e as regras existentes de recebimento, horário, folgas, férias e feriados. O quadro existente é reutilizado sem trocar seu token. Se não existir, é criado para o dia atual. O link de supervisão só é incluído para o próprio destinatário quando seu perfil está habilitado. A abertura do quadro gera os links de tarefas pelo fluxo existente.
+A declaração é salva no Supabase por pessoa e dia e no histórico de mensagens como `quadro_manual_confirmado`. O botão principal passa a **Envio Confirmado** pelo restante daquele dia, inclusive após reabrir o aplicativo em outro aparelho. Isso significa confirmação pelo proprietário, sem presumir entrega, leitura ou identificação técnica pelo WhatsApp. No dia seguinte, o botão volta ao estado de envio.
 
-Se houver um envio automático registrado naquele dia, o aplicativo solicita conferência da conversa antes de abrir a mensagem novamente. Há um link alternativo para abrir a mensagem caso o redirecionamento seja bloqueado.
+## Reconhecimento pela rotina automática
 
-Este envio exige a confirmação manual no WhatsApp. Não apaga a mensagem anterior e não registra abertura de conversa como envio confirmado. As respostas dos funcionários continuam sendo registradas pelo quadro e formulários existentes. A tarefa das 7h, suas cinco tentativas e seu diário são preservados.
+Atualizar o repositório no computador executor é necessário para ativar essa integração:
 
-A infraestrutura de pedidos para o executor permanece disponível no servidor, mas a interface individual não depende dela nem cria pedidos em lote.
+```powershell
+Set-Location "$env:USERPROFILE\Assistente.FSJ"
+git pull --ff-only
+```
 
-Verificação: `node --test tests/manual-send.cjs tests/individual-send.cjs`.
+O `run.mjs` passa a envolver a rotina local existente com `manual-history.mjs`. O agendamento, o número de tentativas e os arquivos locais de envio, imagem e diário são preservados. Um envio manual confirmado impede a repetição automática naquele dia. Antes do envio em dia posterior, o executor tenta identificar a última mensagem manual confirmada entre até 200 mensagens recentes da conversa registrada, exigindo saída pela própria conta, destinatário, dia e URL/token exatos. Nenhuma mensagem é escolhida apenas pelo nome da pessoa ou por conter texto genérico de tarefas.
+
+Uma correspondência única é registrada com o identificador real em `mensagens_whatsapp` como `quadro_manual_identificado`. A rotina existente então considera essa mensagem no histórico e solicita sua exclusão antes do novo quadro. Correspondências inexistentes ou ambíguas não geram identificadores fictícios. A exclusão depende da sincronização, disponibilidade da mensagem e permissão do WhatsApp; o resultado efetivo continua registrado pela rotina. Sem atualizar o executor, a integração automática não estará ativa.
+
+## Folga semanal
+
+Depois de salvar a folga, o quadro do empregado exibe apenas a data escolhida. As demais datas reaparecem somente ao tocar em Alterar minha folga. Se a folga foi definida e bloqueada pelo gestor, esse controle não aparece. A regra de escolha e a autoridade do gestor permanecem as mesmas.
+
+Verificação: `node --test tests/manual-send.cjs tests/individual-send.cjs tests/manual-history.test.mjs tests/folga-selected.cjs`.

@@ -2,7 +2,7 @@ const base=Deno.env.get('SUPABASE_URL');
 const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')||'{}').default;
 const origin='https://urbanopos.github.io';
 function reply(body,status=200){return new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'content-type,authorization,apikey','Access-Control-Allow-Methods':'POST,OPTIONS'}});}
-async function db(path,body){const r=await fetch(base+'/rest/v1/'+path,{method:body===undefined?'GET':'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=representation'},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(30000)});if(!r.ok)throw Error('Não foi possível preparar o quadro.');const s=await r.text();return s?JSON.parse(s):null;}
+async function db(path,body,method=body===undefined?'GET':'POST'){const r=await fetch(base+'/rest/v1/'+path,{method,headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=representation'},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(30000)});if(!r.ok)throw Error('Não foi possível preparar o quadro.');const s=await r.text();return s?JSON.parse(s):null;}
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return reply({});
  if(req.method!=='POST')return reply({erro:'Método inválido'},405);
@@ -16,6 +16,27 @@ Deno.serve(async req=>{
   const user=await auth.json();
   if(String(user.email||'').toLowerCase()!=='urbanopos@yahoo.com.br')return reply({erro:'Acesso exclusivo do proprietário'},403);
   const data=await req.json();
+  const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date());
+  if(data.action==='individuais-status'){
+   const rows=await db('fsj_envios_manuais?dia=eq.'+today()+'&select=pessoa_id,dia,confirmado_em,whatsapp_message_id,resultado_reconciliacao');
+   return reply({dia:today(),envios:rows});
+  }
+  if(data.action==='confirmar'){
+   const pid=String(data.pessoa_id||''),day=today();
+   if(data.dia!==day||!pid||pid.length>100)return reply({erro:'Confirme somente o envio de hoje.'},400);
+   const people=await db('pessoas?id=eq.'+encodeURIComponent(pid)+'&ativo=eq.true&select=whatsapp');
+   const boards=await db('quadros_do_dia?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=token');
+   if(!people[0]||!boards[0])return reply({erro:'Prepare o quadro de hoje antes de confirmar.'},409);
+   let phone=String(people[0].whatsapp||'').replace(/\D/g,'');if(phone.length===10||phone.length===11)phone='55'+phone;
+   if(!/^55\d{10,11}$/.test(phone))return reply({erro:'WhatsApp inválido no cadastro.'},400);
+   await db('fsj_envios_manuais?on_conflict=pessoa_id,dia',{pessoa_id:pid,dia:day,token:boards[0].token,whatsapp:phone});
+   // Preserve the original declaration timestamp on repeated confirmations.
+   await db('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&confirmado_em=is.null',{confirmado_em:new Date().toISOString()},'PATCH');
+   const rows=await db('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=id,pessoa_id,dia,confirmado_em,whatsapp_message_id,resultado_reconciliacao');
+   const row=rows[0];
+   await db('mensagens_whatsapp?on_conflict=id',{id:row.id,pessoa_id:pid,direcao:'saida',tipo:'quadro_manual_confirmado',conteudo:JSON.stringify({dia:day,status:'confirmado_pelo_gestor',confirmacao_tecnica:false}),criado_em:row.confirmado_em});
+   return reply({envio:row});
+  }
   if(data.action==='individual'){
   const pid=String(data.pessoa_id||'');
   if(!pid||pid.length>100)return reply({erro:'Selecione o funcionário'},400);
@@ -35,7 +56,9 @@ Deno.serve(async req=>{
   const events=await db('mensagens_whatsapp?pessoa_id=eq.'+encodeURIComponent(pid)+'&tipo=eq.quadro_automatico&criado_em=gte.'+encodeURIComponent(day+'T03:00:00Z')+'&whatsapp_message_id=not.is.null&select=id&limit=1');
   const supervision=await db('rpc/fsj_link_supervisao',{p_pessoa:pid,p_token:boards[0].token});
   const text='Bom dia, '+(person.identificacao||person.nome)+'.\nTarefas do dia '+day.split('-').reverse().join('/')+' — Fazenda São José.\n\nToque no link para abrir suas tarefas:\n'+link+(supervision?'\n\nSUPERVISÃO: DEMANDAS DOS SUPERVISIONADOS\n'+supervision:'')+'\n\nESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR';
-  return reply({phone,text,ja_registrado:events.length>0,dia:day});
+  await db('fsj_envios_manuais?on_conflict=pessoa_id,dia',{pessoa_id:pid,dia:day,token:boards[0].token,whatsapp:phone});
+  const manual=await db('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=confirmado_em');
+  return reply({phone,text,ja_registrado:events.length>0,dia:day,confirmado:!!manual[0]?.confirmado_em,confirmado_em:manual[0]?.confirmado_em||null});
   }
   if(data.action==='status'){
    const [requests,heartbeat]=await Promise.all([db('fsj_envios_emergencia?order=solicitado_em.desc&limit=1&select=*'),db('fsj_executor_emergencia?select=visto_em&limit=1')]);

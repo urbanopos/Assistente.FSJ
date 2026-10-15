@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261015-individual-03">
+<meta name="fsj-build" content="20261015-confirmacao-folga-04">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -61,7 +61,7 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 <div id="cadGrupos" class="card"><h2>Grupos de execução</h2><input type="hidden" id="gid"><label>Nome do grupo</label><input id="gname" type="text" placeholder="Ex.: Campo"><label>Integrantes</label><div id="groupChecks" class="checks"></div><div class="row"><button class="primary" onclick="saveGroup()">Salvar grupo</button><button onclick="clearGroup()">Cancelar</button></div><div id="groups"></div></div>
 <div id="novaTarefa" class="card"><h2>Registrar demanda</h2><input type="hidden" id="taskEditId"><label>Responsabilidade pela tarefa</label><select id="execType" onchange="renderTargets()"><option value="individual">Pessoa(s) responsável(is)</option><option value="group">Grupo existente responsável</option></select><div id="targetBox"></div><label>Demanda</label><textarea id="taskText"></textarea><label for="taskPriority">Prioridade</label><select id="taskPriority"><option value="normal">Normal</option><option value="prioritaria">Prioritária</option><option value="urgente">Urgente</option></select><div class="row"><button onclick="listen('taskText')">🎙 Falar</button><label style="margin:0"><input id="daily" type="checkbox"> Tarefa diária/repetitiva</label><button class="primary" id="taskSaveBtn" onclick="addTask()">Adicionar</button><button onclick="clearTaskForm()">Cancelar edição</button></div><div id="taskDraftStatus" class="muted" role="status" style="margin-top:8px"></div><div class="muted">Tarefa pontual permanece até ser concluída. Tarefa diária reaparece no dia seguinte. Em tarefa de grupo, a primeira conclusão encerra a atividade para todos.</div><hr><h2>Histórico diário</h2><div class="msg" id="rotina7hStatus"><b>Rotina das 7h • Igarassu/PE</b><br>Destinatários definidos em Pessoas: cadastro ativo e recebimento às 7h marcado. A execução depende do computador executor ligado, WhatsApp vinculado e rotina ativada. O histórico abaixo registra os resultados efetivos.</div><div class="row"><button onclick="carregarHistoricoTarefas()">Atualizar histórico</button><span id="historicoStatus" class="muted" role="status"></span></div><div id="historicoTarefas" class="muted">Carregando registros...</div></div>
 <div id="demandas" class="card"><h2>Demandas e retornos</h2><div class="row demandas-filtros" style="margin-bottom:12px"><div style="flex:1;max-width:360px;min-width:220px"><label for="demandaFuncionario">Filtrar por funcionário / responsável</label><select id="demandaFuncionario" onchange="renderDemandas()"><option value="">Todos os responsáveis</option></select></div><div><label for="demandaSituacao">Filtrar por situação</label><select id="demandaSituacao" onchange="renderDemandas()"><option value="">Todas as situações</option><option>Em aberto</option><option>Concluída</option><option>Pendente</option><option value="Aguardando gestão">Perguntas</option></select></div><button onclick="limparFiltroDemandas()">Mostrar todos</button><span id="demandaContagem" class="muted" role="status" aria-live="polite"></span></div><div class="table"><table><thead><tr><th>Tarefa</th><th>Responsáveis</th><th>Tipo</th><th>Situação</th><th>Retorno</th><th>Concluída por</th><th>Ações</th></tr></thead><tbody id="taskRows"></tbody></table></div></div>
-<div id="whatsapp" class="card"><h2>Central de comunicação WhatsApp</h2><section class="card" aria-label="Envio individual de emergência"><h3>Envio individual pelo celular</h3><p>Toque no botão ao lado de cada pessoa e confirme Enviar no seu WhatsApp. Cada mensagem contém apenas o link próprio do destinatário e seu acesso de supervisão, quando habilitado.</p><div id="individualSendList"></div><p class="muted">Funciona sem o computador executor. Respeita folgas, férias e feriados. Não apaga mensagens anteriores nem confirma automaticamente o envio no sistema. As respostas às tarefas continuam registradas. O agendamento das 7h e as cinco tentativas são preservados.</p></section><h3>Confirmação dos envios de hoje</h3><div class="row"><button onclick="carregarConfirmacoesEnvio()">Atualizar confirmações</button><span id="enviosStatus" class="muted" role="status" aria-live="polite"></span></div><div id="enviosHoje" class="table">Consultando registros...</div><p class="muted">O identificador comprova o registro da mensagem. Envio confirmado exige reconhecimento do servidor do WhatsApp. Entrega e leitura não são presumidas. Atualiza automaticamente a cada 30 segundos enquanto esta página está aberta.</p><div class="msg"><b>Fluxo operacional:</b> Gestor → Painel FSJ → WhatsApp individual do funcionário → resposta pelo WhatsApp → registro no banco central → Painel do Gestor.<br><span class="muted">O funcionário não acessa este painel. A recepção automática das respostas será habilitada com o backend e a integração WhatsApp.</span></div><div class="row"><div style="flex:1"><select id="msgTarget" onchange="dailyMessage()"></select></div><button onclick="dailyMessage()">Atualizar</button><button onclick="speakMsg()">🔊 Ouvir</button><button onclick="copyMsg()">Copiar</button><button onclick="openWA()">Abrir WhatsApp Web</button></div><div id="msg" class="msg"></div><div class="muted">O WhatsApp abre em uma aba identificada pelo sistema e é reutilizado enquanto permanecer aberta. O recebimento automático das respostas do WhatsApp ainda depende da futura integração de backend.</div></div>
+<div id="whatsapp" class="card"><h2>Central de comunicação WhatsApp</h2><section class="card" aria-label="Envio individual de emergência"><h3>Envio individual pelo celular</h3><p>Toque no botão ao lado de cada pessoa e confirme Enviar no seu WhatsApp. Cada mensagem contém apenas o link próprio do destinatário e seu acesso de supervisão, quando habilitado.</p><div id="individualSendList"></div><p class="muted">Funciona sem o computador executor. Respeita folgas, férias e feriados. Depois de enviar, volte e toque em Confirmar envio. O registro é sua declaração de envio, sem presumir entrega ou leitura. A exclusão posterior depende do executor atualizado identificar a mensagem no WhatsApp. As respostas às tarefas continuam registradas. O agendamento das 7h e as cinco tentativas são preservados.</p></section><h3>Confirmação dos envios de hoje</h3><div class="row"><button onclick="carregarConfirmacoesEnvio()">Atualizar confirmações</button><span id="enviosStatus" class="muted" role="status" aria-live="polite"></span></div><div id="enviosHoje" class="table">Consultando registros...</div><p class="muted">O identificador comprova o registro da mensagem. Envio confirmado exige reconhecimento do servidor do WhatsApp. Entrega e leitura não são presumidas. Atualiza automaticamente a cada 30 segundos enquanto esta página está aberta.</p><div class="msg"><b>Fluxo operacional:</b> Gestor → Painel FSJ → WhatsApp individual do funcionário → resposta pelo WhatsApp → registro no banco central → Painel do Gestor.<br><span class="muted">O funcionário não acessa este painel. A recepção automática das respostas será habilitada com o backend e a integração WhatsApp.</span></div><div class="row"><div style="flex:1"><select id="msgTarget" onchange="dailyMessage()"></select></div><button onclick="dailyMessage()">Atualizar</button><button onclick="speakMsg()">🔊 Ouvir</button><button onclick="copyMsg()">Copiar</button><button onclick="openWA()">Abrir WhatsApp Web</button></div><div id="msg" class="msg"></div><div class="muted">O WhatsApp abre em uma aba identificada pelo sistema e é reutilizado enquanto permanecer aberta. O recebimento automático das respostas do WhatsApp ainda depende da futura integração de backend.</div></div>
 <div id="seguranca" class="card"><h2>Armazenagem — banco central</h2><div class="msg"><b>Armazenagem ativa.</b> O armazenamento local continua preservado como cópia de segurança durante a migração.<br><span id="syncStatus" class="muted">Verificando transferência...</span></div><div class="row"><button class="primary" onclick="transferirArmazenagem()">Transferir dados deste navegador</button></div><div class="row"><button onclick="exportData()">Fazer backup</button><label style="margin:0"><span class="pill">Restaurar backup</span><input id="restoreFile" type="file" accept=".json,application/json" style="display:none" onchange="restoreData(this)"></label></div><div class="muted">A base usa a chave permanente fsj_fazenda_sao_jose. Ao migrar de outro endereço/navegador, use backup e restauração para transportar os registros.</div></div>
 <div id="relatorios" class="card"><h2>Relatório mensal consolidado</h2><div class="row"><input id="month" type="month" style="max-width:220px"><button onclick="monthly()">Gerar</button></div><div id="report" class="table"></div></div>
 </section>
@@ -80,7 +80,7 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 </div></aside>
 <script>
 let fsjPainelPronto=false;
-const FSJ_BUILD='20261015-individual-03';
+const FSJ_BUILD='20261015-confirmacao-folga-04';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Abertura: '+fsjDataHora(fsjAbertoEm)+' • verificando atualização';
@@ -332,6 +332,8 @@ function estadoEnvioHoje(p,events,day){
   const daily=events.filter(e=>e.pessoa_id===p.id&&e.criado_em&&fsjDia(e.criado_em)===day);
   const sent=daily.find(e=>e.tipo==='quadro_automatico'&&e.whatsapp_message_id);
   if(sent){let details={};try{details=JSON.parse(sent.conteudo||'{}')}catch{}const ack=Number(details.ack);return {text:ack>=1?'Envio confirmado pelo servidor do WhatsApp':ack===-1?'WhatsApp registrou erro no envio':'Mensagem registrada — sem confirmação do servidor',time:fsjHora(sent.criado_em),confirmed:ack>=1};}
+  const manual=daily.find(e=>e.tipo==='quadro_manual_confirmado'||e.tipo==='quadro_manual_identificado');
+  if(manual)return {text:manual.whatsapp_message_id?'Envio manual confirmado por você e identificado no WhatsApp':'Envio Confirmado — declarado por você; identificação técnica pendente',time:fsjHora(manual.criado_em),confirmed:false};
   const uncertain=daily.find(e=>e.tipo==='envio_incerto');
   if(uncertain)return {text:'Envio incerto — conferir a conversa',time:fsjHora(uncertain.criado_em),confirmed:false};
   const failed=daily.find(e=>e.tipo==='falha_rotina');
@@ -395,10 +397,10 @@ function renderHistoricoTarefas(){
     const del=g.events.find(e=>e.tipo==='apagamento_automatico'||e.tipo==='apagamento');
     const falha=g.events.find(e=>e.tipo==='falha_rotina'||e.tipo==='envio_incerto');
     const dados=e=>{try{return JSON.parse(e?.conteudo||'{}')}catch{return {}}};
-    const sent=g.events.find(e=>e.tipo==='quadro_automatico'||e.tipo==='quadro'||e.tipo==='quadro_teste');
+    const sent=g.events.find(e=>e.tipo==='quadro_automatico'||e.tipo==='quadro_manual_confirmado'||e.tipo==='quadro_manual_identificado'||e.tipo==='quadro'||e.tipo==='quadro_teste');
     const nome=person(g.pid).nick||person(g.pid).name;
     const delText=del?(del.tipo==='apagamento_automatico'?(dados(del).status==='confirmado'?'Confirmado pelo WhatsApp':'Sem confirmação • '+(dados(del).reason||'verificar mensagem anterior')):'Confirmado • teste manual')+' • '+fsjHora(del.criado_em):'Sem confirmação registrada';
-    const sentText=sent?(sent.tipo==='quadro_automatico'?'Envio automático registrado pelo WhatsApp; entrega/leitura não confirmadas':sent.tipo==='quadro_teste'?'Teste manual entregue':'Envio registrado')+' • '+fsjHora(sent.criado_em):falha?'Sem confirmação • '+(dados(falha).reason||'resultado incerto; conferir a conversa'):'Sem confirmação registrada';
+    const sentText=sent?(sent.tipo==='quadro_manual_confirmado'?'Envio manual confirmado pelo gestor; identificação técnica pendente':sent.tipo==='quadro_manual_identificado'?'Envio manual identificado no WhatsApp; entrega/leitura não presumidas':sent.tipo==='quadro_automatico'?'Envio automático registrado pelo WhatsApp; entrega/leitura não confirmadas':sent.tipo==='quadro_teste'?'Teste manual entregue':'Envio registrado')+' • '+fsjHora(sent.criado_em):falha?'Sem confirmação • '+(dados(falha).reason||'resultado incerto; conferir a conversa'):'Sem confirmação registrada';
     const rs=retornosDia.filter(r=>r.pessoa_id===g.pid&&r.criado_em&&fsjDia(r.criado_em)===g.day);
     const pending=sent?S.tasks.filter(t=>ids(t).includes(g.pid)&&!rs.some(r=>r.tarefa_id===t.id)):[];
     return '<div class="card" style="background:#f8faf8"><h3 style="margin:0 0 6px">'+esc(fsjData(g.day))+' • '+esc(nome)+'</h3><div>Apagamento da mensagem anterior: <b>'+esc(delText)+'</b></div><div>Mensagem do dia: <b>'+esc(sentText)+'</b></div>'+(sent?'<div style="margin-top:7px"><b>Tarefas sem confirmação registrada:</b> '+(pending.length?pending.map(t=>esc(t.text)).join('; '):'Nenhuma entre as tarefas atuais.')+'</div>':'')+(sent&&sent.tipo==='quadro_teste'?'<div class="muted">Os links deste teste ainda não estavam ativos; não se espera resposta pelo formulário.</div>':'')+'</div>';
@@ -407,6 +409,30 @@ function renderHistoricoTarefas(){
 function speakMsg(){speak(msg.textContent)}async function copyMsg(){await navigator.clipboard.writeText(msg.textContent)}
 
 const fsjIndividualBusy=new Set();
+const fsjManualStates=new Map(),fsjManualControls=new Set();let fsjManualRefresh=null,fsjManualVersion=0;
+function fsjManualDay(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date());}
+function fsjManualConfirmed(pid){const r=fsjManualStates.get(pid);return r?.dia===fsjManualDay()&&!!r.confirmado_em;}
+function fsjApplyManualState(){
+ for(const c of fsjManualControls){if(c.row.isConnected)c.mounted=true;else if(c.mounted){fsjManualControls.delete(c);continue;}
+  const done=fsjManualConfirmed(c.p.id),blocked=c.p.active===false||c.p.whatsapp7h!==true;
+  c.button.textContent=done?'Envio Confirmado':'Enviar tarefas pelo WhatsApp';c.button.disabled=done||blocked||fsjIndividualBusy.has(c.p.id);c.confirm.hidden=done||blocked;
+  if(done){c.fallback.hidden=true;c.status.textContent=fsjManualStates.get(c.p.id).whatsapp_message_id?'Confirmado por você e identificado pelo executor no WhatsApp.':'Confirmado por você hoje. Identificação técnica da mensagem pendente no executor.';}
+ }
+}
+async function fsjRefreshManualStatus(){
+ if(!fsjPainelPronto||window.fsjExited||fsjManualRefresh)return;
+ const version=fsjManualVersion;
+ fsjManualRefresh=(async()=>{try{const d=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'individuais-status'})});if(version!==fsjManualVersion)return;fsjManualStates.clear();for(const row of d.envios||[])fsjManualStates.set(row.pessoa_id,row);fsjApplyManualState();}catch{for(const c of fsjManualControls)if(!fsjManualConfirmed(c.p.id))c.status.textContent='Não foi possível verificar a confirmação de hoje. Confira a conversa antes de repetir.';}})();
+ try{await fsjManualRefresh;}finally{fsjManualRefresh=null;}
+}
+async function fsjConfirmarManual(pid,name){
+ if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid)||fsjManualConfirmed(pid))return;
+ if(!confirm('Confirma que você já enviou o quadro de hoje para '+name+' pelo WhatsApp? Essa declaração não comprova entrega ou leitura.'))return;
+ fsjIndividualBusy.add(pid);fsjApplyManualState();
+ try{const d=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'confirmar',pessoa_id:pid,dia:fsjManualDay()})});fsjManualVersion++;fsjManualStates.set(pid,d.envio);}
+ catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}for(const c of fsjManualControls)if(c.p.id===pid)c.status.textContent='Confirmação não salva: '+message;}
+ finally{fsjIndividualBusy.delete(pid);fsjApplyManualState();}
+}
 function fsjIndividualControls(p,showName=false){
  const row=document.createElement('div');row.className='row';row.style.cssText='padding:10px 0;gap:10px;align-items:center;flex-wrap:wrap';
  if(showName){const name=document.createElement('strong');name.textContent=p.nick||p.name;name.style.cssText='min-width:140px;flex:1';row.append(name);}
@@ -415,13 +441,16 @@ function fsjIndividualControls(p,showName=false){
  const fallback=document.createElement('a');fallback.textContent='Abrir mensagem no WhatsApp';fallback.hidden=true;fallback.rel='noreferrer';fallback.target='_blank';
  button.disabled=p.active===false||p.whatsapp7h!==true;
  if(button.disabled)status.textContent=p.active===false?'Cadastro inativo.':'Recebimento de tarefas desmarcado no cadastro.';
- button.addEventListener('click',()=>fsjEnviarIndividual(p.id,button,status,fallback));row.append(button,status,fallback);return row;
+ const confirmation=document.createElement('button');confirmation.type='button';confirmation.textContent='Confirmar envio';confirmation.addEventListener('click',()=>fsjConfirmarManual(p.id,p.nick||p.name));
+ button.addEventListener('click',()=>fsjEnviarIndividual(p.id,button,status,fallback));row.append(button,status,fallback,confirmation);
+ fsjManualControls.add({row,p,button,status,fallback,confirm:confirmation});fsjApplyManualState();return row;
 }
 function fsjRenderIndividualList(){
  const list=document.getElementById('individualSendList');if(!list)return;
  list.replaceChildren();
  for(const p of S.people)list.append(fsjIndividualControls(p,true));
  if(!S.people.length)list.textContent='Nenhuma pessoa cadastrada.';
+ fsjRefreshManualStatus();
 }
 function fsjAttachPersonSendButtons(){
  document.querySelectorAll('#people [data-owner-person]').forEach(marker=>{
@@ -431,17 +460,21 @@ function fsjAttachPersonSendButtons(){
  });
 }
 async function fsjEnviarIndividual(pid,button,status,fallback){
- if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid))return;
+ if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid)||fsjManualConfirmed(pid))return;
  fsjIndividualBusy.add(pid);button.disabled=true;fallback.hidden=true;status.textContent='Preparando link individual de hoje...';
  try{
   const d=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'individual',pessoa_id:pid})});
+  if(d.confirmado){fsjManualVersion++;fsjManualStates.set(pid,{pessoa_id:pid,dia:d.dia,confirmado_em:d.confirmado_em});return;}
   if(d.ja_registrado&&!confirm('Já existe envio automático registrado hoje para esta pessoa. Confira a conversa para evitar duplicidade. Deseja abrir a mensagem mesmo assim?')){status.textContent='Abertura cancelada. Nenhuma mensagem enviada por este botão.';return;}
   const url='https://wa.me/'+d.phone+'?text='+encodeURIComponent(d.text);
-  fallback.href=url;fallback.hidden=false;status.textContent='Mensagem pronta. Confirme Enviar no WhatsApp. Se não abrir, toque no link ao lado.';
+  fallback.href=url;fallback.hidden=false;status.textContent='Envie no WhatsApp; depois volte e toque em Confirmar envio. Se não abrir, toque no link ao lado.';
   location.assign(url);
  }catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}status.textContent='Não foi possível preparar: '+message;}
- finally{fsjIndividualBusy.delete(pid);button.disabled=false;}
+ finally{fsjIndividualBusy.delete(pid);fsjApplyManualState();}
 }
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjRefreshManualStatus();});
+window.addEventListener('focus',fsjRefreshManualStatus);
+setInterval(()=>{if(!document.hidden)fsjRefreshManualStatus()},60000);
 
 function openWA(){let p=person(msgTarget.value),ph=normalizePhone(p.phone);if(!ph)return alert('Cadastre o WhatsApp da pessoa.');if(!ph.startsWith('55')||ph.length<12||ph.length>13)return alert('Número inválido. Informe DDD + número.');let url='https://web.whatsapp.com/send?phone='+ph+'&text='+encodeURIComponent(msg.textContent),w=window.open(url,'FSJ_WHATSAPP_WEB');if(w){try{w.focus()}catch(e){}}else alert('Permita pop-ups para abrir o WhatsApp.')}
 function monthly(){let ym=month.value||dateKey().slice(0,7),xs=S.tasks.filter(t=>(t.created||'').slice(0,7)===ym);report.innerHTML='<table><thead><tr><th>Tarefa</th><th>Responsáveis</th><th>Tipo</th><th>Situação</th><th>Concluída por</th></tr></thead><tbody>'+(xs.map(t=>'<tr><td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+(t.daily?'Diária':'Pontual')+'</td><td>'+esc(t.status)+'</td><td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td></tr>').join('')||'<tr><td colspan="5">Sem registros.</td></tr>')+'</tbody></table>'}
@@ -551,7 +584,7 @@ async function carregarArmazenagem(){fsjPainelPronto=false;gestor.classList.add(
 const brisaCargaInicial=carregarArmazenagem();
 brisaVerificarIA();
 
-const FSJ_RELEASE_HASH='77a07a5ed61125395a91403006f5caec25d32a1a49112471af9da08e4982ec54';
+const FSJ_RELEASE_HASH='9033d463f86af081fbb6dc6ac43986a3ac21295524576d574de999c92c39439e';
 let fsjUpdatePending=false,fsjUpdateChecking=false;
 const fsjEditedFields=new Set();
 document.addEventListener('input',event=>{if(event.target.matches('input,textarea,select'))fsjEditedFields.add(event.target)});
@@ -584,7 +617,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./weekly-off-manager.js?v=20261015-individual-03"></script><script src="./supervisor-manager.js?v=20261015-individual-03"></script><script src="./proprietario.js?v=20261015-individual-03"></script></body></html>
+</script><script src="./weekly-off-manager.js?v=20261015-confirmacao-folga-04"></script><script src="./supervisor-manager.js?v=20261015-confirmacao-folga-04"></script><script src="./proprietario.js?v=20261015-confirmacao-folga-04"></script></body></html>
 
 
 

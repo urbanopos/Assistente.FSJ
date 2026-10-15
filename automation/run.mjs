@@ -1,4 +1,5 @@
 import {runRoutine} from './routine.mjs';
+import {runManualAwareRoutine} from './manual-history.mjs';
 import {connect,revoke,send} from './wa.mjs';
 const base=process.env.SUPABASE_URL||'https://awrxnzbfrsaurzpunuko.supabase.co';
 const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -10,5 +11,5 @@ async function db(path,opt={}){
   if(!r.ok)throw Error('Armazenagem: HTTP '+r.status);
   const body=await r.text();return body?JSON.parse(body):null;
 }
-const result=await runRoutine({db,connect,revoke,send,stateDir});
+const result=await runManualAwareRoutine({routine:runRoutine,db,connect,revoke,send,stateDir});
 if(result.failures)process.exitCode=1;
