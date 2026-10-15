@@ -16,4 +16,4 @@ refresh();
 $('frame').addEventListener('load',()=>{try{const child=$('frame').contentWindow,doc=$('frame').contentDocument;if(closed||!doc||$('frame').src==='about:blank')return;exitObserver?.disconnect();if(child.fsjExited){encerrarReserva();return;}exitObserver=new MutationObserver(()=>{if(child.fsjExited)encerrarReserva();});if(doc.body)exitObserver.observe(doc.body,{childList:true,subtree:true});}catch{}});
 
 function encerrarReserva(){if(closed)return;closed=true;clearInterval(refreshTimer);requestController?.abort();exitObserver?.disconnect();try{$('frame').contentWindow.brisaEncerrarEscuta?.();}catch{}$('viewer').hidden=true;$('setup').hidden=true;$('loadingHeader').hidden=true;$('frame').src='about:blank';board=null;openedKey='';$('closed').hidden=false;setTimeout(()=>{try{window.close();}catch{}},200);}
-$('exit').onclick=encerrarReserva;$('reopen').onclick=()=>location.reload();
+$('reopen').onclick=()=>location.reload();
