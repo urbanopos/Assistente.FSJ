@@ -16,6 +16,27 @@ Deno.serve(async req=>{
   const user=await auth.json();
   if(String(user.email||'').toLowerCase()!=='urbanopos@yahoo.com.br')return reply({erro:'Acesso exclusivo do proprietário'},403);
   const data=await req.json();
+  if(data.action==='individual'){
+  const pid=String(data.pessoa_id||'');
+  if(!pid||pid.length>100)return reply({erro:'Selecione o funcionário'},400);
+  const now=new Date(),day=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(now);
+  if(Number(new Intl.DateTimeFormat('en-GB',{timeZone:'America/Recife',hour:'2-digit',hourCycle:'h23'}).format(now))<7)return reply({erro:'Envio disponível a partir das 7h'},409);
+  await db('rpc/fsj_preparar_calendario',{p_dia:day});
+  if(await db('rpc/fsj_pode_enviar',{p_pessoa:pid,p_dia:day})!==true)return reply({erro:'Envio bloqueado: confira cadastro ativo, recebimento às 7h, folgas, férias e feriados.'},409);
+  const people=await db('pessoas?id=eq.'+encodeURIComponent(pid)+'&select=nome,identificacao,whatsapp');
+  const person=people[0];if(!person)return reply({erro:'Cadastro não encontrado'},404);
+  let phone=String(person.whatsapp||'').replace(/\D/g,'');if(phone.length===10||phone.length===11)phone='55'+phone;
+  if(!/^55\d{10,11}$/.test(phone))return reply({erro:'WhatsApp inválido no cadastro'},400);
+  const path='quadros_do_dia?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=*';
+  let boards=await db(path);
+  if(!boards.length){await db('quadros_do_dia?on_conflict=pessoa_id,dia',{pessoa_id:pid,dia:day,expira_em:new Date(new Date(day+'T03:00:00Z').getTime()+86400000).toISOString()});boards=await db(path);}
+  if(!boards[0]||new Date(boards[0].expira_em)<=now)throw Error('Quadro do dia indisponível ou expirado.');
+  const link='https://urbanopos.github.io/Assistente.FSJ/quadro.html#token='+boards[0].token;
+  const events=await db('mensagens_whatsapp?pessoa_id=eq.'+encodeURIComponent(pid)+'&tipo=eq.quadro_automatico&criado_em=gte.'+encodeURIComponent(day+'T03:00:00Z')+'&whatsapp_message_id=not.is.null&select=id&limit=1');
+  const supervision=await db('rpc/fsj_link_supervisao',{p_pessoa:pid,p_token:boards[0].token});
+  const text='Bom dia, '+(person.identificacao||person.nome)+'.\nTarefas do dia '+day.split('-').reverse().join('/')+' — Fazenda São José.\n\nToque no link para abrir suas tarefas:\n'+link+(supervision?'\n\nSUPERVISÃO: DEMANDAS DOS SUPERVISIONADOS\n'+supervision:'')+'\n\nESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR';
+  return reply({phone,text,ja_registrado:events.length>0,dia:day});
+  }
   if(data.action==='status'){
    const [requests,heartbeat]=await Promise.all([db('fsj_envios_emergencia?order=solicitado_em.desc&limit=1&select=*'),db('fsj_executor_emergencia?select=visto_em&limit=1')]);
    return reply({pedido:requests[0]||null,executor_online:!!heartbeat[0]&&Date.now()-new Date(heartbeat[0].visto_em).getTime()<120000});
