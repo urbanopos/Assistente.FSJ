@@ -13,7 +13,13 @@ Deno.serve(async req=>{
   if(['available','demands'].includes(data.action)){
    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(data.token||'')))return reply({erro:'Link invalido'},400);
    if(data.action==='demands'){
-    try{return reply(await db('rpc/fsj_supervisor_demandas',{p_token:data.token}));}
+    try{
+     const result=await db('rpc/fsj_supervisor_demandas',{p_token:data.token});
+     // Only enrich tasks already authorized by the token-scoped RPC.
+     const tasks=result.tarefas||[];
+     if(tasks.length){const ids=tasks.map((t:any)=>JSON.stringify(t.id)).join(',');const priorities=await db('tarefas?id=in.'+encodeURIComponent('('+ids+')')+'&select=id,prioridade');for(const t of tasks)t.prioridade=priorities.find((p:any)=>p.id===t.id)?.prioridade||'normal';}
+     return reply(result);
+    }
     catch{return reply({erro:'Acesso de supervisao indisponivel ou link expirado. Solicite ao gestor a verificacao do cadastro.'},403);}
    }
    // A board token only reveals whether its own holder has an active supervisor role.

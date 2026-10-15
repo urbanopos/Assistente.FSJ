@@ -3,6 +3,12 @@ const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||JSON.parse(Deno.env.get('SU
 const allowed='https://urbanopos.github.io';
 function reply(data:unknown,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Access-Control-Allow-Origin':allowed,'Access-Control-Allow-Headers':'content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Cache-Control':'no-store'}})}
 async function db(path:string,opt:RequestInit={}){const r=await fetch(base+'/rest/v1/'+path,{...opt,headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',...(opt.headers||{})}});if(!r.ok)throw new Error('Banco: '+r.status+' '+(await r.text()).slice(0,300));let s=await r.text();return s?JSON.parse(s):null}
+function taskSituation(t:any,answers:any[],day:string){
+ const start=new Date(day+'T03:00:00Z').getTime(),end=start+86400000;
+ const relevant=answers.filter(a=>a.tarefa_id===t.id&&(!t.diaria||(new Date(a.criado_em).getTime()>=start&&new Date(a.criado_em).getTime()<end)));
+ if(relevant.some(a=>a.tipo==='sim')||(!t.diaria&&t.situacao==='Concluída'))return 'Concluída';
+ const last=relevant[0];return last?.tipo==='nao'?'Pendente':last?.tipo==='pergunta'?'Aguardando gestão':t.diaria?'Em aberto':t.situacao||'Em aberto';
+}
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return reply({});
  if(req.method!=='POST')return reply({erro:'Método inválido'},405);
@@ -19,28 +25,29 @@ Deno.serve(async req=>{
    const boards=await db('quadros_do_dia?token=eq.'+token+'&select=*');
    const board=boards?.[0];
    if(!board||new Date(board.expira_em)<new Date())return reply({erro:'Quadro expirado ou inválido'},404);
-   const [people,links,tasks,answers,assignments]=await Promise.all([
+   const [people,links,tasks,answers,assignments,executions]=await Promise.all([
     db('pessoas?id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=identificacao,nome,ativo'),
     db('links_resposta?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+board.dia+'&select=token,tarefa_id,respondido_em,ordem'),
     db('tarefas?select=id,descricao,criada_em,diaria,situacao,prioridade'),
-    db('retornos?tipo=eq.sim&select=tarefa_id,tipo,criado_em&order=criado_em.desc'),
-    db('tarefa_responsaveis?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=tarefa_id')
+    db('retornos?select=tarefa_id,tipo,criado_em&order=criado_em.desc'),
+    db('tarefa_responsaveis?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=tarefa_id'),
+    db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+board.dia+'&select=tarefa_id,estado')
    ]);
    if(!people?.length||!people[0].ativo)return reply({erro:'Quadro indisponível'},404);
    const done=(t:any)=>answers.some((a:any)=>a.tarefa_id===t.id&&a.tipo==='sim'&&(!t.diaria||(new Date(a.criado_em)>=new Date(board.dia+'T03:00:00Z')&&new Date(a.criado_em)<new Date(new Date(board.dia+'T03:00:00Z').getTime()+86400000))));
    const available=(t:any)=>!!t&&(t.diaria||t.situacao!=='Concluída')&&!done(t)&&assignments.some((a:any)=>a.tarefa_id===t.id);
    const missing=tasks.filter((t:any)=>available(t)&&!links.some((l:any)=>l.tarefa_id===t.id)&&new Date(t.criada_em).getTime()<=new Date(board.expira_em).getTime());
    for(const t of missing){const created=await db('links_resposta?select=token,tarefa_id,respondido_em,ordem',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({token:crypto.randomUUID(),tarefa_id:t.id,pessoa_id:board.pessoa_id,dia:board.dia,expira_em:board.expira_em,ordem:links.length+1})});links.push(created[0])}
-   const items=links.map((l:any)=>({token:l.token,tarefa_id:l.tarefa_id,tarefa:tasks.find((t:any)=>t.id===l.tarefa_id)?.descricao||'',prioridade:tasks.find((t:any)=>t.id===l.tarefa_id)?.prioridade||'normal',ordem:l.ordem||999,respondido:!!l.respondido_em,concluida:!available(tasks.find((t:any)=>t.id===l.tarefa_id))})).filter((x:any)=>x.tarefa&&!x.concluida).sort((a:any,b:any)=>a.ordem-b.ordem||a.tarefa.localeCompare(b.tarefa));
+   const items=links.map((l:any)=>({token:l.token,tarefa_id:l.tarefa_id,tarefa:tasks.find((t:any)=>t.id===l.tarefa_id)?.descricao||'',prioridade:tasks.find((t:any)=>t.id===l.tarefa_id)?.prioridade||'normal',situacao:taskSituation(tasks.find((t:any)=>t.id===l.tarefa_id)||{},answers,board.dia),execucao:executions.find((e:any)=>e.tarefa_id===l.tarefa_id)||null,ordem:l.ordem||999,respondido:!!l.respondido_em,concluida:!available(tasks.find((t:any)=>t.id===l.tarefa_id))})).filter((x:any)=>x.tarefa&&!x.concluida).sort((a:any,b:any)=>a.ordem-b.ordem||a.tarefa.localeCompare(b.tarefa));
    return reply({responsavel:people[0].identificacao||people[0].nome,dia:board.dia,criado_em:board.criado_em,tarefas:items});
   }
   const links=await db('links_resposta?token=eq.'+token+'&select=*');
   const link=links?.[0];
   if(!link||new Date(link.expira_em)<new Date())return reply({erro:'Link expirado ou inválido'},404);
-  const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,prioridade'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
+  const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,prioridade,diaria'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return reply({erro:'Tarefa indisponível'},404);
   const detail={tarefa:tasks[0].descricao,prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:link.dia,respondido:!!link.respondido_em};
-  if(data.action==='detail'){const executions=await db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+link.dia+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em');return reply({...detail,execucao:executions[0]||null});}
+  if(data.action==='detail'){const [executions,answers]=await Promise.all([db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+link.dia+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em'),db('retornos?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=tarefa_id,tipo,criado_em&order=criado_em.desc')]);return reply({...detail,situacao:taskSituation(tasks[0],answers,link.dia),execucao:executions[0]||null});}
   if(data.action==='start'){try{return reply(await db('rpc/fsj_iniciar_tarefa',{method:'POST',body:JSON.stringify({p_token:token})}));}catch{return reply({erro:'Não foi possível iniciar: confira se o link está vigente e a tarefa disponível.'},409);}}
   if(data.action!=='submit')return reply({erro:'Ação inválida'},400);
   if(link.respondido_em)return reply({erro:'Esta tarefa já recebeu resposta.'},409);
