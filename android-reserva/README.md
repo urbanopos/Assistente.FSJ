@@ -1,4 +1,4 @@
-# FSJ Reserva Android — protótipo 0.1
+# FSJ Reserva Android — protótipo 0.2
 
 Aplicativo independente (pacote `br.com.fazendasaojose.reserva`), Android 8 ou superior, ícone do ramo com R. Carrega exclusivamente a Reserva hospedada no FSJ usando WebView. A aplicação principal e a rotina WhatsApp não são substituídas.
 
@@ -12,7 +12,7 @@ Aplicativo independente (pacote `br.com.fazendasaojose.reserva`), Android 8 ou s
 
 ## Escopo e limites
 
-Protótipo restrito ao Proprietário, usando a autorização já validada no servidor. Requer internet. Arquivos podem ser selecionados pelo seletor do Android, sem permissão de acesso irrestrito ao armazenamento. Voz depende da compatibilidade do WebView e ainda precisa de validação no aparelho. Notificações automáticas das 7h com o app fechado não são implementadas nesta versão.
+Protótipo restrito ao Proprietário, usando a autorização já validada no servidor. Requer internet. Arquivos podem ser selecionados pelo seletor do Android, sem permissão de acesso irrestrito ao armazenamento. Voz depende da compatibilidade do WebView e ainda precisa de validação no aparelho. Sinalização silenciosa às 7h usa AlarmManager e JobScheduler com consulta ao servidor. Requer permitir notificações e, para horário preciso, alarmes. O Android pode adiar o processamento por condições de energia ou rede; o marcador depende também das configurações do launcher. Sair fecha a tela, mantendo o agendamento para o próximo dia. Folgas/férias bloqueiam a sinalização. Leitura sincronizada no servidor, separada da conclusão.
 
 APK com assinatura de desenvolvimento e sem depuração WebView habilitada. A chave de teste é preservada pelo cache do build enquanto disponível; para distribuição estável, preparar uma chave de produção privada do Proprietário. Se a chave de teste mudar, será necessário reinstalar o protótipo.
 

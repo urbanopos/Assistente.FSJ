@@ -27,6 +27,12 @@ jobs:
         with:
           path: ~/.android/debug.keystore
           key: fsj-reserva-prototipo-signing-v1
+      - name: Preparar assinatura de teste persistente
+        run: |
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -keystore "$HOME/.android/debug.keystore" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=FSJ Reserva Android,O=FSJ,C=BR'
+          fi
       - name: Instalar SDK
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - name: Compilar e verificar
@@ -48,4 +54,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view fsj-reserva-android-prototipo-v1 >/dev/null 2>&1 || gh release create fsj-reserva-android-prototipo-v1 --target "$GITHUB_SHA" --title 'FSJ Reserva Android — protótipo 0.1' --prerelease --notes 'APK de teste privado por autenticação. Principal preservado. Sair fecha a atividade Android. Notificações automáticas ainda não ativadas. Assinatura de desenvolvimento; futuras versões poderão exigir reinstalação.'
+          gh release edit fsj-reserva-android-prototipo-v1 --title 'FSJ Reserva Android — protótipo 0.2' --notes 'Sinalização silenciosa do quadro não lido às 7h, consulta ao servidor respeitando folgas e férias, leitura sincronizada. Permitir notificações e alarmes no Android. Esta versão pode exigir reinstalação do protótipo anterior por mudança da assinatura de teste.'
           gh release upload fsj-reserva-android-prototipo-v1 apk/FSJ-Reserva-Android.apk apk/SHA256SUMS.txt --clobber
