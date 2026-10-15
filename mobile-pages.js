@@ -16,21 +16,36 @@
   prev.type=next.type='button';prev.textContent='Anterior';next.textContent='Próximo';
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   footer.append(prev,status,next);root.append(viewport,footer);root.classList.add('fsj-page-shell');
-  const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0};states.set(root,state);
-  prev.onclick=()=>turn(state,state.index-1);next.onclick=()=>turn(state,state.index+1);
+  const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null};states.set(root,state);
+  prev.onclick=()=>{if(state.index>0)turn(state,state.index-1);else goBack();};next.onclick=()=>turn(state,state.index+1);
   viewport.addEventListener('scroll',()=>{if(!mobile.matches)return;const index=Math.round(viewport.scrollLeft/state.stride);if(Number.isFinite(index)&&index!==state.index){state.index=index;update(state);}});
   flow.addEventListener('focusin',event=>{if(!mobile.matches)return;reveal(state,event.target);});
   flow.addEventListener('load',schedule,true);
+  flow.addEventListener('click',event=>{
+   if(!location.pathname.endsWith('/quadro.html'))return;
+   const link=event.target.closest?.('a[href]');if(!link)return;
+   const url=new URL(link.href,location.href);
+   if(url.origin!==location.origin||!url.pathname.endsWith('/responder.html'))return;
+   const params=new URLSearchParams(url.hash.slice(1));params.set('pagina',String(state.index));url.hash=params.toString();link.href=url.href;
+  },true);
   // Styling written by the pager is excluded to avoid observer feedback loops.
   new MutationObserver(records=>{if(records.some(record=>record.target!==flow||record.type!=='attributes'))schedule();}).observe(flow,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden','class','style']});
   return state;
  }
+ function previousURL(){
+  const link=document.querySelector('[data-fsj-screen-back]:not([hidden])');
+  if(!link?.getAttribute('href'))return null;
+  try{const url=new URL(link.getAttribute('href'),location.href),base=new URL('.',location.href);if(url.origin===base.origin&&[new URL('index.html',base).pathname,new URL('quadro.html',base).pathname].includes(url.pathname))return url.href;}catch{}
+  return null;
+ }
+ function canGoBack(){return typeof window.fsjCanGoBack==='function'?window.fsjCanGoBack():!!previousURL();}
+ function goBack(){if(typeof window.fsjGoBack==='function')window.fsjGoBack();else{const url=previousURL();if(url)location.assign(url);}}
  function update(state){
   state.index=Math.max(0,Math.min(state.count-1,state.index));
-  state.prev.disabled=state.index===0;state.next.disabled=state.index===state.count-1;
+  state.prev.disabled=state.index===0&&!canGoBack();state.next.disabled=state.index===state.count-1;
   state.status.textContent=(state.index+1)+' / '+state.count;
   state.status.setAttribute('aria-label','Página '+(state.index+1)+' de '+state.count);
-  state.footer.hidden=state.count<2;
+  state.footer.hidden=state.count<2&&!canGoBack();
  }
  function turn(state,index){
   state.index=index;update(state);
@@ -63,6 +78,7 @@
    state.flow.style.setProperty('--fsj-page-height',height+'px');
    state.stride=width+24;
    state.count=Math.max(1,Math.ceil((state.flow.scrollWidth+24-1)/state.stride));
+   if(state.pendingIndex!==null&&state.flow.querySelector('#content')?.style.display==='block'){state.index=state.pendingIndex;state.pendingIndex=null;}
    turn(state,state.index);
    if(state.flow.contains(document.activeElement))reveal(state,document.activeElement);
   }
@@ -77,7 +93,12 @@
   new MutationObserver(records=>{if(records.some(record=>record.target===manager||states.has(record.target)))schedule();}).observe(manager,{attributes:true,subtree:true,attributeFilter:['class','hidden']});
  }else{
   document.body.classList.add('fsj-reader');
-  const main=document.querySelector('main');if(main){const copyright=document.querySelector('body>footer');if(copyright)main.append(copyright);setup(main);}
+  // A direct task link may lack board context. Only an existing manager session
+  // offers a return to the app; employee links never grant manager access.
+  const back=document.getElementById('screenPrevious');
+  if(back&&back.hidden){try{if(localStorage.getItem('fsj_access_token')||localStorage.getItem('fsj_refresh_token')){back.href='./index.html?fsj_return=1';back.hidden=false;}}catch{}}
+
+  const main=document.querySelector('main');if(main){const copyright=document.querySelector('body>footer');if(copyright)main.append(copyright);const state=setup(main);if(location.pathname.endsWith('/quadro.html')){const page=new URLSearchParams(location.hash.slice(1)).get('pagina');if(/^\d{1,5}$/.test(page||''))state.pendingIndex=Number(page);}}
  }
  window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);
  window.visualViewport?.addEventListener('scroll',schedule);

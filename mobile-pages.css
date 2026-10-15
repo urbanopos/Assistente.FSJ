@@ -1,5 +1,7 @@
+[data-fsj-screen-back]{display:inline-block;font:inherit;font-size:14px;color:inherit;border:1px solid currentColor;border-radius:8px;padding:6px 10px;margin:0 8px 6px 0;text-decoration:none}
 .fsj-page-navigation{display:none}
 @media(max-width:700px){
+ .fsj-mobile [data-fsj-screen-back]{display:none}
  html.fsj-mobile,html.fsj-mobile body{height:100%;overflow:hidden;overscroll-behavior:none}
  .fsj-mobile [hidden]{display:none!important}
  .fsj-mobile main{margin:0 auto;padding:4px 8px;max-width:100%}

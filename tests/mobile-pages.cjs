@@ -23,3 +23,6 @@ test('all mobile entry pages load the shared pager within their CSP',()=>{
  for(const name of ['index.html','quadro.html','responder.html','supervisor.html']){const html=fs.readFileSync(name,'utf8');assert.match(html,/mobile-pages\.js\?v=/);assert.match(html,/mobile-pages\.css\?v=/);const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)/)?.[1];if(csp){assert.match(csp,/script-src 'self'/);assert.match(csp,/style-src 'self'/);}}
  const css=fs.readFileSync('mobile-pages.css','utf8');assert.match(css,/column-fill:auto/);assert.match(css,/height:52px/);assert.match(css,/object-fit:contain/);
 });
+test('first page can return to the previous app screen even when there is only one content page',async()=>{
+ const f=fixture('<main><div id="gestor"><div id="demandas" class="card"><h2>Tarefas por funcionário</h2></div></div></main>');let backs=0;f.w.fsjCanGoBack=()=>true;f.w.fsjGoBack=()=>backs++;const flow=f.w.document.querySelector('.fsj-page-flow');Object.defineProperty(flow,'scrollWidth',{get(){return 374}});await f.wait();const footer=f.w.document.querySelector('.fsj-page-navigation'),[prev,next]=footer.querySelectorAll('button');assert.equal(footer.hidden,false);assert.equal(prev.disabled,false);assert.equal(next.disabled,true);prev.click();assert.equal(backs,1);f.dom.window.close();
+});
