@@ -1,18 +1,16 @@
+process.chdir(require('node:path').resolve(__dirname,'..'));
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-const source=fs.readFileSync('supabase/functions/envio-manual/index.ts','utf8');
-function setup({email='urbanopos@yahoo.com.br',allowed=true,existing=true}={}){let handler,creates=0;const fixed=new Date('2026-10-15T10:20:00Z');class Clock extends Date{constructor(...args){super(...(args.length?args:[fixed]));}};
- const context={Deno:{env:{get:n=>n==='SUPABASE_URL'?'https://test.invalid':'secret'},serve:f=>handler=f},Date:Clock,Intl,Response,AbortSignal,console,fetch:async(url,opt)=>{
- if(url.endsWith('/auth/v1/user'))return Response.json({email});
- if(url.includes('fsj_preparar_calendario'))return Response.json(null);
- if(url.includes('fsj_pode_enviar'))return Response.json(allowed);
- if(url.includes('/pessoas?'))return Response.json([{nome:'Pessoa teste',whatsapp:'81999999999'}]);
- if(url.includes('/quadros_do_dia?')){if(opt.method==='POST'){creates++;existing=true;return Response.json([]);}return Response.json(existing?[{token:'test-token',expira_em:'2026-10-16T03:00:00Z'}]:[]);}
- if(url.includes('mensagens_whatsapp?'))return Response.json([]);
- if(url.includes('fsj_link_supervisao'))return Response.json(null);
- throw Error('Unexpected '+url);
- }};vm.runInNewContext(source,context);
- return {call:()=>handler(new Request('https://test.invalid',{method:'POST',headers:{origin:'https://urbanopos.github.io',authorization:'Bearer user','content-type':'application/json'},body:JSON.stringify({pessoa_id:'test-person'})})),creates:()=>creates};}
-test('reutiliza quadro; prepara telefone e link sem presumir envio',async()=>{const s=setup(),r=await s.call(),d=await r.json();assert.equal(r.status,200);assert.equal(d.phone,'5581999999999');assert.match(d.text,/quadro.html#token=test-token/);assert.equal(s.creates(),0);});
-test('cria quadro ausente e recupera token persistido',async()=>{const s=setup({existing:false});assert.equal((await s.call()).status,200);assert.equal(s.creates(),1);});
-test('outro usuário não acessa quadro',async()=>{const s=setup({email:'other@example.com'});assert.equal((await s.call()).status,403);assert.equal(s.creates(),0);});
-test('bloqueio de calendário impede geração',async()=>{const s=setup({allowed:false});assert.equal((await s.call()).status,409);assert.equal(s.creates(),0);});
+process.env.FSJ_STATE_DIR||='/tmp/fsj-emergency-test';process.env.SUPABASE_SERVICE_ROLE_KEY||='test-only';
+test('executor reaproveita script existente e registra resultado real',async()=>{
+ const {processEmergency}=await import('../automation/emergency-worker.mjs');let runs=0;const writes=[];
+ await processEmergency({isBusy:async()=>false,run:async()=>{runs++;return 0;},db:async(path,body,method)=>{if(path.startsWith('rpc/'))return [{id:'test-id'}];writes.push({path,body,method});}});
+ assert.equal(runs,1);assert.equal(writes[0].method,'PATCH');assert.equal(writes[0].body.estado,'concluido');
+ const worker=fs.readFileSync('automation/emergency-worker.mjs','utf8');assert(worker.includes("['run-retries.mjs']"));assert(!worker.includes('sendMessage'));
+});
+test('rotina das 7h em andamento impede disputa do WhatsApp',async()=>{const {processEmergency}=await import('../automation/emergency-worker.mjs');let ran=false;const calls=[];await processEmergency({isBusy:async()=>true,run:async()=>ran=true,db:async p=>calls.push(p)});assert(!ran);assert.equal(calls.length,1);assert(!calls[0].startsWith('rpc/'));});
+test('falhas não são marcadas como sucesso',async()=>{const {processEmergency}=await import('../automation/emergency-worker.mjs');let result;await processEmergency({isBusy:async()=>false,run:async()=>1,db:async(path,body)=>{if(path.startsWith('rpc/'))return [{id:'test-id'}];result=body;}});assert.equal(result.estado,'falhou');});
+function endpoint(email){let handler;vm.runInNewContext(fs.readFileSync('supabase/functions/envio-manual/index.ts','utf8'),{Deno:{env:{get:()=> 'test'},serve:f=>handler=f},Response,AbortSignal,console,fetch:async url=>{if(url.endsWith('/auth/v1/user'))return Response.json({email});if(url.includes('fsj_envios_emergencia?'))return Response.json([]);if(url.includes('fsj_executor_emergencia?'))return Response.json([]);throw Error('Unexpected call');}});return handler;}
+const request=()=>new Request('https://test.invalid',{method:'POST',headers:{origin:'https://urbanopos.github.io',authorization:'Bearer test'},body:JSON.stringify({action:'status'})});
+test('apenas proprietário pode consultar e solicitar',async()=>assert.equal((await endpoint('other@example.com')(request())).status,403));
+test('sem executor não informa disponibilidade falsa',async()=>{const r=await endpoint('urbanopos@yahoo.com.br')(request());assert.equal(r.status,200);assert.equal((await r.json()).executor_online,false);});
+test('botão da equipe bloqueia pedido duplicado e executor indisponível',()=>{const s=fs.readFileSync('index.html','utf8');const code=s.slice(s.indexOf('function fsjEmergencyDisplay(data){'),s.indexOf('async function fsjEmergencyStatus(){'));const elements={manualSendStatus:{},manualSendBtn:{}};const c={fsjEmergencyBusy:false,document:{getElementById:id=>elements[id]}};vm.runInNewContext(code,c);c.fsjEmergencyDisplay({executor_online:false});assert(elements.manualSendBtn.disabled);c.fsjEmergencyDisplay({executor_online:true,pedido:{dia:'2026-10-15',estado:'executando'}});assert(elements.manualSendBtn.disabled);c.fsjEmergencyDisplay({executor_online:true});assert.equal(elements.manualSendBtn.disabled,undefined);});
