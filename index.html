@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261015-carregamento-estavel">
+<meta name="fsj-build" content="20261015-navegacao-simples">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -42,8 +42,8 @@ main:has(.person-paged:not(.hidden)){padding-top:0;padding-bottom:0}
 .person-page-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
 .person-page-body label{margin-top:3px}.person-page-body h3{margin:5px 0}.person-page-body p{margin:5px 0}.person-page-body fieldset{margin:4px 0!important}
 .person-page-body .person-page-empty,.person-page-body .person-page-hidden{display:none!important}
-.person-page-footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 80px max(4px,env(safe-area-inset-bottom)) 0;border-top:1px solid var(--line);background:white}
-.person-page-footer span{font-size:12px}
+.person-page-footer{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:6px 80px max(4px,env(safe-area-inset-bottom)) 0;border-top:1px solid var(--line);background:white}
+.person-page-footer span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .person-page-footer button{min-height:36px}
 #personSettingsTitle{font-size:15px;margin:4px 0}
 #personBasicFields>.muted{margin:3px 0}
@@ -107,7 +107,7 @@ main:has(.person-paged:not(.hidden)){padding-top:0;padding-bottom:0}
 </div></aside>
 <script>
 let fsjPainelPronto=false;
-const FSJ_BUILD='20261015-carregamento-estavel';
+const FSJ_BUILD='20261015-navegacao-simples';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Abertura: '+fsjDataHora(fsjAbertoEm)+' • verificando atualização';
@@ -645,7 +645,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./weekly-off-manager.js?v=20261015-carregamento-estavel"></script><script src="./supervisor-manager.js?v=20261015-carregamento-estavel"></script><script src="./proprietario.js?v=20261015-carregamento-estavel"></script>
+</script><script src="./weekly-off-manager.js?v=20261015-navegacao-simples"></script><script src="./supervisor-manager.js?v=20261015-navegacao-simples"></script><script src="./proprietario.js?v=20261015-navegacao-simples"></script>
 <script>
 // Keep the original controls mounted so paging never discards unsaved edits.
 const fsjPersonPages=new Map();
@@ -657,12 +657,10 @@ function fsjPersonSetup(id){
  const body=document.createElement('div');body.className='person-page-body';
  for(const child of [...card.children])if(child!==title)body.append(child);
  const footer=document.createElement('div');footer.className='person-page-footer';
- const back=document.createElement('button');back.type='button';back.textContent=id==='fichaPessoa'?'← Voltar às pessoas':'← Voltar';
- back.onclick=()=>id==='fichaPessoa'?clearPerson():navTo('dashboard');
  const prev=document.createElement('button');prev.type='button';prev.textContent='Anterior';
  const status=document.createElement('span');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  const next=document.createElement('button');next.type='button';next.textContent='Próxima';
- footer.append(back,prev,status,next);card.append(body,footer);card.classList.add('person-paged');
+ footer.append(prev,next,status);card.append(body,footer);card.classList.add('person-paged');
  const state={card,body,footer,title,prev,next,status,index:0,pages:[]};fsjPersonPages.set(id,state);
  prev.onclick=()=>fsjPersonTurn(state,-1);next.onclick=()=>fsjPersonTurn(state,1);
  const observer=new MutationObserver(()=>fsjPersonLayout());
@@ -671,7 +669,7 @@ function fsjPersonSetup(id){
 function fsjPersonTurn(state,step){state.index=Math.max(0,Math.min(state.pages.length-1,state.index+step));fsjPersonShow(state);state.title.setAttribute('tabindex','-1');state.title.focus({preventScroll:true});}
 function fsjPersonShow(state){
  state.pages.forEach((page,i)=>page.forEach(el=>el.classList.toggle('person-page-hidden',i!==state.index)));
- state.prev.hidden=state.next.hidden=state.pages.length<2;
+ state.prev.hidden=state.index===0;state.next.hidden=state.index>=state.pages.length-1;state.footer.hidden=state.pages.length<2;
  state.prev.disabled=state.index===0;state.next.disabled=state.index===state.pages.length-1;
  state.status.textContent=state.pages.length>1?'Página '+(state.index+1)+' de '+state.pages.length:'';
  state.body.querySelectorAll('.table').forEach(box=>{const rows=[...box.querySelectorAll('tbody>tr')];box.classList.toggle('person-page-empty',rows.length>0&&rows.every(row=>row.classList.contains('person-page-hidden')));});
@@ -685,7 +683,7 @@ function fsjPersonLayout(reset=false){
  state.body.querySelectorAll('.person-page-hidden').forEach(el=>el.classList.remove('person-page-hidden'));
  const nav=document.querySelector('.topnav').getBoundingClientRect();
  const available=Math.max(200,(window.visualViewport?.height||window.innerHeight)-nav.bottom-12);
- state.card.style.height=available+'px';state.prev.hidden=state.next.hidden=false;
+ state.card.style.height=available+'px';state.footer.hidden=false;state.prev.hidden=state.next.hidden=false;
  const basic=document.getElementById('personBasicFields'),units=[];
  const add=el=>{if(el&&!el.hidden&&el.getClientRects().length)units.push(el)};
  if(currentPage==='cadPessoas'||currentPage==='fichaPessoa')for(const el of basic.children){
