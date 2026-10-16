@@ -14,17 +14,18 @@ function renderFolga(){
   if(!folgaAgenda.bloqueada_gestor){const change=document.createElement('button');change.type='button';change.textContent='Alterar minha folga';change.onclick=()=>{folgaEditing=true;renderFolga();};folgaBox.append(change);}
   return;
  }
- const grid=document.createElement('div');grid.className='folga-calendar';
+ const label=document.createElement('label');label.htmlFor='folgaDia';label.textContent='Dia da folga semanal';
+ const select=document.createElement('select');select.id='folgaDia';select.name='folga-dia';select.disabled=!!folgaAgenda.bloqueada_gestor;
+ select.add(new Option('Selecione um dia desta semana',''));
  for(let i=0;i<7;i++){
-  const day=folgaDate(folgaAgenda.semana,i),label=document.createElement('label'),input=document.createElement('input');
-  input.type='radio';input.name='folga-dia';input.value=day;input.checked=day===folgaAgenda.dia;input.disabled=folgaAgenda.bloqueada_gestor||day<folgaAgenda.hoje;
-  label.append(input,document.createTextNode(' '+folgaLabel(day)));grid.append(label);
+  const day=folgaDate(folgaAgenda.semana,i),option=new Option(folgaLabel(day),day);
+  option.disabled=day<folgaAgenda.hoje;select.add(option);
  }
- folgaBox.append(grid);
+ select.value=folgaAgenda.dia||'';folgaBox.append(label,select);
  const status=document.createElement('p');status.id='folgaStatus';status.setAttribute('role','status');
  status.textContent=folgaAgenda.dia?'Folga: '+folgaLabel(folgaAgenda.dia):'Escolha pendente.';folgaBox.append(status);
  if(!folgaAgenda.bloqueada_gestor){const b=document.createElement('button');b.type='button';b.textContent=folgaAgenda.dia?'Alterar minha folga':'Confirmar folga';b.onclick=async()=>{
-  const day=folgaBox.querySelector('input[name="folga-dia"]:checked')?.value;if(!day){status.textContent='Escolha um dia.';return;}b.disabled=true;folgaBusy=true;
+  const day=folgaBox.querySelector('select[name="folga-dia"]')?.value;if(!day){status.textContent='Escolha um dia.';return;}b.disabled=true;folgaBusy=true;
   try{folgaAgenda=await folgaPost({action:'choose',dia:day});folgaEditing=false;renderFolga();document.getElementById('folgaStatus').textContent='Folga salva: '+folgaLabel(folgaAgenda.dia)+'.';}catch(e){status.textContent=e.message;b.disabled=false;}finally{folgaBusy=false;}
  };folgaBox.append(b);}
 }

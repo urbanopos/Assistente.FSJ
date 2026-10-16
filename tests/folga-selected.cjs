@@ -1,17 +1,6 @@
 process.chdir(require('node:path').resolve(__dirname,'..'));
-const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-test('folga salva exibe só a data escolhida; opções voltam apenas ao alterar',()=>{
- function element(tag){return {tag,children:[],append(...xs){this.children.push(...xs);},replaceChildren(){this.children=[];},setAttribute(){}};}
- const box=element('section'),context=vm.createContext({document:{getElementById:()=>box,createElement:element,createTextNode:text=>({text})}});
- const src=fs.readFileSync('weekly-off-employee.js','utf8');vm.runInContext(src.slice(0,src.lastIndexOf('carregarFolgaEmpregado();document')),context);
- vm.runInContext("folgaAgenda={dia:'2026-10-18',semana:'2026-10-12',hoje:'2026-10-15',bloqueada_gestor:false};renderFolga()",context);
- assert(!box.children.some(e=>e.className==='folga-calendar'));assert(box.children.some(e=>e.id==='folgaStatus'&&e.textContent.includes('18/10')));
- box.children.find(e=>e.tag==='button').onclick();const grid=box.children.find(e=>e.className==='folga-calendar');assert.equal(grid.children.length,7);
-});
-test('folga definida pelo gestor não oferece outras opções',()=>{
- const box={children:[],append(...xs){this.children.push(...xs);},replaceChildren(){this.children=[];}};
- const c=vm.createContext({document:{getElementById:()=>box,createElement:tag=>({tag,children:[],append(...xs){this.children.push(...xs);},setAttribute(){}})}});
- const src=fs.readFileSync('weekly-off-employee.js','utf8');vm.runInContext(src.slice(0,src.lastIndexOf('carregarFolgaEmpregado();document')),c);
- vm.runInContext("folgaAgenda={dia:'2026-10-18',semana:'2026-10-12',hoje:'2026-10-15',bloqueada_gestor:true};renderFolga()",c);
- assert(!box.children.some(e=>e.tag==='button'||e.className==='folga-calendar'));
-});
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{JSDOM}=require('jsdom');
+function setup(agenda){const dom=new JSDOM('<section id="folgaSemanal"></section>',{runScripts:'outside-only'}),w=dom.window;const src=fs.readFileSync('weekly-off-employee.js','utf8');w.eval(src.slice(0,src.lastIndexOf('carregarFolgaEmpregado();document'))+'\nfolgaAgenda='+JSON.stringify(agenda)+';renderFolga();');return dom;}
+test('folga salva mostra somente escolha; alterar abre lista dos sete dias e bloqueia dias anteriores',()=>{const dom=setup({dia:'2026-10-18',semana:'2026-10-12',hoje:'2026-10-15',bloqueada_gestor:false}),d=dom.window.document;assert.equal(d.querySelector('select'),null);assert.match(d.getElementById('folgaStatus').textContent,/18\/10/);d.querySelector('button').click();const select=d.querySelector('select');assert.equal(select.options.length,8);assert.equal(select.value,'2026-10-18');assert.equal(select.querySelector('[value="2026-10-14"]').disabled,true);assert.equal(select.querySelector('[value="2026-10-16"]').disabled,false);assert.equal(d.querySelector('input[type=radio]'),null);dom.window.close();});
+test('folga bloqueada pelo gestor nao oferece edicao',()=>{const dom=setup({dia:'2026-10-18',semana:'2026-10-12',hoje:'2026-10-15',bloqueada_gestor:true});assert.equal(dom.window.document.querySelector('select,button'),null);dom.window.close();});
+test('selecao salva a data escolhida pelo mesmo endpoint',async()=>{const dom=setup({dia:null,semana:'2026-10-12',hoje:'2026-10-15',bloqueada_gestor:false}),w=dom.window;w.token="fake";w.AbortSignal=AbortSignal;let sent;w.fetch=async(u,req)=>{sent=JSON.parse(req.body);return {ok:true,json:async()=>({agenda:{dia:sent.dia,semana:'2026-10-12',hoje:'2026-10-15',bloqueada_gestor:false}})};};w.document.querySelector('select').value='2026-10-17';await w.document.querySelector('button').onclick();assert.equal(sent.action,'choose');assert.equal(sent.dia,'2026-10-17');assert.equal(w.document.querySelector('select'),null);dom.window.close();});

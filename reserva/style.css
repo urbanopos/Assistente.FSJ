@@ -5,3 +5,12 @@
 #viewer #install{margin:0;width:auto;font-size:12px;padding:7px}#viewer #refresh{padding:6px;font-size:22px}#viewer nav b{white-space:nowrap}#viewer nav{justify-content:space-between}
 
 #closed{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:#f5fbfd}#closed img{width:80px;height:80px}#viewer #exit{padding:7px;font-size:12px}
+
+/* Identidade da Reserva permanece visível fora do quadro incorporado. */
+#loadingHeader{position:fixed;inset:0 0 auto;height:64px;z-index:30;padding:8px 12px;gap:10px}
+#loadingHeader .reserva-logo{display:block;width:46px;height:46px;min-width:46px;max-width:none;flex:0 0 46px;object-fit:contain}
+#loadingHeader b{font-size:15px}body{padding-top:64px}
+#viewer{top:64px}#viewer nav{height:48px;gap:6px;overflow-x:auto;justify-content:flex-start}
+#viewer nav>*{flex-shrink:0}#viewer nav b{margin-right:auto}
+#viewer iframe{height:calc(100dvh - 112px)}
+#closed{min-height:calc(100dvh - 64px)}
