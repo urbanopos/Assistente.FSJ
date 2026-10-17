@@ -56,3 +56,15 @@ O principal oferece Vídeos e chamadas na tela inicial e na navegação. No Andr
 ## Release 7 / Android 8
 
 Selecionar um vídeo da biblioteca inicia sua reprodução no mesmo player do institucional. Ao terminar, limpa a seleção e restaura o institucional, iniciando sua reprodução se o aparelho permitir. Se não existir institucional cadastrado, volta ao quadro vazio correspondente. O término do próprio institucional não entra em repetição. Atualização de interface sem reiniciar servidor nem alterar arquivos de vídeo.
+
+
+## Release 8 / Android 9
+
+- Um botão discreto amplia o player e outro toque restaura a tela. O APK9 implementa tela cheia nativa, com saída pelo botão e Voltar. A imagem conserva a proporção original.
+- A lista agrupa títulos iguais após normalização de espaços e caixa. Mostra o envio mais recente, sem excluir arquivos nem registros.
+- Seleções não são reconstruídas a cada consulta. Uma barra sempre visível permite entrar e finalizar a chamada; uma preparação pendente pode ser retomada. Tipo de chamada: Vídeo e voz ou Somente voz (não solicita câmera).
+- Exibição em grupo usa convites autenticados e o mesmo player. Selecione vídeo e até três pessoas, toque em Exibir vídeo aos selecionados; os convidados entram em Assistir com o grupo. Aguarde todos entrarem e dê play. O Proprietário controla início, pausa e avanço. Cada cliente lê o arquivo diretamente da VM e acompanha a posição publicada por ela. Há tolerância a atrasos da rede, sem garantia de sincronização quadro a quadro. Ao terminar, todos voltam ao institucional.
+- Um convite de exibição concede acesso temporário somente ao vídeo selecionado. Outros usuários não acessam a sessão ou mídia; participantes não controlam o grupo e não recebem download. Ao finalizar, expirar ou bloquear acesso, a concessão termina. Sessões são temporárias e encerram se o Proprietário parar de responder por 45 segundos.
+- Os testes de navegador usam três sessões e mídia sintética: seleção, títulos únicos, tela cheia, controle e retorno da exibição em grupo, início/finalização de voz e vídeo, autorização e SDP. O ambiente de testes não gerou candidatos ICE; mídia WebRTC entre aparelhos ainda exige teste na rede real. O suporte nativo a tela cheia foi compilado e a assinatura conferida, mas requer conferência no Android real.
+- Testes: python3 -m unittest discover -p 'test_*.py'. Navegador: instale playwright/Chromium e ffmpeg e execute node test_browser.cjs. FSJ_SIGNAL_ONLY=1 testa SDP quando o ambiente não disponibiliza ICE. Não confunda esse modo com teste de mídia entre aparelhos.
+- A VM aplica o pacote assinado automaticamente, com backup e reinício do servidor quando estiver livre. Android9 é oferecido pelo aplicativo; o sistema Android exige confirmação de instalação. Não são necessários ZIPs, comandos ou reinstalação de certificados.
