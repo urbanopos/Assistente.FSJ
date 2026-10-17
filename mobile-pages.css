@@ -46,3 +46,26 @@
  .fsj-page-navigation button:disabled{opacity:.4;cursor:default}.fsj-page-count{font-size:12px;text-align:center;color:#546775}
  body:not(.fsj-reader) .fsj-page-navigation{padding-right:58px}.fsj-mobile .brisa-fab{width:46px;height:46px;bottom:12px;right:10px}
 }
+
+/* Compact task list and consistent horizontal navigation. */
+.fsj-nav-arrow,[data-fsj-screen-back].fsj-nav-arrow{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0!important;border:0!important;background:transparent!important;color:#235d41;font:700 30px/1 Arial!important;text-decoration:none}
+#tasks a.task{min-height:44px;margin:5px 0;padding:3px 8px;display:flex;align-items:center;gap:8px;break-inside:avoid}
+#tasks .num{min-width:28px;height:28px;font-size:14px;border-radius:8px;margin:0}
+#tasks .name{font-size:17px;white-space:nowrap}
+#tasks .status{font-size:11px;margin-left:auto}
+#folgaSemanal{padding:3px 8px 5px}#folgaSemanal h2{font-size:18px;margin:2px 0}#folgaSemanal p{margin:3px 0}#folgaStatus{font-weight:600}
+#supervisaoAcesso{padding:3px 8px}#supervisaoAcesso a.task{min-height:40px;padding:7px 10px;margin:2px 0;font-size:15px;font-weight:700}
+@media(max-width:700px){
+ .fsj-page-flow #tasks a.task{display:flex;min-height:44px;padding:3px 8px;margin:5px 0}
+ .fsj-page-flow #folgaSemanal,.fsj-page-flow #supervisaoAcesso{padding:3px 8px}
+ .fsj-page-flow .fsj-task-legend{margin:3px 0;font-size:11px}
+ .fsj-page-navigation{height:62px}
+ .fsj-page-navigation .fsj-task-answer{display:flex;flex-direction:column;align-items:center;gap:3px}
+ .fsj-page-navigation .fsj-answer-buttons{display:flex;gap:12px}
+ .fsj-page-navigation .fsj-answer-buttons button{padding:2px 12px;min-height:30px;height:30px;font-size:14px}
+ .fsj-page-navigation .fsj-task-answer strong{font-size:12px;color:#213d2d}
+ .fsj-page-navigation [hidden]{display:none!important}
+ .fsj-page-flow .response-brand img{width:36px;height:36px}
+}
+
+@media(max-width:700px){.fsj-mobile .fsj-response-back{display:none}}

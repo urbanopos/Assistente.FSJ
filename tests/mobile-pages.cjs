@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{JSDOM}=require('jsdom');
 const script=fs.readFileSync('mobile-pages.js','utf8');
-function fixture(html,manager=false){
- const dom=new JSDOM(html,{runScripts:'outside-only',pretendToBeVisual:true,url:'https://test.invalid/'}),w=dom.window;let mobile=true,frames=0;
+function fixture(html,manager=false,url='https://test.invalid/'){
+ const dom=new JSDOM(html,{runScripts:'outside-only',pretendToBeVisual:true,url}),w=dom.window;let mobile=true,frames=0;
  w.matchMedia=()=>({get matches(){return mobile},addEventListener(){}});
  w.HTMLElement.prototype.getClientRects=function(){return this.hidden||this.classList.contains('hidden')?[]:[this.getBoundingClientRect()]};
  w.HTMLElement.prototype.getBoundingClientRect=function(){return {top:60,left:8,width:374,height:500,bottom:560,right:382}};
@@ -25,4 +25,8 @@ test('all mobile entry pages load the shared pager within their CSP',()=>{
 });
 test('first page can return to the previous app screen even when there is only one content page',async()=>{
  const f=fixture('<main><div id="gestor"><div id="demandas" class="card"><h2>Tarefas por funcionário</h2></div></div></main>');let backs=0;f.w.fsjCanGoBack=()=>true;f.w.fsjGoBack=()=>backs++;const flow=f.w.document.querySelector('.fsj-page-flow');Object.defineProperty(flow,'scrollWidth',{get(){return 374}});await f.wait();const footer=f.w.document.querySelector('.fsj-page-navigation'),[prev,next]=footer.querySelectorAll('button');assert.equal(footer.hidden,false);assert.equal(prev.disabled,false);assert.equal(next.disabled,true);prev.click();assert.equal(backs,1);f.dom.window.close();
+});
+
+test('resposta fica entre setas na ultima pagina e se recolhe na justificativa',async()=>{
+ const f=fixture('<main><div id="taskScreen">Tarefa</div><div id="taskAnswer" hidden><button>SIM</button><button>NÃO</button><strong>CONCLUÍDA?</strong></div></main>',false,'https://test.invalid/responder.html');let details=true;f.w.fsjTaskAnswerVisible=()=>details;f.w.fsjCanGoBack=()=>true;await f.wait();const d=f.w.document,nav=d.querySelector('.fsj-page-navigation'),buttons=nav.querySelectorAll(':scope>button');assert.equal(buttons[0].textContent,'←');assert.equal(buttons[1].textContent,'→');assert.equal(buttons[0].getAttribute('aria-label'),'Anterior');assert(d.getElementById('taskAnswer').hidden);buttons[1].click();buttons[1].click();assert.equal(d.getElementById('taskAnswer').hidden,false);details=false;f.w.dispatchEvent(new f.w.Event('resize'));await f.wait();assert(d.getElementById('taskAnswer').hidden);f.dom.window.close();
 });

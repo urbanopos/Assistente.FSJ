@@ -5,5 +5,5 @@ test('NÃO mostra campo e envia itens; SIM oculta e não envia conteúdo antigo'
  w.eval(dom.window.document.querySelector('script').textContent);await w.load();
  const nao=w.document.querySelector('[value=nao]'),sim=w.document.querySelector('[value=sim]');nao.checked=true;nao.dispatchEvent(new w.Event('change'));assert.equal(w.document.getElementById('missingBox').hidden,false);
  w.document.getElementById('why').value='Sem ferramenta';w.document.getElementById('missing').value='Enxada <script>';await w.document.getElementById('send').onclick();assert.equal(body.get('itens_faltantes'),'Enxada <script>');assert.match(w.document.querySelector('#done p').textContent,/Proprietário/);
- sim.checked=true;sim.dispatchEvent(new w.Event('change'));assert.equal(w.document.getElementById('missingBox').hidden,true);await w.document.getElementById('send').onclick();assert.equal(body.get('itens_faltantes'),'');dom.window.close();
+ sim.checked=true;sim.dispatchEvent(new w.Event('change'));assert.equal(w.document.getElementById('missingBox').hidden,true);await w.document.getElementById('send').onclick();assert.equal(body.get('itens_faltantes'),'Enxada <script>','resposta confirmada nao pode ser reenviada pelo mesmo formulario');dom.window.close();
 });

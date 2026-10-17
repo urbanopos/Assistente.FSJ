@@ -10,7 +10,7 @@ function renderFolga(){
  const note=document.createElement('p');note.textContent=folgaAgenda.bloqueada_gestor?'Data definida pelo gestor. Você pode consultar, mas não alterar.':'Marque um dia desta semana. Não haverá envio diário de tarefas na data escolhida.';folgaBox.append(note);
  if(folgaAgenda.dia&&!folgaEditing){
   note.textContent=folgaAgenda.bloqueada_gestor?'Data definida pelo gestor. Você pode consultar, mas não alterar.':'Sua folga semanal está registrada.';
-  const selected=document.createElement('p');selected.id='folgaStatus';selected.setAttribute('role','status');selected.textContent='Folga: '+folgaLabel(folgaAgenda.dia);folgaBox.append(selected);
+  const selected=document.createElement('span');selected.id='folgaStatus';selected.setAttribute('role','status');selected.textContent='Folga: '+folgaLabel(folgaAgenda.dia);note.append(document.createTextNode(' '),selected);
   if(!folgaAgenda.bloqueada_gestor){const change=document.createElement('button');change.type='button';change.textContent='Alterar minha folga';change.onclick=()=>{folgaEditing=true;renderFolga();};folgaBox.append(change);}
   return;
  }

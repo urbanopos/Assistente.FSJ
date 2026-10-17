@@ -13,10 +13,11 @@
   if(root.id==='dashboard'){root.classList.remove('grid');flow.classList.add('grid');}
   const footer=element('nav','fsj-page-navigation');footer.setAttribute('aria-label','Páginas desta tela');
   const prev=element('button',''),next=element('button',''),status=element('span','fsj-page-count');
-  prev.type=next.type='button';prev.textContent='Anterior';next.textContent='Próximo';
+  prev.type=next.type='button';prev.textContent='←';next.textContent='→';prev.className=next.className='fsj-nav-arrow';prev.setAttribute('aria-label','Anterior');next.setAttribute('aria-label','Próximo');
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-  footer.append(prev,status,next);root.append(viewport,footer);root.classList.add('fsj-page-shell');
-  const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null};states.set(root,state);
+  const answer=location.pathname.endsWith('/responder.html')?flow.querySelector('#taskAnswer'):null;
+  footer.append(prev,status,next);if(answer)footer.insertBefore(answer,next);root.append(viewport,footer);root.classList.add('fsj-page-shell');
+  const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null,answer};states.set(root,state);
   prev.onclick=()=>{if(state.index>0)turn(state,state.index-1);else goBack();};next.onclick=()=>turn(state,state.index+1);
   viewport.addEventListener('scroll',()=>{if(!mobile.matches)return;const index=Math.round(viewport.scrollLeft/state.stride);if(Number.isFinite(index)&&index!==state.index){state.index=index;update(state);}});
   flow.addEventListener('focusin',event=>{if(!mobile.matches)return;reveal(state,event.target);});
@@ -45,7 +46,9 @@
   state.prev.disabled=state.index===0&&!canGoBack();state.next.disabled=state.index===state.count-1;
   state.status.textContent=(state.index+1)+' / '+state.count;
   state.status.setAttribute('aria-label','Página '+(state.index+1)+' de '+state.count);
-  state.footer.hidden=state.count<2&&!canGoBack();
+  const showAnswer=!!state.answer&&!!window.fsjTaskAnswerVisible?.()&&state.index===state.count-1;
+  if(state.answer)state.answer.hidden=!showAnswer;state.status.hidden=showAnswer;
+  state.footer.hidden=state.count<2&&!canGoBack()&&!showAnswer;
  }
  function turn(state,index){
   state.index=index;update(state);
@@ -62,7 +65,8 @@
   document.documentElement.classList.toggle('fsj-mobile',mobile.matches);
   for(const state of states.values()){
    if(reset)state.index=0;
-   if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;continue;}
+   if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;if(state.answer){state.flow.append(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}continue;}
+   if(state.answer&&state.answer.parentElement!==state.footer)state.footer.insertBefore(state.answer,state.next);
    if(!state.root.getClientRects().length)continue;
    for(const table of state.flow.querySelectorAll('table')){const headers=[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim());for(const row of table.querySelectorAll('tbody tr'))[...row.cells].forEach((cell,i)=>{if(headers[i])cell.dataset.label=headers[i];});}
    const visual=window.visualViewport;
@@ -100,6 +104,7 @@
 
   const main=document.querySelector('main');if(main){const copyright=document.querySelector('body>footer');if(copyright)main.append(copyright);const state=setup(main);if(location.pathname.endsWith('/quadro.html')){const page=new URLSearchParams(location.hash.slice(1)).get('pagina');if(/^\d{1,5}$/.test(page||''))state.pendingIndex=Number(page);}}
  }
+ for(const link of document.querySelectorAll('[data-fsj-screen-back]')){link.textContent='←';link.classList.add('fsj-nav-arrow');link.setAttribute('aria-label','Anterior');}
  window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);
  window.visualViewport?.addEventListener('scroll',schedule);
  window.addEventListener('pageshow',schedule);document.fonts?.ready.then(schedule);
