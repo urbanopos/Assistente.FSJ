@@ -28,7 +28,8 @@ export async function cycle({state, previous, persist, revoke, send, record, url
   const notice=state.deletion.status==='confirmado'?'':'Aviso: a mensagem anterior não teve o apagamento confirmado.\n';
   state.phase='sending';await persist(state);
   let result;
-  try{result=await send(notice+url+'\n\nESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR');}catch(e){const reason=String(e?.message||e).slice(0,500);state.lastSendError=reason;await record('envio_incerto',{status:'sem_confirmacao',reason}).catch(()=>{});throw Error('Sem confirmação do envio. Nova tentativa automática bloqueada para evitar duplicação. Erro original: '+reason);}
+  const footer=url.includes('\nGESTÃO DE TAREFAS ')?'*ESTA MENSAGEM CANCELA AS ANTERIORES*':'ESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR';
+  try{result=await send(notice+url+'\n\n'+footer);}catch(e){const reason=String(e?.message||e).slice(0,500);state.lastSendError=reason;await record('envio_incerto',{status:'sem_confirmacao',reason}).catch(()=>{});throw Error('Sem confirmação do envio. Nova tentativa automática bloqueada para evitar duplicação. Erro original: '+reason);}
   state.messageId=result.messageId;state.ack=result.ack;state.phase='sent';await persist(state);
   await record('quadro_automatico',{status:'enviado',messageId:state.messageId,ack:state.ack});
   return state;

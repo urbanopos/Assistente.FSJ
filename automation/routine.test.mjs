@@ -78,3 +78,16 @@ test('link de supervisão entra apenas na mensagem do supervisor autorizado',()=
  assert.match(f.messages[0].text,/SUPERVISAO: DEMANDAS DOS SUPERVISIONADOS/);assert.match(f.messages[0].text,/supervisor.html#token=token-a/);
  assert.doesNotMatch(f.messages[1].text,/supervisor.html/);assert.match(f.messages[1].text,/quadro.html#token=token-b/);
 }));
+test('novo modelo começa em 18/10, preserva links e não repete envio confirmado',()=>withDir(async stateDir=>{
+ const f=fixture([person('a',{nome:'Urbano Neto'}),person('b')]);const db=f.args.db;
+ f.args.db=async(path,opt)=>path==='rpc/fsj_link_supervisao'?(JSON.parse(opt.body).p_pessoa==='a'?'https://urbanopos.github.io/Assistente.FSJ/supervisor.html#token=token-a':null):db(path,opt);
+ const next={...f.args,stateDir,now:new Date('2026-10-18T10:00:00Z')};
+ await runRoutine(next);
+ assert.match(f.messages[0].text,/GESTÃO DE TAREFAS 18\/10\/2026/);
+ assert.match(f.messages[0].text,/\*CONSULTA TAREFAS\*/);
+ assert.match(f.messages[0].text,/\*TAREFAS DE TERCEIROS\*/);
+ assert.match(f.messages[0].text,/quadro.html#token=token-a/);
+ assert.ok(f.messages[0].text.endsWith('*ESTA MENSAGEM CANCELA AS ANTERIORES*'));
+ assert.doesNotMatch(f.messages[1].text,/TAREFAS DE TERCEIROS/);
+ await runRoutine(next);assert.equal(f.messages.length,2);
+}));

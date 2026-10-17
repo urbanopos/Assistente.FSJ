@@ -1,3 +1,4 @@
+import {renderDailyCard} from './daily-message.mjs';
 import wwebjs from 'whatsapp-web.js';
 import {mkdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -32,7 +33,10 @@ export async function revoke(client,id,chatId) {
   finally{clearTimeout(timer);client.off('message_revoke_everyone',listener);}
 }
 export async function send(client,chatId,text) {
-  const m=await client.sendMessage(chatId,text,{linkPreview:true});
+  const date=text.match(/\nGESTÃO DE TAREFAS (\d{2}\/\d{2}\/\d{4})\n/)?.[1];
+  let media;
+  if(date){try{const png=await renderDailyCard(client.pupBrowser,date);media=new wwebjs.MessageMedia('image/png',Buffer.from(png).toString('base64'),'tarefas-do-dia.png');}catch{console.warn('Cartão indisponível; envio único em texto com os mesmos links.');}}
+  const m=await client.sendMessage(chatId,media||text,media?{caption:text,linkPreview:false}:{linkPreview:true});
   if(!m?.id?._serialized)throw Error('WhatsApp não devolveu o identificador.');
   return {messageId:m.id._serialized,ack:m.ack||0};
 }

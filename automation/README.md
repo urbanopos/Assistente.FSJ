@@ -28,3 +28,9 @@ O computador executor deve permanecer ligado, conectado e sem suspensão.
 - Prévia do quadro depende do WhatsApp; a biblioteca solicita prévia de link, sem garantir sua apresentação em todo aparelho.
 
 Fontes: https://docs.wwebjs.dev/Message.html e https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
+
+## Mensagem diária a partir de 18/10/2026
+
+O modelo inclui data em GESTÃO DE TAREFAS, CONSULTA TAREFAS, TAREFAS DE TERCEIROS apenas para supervisores autorizados e o aviso em negrito ESTA MENSAGEM CANCELA AS ANTERIORES. O cartão é gerado no navegador já aberto pela sessão; se a geração falhar, transmite uma única mensagem de texto. Os links completos são preservados: reticências e centralização da bolha de conversa são apenas recursos da prévia, sem controle no WhatsApp do destinatário.
+
+A publicação não executa a rotina e não reenvia a mensagem de 17/10. O workflow faz checkout no horário já configurado. Se a execução usa o Agendador do Windows com uma cópia local, essa cópia precisa ser atualizada antes das 7h; publicações no GitHub não atualizam essa pasta automaticamente. Não substituir arquivos locais com alterações próprias sem conferir o diff e preservar as correções instaladas.
