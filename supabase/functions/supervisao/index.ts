@@ -17,7 +17,7 @@ Deno.serve(async req=>{
      const result=await db('rpc/fsj_supervisor_demandas',{p_token:data.token});
      // Only enrich tasks already authorized by the token-scoped RPC.
      const tasks=result.tarefas||[];
-     if(tasks.length){const ids=tasks.map((t:any)=>JSON.stringify(t.id)).join(',');const priorities=await db('tarefas?id=in.'+encodeURIComponent('('+ids+')')+'&select=id,prioridade');for(const t of tasks)t.prioridade=priorities.find((p:any)=>p.id===t.id)?.prioridade||'normal';}
+     if(tasks.length){const ids=tasks.map((t:any)=>JSON.stringify(t.id)).join(',');const priorities=await db('tarefas?id=in.'+encodeURIComponent('('+ids+')')+'&select=id,prioridade,codigo_tarefa');for(const t of tasks){const stored=priorities.find((p:any)=>p.id===t.id);t.prioridade=stored?.prioridade||'normal';t.codigo_tarefa=stored?.codigo_tarefa||null;}}
      return reply(result);
     }
     catch{return reply({erro:'Acesso de supervisao indisponivel ou link expirado. Solicite ao gestor a verificacao do cadastro.'},403);}
