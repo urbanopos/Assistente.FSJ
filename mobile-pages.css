@@ -69,3 +69,11 @@
 }
 
 @media(max-width:700px){.fsj-mobile .fsj-response-back{display:none}}
+
+/* The footer owns mobile back navigation; the header link only stores its destination. */
+@media(max-width:700px){
+ .fsj-mobile [data-fsj-screen-back],.fsj-mobile [data-fsj-screen-back].fsj-nav-arrow{display:none!important}
+ .fsj-mobile.fsj-mobile main{padding-top:0}
+ .fsj-reader .fsj-page-flow .board{padding-top:0}
+ .fsj-reader .fsj-page-flow .top{padding:6px 10px 10px}
+}
