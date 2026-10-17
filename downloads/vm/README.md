@@ -31,3 +31,8 @@ O manifesto é assinado em bytes exatos com a chave privada do Proprietário (a 
 ## Release 2 / Android 7
 
 Inclui telas fixas, RESERVA sem R, formulário de acesso salvo com Android Keystore, botão Tarefas funcional e espelhamento de leitura. O arquivo privado de conexão deve ser entregue exclusivamente ao Proprietário e ficar em dados/sync.json; nunca deve ser publicado. Cadastros de pessoas do principal não liberam autenticação automaticamente: é necessário aprovar a conta local e vinculá-la explicitamente à pessoa correta. O APK deve manter a assinatura do Proprietário.
+
+
+## Release 3 / Android 7
+
+Listas de vídeos e participantes preservam seleção durante consultas de fundo. Atualizações de opções aguardam o fechamento da lista. Pessoas do cadastro principal aparecem uma vez por identificador; contas locais sem vínculo permanecem em Contas para vinculação explícita. Nenhum registro é apagado. Interface atualizada sem reiniciar o servidor; APK permanece versão 7.
