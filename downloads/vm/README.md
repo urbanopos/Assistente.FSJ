@@ -27,3 +27,7 @@ systemctl --user disable --now fsj-update.timer fsj-update.path
 
 Canal fixo: https://urbanopos.github.io/Assistente.FSJ/downloads/vm/
 O manifesto é assinado em bytes exatos com a chave privada do Proprietário (a chave nunca vai para a VM nem para o GitHub). A chave pública está em update-public.pem. O arquivo release-N.zip contém exatamente server.py, calls.py, version.json, static/index.html, static/app.js, static/calls.js, static/style.css, static/logo.webp e releases/FSJ-Reserva-VM-V001-Simples.apk. Cada arquivo e o ZIP têm SHA-256 no manifesto. A versão inteira deve crescer e coincidir com version.json.release. Publique primeiro o ZIP, depois manifesto e assinatura juntos em um commit; confirme a implantação do Pages. Mantenha código de servidor inalterado em atualizações apenas de interface para preservar sessões e evitar reinício. Teste cada versão antes de assinar. Nunca inclua dados, senhas, certificados privados ou vídeos no canal.
+
+## Release 2 / Android 7
+
+Inclui telas fixas, RESERVA sem R, formulário de acesso salvo com Android Keystore, botão Tarefas funcional e espelhamento de leitura. O arquivo privado de conexão deve ser entregue exclusivamente ao Proprietário e ficar em dados/sync.json; nunca deve ser publicado. Cadastros de pessoas do principal não liberam autenticação automaticamente: é necessário aprovar a conta local e vinculá-la explicitamente à pessoa correta. O APK deve manter a assinatura do Proprietário.
