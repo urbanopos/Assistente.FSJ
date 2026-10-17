@@ -68,3 +68,18 @@ Selecionar um vídeo da biblioteca inicia sua reprodução no mesmo player do in
 - Os testes de navegador usam três sessões e mídia sintética: seleção, títulos únicos, tela cheia, controle e retorno da exibição em grupo, início/finalização de voz e vídeo, autorização e SDP. O ambiente de testes não gerou candidatos ICE; mídia WebRTC entre aparelhos ainda exige teste na rede real. O suporte nativo a tela cheia foi compilado e a assinatura conferida, mas requer conferência no Android real.
 - Testes: python3 -m unittest discover -p 'test_*.py'. Navegador: instale playwright/Chromium e ffmpeg e execute node test_browser.cjs. FSJ_SIGNAL_ONLY=1 testa SDP quando o ambiente não disponibiliza ICE. Não confunda esse modo com teste de mídia entre aparelhos.
 - A VM aplica o pacote assinado automaticamente, com backup e reinício do servidor quando estiver livre. Android9 é oferecido pelo aplicativo; o sistema Android exige confirmação de instalação. Não são necessários ZIPs, comandos ou reinstalação de certificados.
+
+
+## Release 9 / Android 9 / iPhone e iPad pela web
+
+A página principal de instalação oferece Android (APK9) e iPhone/iPad (aplicativo web adicionado à Tela de Início pelo Safari). A VM fornece manifesto standalone, ícone PNG da marca e instruções locais em /instalar/ios. Os dados, sessões, tarefas, biblioteca e chamadas continuam servidos pela VM, sem novo backend externo. Nenhum service worker armazena APIs ou vídeos; as atualizações continuam vindo do servidor.
+
+Não existe IPA assinado nem distribuição App Store neste pacote. Distribuição nativa de iOS exige Xcode e assinatura/provisionamento Apple. A versão web possui diferenças do Android: instalação pelo Safari, confiança manual na CA local na configuração inicial, Sair encerra sessão mas não força o iOS a voltar à Tela de Início, e senhas são gerenciadas pelo preenchimento automático do sistema em vez do Android Keystore. Recursos de gravação, reprodução e câmera dependem da versão do iOS; não foi realizado teste em iPhone real. Portanto, não se afirma paridade nativa completa.
+
+Gravação negocia WebM ou MP4 conforme MediaRecorder.isTypeSupported e preserva o tipo correto no envio. O player usa tela cheia web e alternativa webkitEnterFullscreen. Há detecção de aplicativo standalone para ocultar a oferta de instalação depois de adicionado o ícone.
+
+A página pública instalar-reserva.html contém somente instruções, links e a impressão digital do certificado público. downloads/fsj-ca-publico.cer corresponde à CA já embarcada no APK; não contém chave privada nem credenciais. Se a CA da VM for trocada, esse arquivo e os instaladores nativos precisam ser substituídos pelo Proprietário. Não instale certificados divergentes.
+
+Testes verificam manifesto, ícone, rotas públicas de instalação, logout com sessão revogada, detecção standalone e regressões do grupo/chamadas. O teste da interface com identificação iPhone em Chromium não substitui Safari real. O WebKit Linux foi obtido, mas faltam dependências para executá-lo neste ambiente; instalação de perfil e câmera no iOS permanecem pendentes.
+
+Referências oficiais: https://support.apple.com/pt-br/guide/iphone/iphea86e5236/ios ; https://support.apple.com/pt-br/102390 ; https://developer.apple.com/documentation/xcode/distributing-your-app-for-beta-testing-and-releases ; https://webkit.org/blog/11353/mediarecorder-api/ .
