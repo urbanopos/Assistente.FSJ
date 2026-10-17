@@ -41,3 +41,8 @@ Listas de vídeos e participantes preservam seleção durante consultas de fundo
 ## Release 4 / Android 7
 
 Preparação de chamadas salva por usuário neste aparelho, com título e convidados. Atualizar participantes preserva a seleção; avisos de chamada aparecem no rodapé visível. A edição do título não é interrompida pelo redimensionamento do teclado. Ao entrar, a navegação exibe o quadro da chamada. Somente contas ativas explicitamente vinculadas podem ser convidadas quando existe cadastro principal. O teste usa câmera simulada; mídia entre aparelhos requer verificação na rede local.
+
+
+## Release 5 / Android 7
+
+Todos os cadastros ativos do principal entram automaticamente na lista de convidados, uma vez por ID da pessoa. Podem receber convites antes de criar conta local. Aceitar o convite exige entrar com conta autorizada vinculada à pessoa correta; não há associação automática por nome nem importação de senhas. Pessoas inativas e contas vinculadas bloqueadas não podem participar. A atualização altera o servidor e reinicia o serviço quando não há chamada ou gravação; pode ser necessário entrar novamente. Inclui as correções de preparação, título salvo e avisos visíveis da release 4.
