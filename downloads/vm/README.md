@@ -46,3 +46,8 @@ Preparação de chamadas salva por usuário neste aparelho, com título e convid
 ## Release 5 / Android 7
 
 Todos os cadastros ativos do principal entram automaticamente na lista de convidados, uma vez por ID da pessoa. Podem receber convites antes de criar conta local. Aceitar o convite exige entrar com conta autorizada vinculada à pessoa correta; não há associação automática por nome nem importação de senhas. Pessoas inativas e contas vinculadas bloqueadas não podem participar. A atualização altera o servidor e reinicia o serviço quando não há chamada ou gravação; pode ser necessário entrar novamente. Inclui as correções de preparação, título salvo e avisos visíveis da release 4.
+
+
+## Release 6 / Android 8
+
+O principal oferece Vídeos e chamadas na tela inicial e na navegação. No Android, o link fsjreservavm://videos abre o aplicativo exclusivo da VM; se indisponível, oferece o APK8. No desktop, abre HTTPS da VM. O APK8 registra somente essa rota e continua aceitando rede exclusivamente do endereço fixo da VM, com a CA embarcada. A chave de assinatura é preservada. Um aplicativo Android comum exige confirmação para instalar a atualização nativa; as atualizações da interface da VM continuam automáticas. Abertura do link no aparelho e permissões de câmera precisam de conferência real.
