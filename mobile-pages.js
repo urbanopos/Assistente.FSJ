@@ -68,7 +68,7 @@
    if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;if(state.answer){state.flow.append(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}continue;}
    if(state.answer&&state.answer.parentElement!==state.footer)state.footer.insertBefore(state.answer,state.next);
    if(!state.root.getClientRects().length)continue;
-   for(const table of state.flow.querySelectorAll('table')){const headers=[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim());for(const row of table.querySelectorAll('tbody tr'))[...row.cells].forEach((cell,i)=>{if(headers[i])cell.dataset.label=headers[i];});}
+   for(const table of state.flow.querySelectorAll('table')){const grid=[];[...table.querySelectorAll('thead tr')].forEach((row,r)=>{grid[r]||=[];let c=0;for(const th of row.cells){while(grid[r][c]!==undefined)c++;for(let y=r;y<r+th.rowSpan;y++){grid[y]||=[];for(let x=c;x<c+th.colSpan;x++)grid[y][x]=th.textContent.trim();}c+=th.colSpan;}});const headers=Array.from({length:Math.max(0,...grid.map(row=>row.length))},(_,c)=>[...new Set(grid.map(row=>row[c]).filter(Boolean))].join(' / '));for(const row of table.querySelectorAll('tbody tr'))[...row.cells].forEach((cell,i)=>{if(headers[i])cell.dataset.label=headers[i];});}
    const visual=window.visualViewport;
    const top=Math.max(0,state.root.getBoundingClientRect().top-(visual?.offsetTop||0));
    const available=Math.max(96,(visual?.height||innerHeight)-top-8);

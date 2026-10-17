@@ -1,0 +1,10 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{JSDOM}=require('jsdom');
+const html=fs.readFileSync('index.html','utf8');
+test('Tempo agrupa R/I e E/C entre Retorno e Concluída',()=>{const d=new JSDOM(html),rows=d.window.document.querySelector('#demandaTabela thead').rows;assert.deepEqual([...rows[0].cells].map(x=>x.textContent),['Tarefa','Responsáveis','Tipo','Situação','Retorno','Tempo','Concluída por','Ações']);assert.equal(rows[0].cells[5].colSpan,2);assert.deepEqual([...rows[1].cells].map(x=>x.textContent),['R/I (h)','E/C (h)']);d.window.close();});
+test('intervalos usam registro, primeiro inicio e conclusao da execucao do funcionario',()=>{
+ const d=new JSDOM('',{runScripts:'outside-only'}),w=d.window;w.fsjDia=()=> '2026-10-17';
+ w.eval(html.slice(html.indexOf('let fsjExecucoes=[];'),html.indexOf('function fsjExecucaoTexto'))+'\nwindow.setExecucoes=value=>fsjTemposExecucoes=value;');
+ assert.equal(w.fsjIntervaloHoras('2026-10-17T07:00:00Z','2026-10-17T08:30:00Z'),'1,50 h');for(const args of [[null,null],['invalid','2026-10-17'],['2026-10-18','2026-10-17']])assert.equal(w.fsjIntervaloHoras(...args),'—');
+ w.eval(`setExecucoes([{tarefa_id:'t',pessoa_id:'p',dia:'2026-10-16',iniciado_em:'2026-10-16T08:00:00Z',concluido_em:'2026-10-16T10:00:00Z'},{tarefa_id:'t',pessoa_id:'p',dia:'2026-10-17',iniciado_em:'2026-10-17T08:30:00Z',retomado_em:'2026-10-17T09:45:00Z',concluido_em:'2026-10-17T10:00:00Z'},{tarefa_id:'t',pessoa_id:'other',dia:'2026-10-17',iniciado_em:'2026-10-17T09:00:00Z'}]);`);
+ const t={id:'t',created:'2026-10-17T07:00:00Z'};assert.deepEqual(JSON.parse(JSON.stringify(w.fsjTempoTarefa(t,'p'))),{ri:'1,50 h',ec:'1,50 h'});assert.equal(w.fsjTempoTarefa(t,'other').ec,'—');assert.equal(w.fsjTempoTarefa({...t,daily:true},'missing').ri,'—');w.setExecucoes([{tarefa_id:'t',pessoa_id:'p',dia:'2026-10-16',iniciado_em:'2026-10-16T08:00:00Z',concluido_em:'2026-10-16T10:00:00Z'}]);assert.equal(w.fsjTempoTarefa({...t,daily:true},'p').ec,'—');d.window.close();
+});

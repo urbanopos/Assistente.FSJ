@@ -1,5 +1,8 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{JSDOM}=require('jsdom');
 const script=fs.readFileSync('mobile-pages.js','utf8');
+test('cabecalhos Tempo R/I e E/C preservam rotulos no celular',async()=>{
+ const f=fixture('<main><table><thead><tr><th rowspan="2">Retorno</th><th colspan="2">Tempo</th><th rowspan="2">Concluída por</th></tr><tr><th>R/I (h)</th><th>E/C (h)</th></tr></thead><tbody><tr><td>—</td><td>1,50 h</td><td>2,00 h</td><td>Regina</td></tr></tbody></table></main>');await f.wait();assert.deepEqual([...f.w.document.querySelectorAll('tbody td')].map(c=>c.dataset.label),['Retorno','Tempo / R/I (h)','Tempo / E/C (h)','Concluída por']);f.dom.window.close();
+});
 function fixture(html,manager=false,url='https://test.invalid/'){
  const dom=new JSDOM(html,{runScripts:'outside-only',pretendToBeVisual:true,url}),w=dom.window;let mobile=true,frames=0;
  w.matchMedia=()=>({get matches(){return mobile},addEventListener(){}});
