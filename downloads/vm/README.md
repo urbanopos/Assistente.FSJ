@@ -51,3 +51,8 @@ Todos os cadastros ativos do principal entram automaticamente na lista de convid
 ## Release 6 / Android 8
 
 O principal oferece Vídeos e chamadas na tela inicial e na navegação. No Android, o link fsjreservavm://videos abre o aplicativo exclusivo da VM; se indisponível, oferece o APK8. No desktop, abre HTTPS da VM. O APK8 registra somente essa rota e continua aceitando rede exclusivamente do endereço fixo da VM, com a CA embarcada. A chave de assinatura é preservada. Um aplicativo Android comum exige confirmação para instalar a atualização nativa; as atualizações da interface da VM continuam automáticas. Abertura do link no aparelho e permissões de câmera precisam de conferência real.
+
+
+## Release 7 / Android 8
+
+Selecionar um vídeo da biblioteca inicia sua reprodução no mesmo player do institucional. Ao terminar, limpa a seleção e restaura o institucional, iniciando sua reprodução se o aparelho permitir. Se não existir institucional cadastrado, volta ao quadro vazio correspondente. O término do próprio institucional não entra em repetição. Atualização de interface sem reiniciar servidor nem alterar arquivos de vídeo.
