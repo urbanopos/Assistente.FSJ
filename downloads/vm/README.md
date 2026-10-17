@@ -36,3 +36,8 @@ Inclui telas fixas, RESERVA sem R, formulário de acesso salvo com Android Keyst
 ## Release 3 / Android 7
 
 Listas de vídeos e participantes preservam seleção durante consultas de fundo. Atualizações de opções aguardam o fechamento da lista. Pessoas do cadastro principal aparecem uma vez por identificador; contas locais sem vínculo permanecem em Contas para vinculação explícita. Nenhum registro é apagado. Interface atualizada sem reiniciar o servidor; APK permanece versão 7.
+
+
+## Release 4 / Android 7
+
+Preparação de chamadas salva por usuário neste aparelho, com título e convidados. Atualizar participantes preserva a seleção; avisos de chamada aparecem no rodapé visível. A edição do título não é interrompida pelo redimensionamento do teclado. Ao entrar, a navegação exibe o quadro da chamada. Somente contas ativas explicitamente vinculadas podem ser convidadas quando existe cadastro principal. O teste usa câmera simulada; mídia entre aparelhos requer verificação na rede local.
