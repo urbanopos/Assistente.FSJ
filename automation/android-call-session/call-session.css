@@ -1,0 +1,1 @@
+#content{overflow:auto}#callPanel{overflow:auto!important}#callCreate,#callSaveDraft,#callRefresh,#callInvites,#callRecord,#callStopRecord,#recordSave,#fsjCallSoundBar{display:none!important}#callLive:not([hidden]){max-height:none;overflow:visible}#callPanel:not(:has(#callLive:not([hidden])))>p{display:none}#callStatus,#status{font-size:14px;overflow:visible;max-height:none}
