@@ -1,0 +1,6 @@
+/* FSJ_SAVED_LOGIN_ROW_V14 */
+#login #fsjLoginActions{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:nowrap;margin:7px 0}
+#login #fsjLoginActions #rememberLoginLabel{display:flex!important;align-items:center;gap:4px;margin:0;font-size:12px;line-height:1.15;flex:1;min-width:0}
+#login #fsjLoginActions #rememberLogin{width:18px;height:18px;margin:0;padding:0;flex:none}
+#login #fsjLoginActions button{display:block;width:auto;white-space:nowrap;font-size:12px;min-height:36px;padding:7px 8px;margin:0;flex:none}
+@media(max-width:340px){#login #fsjLoginActions{gap:3px}#login #fsjLoginActions button{font-size:11px;padding:6px}#login #fsjLoginActions #rememberLoginLabel{font-size:11px}}
