@@ -10,7 +10,7 @@ function scan(){
   const box=document.createElement('div');box.className='fsj-selection-list';
   const select=document.createElement('select');select.setAttribute('aria-label','Selecione um item para adicionar');
   const selected=document.createElement('div');selected.className='row';selected.style.marginTop='6px';
-  box.append(select,selected);source.before(box);source.style.display='none';
+  box.append(select,selected);source.before(box);source.hidden=true;source.style.setProperty('display','none','important');
   const state={box,select,selected,signature:null};managed.set(source,state);
   select.onchange=()=>{const input=[...source.querySelectorAll('input[type=checkbox]')][Number(select.value)];if(!input||input.disabled)return;input.checked=true;input.dispatchEvent(new Event('change',{bubbles:true}));refresh(source,state);};
  }
