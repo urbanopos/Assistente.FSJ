@@ -1,0 +1,16 @@
+const {JSDOM}=require('jsdom'),fs=require('fs'),assert=require('node:assert/strict');
+const d=new JSDOM('<div id="reservaInstallShare"></div>',{url:'https://urbanopos.github.io/Assistente.FSJ/',runScripts:'outside-only'});
+d.window.HTMLDialogElement.prototype.showModal=function(){this.open=true};
+d.window.HTMLDialogElement.prototype.close=function(){this.open=false};
+d.window.eval(fs.readFileSync(process.argv[2]||'app-maintenance.js','utf8'));
+const w=d.window;w.localStorage.setItem('session','preserved');w.abrirVideosReserva();
+assert(w.document.querySelector('dialog').open);
+assert([...w.document.querySelectorAll('dialog a')].some(a=>a.href==='https://192.168.1.114:8443/'));
+assert([...w.document.querySelectorAll('dialog a')].some(a=>a.href==='https://168.196.84.147/'));
+assert.equal(w.document.querySelectorAll('#reservaInstallShare button').length,2);
+w.fsjOpenMaintenance('web');w.fsjCanUpdate=()=>false;
+w.document.querySelector('[data-actions] button').click();
+assert(w.document.querySelector('[data-message]').textContent.includes('Conclua'));
+assert.equal(w.localStorage.getItem('session'),'preserved');
+w.document.querySelector('[data-close]').click();assert(!w.document.querySelector('dialog').open);
+console.log('PASS: videos, rotas local/publica, reparo protegido, fechamento e sessao preservada');
