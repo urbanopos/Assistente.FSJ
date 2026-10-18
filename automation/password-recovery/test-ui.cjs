@@ -1,0 +1,20 @@
+const {JSDOM}=require('jsdom');
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const dom=new JSDOM('<section id="login"><form id="loginForm"><input id="name" value="regina"><input id="password" type="password"><button>Entrar</button></form></section><section id="androidDownload"></section><p id="status"></p><select id="accountSelect"><option value="regina">Regina</option></select><p id="accountDetails"></p>',{runScripts:'outside-only',url:'https://192.168.1.114:8443/'});
+const w=dom.window,calls=[];
+w.AbortSignal.timeout=()=>undefined;
+w.fetch=async(url,options)=>{calls.push([url,JSON.parse(options.body)]);return {ok:true,json:async()=>url.endsWith('/request')?{request:'test-ticket',message:'Codigo solicitado; 5 minutos.'}:{ok:true,message:'Senha alterada.'}};};
+w.prompt=()=> '81900000001';w.confirm=()=>true;w.alert=()=>{};
+w.eval(fs.readFileSync(__dirname+'/recovery-ui.js','utf8'));
+const el=id=>w.document.getElementById(id);
+(async()=>{
+ el('fsjForgotPassword').click();assert(el('login').hidden);assert(!el('fsjRecovery').hidden);assert.equal(el('fsjRecoveryName').value,'regina');
+ await el('fsjRecoveryRequest').onsubmit({preventDefault(){},target:el('fsjRecoveryRequest')});
+ assert(!el('fsjRecoveryReset').hidden);assert.equal(calls[0][1].name,'regina');
+ el('fsjRecoveryPassword').value='NovaSenha1234';el('fsjRecoveryConfirmation').value='NovaSenha1234';el('fsjRecoveryCode').value='123456';
+ el('fsjRecoveryShow').click();assert.equal(el('fsjRecoveryPassword').type,'text');el('fsjRecoveryShow').click();assert.equal(el('fsjRecoveryPassword').type,'password');
+ await el('fsjRecoveryReset').onsubmit({preventDefault(){},target:el('fsjRecoveryReset')});
+ assert.equal(calls[1][1].request,'test-ticket');assert.equal(calls[1][1].code,'123456');assert(el('fsjRecovery').hidden);assert(!el('login').hidden);assert.equal(el('fsjRecoveryPassword').value,'');assert.equal(el('status').textContent,'Senha alterada.');
+ console.log('PASS: navegacao, solicitar codigo, mostrar senha, redefinir, limpar campos.');w.close();
+})().catch(error=>{console.error(error);process.exitCode=1;});
