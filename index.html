@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261018-fluxo-proprietario-01">
+<meta name="fsj-build" content="20261018-controles-visiveis-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -68,7 +68,7 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
  #demandaTabela #taskRows>tr>td:first-child::before{content:none}
  #demandaTabela .fsj-task-number{display:block;width:100%;text-align:left;padding:10px 12px;font-weight:800}
 }
-</style><link rel="stylesheet" href="./mobile-pages.css?v=20261017-cabecalho-compacto"></head><body>
+</style><link rel="stylesheet" href="./mobile-pages.css?v=20261018-controles-visiveis"></head><body>
 <header><img class="fsj-logo" src="fsj-logotipo.webp" alt="Fazenda São José — Sistema de Gestão"><div class="header-info"><div id="ownerAccount">Proprietário: Urbano</div><div id="ultimaAtualizacao">Verificando versão e dados atuais...</div><div>Armazenagem central</div></div><button type="button" class="danger" onclick="sairGestor()" style="margin-left:auto;flex-shrink:0;font-weight:700;min-height:44px" aria-label="Sair e desligar Brisa">Sair</button></header>
 <nav class="topnav"><div class="inner"><button class="active" onclick="navTo('dashboard',this)">Início</button><button onclick="navTo('cadPessoas',this)">Pessoas</button><button onclick="navTo('folgasGestor',this)">Folgas e feriados</button><button onclick="navTo('cadGrupos',this)">Grupos</button><button onclick="navTo('novaTarefa',this)">Tarefas</button><button onclick="navTo('demandas',this)">Demandas</button><button onclick="navTo('whatsapp',this)">WhatsApp</button><button type="button" onclick="abrirVideosReserva()">Vídeos e chamadas</button><button onclick="navTo('relatorios',this)">Relatórios</button><button onclick="navTo('seguranca',this)">Armazenagem</button></div></nav>
 <main><div class="card" id="reservaInstallShare"><h2>Enviar link de instalação pelo WhatsApp</h2><div class="row"><a class="primary" data-fsj-share="vm" style="display:inline-block;background:#176341;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:600" href="https://wa.me/?text=Instale%20o%20Assistente%20FSJ.VM.%20Abra%20o%20link%20e%20siga%20as%20instru%C3%A7%C3%B5es%20para%20o%20seu%20aparelho%3A%0Ahttps%3A%2F%2Furbanopos.github.io%2FAssistente.FSJ%2Finstalar-fsj-vm.html" target="_blank" rel="noopener noreferrer">Assistente FSJ.VM</a><a class="primary" data-fsj-share="web" style="display:inline-block;background:#176341;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:600" href="https://wa.me/?text=Instale%20o%20Assistente%20FSJ.Web.%20Abra%20o%20link%20e%20siga%20as%20instru%C3%A7%C3%B5es%20para%20o%20seu%20aparelho%3A%0Ahttps%3A%2F%2Furbanopos.github.io%2FAssistente.FSJ%2Finstalar-fsj-web.html" target="_blank" rel="noopener noreferrer">Assistente FSJ.Web</a></div><p class="muted">Escolha o aplicativo, selecione o destinatário no WhatsApp e confirme o envio. A página recebida orienta a instalação. As atualizações são automáticas, com confirmação do Android quando necessária.</p></div><div id="loginBox" class="card"><h2>Acesso do Proprietário</h2><div class="muted">Após o primeiro acesso, sua sessão fica salva neste navegador. Funcionários respondem pelo formulário recebido no WhatsApp.</div><label>E-mail do Proprietário</label><input id="loginEmail" type="text" value="urbanopos@yahoo.com.br" readonly><div class="row"><button class="primary" onclick="enviarAcesso()">Enviar link de acesso por e-mail</button><button onclick="sairGestor()">Sair</button></div><div id="loginStatus" class="muted">Verificando acesso...</div><button type="button" onclick="carregarArmazenagem()">Tentar novamente</button></div><section id="gestor" class="hidden">
@@ -105,7 +105,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261018-fluxo-proprietario-01';
+const FSJ_BUILD='20261018-controles-visiveis-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
