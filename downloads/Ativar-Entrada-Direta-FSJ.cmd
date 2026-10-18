@@ -3,9 +3,7 @@ setlocal
 set "FSJ_INSTALLER=%~f0"
 echo Assistente FSJ Reserva - Ativar entrada direta
 echo Informe a senha do Debian quando solicitada.
-powershell.exe -NoProfile -Command "$c=[IO.File]::ReadAllText($env:FSJ_INSTALLER);try{& ([scriptblock]::Create(($c -split '#FSJ_PAYLOAD
-?
-',2)[1]))}catch{Write-Host $_;exit 1}"
+powershell.exe -NoProfile -Command "$c=[IO.File]::ReadAllText($env:FSJ_INSTALLER);try{& ([scriptblock]::Create(($c -split ('#FSJ_'+'PAYLOAD'),2)[1]))}catch{Write-Host $_;exit 1}"
 pause
 exit /b
 #FSJ_PAYLOAD
