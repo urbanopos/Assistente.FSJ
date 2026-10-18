@@ -17,6 +17,21 @@ Deno.serve(async req=>{
   if(String(user.email||'').toLowerCase()!=='urbanopos@yahoo.com.br')return reply({erro:'Acesso exclusivo do proprietário'},403);
   const data=await req.json();
   const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date());
+  if(data.action==='abrir-tarefa'){
+   const pid=String(data.pessoa_id||''),tid=String(data.tarefa_id||''),day=today();
+   if(!pid||pid.length>100||!tid||tid.length>100)return reply({erro:'Selecione a tarefa e seu responsável.'},400);
+   const [people,assignments,tasks]=await Promise.all([
+    db('pessoas?id=eq.'+encodeURIComponent(pid)+'&ativo=eq.true&select=id'),
+    db('tarefa_responsaveis?pessoa_id=eq.'+encodeURIComponent(pid)+'&tarefa_id=eq.'+encodeURIComponent(tid)+'&select=tarefa_id'),
+    db('tarefas?id=eq.'+encodeURIComponent(tid)+'&select=id,situacao,diaria')
+   ]);
+   if(!people.length||!assignments.length||!tasks.length)return reply({erro:'Tarefa ou responsável indisponível.'},404);
+   const path='links_resposta?pessoa_id=eq.'+encodeURIComponent(pid)+'&tarefa_id=eq.'+encodeURIComponent(tid)+'&dia=eq.'+day+'&select=token,expira_em,respondido_em&order=expira_em.desc&limit=1';
+   let links=await db(path);
+   if(!links.length){await db('links_resposta',{token:crypto.randomUUID(),pessoa_id:pid,tarefa_id:tid,dia:day,expira_em:new Date(new Date(day+'T03:00:00Z').getTime()+86400000).toISOString()});links=await db(path);}
+   if(!links[0]||new Date(links[0].expira_em)<=new Date())return reply({erro:'Link do dia expirado.'},409);
+   return reply({token:links[0].token,concluida:tasks[0].situacao==='Concluída'&&!tasks[0].diaria});
+  }
   if(data.action==='individuais-status'){
    const rows=await db('fsj_envios_manuais?dia=eq.'+today()+'&select=pessoa_id,dia,confirmado_em,whatsapp_message_id,resultado_reconciliacao');
    return reply({dia:today(),envios:rows});

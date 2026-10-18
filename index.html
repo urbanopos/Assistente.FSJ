@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261018-lista-proprietario-01">
+<meta name="fsj-build" content="20261018-fluxo-proprietario-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -105,7 +105,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261018-lista-proprietario-01';
+const FSJ_BUILD='20261018-fluxo-proprietario-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -573,8 +573,20 @@ function fsjCompareTaskPriority(a,b){const rank=t=>({urgente:0,prioritaria:1}[t.
 function fsjTaskClass(priority,status,running=false){if(priority==='urgente')return 'fsj-priority fsj-urgent';if(priority==='prioritaria')return 'fsj-priority';if(status!=='Concluída'&&(running||status==='Em andamento'))return 'fsj-task-running';if(status==='Pendente')return 'fsj-task-pending';return 'fsj-task-open';}
 function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.classList.remove('fsj-task-open','fsj-task-running','fsj-task-pending','fsj-priority','fsj-urgent');el.classList.add(...fsjTaskClass(priority,status,running).split(' '));}
 function fsjTaskName(t,employee=false){const running=fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento');return '<button type="button" class="fsj-task-number '+fsjTaskClass(t.priority,t.status,running)+'" data-fsj-task-id="'+esc(t.id)+'"><strong>'+esc(fsjTaskNumber(t.code))+'</strong></button>';}
-document.addEventListener('click',event=>{const button=event.target.closest('[data-fsj-task-id]');if(!button)return;const t=S.tasks.find(t=>t.id===button.dataset.fsjTaskId);if(t)fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id));});
+document.addEventListener('click',event=>{const button=event.target.closest('[data-fsj-task-id]');if(!button)return;const t=S.tasks.find(t=>t.id===button.dataset.fsjTaskId);if(t){if(matchMedia('(max-width:700px)').matches&&button.closest('#taskRows'))fsjOpenEmployeeTask(t,button);else fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id));}});
 function mostrarDemandasSituacao(situacao){document.getElementById('demandaSituacao').value=situacao;renderDemandas()}
+async function fsjOpenEmployeeTask(t,button){
+ const pid=document.getElementById('demandaFuncionario').value;
+ if(!ids(t).includes(pid)){alert('Selecione o responsável desta tarefa.');return;}
+ button.disabled=true;
+ try{
+  const result=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'abrir-tarefa',pessoa_id:pid,tarefa_id:t.id})});
+  if(!/^[0-9a-f-]{36}$/i.test(result.token||''))throw Error('Link de tarefa inválido.');
+  const params=new URLSearchParams({token:result.token,gestor:'1'});
+  if(result.concluida)params.set('concluida','1');
+  location.assign('./responder.html#'+params.toString());
+ }catch{alert('Não foi possível abrir a tarefa. Confira sua conexão e o acesso de proprietário.');button.disabled=false;}
+}
 function renderDemandas(){const situacaoSelecionada=document.getElementById('demandaSituacao').value;for(const [id,situacao] of [['demandaAbertasBtn','Em aberto'],['demandaConcluidasBtn','Concluída']]){const btn=document.getElementById(id);btn.classList.toggle('primary',situacaoSelecionada===situacao);btn.setAttribute('aria-pressed',String(situacaoSelecionada===situacao));}let responsavel=document.getElementById('demandaFuncionario').value;document.getElementById('demandaTabela').hidden=!responsavel;document.getElementById('demandaEscolha').hidden=!!responsavel;if(!responsavel){taskRows.innerHTML='';document.getElementById('demandaContagem').textContent='';return;}let tarefas=filtrarDemandas(S.tasks,responsavel).filter(t=>!document.getElementById('demandaSituacao').value||t.status===document.getElementById('demandaSituacao').value).sort(fsjCompareTaskPriority);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+(t.daily?'Diária':'Pontual')+(t.groupId?' / Grupo':'')+'</td><td>'+esc(t.status)+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions"><button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button></div></td></tr>').join('');document.getElementById('demandaContagem').textContent=tarefas.length+' de '+S.tasks.length+' tarefa(s)';if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="9" class="muted">'+'Nenhuma tarefa encontrada com estes filtros.'+'</td></tr>'}
 function limparFiltroDemandas(){document.getElementById('demandaFuncionario').value='';document.getElementById('demandaSituacao').value='Em aberto';renderDemandas()}
 function render(){renderPersonSelect();if(typeof fsjRenderFolgas==='function')fsjRenderFolgas();rollover();renderPersonRecord();groupChecks.innerHTML=S.people.map(p=>'<label><input class="gm" type="checkbox" value="'+p.id+'"> '+esc(p.nick||p.name)+'</label>').join('');groups.innerHTML=S.groups.map(g=>'<div style="padding:6px"><b>'+esc(g.name)+'</b>: '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+' <button onclick="editGroup(\''+g.id+'\')">Editar</button> <button onclick="delGroup(\''+g.id+'\')">Excluir</button></div>').join('');fsjRenderWhatsAppSelect();atualizarFiltroDemandas();renderDemandas();ko.textContent=S.tasks.filter(t=>t.status==='Em aberto').length;kc.textContent=S.tasks.filter(t=>t.status==='Concluída').length;kp.textContent=S.tasks.filter(t=>t.status==='Pendente').length;kq.textContent=S.tasks.filter(t=>t.status==='Aguardando gestão').length;renderTargets();dailyMessage();save();fsjRenderIndividualList();fsjRenderEnviosFuncionario();fsjAttachPersonSendButtons();if(typeof fsjSupervisorBadges==='function')fsjSupervisorBadges();if(typeof fsjOwnerBadges==='function')fsjOwnerBadges()}
