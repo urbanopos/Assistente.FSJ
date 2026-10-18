@@ -21,6 +21,33 @@ Deno.serve(async req=>{
   else data=await req.json();
   const token=String(data.token||'');
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token))return reply({erro:'Link inválido'},400);
+  if(data.action==='reminders'){
+   const boards=await db('quadros_do_dia?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
+   const links=boards.length?[]:await db('links_resposta?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
+   const identity=boards[0]||links[0];
+   if(!identity||new Date(identity.expira_em)<new Date())return reply({erro:'Link expirado ou inválido'},404);
+   const person=encodeURIComponent(identity.pessoa_id);
+   const [people,assignments,executions]=await Promise.all([
+    db('pessoas?id=eq.'+person+'&select=ativo'),
+    db('tarefa_responsaveis?pessoa_id=eq.'+person+'&select=tarefa_id'),
+    db('execucoes_tarefa?pessoa_id=eq.'+person+'&select=tarefa_id,dia,estado,iniciado_em,retomado_em,concluido_em&order=iniciado_em.desc')
+   ]);
+   if(!people[0]?.ativo)return reply({erro:'Pessoa indisponível'},404);
+   const ids=assignments.map((a:any)=>a.tarefa_id);
+   const tasks=ids.length?await db('tarefas?id=in.('+ids.map(encodeURIComponent).join(',')+')&select=id,diaria,situacao'):[];
+   const now=Date.now(),hour=3600000;
+   const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now));
+   const start=new Date(today+'T07:00:00-03:00').getTime();
+   const answers=ids.length?await db('retornos?tarefa_id=in.('+ids.map(encodeURIComponent).join(',')+')&tipo=eq.sim&select=tarefa_id,criado_em'):[];
+   const done=(t:any,day:string)=>t.situacao==='Concluída'&&!t.diaria||answers.some((a:any)=>a.tarefa_id===t.id&&(!t.diaria||new Date(a.criado_em).toLocaleDateString('en-CA',{timeZone:'America/Recife'})===day));
+   const pending=tasks.filter((t:any)=>!done(t,today));
+   const latest=Math.max(start,...executions.flatMap((e:any)=>[Date.parse(e.iniciado_em)||0,Date.parse(e.retomado_em)||0]));
+   const stale=executions.filter((e:any)=>e.estado!=='concluida'&&!e.concluido_em&&tasks.some((t:any)=>t.id===e.tarefa_id&&!done(t,e.dia))&&now-Date.parse(e.iniciado_em)>=48*hour);
+   const alerts=[];
+   if(pending.length&&now-latest>=2*hour)alerts.push({kind:'start',anchor:latest,message:'NÃO ESQUEÇA REGISTRAR O INÍCIO DE TAREFA'});
+   if(stale.length)alerts.push({kind:'finish',anchor:Math.min(...stale.map((e:any)=>Date.parse(e.iniciado_em)))+48*hour,message:'VERIFIQUE SE HÁ TAREFAS CONCLUÍDAS E NÃO INFORMADAS'});
+   return reply({pessoa_id:identity.pessoa_id,alerts});
+  }
   if(data.action==='board'){
    const boards=await db('quadros_do_dia?token=eq.'+token+'&select=*');
    const board=boards?.[0];
