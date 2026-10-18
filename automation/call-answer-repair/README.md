@@ -7,3 +7,7 @@ Libera captura se a admissao ou a preparacao da interface falhar; cancela admiss
 A consulta do app.js enviado nao confirmou uso automatico de fsjCallsPause. A causa definitiva da queda no Android ainda depende de teste real e da mensagem produzida pela versao corrigida.
 
 Validacao: node --test automation/call-answer-repair/test.cjs; sintaxe dos dois arquivos finais verificada; instalacao e idempotencia exercitadas em pasta temporaria. Instalar na VM com python3 install.py, sem chamadas em andamento. Nao reinicia o servidor: arquivos estaticos recebem nova identificacao web e sao carregados ao abrir/retomar a interface quando seguro. Reverter: restaurar os tres arquivos do backup indicado pelo instalador.
+
+## Reparo complementar: aceite unico
+
+install-v2.py aceita tanto os arquivos originais quanto a saida do primeiro instalador. Impede o dialogo de convite durante uma entrada em andamento e em sessao restrita aberta pelo Android, preservando o aceite no navegador comum. O botao de reproduzir audio permanece disponivel quando o navegador ainda rejeita play(). Isso nao comprova, sozinho, que a causa da falta de audio nos aparelhos foi resolvida. Testes de captura, dialogo e instalacao passaram; requer teste real com audio nos dois sentidos.
