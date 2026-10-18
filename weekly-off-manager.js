@@ -3,15 +3,40 @@ const folgaHoje=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'})
 function folgaSomar(day,n){const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
 function folgaSegunda(day){const d=new Date(day+'T12:00:00Z');return folgaSomar(day,-((d.getUTCDay()+6)%7))}
 async function folgasPost(body){const tok=await recuperarAcessoGestor();if(!tok)throw Error('Entre como gestor');const r=await fetch(folgasEndpoint,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify(body),signal:AbortSignal.timeout(30000)});const d=await r.json();if(!r.ok)throw Error(d.erro||'Falha na agenda');return d;}
-let folgasAgenda=null;
+let folgasAgenda=null,folgasConsulta=0;
+let folgasCiclo=folgaSegunda(folgaHoje());
+const folgasReferenciaKey='fsj_folgas_semana_referencia';
+function folgasRestaurarReferencia(){
+ const input=document.getElementById('folgasSemana');
+ try{const saved=JSON.parse(localStorage.getItem(folgasReferenciaKey)||'null');
+  if(saved?.ciclo===folgasCiclo&&/^\d{4}-\d{2}-\d{2}$/.test(saved.semana||''))input.value=saved.semana;
+ }catch{}
+ if(!input.value)input.value=folgasCiclo;
+}
+function folgasVirarSemana(){
+ const cycle=folgaSegunda(folgaHoje());if(cycle===folgasCiclo)return false;
+ folgasCiclo=cycle;folgasConsulta++;folgasAgenda=null;
+ document.getElementById('folgasSemana').value=cycle;
+ document.getElementById('folgasPessoaDados').hidden=true;
+ try{localStorage.setItem(folgasReferenciaKey,JSON.stringify({ciclo:cycle,semana:cycle}));}catch{}
+ return true;
+}
+
 async function carregarFolgas(){
+ folgasVirarSemana();
+ const request=++folgasConsulta;
  const status=document.getElementById('folgasStatus');status.textContent='Consultando calendário...';
  const input=document.getElementById('folgasSemana');if(!input.value)input.value=folgaSegunda(folgaHoje());
  try{
-  folgasAgenda=await folgasPost({action:'manager-calendar',semana:input.value});input.value=folgasAgenda.semana;
+  const agenda=await folgasPost({action:'manager-calendar',semana:input.value});
+  if(request!==folgasConsulta)return;
+  if(folgasVirarSemana()){carregarFolgas();return;}
+  folgasAgenda=agenda;input.value=folgasAgenda.semana;
+  try{localStorage.setItem(folgasReferenciaKey,JSON.stringify({ciclo:folgasCiclo,semana:folgasAgenda.semana}));}catch{}
+
   fsjRenderFolgas();
   status.textContent='Atualizado em '+new Date().toLocaleString('pt-BR',{timeZone:'America/Recife'});
- }catch(e){folgasAgenda=null;document.getElementById('folgasPessoaDados').hidden=true;status.textContent='Não foi possível atualizar: '+e.message;document.getElementById('folgasResumo').textContent=status.textContent;document.getElementById('folgasLista').replaceChildren();document.getElementById('feriadosLista').replaceChildren();const holidaySection=document.getElementById('feriadosSection');if(holidaySection)holidaySection.hidden=true;}
+ }catch(e){if(request!==folgasConsulta)return;folgasAgenda=null;document.getElementById('folgasPessoaDados').hidden=true;status.textContent='Não foi possível atualizar: '+e.message;document.getElementById('folgasResumo').textContent=status.textContent;document.getElementById('folgasLista').replaceChildren();document.getElementById('feriadosLista').replaceChildren();const holidaySection=document.getElementById('feriadosSection');if(holidaySection)holidaySection.hidden=true;}
 }
 
 function fsjRenderFolgas(){
@@ -65,3 +90,17 @@ document.getElementById('feriadosLista').addEventListener('change',async e=>{
 });
 
 document.getElementById('feriadosLista').addEventListener('click',async e=>{const b=e.target.closest('[data-compensacao-pessoa]');if(!b)return;const input=[...document.querySelectorAll('[data-compensacao-input]')].find(x=>x.dataset.compensacaoInput===b.dataset.compensacaoPessoa+'|'+b.dataset.compensacaoFeriado);if(!input?.value)return alert('Escolha a data da folga compensatória.');b.disabled=true;try{await folgasPost({action:'compensation-set',pessoa_id:b.dataset.compensacaoPessoa,feriado:b.dataset.compensacaoFeriado,folga:input.value});await carregarFolgas();}catch(err){alert(err.message);}finally{b.disabled=false;}});
+
+// Revalida ao retomar e na meia-noite local, sem depender de recarregar o aplicativo.
+folgasRestaurarReferencia();
+let folgasViradaTimer;
+function folgasAgendarVirada(){
+ clearTimeout(folgasViradaTimer);
+ const next=folgaSomar(folgaSegunda(folgaHoje()),7);
+ const delay=Math.max(1,new Date(next+'T00:00:00-03:00').getTime()-Date.now());
+ folgasViradaTimer=setTimeout(()=>{if(folgasVirarSemana())carregarFolgas();folgasAgendarVirada();},delay);
+}
+function folgasRetomar(){if(document.hidden)return;if(folgasVirarSemana())carregarFolgas();folgasAgendarVirada();}
+document.addEventListener('visibilitychange',folgasRetomar);
+window.addEventListener('pageshow',folgasRetomar);
+folgasAgendarVirada();
