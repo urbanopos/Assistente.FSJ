@@ -14,6 +14,9 @@ def prepare(root):
  server=server.replace(marker,"# FSJ_LIBRARY_THEMES_V1\nfrom library_videos import install as fsj_library_install, metadata as fsj_library_metadata\nfsj_library_install(globals())\n\n"+marker)
  anchor="const q=new URLSearchParams({title,institutional:institutional?'1':'0',allowed});"
  if app.count(anchor)!=1:raise ValueError('Envio de arquivo diferente do esperado.')
+ focus="document.activeElement===$('callNewTitle')"
+ if app.count(focus)!=1:raise ValueError('Proteção de edição diferente da esperada.')
+ app=app.replace(focus,"document.activeElement?.matches('input,textarea,[contenteditable=true]')")
  app=app.replace(anchor,"const q=new URLSearchParams({title,institutional:institutional?'1':'0',allowed,theme:institutional?'':($('libraryTheme')?.value||''),description:institutional?'':($('libraryDescription')?.value||'')});")
  csp="frame-ancestors 'none'; base-uri 'none'"
  if csp not in server:raise ValueError('Política de reprodução não localizada.')
