@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261019-filtro-unico-03">
+<meta name="fsj-build" content="20261019-sugestoes-04">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -111,7 +111,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261019-filtro-unico-03';
+const FSJ_BUILD='20261019-sugestoes-04';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -736,4 +736,4 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 <script src="./mobile-pages.js?v=20261017-tempo"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261018-1"></script>
-<script src="./app-maintenance.js?v=20261019-2"></script></body></html>
+<script src="./app-maintenance.js?v=20261019-2"></script><script src="./task-suggestions.js?v=20261019-1"></script></body></html>
