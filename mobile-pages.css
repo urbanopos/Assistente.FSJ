@@ -136,3 +136,27 @@
  body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-doubt-action{grid-column:2}
  body.fsj-reader:has(#taskAnswer) .fsj-page-flow #taskAnswer{display:none!important}
 }
+
+/* Resposta mobile: rodape em uma unica linha, sem colunas implicitas. */
+@media(max-width:700px){
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation{
+ display:grid!important;grid-template-columns:minmax(0,1.35fr) 44px 48px 44px minmax(0,1.35fr)!important;
+ grid-template-rows:44px!important;gap:4px!important;min-height:58px!important;height:58px!important;
+ padding:4px 6px calc(4px + env(safe-area-inset-bottom))!important;align-items:center!important;
+ }
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-task-answer{display:none!important}
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-doubt-action{grid-column:1!important;grid-row:1!important}
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-nav-arrow:first-child{grid-column:2!important;grid-row:1!important;justify-self:center!important}
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-page-count{grid-column:3!important;grid-row:1!important;justify-self:center!important;white-space:nowrap;font-size:13px}
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-nav-arrow:nth-of-type(2){grid-column:4!important;grid-row:1!important;justify-self:center!important}
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-suggestion-action{grid-column:5!important;grid-row:1!important}
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-footer-action{font-size:11px!important;line-height:1.1!important;padding:3px!important;height:42px!important;min-height:42px!important}
+ body.fsj-reader:has(#taskAnswer) #taskAnswer{display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;gap:10px!important;padding:6px 10px!important}
+ body.fsj-reader:has(#taskAnswer) #taskAnswer[hidden]{display:none!important}
+ body.fsj-reader:has(#taskAnswer) #taskAnswer strong{order:0!important;font-size:14px}
+ body.fsj-reader:has(#taskAnswer) #taskAnswer .fsj-answer-buttons{order:1!important}
+ #fsjSuggestionDialog>header{display:none!important}
+ #fsjSuggestionDialog #fsjSuggestionIdentity{display:none!important}
+ #fsjSuggestionDialog section{padding:12px!important}
+ #fsjSuggestionDialog #fsjSuggestionHeading{margin:0 0 10px!important;font-size:21px!important}
+}
