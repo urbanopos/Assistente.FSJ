@@ -47,7 +47,7 @@
   state.status.textContent=(state.index+1)+' / '+state.count;
   state.status.setAttribute('aria-label','Página '+(state.index+1)+' de '+state.count);
   const showAnswer=!!state.answer&&!!window.fsjTaskAnswerVisible?.()&&state.index===state.count-1;
-  if(state.answer)state.answer.hidden=!showAnswer;state.status.hidden=showAnswer;
+  if(state.answer)state.answer.hidden=!showAnswer;state.status.hidden=false;
   state.footer.hidden=state.count<2&&!canGoBack()&&!showAnswer&&!state.footer.querySelector('.brisa-fab');
  }
  function turn(state,index){
