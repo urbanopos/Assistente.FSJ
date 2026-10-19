@@ -2,7 +2,7 @@
 ;(()=>{
 const el=id=>document.getElementById(id),mode=document.body.dataset.fsjApp,device=el('guideDevice');let step=0;
 const vm='https://168.196.84.147/',web='https://urbanopos.github.io/Assistente.FSJ/';
-const link=(url,label)=>'<a class="action" href="'+url+'" target="_blank" rel="noopener noreferrer">'+label+'</a>';
+const link=(url,label)=>url===vm?'<a class="action" href="'+url+'" target="FSJ_VIDEOS_CHAMADAS">'+label+'</a>':'<a class="action" href="'+url+'" target="_blank" rel="noopener noreferrer">'+label+'</a>';
 const apk='<a class="action" href="./downloads/FSJ-Reserva-VM.apk" download="Assistente-FSJ-VM.apk">Baixar Assistente FSJ.VM para Android</a>';
 function steps(){
  if(new URL(location.href).searchParams.get('manutencao')==='1'){
