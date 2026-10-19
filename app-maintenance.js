@@ -12,11 +12,11 @@ function show(mode='vm'){
  const vm=mode==='vm';panel.querySelector('h2').textContent=vm?'Assistente FSJ.VM — vídeos e chamadas':'Assistente FSJ.Web';
  panel.querySelector('[data-message]').textContent=vm?'Escolha o acesso. Se a internet pública falhar e você estiver na rede da fazenda, tente a rede local. O servidor precisa estar ligado.':'A atualização é automática. Use o reparo se alguma tela não estiver funcionando.';
  const actions=panel.querySelector('[data-actions]');actions.replaceChildren();
- function link(label,url){const a=document.createElement('a');a.textContent=label;a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.style.cssText='display:block;padding:12px;background:#176341;color:white;border-radius:8px;text-decoration:none';actions.append(a);}
+ function link(label,url){const a=document.createElement('a');a.textContent=label;a.href=url;a.target=url.startsWith('https://168.196.84.147/')||url.startsWith('https://192.168.1.114:8443/')?'FSJ_VIDEOS_CHAMADAS':'FSJ_MANUTENCAO';a.style.cssText='display:block;padding:12px;background:#176341;color:white;border-radius:8px;text-decoration:none';actions.append(a);}
  if(vm){
  link('Abrir pela internet pública','https://168.196.84.147/');
  link('Abrir pela rede local da fazenda','https://192.168.1.114:8443/');
- link('Reparar / atualizar aplicativo Android','./instalar-fsj-vm.html?manutencao=1');
+ link('Atualizar aplicativo existente','./instalar-fsj-vm.html?manutencao=1');
  const note=document.createElement('p');note.textContent='Se os dois endereços falharem, o servidor ou a conexão precisam de manutenção. Reinstalar o aplicativo não corrige uma falha de rede. No Android, atualize sem desinstalar para preservar o acesso.';actions.append(note);
  }else{
  const b=document.createElement('button');b.type='button';b.textContent='Reparar telas do FSJ.Web';b.onclick=()=>{
@@ -29,7 +29,7 @@ function show(mode='vm'){
  if(!panel.open)panel.showModal();
 }
 window.fsjOpenMaintenance=show;
-window.abrirVideosReserva=()=>show('vm');
+// Vídeos e chamadas preserva a abertura direta e a referência da aba em index.html.
 const section=document.getElementById('reservaInstallShare');
 if(section){const row=document.createElement('div');row.className='row';for(const [mode,name] of [['web','FSJ.Web'],['vm','FSJ.VM']]){const b=document.createElement('button');b.type='button';b.textContent='Abrir / reparar '+name;b.onclick=()=>show(mode);row.append(b);}section.append(row);}
 })();
