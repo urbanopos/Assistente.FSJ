@@ -1,0 +1,5 @@
+Retorno ao padrao web sem PDF. Executar Instalar-FSJ-Retorno-Web.ps1 no computador executor.
+Nova rodada em 19/10/2026, incluindo participantes novos habilitados. Envios confirmados nao se repetem na reexecucao. Resultado incerto fica bloqueado para conferência.
+Ate cinco tentativas de apagamento; falha nao impede novo envio e gera tarefa urgente ao proprietario.
+Envio com imagem de cabecalho e links web. Se a imagem nao puder ser preparada, envia texto com os mesmos links. Nenhum PDF e enviado.
+Depois do sucesso integral, modulos PDF sao retirados da pasta ativa e preservados no backup. A rotina diaria usa o mesmo transporte web.
