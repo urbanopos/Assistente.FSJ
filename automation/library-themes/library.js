@@ -1,6 +1,11 @@
 /* FSJ_LIBRARY_THEMES_V1 */
 ;(()=>{
  const form=$('uploadForm'),stage=$('videoStage');if(!form||!stage)return;
+ // Reserva uma faixa de rodapé, sem cobrir a imagem nem os controles do vídeo.
+ const style=document.createElement('style');style.textContent='#videoStage{padding-bottom:56px;box-sizing:border-box}#videoFullscreen{top:auto!important;right:12px!important;bottom:6px!important;min-width:128px!important;min-height:44px!important;width:auto!important;height:auto!important;padding:10px 16px!important;border-radius:12px!important;border:1px solid #ffffff80!important;background:#174b3b!important;color:#fff!important;font:600 15px system-ui!important;box-shadow:0 2px 6px #0004}#videoFullscreen:focus-visible{outline:3px solid #f4ca64;outline-offset:2px}#libraryVideoDescription{line-height:1.5}#libraryYoutube,#libraryTheme,#libraryDescription{box-sizing:border-box;width:100%}';document.head.append(style);
+ const fullButton=$('videoFullscreen');
+ function buttonLabel(){fullButton.textContent=stage.classList.contains('video-expanded')?'Fechar tela cheia':'Ampliar vídeo';}
+ new MutationObserver(buttonLabel).observe(stage,{attributes:true,attributeFilter:['class']});buttonLabel();
  const fields=document.createElement('div');
  fields.innerHTML='<label>Tema<input id="libraryTheme" maxlength="80" list="libraryThemes" placeholder="Aves, gado, plantio, manutenção…"></label><datalist id="libraryThemes"></datalist><label>Breve descrição<textarea id="libraryDescription" maxlength="500" rows="3"></textarea></label><label>Link do YouTube<input id="libraryYoutube" type="url" placeholder="https://www.youtube.com/watch?v=…"></label><p>Escolha um arquivo ou informe um link do YouTube.</p>';
  $('title').closest('label').after(fields);$('file').required=false;
