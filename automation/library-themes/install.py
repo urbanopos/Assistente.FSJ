@@ -15,7 +15,7 @@ def prepare(root):
  anchor="const q=new URLSearchParams({title,institutional:institutional?'1':'0',allowed});"
  if app.count(anchor)!=1:raise ValueError('Envio de arquivo diferente do esperado.')
  focus="document.activeElement===$('callNewTitle')"
- if app.count(focus)!=1:raise ValueError('Proteção de edição diferente da esperada.')
+ if app.count(focus) not in (1,2):raise ValueError('Proteção de edição diferente da esperada.')
  app=app.replace(focus,"document.activeElement?.matches('input,textarea,[contenteditable=true]')")
  app=app.replace(anchor,"const q=new URLSearchParams({title,institutional:institutional?'1':'0',allowed,theme:institutional?'':($('libraryTheme')?.value||''),description:institutional?'':($('libraryDescription')?.value||'')});")
  csp="frame-ancestors 'none'; base-uri 'none'"
