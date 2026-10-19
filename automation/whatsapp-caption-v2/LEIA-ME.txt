@@ -1,0 +1,15 @@
+FSJ - PDF unico com links diretos na legenda (modelo permanente)
+
+O instalador aplica o novo formato ao modulo card-bundle.mjs usado pelo wa.mjs instalado no Windows. Ativa enabled=true e daily=true: o formato deixa de depender da lista de datas de teste. Preserva a rotina agendada FSJ-Tarefas-07h, a validacao do servidor e o caminho convencional de reserva existente no wa.mjs.
+
+Formato: um unico PDF por participante, com os links tambem na legenda do WhatsApp. CONSULTAR TAREFAS abre quadro.html. TAREFAS DE TERCEIROS so e incluido se o servidor devolver um link de supervisao autorizado. O PDF mantem os botoes. Links na legenda evitam passar pelo leitor PDF; nao removem barras do navegador. Nome e tokens sao individuais. O PDF nao opera tarefas: as paginas web fazem a operacao.
+
+Execucao: extraia este ZIP em Downloads\FSJ-Legenda-Web e execute Instalar-FSJ-Legenda-Web.ps1 no computador vinculado ao WhatsApp. Necessita das variaveis FSJ_STATE_DIR e SUPABASE_SERVICE_ROLE_KEY ja configuradas; nunca publique seus valores. O instalador salva backup dos arquivos substituidos e nao altera senhas ou a vinculação.
+
+A substituicao emergencial deste pacote vale somente em 19/10/2026. Ela cria uma rodada independente da substituicao anterior, registrada em FSJ_STATE_DIR\substituicao-legenda-web-v2-2026-10-19.json, e tenta substituir novamente o envio para todos os cadastros atuais ativos e habilitados, conforme folgas, feriados e autorizacoes. Apos completar uma pessoa, nao repete seu envio nesta rodada. Em caso de resultado incerto, bloqueia repeticao. Em caso de registro pendente apos envio conhecido, recupera o registro sem reenviar. Utiliza o mesmo bloqueio routine.lock da rotina diaria.
+
+Antes de enviar tenta revogar os IDs conhecidos de hoje. Se algum apagamento nao for confirmado, bloqueia aquele participante e mostra o motivo. Nao considera cancelamento textual como comprovacao de exclusao. O caso de Urbano, que ja apresentava apagamento sem confirmacao, pode continuar pendente; nao sera omitido do resultado nem considerado sucesso.
+
+Nao executar junto com o pacote anterior, nem apagar os diarios ou bloqueios para forcar envio. Nao executar run.mjs como substituto deste instalador. O pacote emergencial nao substitui a rotina agendada nos dias seguintes; apenas instala o formato que ela usara.
+
+Testes: sintaxe Node; legenda com links individuais e supervisao condicional; destinos externos rejeitados; tamanho de legenda; um unico PDF e um recibo; modo diario em datas futuras; simulacoes de novo integrante, substituicao de envio existente, repeticao, falha de revogacao e diario incerto. Nao houve envio real pelo ambiente de desenvolvimento. A execucao e a entrega precisam ser confirmadas pelo retorno do Windows e pelo aparelho destinatario.
