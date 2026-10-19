@@ -1,6 +1,6 @@
 function fsjCompareTaskPriority(a,b){const rank=t=>({urgente:0,prioritaria:1}[t.priority||t.prioridade]??2);return rank(a)-rank(b);}
-function fsjTaskClass(priority,status,running=false){if(priority==='urgente')return 'fsj-priority fsj-urgent';if(priority==='prioritaria')return 'fsj-priority';if(status!=='Concluída'&&(running||status==='Em andamento'))return 'fsj-task-running';if(status==='Pendente')return 'fsj-task-pending';return 'fsj-task-open';}
-function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.classList.remove('fsj-task-open','fsj-task-running','fsj-task-pending','fsj-priority','fsj-urgent');el.classList.add(...fsjTaskClass(priority,status,running).split(' '));}
+function fsjTaskClass(priority,status,running=false){if(status==='Concluída')return 'fsj-task-completed';if(priority==='urgente')return 'fsj-priority fsj-urgent';if(priority==='prioritaria')return 'fsj-priority';if(status!=='Concluída'&&(running||status==='Em andamento'))return 'fsj-task-running';if(status==='Pendente')return 'fsj-task-pending';return 'fsj-task-open';}
+function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.classList.remove('fsj-task-completed','fsj-task-open','fsj-task-running','fsj-task-pending','fsj-priority','fsj-urgent');el.classList.add(...fsjTaskClass(priority,status,running).split(' '));}
 const supervisorToken=new URLSearchParams(location.hash.slice(1)).get('token')||'';
 const supervisorApi='https://awrxnzbfrsaurzpunuko.supabase.co/functions/v1/supervisao';
 const supervisorStatus=document.getElementById('status'),supervisorTasks=document.getElementById('demandas');
