@@ -11,3 +11,9 @@ Validacao: node --test automation/call-answer-repair/test.cjs; sintaxe dos dois 
 ## Reparo complementar: aceite unico
 
 install-v2.py aceita tanto os arquivos originais quanto a saida do primeiro instalador. Impede o dialogo de convite durante uma entrada em andamento e em sessao restrita aberta pelo Android, preservando o aceite no navegador comum. O botao de reproduzir audio permanece disponivel quando o navegador ainda rejeita play(). Isso nao comprova, sozinho, que a causa da falta de audio nos aparelhos foi resolvida. Testes de captura, dialogo e instalacao passaram; requer teste real com audio nos dois sentidos.
+
+## Acesso automatico (v3)
+
+`install-v3.py` acrescenta ao app Android a entrada com as credenciais que o usuario ja salvou. Uma sessao existente e preservada; Sair explicitamente continua removendo o acesso salvo. Na pagina restrita da chamada, o identificador para atendimento vem de `call_room`, confirmado em `/api/me`, sem consumir o evento nativo de aceite. A sessao e renovada durante a chamada e revogada ao final, sem apagar o vinculo do aparelho. Falhas temporarias de rede nao fecham imediatamente a atividade. As permissoes de microfone/camera do Android continuam obrigatorias.
+
+O instalador valida as versoes previamente conferidas e cria backup antes da troca atomica. Publicar este arquivo nao o executa na VM. Testes: `node automation/call-answer-repair/test-v3.cjs`, testes v1/v2, teste de login automatico e contrato de atualizacao. Atendimento e audio nos aparelhos ainda exigem teste real.
