@@ -1,0 +1,17 @@
+FSJ - continuidade do envio e tarefa de limpeza manual
+
+Instale sobre o modelo PDF com legenda web ja aplicado no executor Windows. Execute Instalar-FSJ-Continuidade.ps1. O instalador preserva backups de core.mjs, wa.mjs, routine.mjs e dos auxiliares que substituir. Nao altera senha, vinculo WhatsApp ou agendamento.
+
+Regra aprovada em 19/10/2026: ate cinco tentativas de apagar cada mensagem anterior conhecida. Se nao confirmar, o envio do dia continua com aviso e a rotina cria uma tarefa urgente para o proprietario registrado em fsj_titularidade conferir e apagar manualmente. Uma pendencia por pessoa e data, sem duplicacao; ela so sera encerrada pelo procedimento normal de tarefas do gestor. Se o WhatsApp nao permitir apagar para todos, a tarefa orienta registrar essa limitacao.
+
+Envio: ate cinco preparacoes/tentativas de cartao em falha comprovadamente anterior a transmissao; depois, ate cinco da mensagem convencional de reserva. Encerra ao obter identificador. Se uma transmissao tiver resultado incerto, bloqueia repeticao e reserva automatica ate conferir a conversa: falha de conexao nao prova ausencia de envio. Se o ID for conhecido, recupera o registro sem enviar novamente.
+
+O resultado e o historico de apagamento continuam registrados como falha/sem confirmacao, nunca falsamente como sucesso. Se o registro da tarefa urgente estiver temporariamente indisponivel, a pendencia fica no diario local e o envio prossegue; a rotina tenta novamente registrar apos o envio ou na retomada desse estado.
+
+A tarefa de limpeza identifica participante, data, IDs conhecidos e motivo. O endpoint de criacao e exclusivo do executor service_role: anonimos e participantes nao podem criar tarefas por essa funcao.
+
+O instalador retoma apenas os pendentes da rodada pdf-legenda-web-v2 de 19/10/2026. Os oito envios ja concluidos nao sao repetidos. O caso ainda pendente de Urbano pode assim ser atendido mesmo quando o WhatsApp recusar o apagamento anterior, gerando a tarefa correspondente. A retomada emergencial e limitada ao dia 19/10; a politica instalada no core/transporte vale para os proximos disparos das 7h.
+
+Pacote anterior continua salvo para recuperacao, mas nao deve ser executado depois deste para evitar restaurar a politica que bloqueava no apagamento. Nao apague diarios ou routine.lock para forcar envios. Nunca publique FSJ_STATE_DIR nem a chave de servico.
+
+Testes: banco transacional com rollback para criacao e deduplicacao da tarefa urgente; permissoes da funcao; simulacoes de cinco apagamentos frustrados seguidos de envio, cinco PDF e cinco reservas em falha conhecida, nenhum reenvio incerto, recibo recuperado, transporte PDF com legenda e reserva textual. O novo instalador ainda precisa ser executado no Windows; testes nao equivalem a entrega real.
