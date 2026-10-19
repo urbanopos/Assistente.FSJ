@@ -5,6 +5,16 @@
  const endpoint='https://awrxnzbfrsaurzpunuko.supabase.co/functions/v1/sugestoes-tarefas';
  const dialog=document.createElement('dialog');dialog.id='fsjSuggestionDialog';dialog.style.cssText='box-sizing:border-box;width:min(620px,100vw);max-height:100dvh;border:0;border-radius:12px;padding:0;background:#f4f6ed;color:#213d2d;font:16px system-ui';
  dialog.innerHTML='<header style="display:flex;align-items:center;gap:10px;background:#174b3b;color:white;padding:10px 16px"><img src="./icon-512.png" width="36" height="36" alt=""><strong>Fazenda São José</strong></header><section style="padding:14px 18px"><h2 id="fsjSuggestionHeading"></h2><p id="fsjSuggestionIdentity"></p><label for="fsjSuggestionChoice">Sugestões registradas</label><select id="fsjSuggestionChoice" style="width:100%;font:inherit;padding:8px"><option value="">Nova sugestão</option></select><label for="fsjSuggestionText" style="display:block;margin-top:10px">Descreva sua sugestão</label><textarea id="fsjSuggestionText" maxlength="2000" rows="3" style="box-sizing:border-box;width:100%;font:inherit;padding:10px;border:1px solid #bccfc0;border-radius:8px"></textarea><button type="button" id="fsjSuggestionVoice">🎙 Capturar voz</button><button type="button" id="fsjSuggestionSend">Enviar sugestão</button><p id="fsjSuggestionState" role="status"></p><div id="fsjSuggestionReview" hidden><label for="fsjSuggestionNotes">Justificativa / observações do gestor</label><textarea id="fsjSuggestionNotes" rows="3" maxlength="2000" style="box-sizing:border-box;width:100%;font:inherit;padding:10px;border:1px solid #bccfc0;border-radius:8px"></textarea><div id="fsjSuggestionDecision"><label><input type="radio" name="fsjSuggestionDecision" value="aprovada"> APROVAR</label> <label><input type="radio" name="fsjSuggestionDecision" value="rejeitada"> REJEITAR</label><button type="button" id="fsjSuggestionSave">Enviar decisão</button></div></div><p id="fsjSuggestionFeedback" role="status" aria-live="polite"></p><button type="button" id="fsjSuggestionBack" aria-label="Voltar">←</button></section>';
+ 
+ // Categorias opcionais, sem alterar o contrato da API nem o fluxo de aprovação.
+ const category=document.createElement('div');category.id='fsjSuggestionCategories';
+ category.innerHTML='<p style="margin:10px 0 5px"><strong>Categoria (opcional)</strong></p><div style="display:flex;flex-wrap:wrap;gap:5px"></div>';
+ for(const name of ['Manutenção','Limpeza','Plantio','Irrigação','Animais','Infraestrutura','Outros']){
+  const b=document.createElement('button');b.type='button';b.textContent=name;b.className='fsj-category';b.style.cssText='background:#eaf4e9;color:#213d2d;border:1px solid #bed5c2;font-size:14px;padding:7px 10px';
+  b.onclick=()=>{for(const x of category.querySelectorAll('button')){x.dataset.active='';x.style.background='#eaf4e9'}b.dataset.active='1';b.style.background='#b6dfc3';};
+  category.querySelector('div').append(b);
+ }
+ dialog.querySelector('#fsjSuggestionVoice').before(category);
  document.body.append(dialog);
  let rows=[],selected='',requestId=null,working=false,recognition=null,kind='sugestao';
  const labels={aguardando:'Aguardando análise do gestor',aprovada:'APROVADA',rejeitada:'REJEITADA'};
@@ -15,6 +25,7 @@
  function feedback(text){el('fsjSuggestionFeedback').textContent=text;}
  function show(){
   const item=rows.find(s=>s.id===selected),locked=!!item;
+  category.hidden=manager||locked||kind==='duvida';
   el('fsjSuggestionText').readOnly=manager||locked;
   el('fsjSuggestionText').value=item?.descricao||'';
   el('fsjSuggestionVoice').hidden=manager||locked;el('fsjSuggestionSend').hidden=manager||locked;
@@ -51,7 +62,7 @@
   recognition=new R();recognition.lang='pt-BR';recognition.onresult=e=>{el('fsjSuggestionText').value=(el('fsjSuggestionText').value+' '+e.results[0][0].transcript).trim().slice(0,2000);feedback('Texto preenchido. Confira antes de enviar.');};recognition.onerror=()=>feedback('Não foi possível capturar voz. Você pode digitar.');recognition.onend=()=>{el('fsjSuggestionVoice').disabled=false;};el('fsjSuggestionVoice').disabled=true;try{recognition.start();feedback('Ouvindo…');}catch{el('fsjSuggestionVoice').disabled=false;feedback('Microfone indisponível.');}
  };
  el('fsjSuggestionSend').onclick=async()=>{
-  if(working||selected)return;const descricao=el('fsjSuggestionText').value.trim();if(!descricao)return feedback('Descreva sua sugestão antes de enviar.');
+  if(working||selected)return;const texto=el('fsjSuggestionText').value.trim();const categoria=category.querySelector('button[data-active="1"]')?.textContent;const descricao=categoria&&kind==='sugestao'?'['+categoria+'] '+texto:texto;if(!texto)return feedback('Descreva sua sugestão antes de enviar.');
   requestId ||= crypto.randomUUID();working=true;el('fsjSuggestionSend').disabled=true;
   try{const data=await call({action:kind==='duvida'?'enviar_duvida':'enviar',descricao,requisicao:requestId});selected=data.sugestao.id;await refresh();el('fsjSuggestionChoice').value=selected;show();feedback('Registro enviado. Foi criada uma tarefa urgente para o gestor.');requestId=null;}catch(e){feedback(e.message+' Sua descrição foi preservada.');}finally{working=false;el('fsjSuggestionSend').disabled=false;}
  };
