@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {deletionAttempts,sendAttempts,cycleWithFollowup} from './fsj-delivery-policy.mjs';
+const wait=async()=>{};
+let deletes=0,delivered=0,reports=0,records=[];const state={};
+await cycleWithFollowup({state,previous:{messageId:'old',messageIds:['old']},personId:'person',day:'2026-10-19',url:'https://example.test',persist:async()=>{},record:async(t,d)=>records.push({t,d}),revoke:async()=>{deletes++;return{status:'falhou',reason:'Nao permite apagar'}},send:async(text,onPart)=>{assert(text.startsWith('Aviso:'));delivered++;const r={messageId:'new',ack:1};await onPart(r);return r;},report:async()=>{reports++;return {tarefa_id:'task-owner'}},wait});
+assert.equal(deletes,5);assert.equal(delivered,1);assert.equal(reports,1);assert.equal(state.phase,'sent');assert.equal(state.deletionTask.tarefa_id,'task-owner');
+await cycleWithFollowup({state,personId:'person',day:'2026-10-19',persist:async()=>{},record:async()=>{},send:async()=>{throw Error('duplicou')},report:async()=>{throw Error('duplicou tarefa')}});assert.equal(reports,1);
+let pdf=0,text=0;const result=await sendAttempts({card:async()=>{pdf++;throw Object.assign(Error('Preparacao falhou'),{notTransmitted:true})},conventional:async()=>{text++;if(text<5)throw Object.assign(Error('Nao transmitido'),{notTransmitted:true});return{messageId:'fallback'}},wait});assert.equal(pdf,5);assert.equal(text,5);assert.equal(result.messageId,'fallback');
+pdf=0;text=0;await assert.rejects(()=>sendAttempts({card:async()=>{pdf++;throw Error('Resultado incerto')},conventional:async()=>{text++;return{messageId:'bad'}},wait}));assert.equal(pdf,1);assert.equal(text,0);
+let attempts=0;await deletionAttempts({ids:['one'],state:{items:{one:{attempts:3,status:'falhou'}}},persist:async()=>{},wait,revoke:async()=>{attempts++;return{status:'falhou'}}});assert.equal(attempts,2);
+let successful=0;await sendAttempts({card:async()=>{successful++;return{messageId:'ok'}},conventional:async()=>{throw Error('Nao deve usar reserva')},wait});assert.equal(successful,1);
+let saved=0;const s2={};await cycleWithFollowup({state:s2,personId:'p',day:'2026-10-19',persist:async()=>{saved++},record:async()=>{},url:'x',send:async()=>{throw Object.assign(Error('Persistencia posterior falhou'),{deliveryResult:{messageId:'known'}})},wait});assert.equal(s2.messageId,'known');assert.equal(s2.phase,'sent');
+console.log('PASS: 5 apagamentos, envio apesar da falha, tarefa unica, 5 PDF + 5 reserva em falha conhecida, bloqueio de incerteza e recibo conhecido.');
