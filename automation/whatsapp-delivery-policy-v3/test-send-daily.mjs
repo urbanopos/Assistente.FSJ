@@ -9,7 +9,7 @@ const dir=await mkdtemp(join(tmpdir(),'fsj-send-'));try{
  const own='https://urbanopos.github.io/Assistente.FSJ/quadro.html#token=00000000-0000-4000-8000-000000000001';
  globalThis.failPrepare=false;globalThis.prepares=0;let sends=[];const client={sendMessage:async(c,p,o)=>{sends.push({p,o});return{id:{_serialized:'id-'+sends.length}}}};
  await sendDaily(client,'chat',own);assert.equal(sends.length,1);assert.equal(sends[0].p.mime,'application/pdf');assert(sends[0].o.caption.includes('CONSULTAR TAREFAS'));assert(!sends[0].o.caption.includes('TAREFAS DE TERCEIROS'));
- globalThis.failPrepare=true;globalThis.prepares=0;sends=[];await sendDaily(client,'chat',own);assert.equal(globalThis.prepares,5);assert.equal(sends.length,1);assert.equal(typeof sends[0].p,'string');assert(sends[0].p.includes(own));
+ globalThis.failPrepare=true;globalThis.prepares=0;sends=[];await sendDaily(client,'chat',own);assert.equal(globalThis.prepares,5);assert.equal(sends.length,1);assert.equal(typeof sends[0].p,'string');const link=new URL(sends[0].p.split('\n').find(x=>x.startsWith('https:')));assert.equal(link.pathname,'/Assistente.FSJ/quadro.html');assert.equal(link.hash,new URL(own).hash);
  globalThis.failPrepare=false;let uncertain=0;await assert.rejects(()=>sendDaily({sendMessage:async()=>{uncertain++;throw Error('conexao perdida durante envio')}},'chat',own));assert.equal(uncertain,1);
  let known;try{await sendDaily(client,'chat',own,async()=>{throw Error('gravacao local falhou')})}catch(e){known=e.deliveryResult}assert(known.messageId);
  console.log('PASS: transporte com legenda, 5 preparacoes PDF antes da reserva, envio incerto sem repeticao e ID preservado.');
