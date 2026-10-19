@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente Fazenda São José — Gestor Web v1.9</title>
-<meta name="fsj-build" content="20261019-periodicidade-01">
+<meta name="fsj-build" content="20261019-manutencao-02">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -96,7 +96,7 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 <div class="brisa-actions"><button id="brisaTalkBtn" class="primary" onclick="brisaEncerrarEscuta();brisaResposta.textContent='Microfone desligado. Toque no ícone redondo para conversar novamente.'" aria-pressed="false">Encerrar conversa</button><button id="brisaExpand" onclick="brisaExpandir()" aria-pressed="false">Ampliar</button><button onclick="fecharBrisa()">Minimizar</button></div>
 <label for="brisaPerguntaTexto">Ou escreva sua pergunta</label><div class="row"><input type="text" id="brisaPerguntaTexto" placeholder="Quais tarefas estão pendentes?" style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter'){event.preventDefault();brisaEnviarTexto()}"><button onclick="brisaEnviarTexto()">Consultar</button></div><label for="brisaVozEscolha">Voz da Brisa</label><select id="brisaVozEscolha" onchange="brisaSalvarVoz()"></select><label for="brisaRitmo">Ritmo da fala</label><select id="brisaRitmo" onchange="brisaSalvarRitmo(this.value)"><option value="0.85">Mais pausado</option><option value="1">Natural</option><option value="1.15">Mais rápido</option></select><button type="button" onclick="brisaApresentar()">Ouvir a voz escolhida</button><p id="brisaVoiceInfo" class="muted" role="status">Carregando a voz feminina fixa da Brisa…</p><details class="card"><summary>Conversar com o ChatGPT da minha assinatura</summary><p class="muted">1. Prepare e copie o contexto. 2. Abra o ChatGPT e cole o texto; você também pode continuar a conversa por voz lá. 3. Copie a resposta do ChatGPT e cole abaixo para a Brisa falar. A transferência é manual e não usa API.</p><button type="button" onclick="brisaPrepararChatGPT()">Preparar contexto da fazenda</button><label for="brisaContextoChatGPT">Confira o texto que será compartilhado</label><textarea id="brisaContextoChatGPT" rows="8" style="min-height:180px" placeholder="O contexto aparecerá aqui para sua revisão."></textarea><div class="row"><button type="button" onclick="brisaCopiarChatGPT()">Copiar contexto</button><a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Abrir ChatGPT</a></div><label for="brisaRetornoChatGPT">Cole a resposta do ChatGPT</label><textarea id="brisaRetornoChatGPT" placeholder="Cole aqui somente a resposta que deseja ouvir."></textarea><div class="row"><button type="button" onclick="brisaFalarRetornoChatGPT()">Brisa, leia a resposta</button><button type="button" onclick="brisaParar();brisaRetomarEscuta()">Parar áudio</button></div><p id="brisaTransferenciaStatus" class="muted" role="status" aria-live="polite"></p></details><p id="brisaResposta" class="msg" style="margin-top:14px">Ao abrir Brisa, a escuta começa e retoma após cada resposta. Minimizar mantém a escuta. Use Encerrar conversa para desligar. A escuta pausa ao sair desta aba e retoma ao voltar. Versão gratuita: consultas locais às tarefas, responsáveis e pendências, sem API de IA paga.</p>
 </div></aside>
-<script src="./task-list-ui.js?v=20261018-fechar-dialogo"></script><script src="./task-detail-manager.js?v=20261017-aviso-detalhe"></script>
+<script src="./task-list-ui.js?v=20261019-negrito"></script><script src="./task-detail-manager.js?v=20261017-aviso-detalhe"></script>
 <script>
 let fsjPainelPronto=false;
 let fsjVideosWindow=null;
@@ -111,7 +111,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261019-periodicidade-01';
+const FSJ_BUILD='20261019-manutencao-02';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -736,4 +736,4 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 <script src="./mobile-pages.js?v=20261017-tempo"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261018-1"></script>
-<script src="./app-maintenance.js?v=20261018-1"></script></body></html>
+<script src="./app-maintenance.js?v=20261019-2"></script></body></html>
