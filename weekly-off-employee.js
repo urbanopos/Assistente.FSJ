@@ -3,7 +3,7 @@ let folgaBox=document.getElementById('folgaSemanal');
 if(!folgaBox){folgaBox=document.createElement('section');folgaBox.id='folgaSemanal';folgaBox.className='card';document.querySelector('main').prepend(folgaBox);}
 let folgaLiberada=false;
 function folgaGate(){
- folgaLiberada=!!folgaAgenda?.dia;
+ folgaLiberada=folgaAgenda?.exigir_folga_semanal===false||!!folgaAgenda?.dia;
  for(const id of ['taskAnswer','form']){const e=document.getElementById(id);if(e)e.inert=!folgaLiberada;}
  document.dispatchEvent(new CustomEvent('fsj:folga',{detail:{liberada:folgaLiberada}}));
 }
@@ -31,7 +31,7 @@ async function folgaRepetirAviso(){
  try{
   const agenda=await folgaPost({action:'calendar'});
   if(folgaBusy||folgaLiberada)return;
-  if(agenda.dia){folgaAgenda=agenda;renderFolga();return;}
+  if(agenda.dia||agenda.exigir_folga_semanal===false){folgaAgenda=agenda;renderFolga();return;}
   folgaAgenda=agenda;folgaMostrarAviso();
  }catch{/* Sem consulta confirmada, nao presumir pendencia. */}
 }
@@ -56,6 +56,8 @@ function renderFolga(){
  folgaGate();
  folgaMostrarAviso();
  folgaBox.replaceChildren();
+ folgaBox.hidden=folgaAgenda?.exigir_folga_semanal===false;
+ if(folgaBox.hidden)return;
  const title=document.createElement('h2');title.textContent=folgaAgenda.dia?'Folga semanal registrada':'Tarefa semanal: informe seu dia de folga';folgaBox.append(title);
  if(!folgaLiberada){const warning=document.createElement('p');warning.setAttribute('role','alert');warning.textContent='Registros de tarefas bloqueados. Escolha e confirme pelo menos um dia de folga da semana que se inicia na segunda-feira.';folgaBox.append(warning);const choose=document.createElement('button');choose.type='button';choose.textContent='Escolher dia de folga';choose.onclick=folgaAvisar;folgaBox.append(choose);}
  const note=document.createElement('p');note.textContent=folgaAgenda.bloqueada_gestor?'Data definida pelo gestor. Você pode consultar, mas não alterar.':'A semana de referência é apenas o período de contagem; não é uma folga registrada. Escolha e confirme um dia desta semana. O gestor poderá alterar a escolha. Não haverá envio diário de tarefas na data escolhida.';folgaBox.append(note);
@@ -80,7 +82,8 @@ function renderFolga(){
   try{folgaAgenda=await folgaPost({action:'choose',dia:day});folgaEditing=false;renderFolga();document.getElementById('folgaStatus').textContent='Folga salva: '+folgaLabel(folgaAgenda.dia)+'.';}catch(e){status.textContent=e.message;b.disabled=false;}finally{folgaBusy=false;}
  };folgaBox.append(b);}
 }
-async function carregarFolgaEmpregado(){if(!token||folgaBusy)return;try{folgaAgenda=await folgaPost({action:'calendar'});renderFolga();}catch(e){folgaAgenda=null;folgaGate();folgaBox.textContent='Registros bloqueados: não foi possível consultar a folga. '+e.message;const retry=document.createElement('button');retry.textContent='Consultar e escolher folga';retry.onclick=carregarFolgaEmpregado;folgaBox.append(retry);}}
+async function carregarFolgaEmpregado(){if(!token||folgaBusy)return;try{folgaAgenda=await folgaPost({action:'calendar'});renderFolga();}catch(e){folgaAgenda=null;folgaGate();folgaBox.hidden=false;folgaBox.textContent='Registros bloqueados: não foi possível consultar a folga. '+e.message;const retry=document.createElement('button');retry.textContent='Consultar e escolher folga';retry.onclick=carregarFolgaEmpregado;folgaBox.append(retry);}}
 carregarFolgaEmpregado();document.addEventListener('visibilitychange',()=>{if(!document.hidden)carregarFolgaEmpregado()});
 
 setInterval(()=>{if(!document.hidden&&!folgaBusy&&!folgaEditing&&!document.getElementById('folgaDia')?.value)carregarFolgaEmpregado()},60000);
+
