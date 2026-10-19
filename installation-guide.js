@@ -5,6 +5,14 @@ const vm='https://168.196.84.147/',web='https://urbanopos.github.io/Assistente.F
 const link=(url,label)=>'<a class="action" href="'+url+'" target="_blank" rel="noopener noreferrer">'+label+'</a>';
 const apk='<a class="action" href="./downloads/FSJ-Reserva-VM.apk" download="Assistente-FSJ-VM.apk">Baixar Assistente FSJ.VM para Android</a>';
 function steps(){
+ if(new URL(location.href).searchParams.get('manutencao')==='1'){
+  return [[mode==='web'?'Atualizar Assistente FSJ.Web':'Atualizar Assistente FSJ.VM',
+   '<p>Abra o aplicativo existente. As telas verificam atualizações ao abrir ou retomar, preservando seu acesso.</p>'+
+   '<a class="action" href="'+(mode==='web'?web:vm)+'" target="FSJ_'+(mode==='web'?'WEB':'VIDEOS_CHAMADAS')+'">Abrir aplicativo e verificar atualizações</a>'+
+   '<p>Na VM, use Verificar atualização dentro do aplicativo. Uma nova versão Android pede a confirmação de instalação do sistema.</p>'+
+   '<p>Este procedimento não baixa o instalador Windows. A primeira instalação continua disponível no guia de instalação.</p>']];
+ }
+
  if(mode==='web'){
   const instruction=device.value==='ios'?'Abra o aplicativo no Safari. Toque em Compartilhar, escolha Adicionar à Tela de Início e confirme Adicionar.':device.value==='android'?'Abra o aplicativo no Chrome. No menu ⋮, procure Instalar aplicativo ou Adicionar à tela inicial e confirme. O ícone será o da casinha.':'Abra o aplicativo no navegador. Use a opção Instalar aplicativo ou Criar atalho, quando disponível. Dê o nome Assistente FSJ.Web ao atalho.';
   return [
