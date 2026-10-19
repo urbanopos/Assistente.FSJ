@@ -79,6 +79,7 @@
   const button=document.createElement('button');button.type='button';button.textContent='Sugestão de tarefas';button.onclick=()=>{kind='sugestao';selected='';requestId=null;open();};button.style.cssText='display:block;margin:10px auto';el('taskAnswer').after(button);
   const doubt=document.createElement('button');doubt.type='button';doubt.textContent='Dúvidas sobre a tarefa';
   doubt.onclick=()=>{kind='duvida';selected='';requestId=null;open();};button.before(doubt);doubt.style.cssText='display:block;margin:10px auto';
+  const footer=document.querySelector('main .fsj-page-navigation');if(footer&&matchMedia('(max-width:700px)').matches){footer.append(button,doubt);button.style.cssText='';doubt.style.cssText='';button.classList.add('fsj-footer-action','fsj-suggestion-action');doubt.classList.add('fsj-footer-action','fsj-doubt-action');}
  }
  setInterval(()=>{if(dialog.open&&selected&&!working&&(!manager||rows.find(s=>s.id===selected)?.estado!=='aguardando'))refresh().catch(()=>{});},15000);
 })();
