@@ -99,7 +99,13 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 <script src="./task-list-ui.js?v=20261018-fechar-dialogo"></script><script src="./task-detail-manager.js?v=20261017-aviso-detalhe"></script>
 <script>
 let fsjPainelPronto=false;
-function abrirVideosReserva(){window.open('https://168.196.84.147/','_blank','noopener,noreferrer');}
+let fsjVideosWindow=null;
+function abrirVideosReserva(){
+ try{if(fsjVideosWindow&&!fsjVideosWindow.closed){fsjVideosWindow.focus();return;}}catch{}
+ fsjVideosWindow=window.open('https://168.196.84.147/','FSJ_VIDEOS_CHAMADAS');
+ if(fsjVideosWindow){try{fsjVideosWindow.opener=null;fsjVideosWindow.focus();}catch{}}
+ else alert('Permita a abertura da aba de Vídeos e chamadas neste navegador.');
+}
 async function copiarLinkReserva(){
  const link='https://168.196.84.147/',status=document.getElementById('reservaCopyStatus');
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
