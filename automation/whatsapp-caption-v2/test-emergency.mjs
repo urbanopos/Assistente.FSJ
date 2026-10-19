@@ -8,6 +8,7 @@ for(const scenario of ['existing','new','uncertain','delete-failure']){
  const dir=await mkdtemp(join(tmpdir(),'fsj-test-'));
  process.env.FSJ_STATE_DIR=dir;process.env.SUPABASE_SERVICE_ROLE_KEY='TEST';
  let sends=0,revokes=0,records=0;
+ await writeFile(join(dir,'substituicao-web-2026-10-19.json'),JSON.stringify({person:{phase:'done',result:{messageId:'v1-id'}}}));
  globalThis.fsjTest={connect:async()=>({getNumberId:async()=>({_serialized:'chat'}),sendMessage:async(_chat,media)=>{assert.equal(media.mime,'application/pdf');sends++;return {id:{_serialized:'new-id'}};},destroy:async()=>{}}),revoke:async()=>{revokes++;return {status:scenario==='delete-failure'?'falhou':'confirmado'};}};
  globalThis.fetch=async(url,opt={})=>{
   let value=null;const route=url.split('/rest/v1/')[1];
