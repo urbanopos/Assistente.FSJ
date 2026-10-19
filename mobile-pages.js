@@ -45,10 +45,10 @@
  function update(state){
   state.index=Math.max(0,Math.min(state.count-1,state.index));
   state.prev.disabled=state.index===0&&!canGoBack();state.next.disabled=state.index===state.count-1;
-  state.status.textContent=(state.index+1)+' / '+state.count;
+  state.status.textContent=location.pathname.endsWith('/responder.html')?'1 / 2':(state.index+1)+' / '+state.count;
   state.status.setAttribute('aria-label','Página '+(state.index+1)+' de '+state.count);
   const showAnswer=!!state.answer&&!!window.fsjTaskAnswerVisible?.()&&state.index===state.count-1;
-  if(state.answer)state.answer.hidden=!showAnswer;state.status.hidden=false;
+  if(state.answer){state.answer.hidden=!showAnswer; if(mobile.matches&&location.pathname.endsWith('/responder.html')){const card=state.flow.querySelector('#taskScreen');if(card&&state.answer.parentElement!==card)card.append(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}}state.status.hidden=false;
   state.footer.hidden=state.count<2&&!canGoBack()&&!showAnswer&&!state.footer.querySelector('.brisa-fab');
  }
  function turn(state,index){
@@ -71,7 +71,7 @@
   for(const state of states.values()){
    if(reset)state.index=0;
    if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;if(state.answer){state.flow.append(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}continue;}
-   if(state.answer&&state.answer.parentElement!==state.footer)state.footer.insertBefore(state.answer,state.next);
+   if(state.answer&&state.answer.parentElement!==state.flow.querySelector('#taskScreen')){const card=state.flow.querySelector('#taskScreen');if(card)card.append(state.answer);}
    if(!state.root.getClientRects().length)continue;
    for(const table of state.flow.querySelectorAll('table')){const grid=[];[...table.querySelectorAll('thead tr')].forEach((row,r)=>{grid[r]||=[];let c=0;for(const th of row.cells){while(grid[r][c]!==undefined)c++;for(let y=r;y<r+th.rowSpan;y++){grid[y]||=[];for(let x=c;x<c+th.colSpan;x++)grid[y][x]=th.textContent.trim();}c+=th.colSpan;}});const headers=Array.from({length:Math.max(0,...grid.map(row=>row.length))},(_,c)=>[...new Set(grid.map(row=>row[c]).filter(Boolean))].join(' / '));for(const row of table.querySelectorAll('tbody tr'))[...row.cells].forEach((cell,i)=>{if(headers[i])cell.dataset.label=headers[i];});}
    const visual=window.visualViewport;
