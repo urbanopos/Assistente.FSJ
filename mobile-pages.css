@@ -144,7 +144,7 @@
  grid-template-rows:44px!important;gap:4px!important;min-height:58px!important;height:58px!important;
  padding:4px 6px calc(4px + env(safe-area-inset-bottom))!important;align-items:center!important;
  }
- body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-task-answer{display:none!important}
+ body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-task-answer:not([hidden]){display:flex!important;grid-column:1/-1!important;grid-row:1!important}
  body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-doubt-action{grid-column:1!important;grid-row:1!important}
  body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-nav-arrow:first-child{grid-column:2!important;grid-row:1!important;justify-self:center!important}
  body.fsj-reader:has(#taskAnswer) .fsj-page-navigation>.fsj-page-count{grid-column:3!important;grid-row:1!important;justify-self:center!important;white-space:nowrap;font-size:13px}
