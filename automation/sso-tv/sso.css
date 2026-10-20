@@ -1,0 +1,5 @@
+/* FSJ_SSO_TV_V1 */
+html[data-fsj-sso] #login,html[data-fsj-sso] #request,html[data-fsj-sso] #androidDownload,html[data-fsj-sso] #logout{display:none!important}
+html[data-fsj-sso="pending"] #content,html[data-fsj-sso="pending"] #pageControls{display:none!important}
+#fsjSSONotice{padding:16px;font:15px Arial;color:#174b3b}
+#fsjSSONotice:empty{display:none}

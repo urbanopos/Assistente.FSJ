@@ -1,0 +1,22 @@
+const fs=require('fs'),assert=require('assert/strict'),{JSDOM}=require('jsdom');const folder=__dirname;
+const wait=()=>new Promise(resolve=>setTimeout(resolve,10));
+(async()=>{
+ const dom=new JSDOM('<div id="fsjVideoEstado"></div><p>autenticação única pendente</p><iframe id="fsjVideoFrame"></iframe>',{url:'https://urbanopos.github.io/Assistente.FSJ/',runScripts:'outside-only'}),w=dom.window;
+ const token='x.'+Buffer.from(JSON.stringify({exp:Date.now()/1000+3600})).toString('base64url')+'.x',sent=[];let exit=0;
+ w.eval(`let fsjPainelPronto=true;const FSJ_VIDEO_VM_URL='https://192.168.1.114/';function navTo(){};async function recuperarAcessoGestor(){return ${JSON.stringify(token)}}async function renovarSessao(){throw Error('Unexpected refresh')}function sairGestor(){window.exitCount=(window.exitCount||0)+1}`+fs.readFileSync(folder+'/web-bridge.js','utf8'));
+ w.abrirVideosReserva();const frame=w.document.getElementById('fsjVideoFrame');frame.contentWindow.postMessage=(...args)=>sent.push(args);const nonce='12345678-1234-1234-1234-123456789abc';
+ const event=(origin,source,data)=>w.dispatchEvent(new w.MessageEvent('message',{origin,source,data}));
+ event('https://evil.invalid',frame.contentWindow,{type:'fsj-sso-ready',nonce});event('https://192.168.1.114',w,{type:'fsj-sso-ready',nonce});await wait();assert.equal(sent.length,0);
+ event('https://192.168.1.114',frame.contentWindow,{type:'fsj-sso-ready',nonce});await wait();assert.equal(sent.length,1);assert.equal(sent[0][1],'https://192.168.1.114');assert.equal(sent[0][0].access_token,token);assert(!frame.src.includes(token));
+ event('https://192.168.1.114',frame.contentWindow,{type:'fsj-sso-ok',nonce});assert.equal(frame.dataset.ssoReady,'1');const old=frame.src;w.abrirVideosReserva();assert.equal(frame.src,old);
+ w.sairGestor();assert.equal(sent.at(-1)[0].type,'fsj-sso-logout');assert.equal(w.exitCount,1);w.close();
+ const child=new JSDOM('<main><div id="content"></div></main>',{url:'https://192.168.1.114/?fsj_aba=1',runScripts:'outside-only'}),c=child.window,back=[],requests=[];let finished=0,locked=0;
+ const parent={postMessage:(...args)=>back.push(args)};Object.defineProperty(c,'parent',{value:parent});c.crypto.randomUUID=()=>nonce;c.setInterval=()=>1;c.fsjSSOFinish=async()=>{finished++;};c.fsjSSOLock=()=>locked++;c.fetch=async(url,opts)=>{requests.push([url,opts]);return {ok:true,json:async()=>url==='/api/me'?{sso:true,role:'owner'}:{}};};
+ c.eval(fs.readFileSync(folder+'/sso-bridge.js','utf8'));await wait();assert(c.fsjSSOEmbedded);assert(back.some(x=>x[0].type==='fsj-sso-ready'));
+ const incoming=(origin,source,data)=>c.dispatchEvent(new c.MessageEvent('message',{origin,source,data}));
+ incoming('https://evil.invalid',parent,{type:'fsj-sso-token',nonce,access_token:token});await wait();assert.equal(requests.length,0);
+ incoming('https://urbanopos.github.io',parent,{type:'fsj-sso-token',nonce,access_token:token});await wait();assert.equal(finished,1);assert.equal(c.document.documentElement.dataset.fsjSso,'ready');
+ incoming('https://urbanopos.github.io',parent,{type:'fsj-sso-token',nonce,access_token:token});await wait();assert.equal(finished,1,'Renovação não reinicia o vídeo nem as chamadas');
+ incoming('https://urbanopos.github.io',parent,{type:'fsj-sso-logout',nonce});await wait();assert.equal(locked,1);assert(requests.some(x=>x[0]==='/api/sso/logout'));c.close();
+ console.log('PASS: origem, janela e nonce; token fora da URL; troca autenticada; renovação sem reiniciar módulo; saída coordenada.');
+})().catch(error=>{console.error(error);process.exitCode=1;});
