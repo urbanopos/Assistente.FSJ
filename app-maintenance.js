@@ -31,5 +31,5 @@ function show(mode='vm'){
 window.fsjOpenMaintenance=show;
 // Vídeos e chamadas preserva a abertura direta e a referência da aba em index.html.
 const section=document.getElementById('reservaInstallShare');
-if(section){const row=document.createElement('div');row.className='row';for(const [mode,name] of [['web','FSJ.Web'],['vm','FSJ.VM']]){const b=document.createElement('button');b.type='button';b.textContent='Abrir / reparar '+name;b.onclick=()=>show(mode);row.append(b);}section.append(row);}
+if(section){const row=section.querySelector('#fsjWebHomeActions')||section.querySelector('.row');if(row){const b=document.createElement('button');b.type='button';b.className='primary';b.textContent='Abrir / reparar FSJ.Web';b.onclick=()=>show('web');row.append(b);}}
 })();
