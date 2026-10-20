@@ -562,6 +562,7 @@ async function fsjEnviarIndividual(pid,button,status,fallback){
   const d=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'individual',pessoa_id:pid})});
   if(d.confirmado){fsjManualVersion++;fsjManualStates.set(pid,{pessoa_id:pid,dia:d.dia,confirmado_em:d.confirmado_em});return;}
   if(d.ja_registrado&&!confirm('Já existe envio automático registrado hoje para esta pessoa. Confira a conversa para evitar duplicidade. Deseja abrir a mensagem mesmo assim?')){status.textContent='Abertura cancelada. Nenhuma mensagem enviada por este botão.';return;}
+  if(!confirm('Antes de enviar a nova mensagem, confira no WhatsApp a mensagem anterior deste destinatário e apague-a para todos, se a opção estiver disponível. O Assistente FSJ não consegue apagar mensagens da sessão pessoal do WhatsApp automaticamente.\n\nDeseja continuar preparando o envio?')){status.textContent='Envio cancelado. Nenhuma mensagem foi apagada ou enviada.';return;}
   const url='https://wa.me/'+d.phone+'?text='+encodeURIComponent(d.text);
   const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   fallback.href=url;fallback.hidden=false;
