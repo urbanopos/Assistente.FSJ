@@ -68,7 +68,7 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
  #demandaTabela #taskRows>tr>td:first-child::before{content:none}
  #demandaTabela .fsj-task-number{display:block;width:100%;text-align:left;padding:10px 12px;font-weight:800}
 }
-</style><link rel="stylesheet" href="./mobile-pages.css?v=20261018-controles-visiveis">
+</style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-telas-aprovadas-01">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
 </head><body>
@@ -765,7 +765,7 @@ document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
 </script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261016-prioridade-cabecalho-01"></script><script src="./proprietario.js?v=20261016-prioridade-cabecalho-01"></script>
-<script src="./mobile-pages.js?v=20261020-answer-repair-03"></script>
+<script src="./mobile-pages.js?v=20261020-telas-aprovadas-01"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261018-1"></script>
 <script src="./app-maintenance.js?v=20261019-2"></script><script src="./task-suggestions.js?v=20261019-1"></script></body></html>
