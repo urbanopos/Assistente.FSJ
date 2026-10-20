@@ -118,6 +118,6 @@
  window.visualViewport?.addEventListener('scroll',schedule);
  window.addEventListener('pageshow',schedule);document.fonts?.ready.then(schedule);
  document.addEventListener('fsj:page-target',event=>{const target=event.detail;for(const state of states.values())if(state.flow.contains(target))requestAnimationFrame(()=>{layout();reveal(state,target);});});
- document.addEventListener('change',schedule);document.addEventListener('input',schedule);
+ document.addEventListener('change',schedule);document.addEventListener('input',schedule);document.addEventListener('fsj:execution-updated',schedule);
  mobile.addEventListener('change',schedule);schedule();
 })();
