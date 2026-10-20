@@ -162,3 +162,15 @@
 }
 
 @media(max-width:700px){body.fsj-reader .fsj-page-navigation #taskAnswer:not([hidden]){display:flex!important;position:fixed!important;left:8px!important;right:8px!important;bottom:calc(64px + env(safe-area-inset-bottom))!important;z-index:1000!important;background:#fff!important;border:1px solid #bed5c2!important;border-radius:10px!important;box-shadow:0 2px 12px #0002!important;justify-content:center!important;padding:8px!important}body.fsj-reader .fsj-page-navigation #taskAnswer[hidden]{display:none!important}}
+
+/* Rodapé único para todas as páginas móveis: ações acima, setas sempre alinhadas embaixo. */
+@media(max-width:700px){
+ .fsj-page-navigation{height:auto!important;min-height:62px;flex-direction:column!important;align-items:stretch!important;justify-content:flex-end!important;padding:4px 8px max(4px,env(safe-area-inset-bottom))!important;gap:4px!important}
+ .fsj-page-nav-row{display:grid;grid-template-columns:56px minmax(0,1fr) 56px;align-items:center;justify-items:center;width:100%;min-height:46px;margin-top:auto}
+ .fsj-page-nav-row>.fsj-nav-arrow{width:46px;height:44px;min-width:44px}
+ .fsj-page-nav-row>.fsj-page-count{justify-self:center;font-size:14px}
+ .fsj-page-navigation>.fsj-task-answer{align-self:stretch;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;min-height:40px}
+ .fsj-page-navigation>.fsj-task-answer strong{order:-1}
+ .fsj-page-navigation>.fsj-task-answer[hidden]{display:none!important}
+ .fsj-page-navigation>.fsj-footer-action{max-width:100%;min-height:34px}
+}
