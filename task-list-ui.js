@@ -1,4 +1,11 @@
-function fsjTaskNumber(code){return code?String(code).replace(/^Tar\s*-\s*/i,'Tar - '):'Tarefa sem número';}
+function fsjTaskNumber(code,frequency){
+ if(!code)return 'Tarefa sem número';
+ const raw=String(code).trim();
+ const digits=raw.match(/^Tar\s*-\s*(\d+)$/i);
+ const number=digits?'Tar - '+digits[1].padStart(7,'0'):raw.replace(/^Tar\s*-\s*/i,'Tar - ');
+ const suffix={pontual:'P',diaria:'D',semanal:'S',mensal:'M',trimestral:'T',semestral:'SM',anual:'A'}[String(frequency||'').toLowerCase()];
+ return suffix?number+' '+suffix:number;
+}
 let fsjTaskDetailRequest=0;
 async function fsjOpenTaskDetails(code,description,context='',loadDetails){
  const request=++fsjTaskDetailRequest;
