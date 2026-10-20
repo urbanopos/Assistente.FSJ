@@ -58,13 +58,13 @@ function renderFolga(){
  folgaBox.replaceChildren();
  folgaBox.hidden=folgaAgenda?.exigir_folga_semanal===false;
  if(folgaBox.hidden)return;
- const title=document.createElement('h2');title.textContent=folgaAgenda.dia?'Folga semanal registrada':'Tarefa semanal: informe seu dia de folga';folgaBox.append(title);
- if(!folgaLiberada){const warning=document.createElement('p');warning.setAttribute('role','alert');warning.textContent='Registros de tarefas bloqueados. Escolha e confirme pelo menos um dia de folga da semana que se inicia na segunda-feira.';folgaBox.append(warning);const choose=document.createElement('button');choose.type='button';choose.textContent='Escolher dia de folga';choose.onclick=folgaAvisar;folgaBox.append(choose);}
+ const title=document.createElement('h2');title.textContent=folgaAgenda.dia?'Folga semanal registrada':'Folga semanal';folgaBox.append(title);
+ if(!folgaLiberada&&!folgaEditing){const choose=document.createElement('button');choose.type='button';choose.textContent='Escolher Folga';choose.onclick=()=>{folgaEditing=true;renderFolga();document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:folgaBox}));};folgaBox.append(choose);return;}
  const note=document.createElement('p');note.textContent=folgaAgenda.bloqueada_gestor?'Data definida pelo gestor. Você pode consultar, mas não alterar.':'A semana de referência é apenas o período de contagem; não é uma folga registrada. Escolha e confirme um dia desta semana. O gestor poderá alterar a escolha. Não haverá envio diário de tarefas na data escolhida.';folgaBox.append(note);
  if(folgaAgenda.dia&&!folgaEditing){
   note.textContent=folgaAgenda.bloqueada_gestor?'Data definida pelo gestor. Você pode consultar, mas não alterar.':'Sua folga semanal está registrada.';
   const selected=document.createElement('span');selected.id='folgaStatus';selected.setAttribute('role','status');selected.textContent='Folga: '+folgaLabel(folgaAgenda.dia);note.append(document.createTextNode(' '),selected);
-  if(!folgaAgenda.bloqueada_gestor){const change=document.createElement('button');change.type='button';change.textContent='Alterar minha folga';change.onclick=()=>{folgaEditing=true;renderFolga();};folgaBox.append(change);}
+  // Escolha registrada: somente consulta; alteracoes cabem ao gestor autorizado.
   return;
  }
  const label=document.createElement('label');label.htmlFor='folgaDia';label.textContent='Dia da folga semanal';
@@ -77,7 +77,7 @@ function renderFolga(){
  select.value=folgaAgenda.dia||'';folgaBox.append(label,select);
  const status=document.createElement('p');status.id='folgaStatus';status.setAttribute('role','status');
  status.textContent=folgaAgenda.dia?'Folga: '+folgaLabel(folgaAgenda.dia):'Escolha pendente.';folgaBox.append(status);
- if(!folgaAgenda.bloqueada_gestor){const b=document.createElement('button');b.type='button';b.textContent=folgaAgenda.dia?'Alterar minha folga':'Confirmar folga';b.onclick=async()=>{
+ if(!folgaAgenda.bloqueada_gestor){const b=document.createElement('button');b.type='button';b.textContent='Confirmar folga';b.onclick=async()=>{
   const day=folgaBox.querySelector('select[name="folga-dia"]')?.value;if(!day){status.textContent='Escolha um dia.';return;}b.disabled=true;folgaBusy=true;
   try{folgaAgenda=await folgaPost({action:'choose',dia:day});folgaEditing=false;renderFolga();document.getElementById('folgaStatus').textContent='Folga salva: '+folgaLabel(folgaAgenda.dia)+'.';}catch(e){status.textContent=e.message;b.disabled=false;}finally{folgaBusy=false;}
  };folgaBox.append(b);}
