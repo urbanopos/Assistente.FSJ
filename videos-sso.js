@@ -10,9 +10,9 @@
   if(data.type==='fsj-sso-ready'){
    nonce=data.nonce;if(working)return;working=true;
    try{const token=await access();if(window.fsjExited)return;frame.contentWindow.postMessage({type:'fsj-sso-token',nonce,access_token:token},vm.origin);state.textContent='Validando o acesso na VM…';}
-   catch(error){state.textContent=error.message;}finally{working=false;}
-  }else if(data.nonce===nonce&&data.type==='fsj-sso-ok'){state.textContent='TV FSJ conectada com seu acesso do Assistente FSJ.';frame.dataset.ssoReady='1';}
-  else if(data.nonce===nonce&&data.type==='fsj-sso-error'){state.textContent=String(data.message||'Acesso não autorizado.');delete frame.dataset.ssoReady;}
+   catch(error){state.hidden=false;state.textContent=error.message;}finally{working=false;}
+  }else if(data.nonce===nonce&&data.type==='fsj-sso-ok'){state.hidden=true;state.textContent='TV FSJ conectada com seu acesso do Assistente FSJ.';frame.dataset.ssoReady='1';}
+  else if(data.nonce===nonce&&data.type==='fsj-sso-error'){state.hidden=false;state.textContent=String(data.message||'Acesso não autorizado.');delete frame.dataset.ssoReady;}
  });
  abrirVideosReserva=function(button){
   if(!fsjPainelPronto||window.fsjExited)return;
