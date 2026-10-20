@@ -7,7 +7,7 @@ function fsjTaskNumber(code,frequency){
  return suffix?number+' '+suffix:number;
 }
 let fsjTaskDetailRequest=0;
-async function fsjOpenTaskDetails(code,description,context='',loadDetails){
+async function fsjOpenTaskDetails(code,description,context='',loadDetails,frequency){
  const request=++fsjTaskDetailRequest;
  let dialog=document.getElementById('fsj-task-detail');
  if(!dialog){
@@ -19,7 +19,7 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails){
   title.id='fsj-task-detail-title';meta.id='fsj-task-detail-meta';text.id='fsj-task-detail-description';back.type='button';back.className='fsj-nav-arrow';back.textContent='←';back.setAttribute('aria-label','Voltar à lista de tarefas');back.addEventListener('click',()=>dialog.close());
   const history=document.createElement('div');history.id='fsj-task-detail-history';content.append(title,meta,text,history);footer.append(back);dialog.append(header,content,footer);document.body.append(dialog);
  }
- document.getElementById('fsj-task-detail-title').textContent=fsjTaskNumber(code);
+ document.getElementById('fsj-task-detail-title').textContent=fsjTaskNumber(code,frequency);
  document.getElementById('fsj-task-detail-meta').textContent=context;
  document.getElementById('fsj-task-detail-description').textContent=description||'Sem descrição registrada.';
  const history=document.getElementById('fsj-task-detail-history');history.replaceChildren();
