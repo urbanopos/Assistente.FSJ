@@ -23,3 +23,14 @@
  const previousExit=sairGestor;
  sairGestor=function(){if(nonce)frame.contentWindow?.postMessage({type:'fsj-sso-logout',nonce},vm.origin);return previousExit();};
 })();
+
+/* FSJ_TV_VISIBLE_WINDOW_V1 */
+(()=>{
+ const frame=document.getElementById('fsjVideoFrame'),panel=document.getElementById('videosChamadas');if(!frame||!panel)return;
+ let pending=0;
+ function fit(){cancelAnimationFrame(pending);pending=requestAnimationFrame(()=>{if(panel.classList.contains('hidden'))return;const top=frame.getBoundingClientRect().top,height=Math.max(0,Math.floor((window.visualViewport?.height||innerHeight)-top-12));if(height<80)return;frame.style.minHeight='0';frame.style.height=height+'px';});}
+ window.addEventListener('resize',fit);window.visualViewport?.addEventListener('resize',fit);frame.addEventListener('load',fit);
+ new MutationObserver(fit).observe(panel,{attributes:true,attributeFilter:['class']});
+ const state=document.getElementById('fsjVideoEstado');if(state)new MutationObserver(fit).observe(state,{childList:true,subtree:true});
+ fit();
+})();
