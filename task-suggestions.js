@@ -21,7 +21,10 @@
   dialog.classList.add('fsj-participant-request');
   const sourceHeader=document.querySelector('body>header');
   if(sourceHeader){const header=sourceHeader.cloneNode(true);header.querySelectorAll('[data-fsj-screen-back]').forEach(x=>x.remove());header.querySelectorAll('[id]').forEach(x=>x.removeAttribute('id'));dialog.querySelector('header').replaceWith(header);}
-  const taskCode=document.createElement('p');taskCode.id='fsjSuggestionTaskCode';taskCode.hidden=true;el('fsjSuggestionChoice').before(taskCode);
+  const taskCode=document.createElement('p');taskCode.id='fsjSuggestionTaskCode';taskCode.hidden=true;el('fsjSuggestionChoice').after(taskCode);
+  const label=dialog.querySelector('label[for="fsjSuggestionText"]');label.before(category);
+  const actions=document.createElement('div');actions.className='fsj-suggestion-actions';el('fsjSuggestionVoice').before(actions);actions.append(el('fsjSuggestionVoice'),el('fsjSuggestionSend'));
+  const counter=document.createElement('small');counter.id='fsjSuggestionCounter';counter.setAttribute('aria-live','polite');el('fsjSuggestionText').after(counter);
   const css=document.createElement('style');
   css.textContent=`
   #fsjTaskQuestions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
@@ -39,7 +42,16 @@
   dialog.fsj-participant-request>section{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
   dialog.fsj-participant-request h2{font-size:20px;margin:4px 0}
   dialog.fsj-participant-request p{margin:4px 0}
-  dialog.fsj-participant-request textarea{resize:vertical;min-height:80px}
+  dialog.fsj-participant-request textarea{resize:none;min-height:90px;height:clamp(90px,22dvh,160px)}
+  #fsjSuggestionDialog.fsj-participant-request #fsjSuggestionCategories{margin:0!important}
+  #fsjSuggestionDialog.fsj-participant-request #fsjSuggestionCategories>p{display:none}
+  #fsjSuggestionDialog.fsj-participant-request #fsjSuggestionCategories button{margin:0!important;min-height:36px!important;padding:7px 9px!important}
+  #fsjSuggestionDialog.fsj-participant-request .fsj-suggestion-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+  #fsjSuggestionDialog.fsj-participant-request .fsj-suggestion-actions button{min-width:0;margin:0!important;min-height:44px}
+  #fsjSuggestionCounter{text-align:right;color:#526957;font-size:12px}
+  #fsjSuggestionDialog.fsj-participant-request #fsjSuggestionState:empty,
+  #fsjSuggestionDialog.fsj-participant-request #fsjSuggestionFeedback:empty{display:none}
+  
   dialog.fsj-participant-request button{background:#235d41;color:#fff;border:0;border-radius:9px;padding:9px;font:inherit}
   dialog.fsj-participant-request [hidden]{display:none!important}
   .fsj-request-navigation{display:grid;grid-template-columns:54px 1fr 54px;align-items:center;gap:8px;margin-top:auto;padding-top:8px;flex:none;text-align:center}
@@ -58,6 +70,9 @@
   if(manager)return api('/functions/v1/sugestoes-tarefas',{method:'POST',body:JSON.stringify(data)});
   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,token})});const result=await response.json();if(!response.ok)throw Error(result.erro||'Não foi possível registrar.');return result;
  }
+ const suggestionCode=item=>item?.numero?'Sug - '+String(item.numero).padStart(6,'0'):'Sug - (número ao enviar)';
+ function updateCounter(){if(!participant)return;const field=el('fsjSuggestionText');el('fsjSuggestionCounter').textContent=field.value.length+' / '+field.maxLength+' caracteres';}
+ el('fsjSuggestionText').addEventListener('input',updateCounter);
  function feedback(text){el('fsjSuggestionFeedback').textContent=text;}
  function show(){
   const item=rows.find(s=>s.id===selected),locked=!!item;
@@ -74,11 +89,13 @@
   if(participant){
    el('fsjSuggestionChoice').hidden=question;
    dialog.querySelector('label[for="fsjSuggestionChoice"]').hidden=question;
-   const code=el('fsjSuggestionTaskCode');code.hidden=!question;
-   code.textContent=typeof info!=='undefined'&&info?.codigo_tarefa?fsjResponseTaskNumber(info.codigo_tarefa,info.periodicidade):'Tarefa sem número';
+   const code=el('fsjSuggestionTaskCode');code.hidden=false;
+   code.textContent=question?(typeof info!=='undefined'&&info?.codigo_tarefa?fsjResponseTaskNumber(info.codigo_tarefa,info.periodicidade):'Tarefa sem número'):suggestionCode(item);
+   el('fsjSuggestionText').maxLength=question||locked?2000:500;
+   updateCounter();
   }
   el('fsjSuggestionHeading').textContent=manager?'Análise do gestor':question?'Dúvidas sobre a tarefa':'Sugestão de Tarefa';
-  el('fsjSuggestionText').previousElementSibling.textContent=question?'Descreva sua dúvida':'Descreva sua sugestão';
+  dialog.querySelector('label[for="fsjSuggestionText"]').textContent=question?'Descreva sua dúvida':'Descreva sua sugestão';
   el('fsjSuggestionSave').textContent=question?'Enviar resposta':'Enviar decisão';
   el('fsjSuggestionSend').textContent=question?'Enviar dúvida':'Enviar sugestão';
   el('fsjSuggestionDecision').querySelectorAll('label').forEach(label=>label.hidden=question);
@@ -88,26 +105,27 @@
  }
  async function refresh(){
   const data=await call({action:manager?'gestor_listar':'listar'});rows=data.sugestoes.filter(s=>manager||s.tipo===kind);
-  const pick=el('fsjSuggestionChoice');pick.replaceChildren(new Option(manager?'Selecione…':'Nova sugestão',''),...rows.map(s=>new Option((labels[s.estado]||s.estado)+' — '+s.descricao.slice(0,65),s.id)));pick.value=selected;
+  const pick=el('fsjSuggestionChoice');pick.replaceChildren(new Option(manager?'Selecione…':'Nova sugestão',''),...rows.map(s=>new Option(participant&&kind==='sugestao'?suggestionCode(s):(labels[s.estado]||s.estado)+' — '+s.descricao.slice(0,65),s.id)));pick.value=selected;
   if(selected&&rows.some(s=>s.id===selected))show();
  }
  async function open(taskId){
   if(!manager&&(typeof info==='undefined'||!info)){return;}
   el('fsjSuggestionHeading').textContent=manager?'Análise de sugestões':'Sugestão de tarefas';
   show();dialog.showModal();feedback('Consultando registros…');
-  try{await refresh();if(taskId)selected=rows.find(s=>s.tarefa_gestor_id===taskId)?.id||'';el('fsjSuggestionChoice').value=selected;show();feedback('');}catch(e){feedback(e.message);}
+  try{await refresh();if(taskId)selected=rows.find(s=>s.tarefa_gestor_id===taskId)?.id||'';el('fsjSuggestionChoice').value=selected;if(selected)show();feedback('');}catch(e){feedback(e.message);}
  }
  el('fsjSuggestionChoice').onchange=()=>{selected=el('fsjSuggestionChoice').value;requestId=null;show();feedback('');};
  el('fsjSuggestionBack').onclick=()=>{recognition?.stop();dialog.close();};
  el('fsjSuggestionVoice').onclick=()=>{
   const R=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!R)return feedback('Captura de voz indisponível neste navegador. Use o microfone do teclado ou digite.');
-  recognition=new R();recognition.lang='pt-BR';recognition.onresult=e=>{el('fsjSuggestionText').value=(el('fsjSuggestionText').value+' '+e.results[0][0].transcript).trim().slice(0,2000);feedback('Texto preenchido. Confira antes de enviar.');};recognition.onerror=()=>feedback('Não foi possível capturar voz. Você pode digitar.');recognition.onend=()=>{el('fsjSuggestionVoice').disabled=false;};el('fsjSuggestionVoice').disabled=true;try{recognition.start();feedback('Ouvindo…');}catch{el('fsjSuggestionVoice').disabled=false;feedback('Microfone indisponível.');}
+  recognition=new R();recognition.lang='pt-BR';recognition.onresult=e=>{el('fsjSuggestionText').value=(el('fsjSuggestionText').value+' '+e.results[0][0].transcript).trim().slice(0,el('fsjSuggestionText').maxLength);updateCounter();feedback('Texto preenchido. Confira antes de enviar.');};recognition.onerror=()=>feedback('Não foi possível capturar voz. Você pode digitar.');recognition.onend=()=>{el('fsjSuggestionVoice').disabled=false;};el('fsjSuggestionVoice').disabled=true;try{recognition.start();feedback('Ouvindo…');}catch{el('fsjSuggestionVoice').disabled=false;feedback('Microfone indisponível.');}
  };
  el('fsjSuggestionSend').onclick=async()=>{
   if(working||selected)return;const texto=el('fsjSuggestionText').value.trim();const categoria=category.querySelector('button[data-active="1"]')?.textContent;const descricao=categoria&&kind==='sugestao'?'['+categoria+'] '+texto:texto;if(!texto)return feedback(kind==='duvida'?'Descreva sua dúvida antes de enviar.':'Descreva sua sugestão antes de enviar.');
+  if(participant&&kind==='sugestao'&&texto.length>500)return feedback('Limite de 500 caracteres para a descrição.');
   requestId ||= crypto.randomUUID();working=true;el('fsjSuggestionSend').disabled=true;
-  try{const data=await call({action:kind==='duvida'?'enviar_duvida':'enviar',descricao,requisicao:requestId});selected=data.sugestao.id;await refresh();el('fsjSuggestionChoice').value=selected;show();feedback(kind==='duvida'?'Dúvida encaminhada ao proprietário e disponível aos supervisores responsáveis.':'Registro enviado. Foi criada uma tarefa urgente para o gestor.');requestId=null;}catch(e){feedback(e.message+' Sua descrição foi preservada.');}finally{working=false;el('fsjSuggestionSend').disabled=false;}
+  try{const data=await call({action:kind==='duvida'?'enviar_duvida':'enviar',descricao,requisicao:requestId});selected=data.sugestao.id;rows=[data.sugestao,...rows.filter(x=>x.id!==selected)];show();await refresh();el('fsjSuggestionChoice').value=selected;show();feedback(kind==='duvida'?'Dúvida encaminhada ao proprietário e disponível aos supervisores responsáveis.':'Registro enviado. Foi criada uma tarefa urgente para o gestor.');requestId=null;}catch(e){feedback(e.message+' Sua descrição foi preservada.');}finally{working=false;el('fsjSuggestionSend').disabled=false;}
  };
  el('fsjSuggestionSave').onclick=async()=>{
   if(working||!selected)return;const estado=rows.find(s=>s.id===selected)?.tipo==='duvida'?'aprovada':document.querySelector('[name=fsjSuggestionDecision]:checked')?.value,observacoes=el('fsjSuggestionNotes').value.trim();if(!estado||!observacoes)return feedback('Escolha aprovar ou rejeitar e preencha a justificativa.');
