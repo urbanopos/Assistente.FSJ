@@ -50,6 +50,16 @@ Deno.serve(async req=>{
   const auth=await fetch(base+'/auth/v1/user',{headers:{apikey:key,Authorization:authorization},signal:AbortSignal.timeout(10000)});
   if(!auth.ok)return reply({erro:'Sessao expirada; entre novamente'},401);
   const user=await auth.json();if(String(user.email||'').toLowerCase()!=='urbanopos@yahoo.com.br')return reply({erro:'Acesso exclusivo do gestor'},403);
+  if(['completion-info','reopen-completion'].includes(data.action)){
+   if(typeof data.tarefa_id!=='string'||!data.tarefa_id||data.tarefa_id.length>200)return reply({erro:'Demanda inválida'},400);
+   try{
+    if(data.action==='completion-info')return reply(await db('rpc/fsj_info_conclusao',{p_tarefa:data.tarefa_id,p_auth:user.id}));
+    if(typeof data.motivo!=='string'||!data.motivo.trim()||data.motivo.length>1000)return reply({erro:'Informe o motivo, com até 1000 caracteres'},400);
+    const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if(!uuid.test(String(data.requisicao||''))||(data.conclusao_id!=null&&!uuid.test(String(data.conclusao_id))))return reply({erro:'Identificador inválido. Atualize a demanda'},400);
+    return reply(await db('rpc/fsj_cancelar_conclusao',{p_tarefa:data.tarefa_id,p_auth:user.id,p_motivo:data.motivo,p_requisicao:data.requisicao,p_conclusao:data.conclusao_id||null}));
+   }catch(e){return reply({erro:(e as Error).message},409);}
+  }
   if(data.action==='daily-progress'){
    if(data.mes!=null&&!/^\d{4}-(0[1-9]|1[0-2])$/.test(String(data.mes)))return reply({erro:'Mês inválido'},400);
    if(data.pessoa_id!=null&&(typeof data.pessoa_id!=='string'||data.pessoa_id.length>200))return reply({erro:'Pessoa inválida'},400);

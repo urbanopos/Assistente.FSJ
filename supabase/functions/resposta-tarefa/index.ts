@@ -8,7 +8,7 @@ function taskSituation(t:any,answers:any[],day:string){
  const start=new Date(day+'T03:00:00Z').getTime(),end=start+86400000;
  const relevant=answers.filter(a=>a.tarefa_id===t.id&&(!t.diaria||((a.dia_previsto?a.dia_previsto===day:new Date(a.criado_em).getTime()>=start&&new Date(a.criado_em).getTime()<end))));
  if(relevant.some(a=>a.tipo==='sim')||(!t.diaria&&t.situacao==='Concluída'))return 'Concluída';
- const last=relevant[0];return last?.tipo==='nao'?'Pendente':last?.tipo==='pergunta'?'Aguardando gestão':t.diaria?'Em aberto':t.situacao||'Em aberto';
+ const last=relevant[0];return last?.tipo==='nao'?'Pendente':last?.tipo==='pergunta'?'Aguardando gestão':t.diaria?(t.reaberta_dia===day?'Pendente':'Em aberto'):t.situacao||'Em aberto';
 }
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return reply({});
@@ -39,7 +39,7 @@ Deno.serve(async req=>{
    const now=Date.now(),hour=3600000;
    const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now));
    const start=new Date(today+'T07:00:00-03:00').getTime();
-   const answers=ids.length?await db('retornos?tarefa_id=in.('+ids.map(encodeURIComponent).join(',')+')&tipo=eq.sim&select=tarefa_id,criado_em,dia_previsto'):[];
+   const answers=ids.length?await db('retornos?cancelado_por_revisao=is.null&tarefa_id=in.('+ids.map(encodeURIComponent).join(',')+')&tipo=eq.sim&select=tarefa_id,criado_em,dia_previsto'):[];
    const done=(t:any,day:string)=>t.situacao==='Concluída'&&!t.diaria||answers.some((a:any)=>a.tarefa_id===t.id&&(!t.diaria||(a.dia_previsto||new Date(a.criado_em).toLocaleDateString('en-CA',{timeZone:'America/Recife'}))===day));
    const pending=tasks.filter((t:any)=>t.situacao!=='Arquivado'&&!done(t,today));
    const latest=Math.max(start,...executions.flatMap((e:any)=>[Date.parse(e.iniciado_em)||0,Date.parse(e.retomado_em)||0]));
@@ -56,8 +56,8 @@ Deno.serve(async req=>{
    const [people,links,tasks,answers,assignments,executions]=await Promise.all([
     db('pessoas?id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=identificacao,nome,ativo'),
     db('links_resposta?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+board.dia+'&select=token,tarefa_id,respondido_em,ordem'),
-    db('tarefas?select=id,descricao,criada_em,diaria,situacao,prioridade,codigo_tarefa,periodicidade'),
-    db('retornos?select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc'),
+    db('tarefas?select=id,descricao,criada_em,diaria,situacao,reaberta_dia,reaberta_em,reabertura_motivo,prioridade,codigo_tarefa,periodicidade'),
+    db('retornos?cancelado_por_revisao=is.null&select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc'),
     db('tarefa_responsaveis?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=tarefa_id'),
     db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+board.dia+'&select=tarefa_id,estado')
    ]);
@@ -77,11 +77,11 @@ Deno.serve(async req=>{
   const links=await db('links_resposta?token=eq.'+token+'&select=*');
   const link=links?.[0];
   if(!link||!(await db('rpc/fsj_link_resposta_vigente',{method:'POST',body:JSON.stringify({p_token:token})})))return reply({erro:'Link expirado ou inválido'},404);
-  const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,prioridade,diaria,codigo_tarefa,periodicidade'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
+  const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,reaberta_dia,reaberta_em,reabertura_motivo,prioridade,diaria,codigo_tarefa,periodicidade'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return reply({erro:'Tarefa indisponível'},404);
   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:link.dia.slice(0,7)+'-01',p_pessoa:link.pessoa_id})});
-  const detail={progresso_mensal:progress[link.tarefa_id]||null,tarefa:tasks[0].descricao,codigo_tarefa:tasks[0].codigo_tarefa,periodicidade:tasks[0].periodicidade||'pontual',prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:link.dia,respondido:!!link.respondido_em||tasks[0].situacao==='Arquivado'};
-  if(data.action==='detail'){const [executions,answers]=await Promise.all([db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+link.dia+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em'),db('retornos?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc')]);return reply({...detail,situacao:taskSituation(tasks[0],answers,link.dia),execucao:executions[0]||null});}
+  const detail={revisao:tasks[0].reaberta_em?{dia:tasks[0].reaberta_dia,em:tasks[0].reaberta_em,motivo:tasks[0].reabertura_motivo}:null,progresso_mensal:progress[link.tarefa_id]||null,tarefa:tasks[0].descricao,codigo_tarefa:tasks[0].codigo_tarefa,periodicidade:tasks[0].periodicidade||'pontual',prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:link.dia,respondido:!!link.respondido_em||tasks[0].situacao==='Arquivado'};
+  if(data.action==='detail'){const [executions,answers]=await Promise.all([db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+link.dia+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em'),db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc')]);return reply({...detail,situacao:taskSituation(tasks[0],answers,link.dia),execucao:executions[0]||null});}
   if(tasks[0].situacao==='Arquivado')return reply({erro:'Tarefa arquivada: disponível somente para consulta.'},403);
   if(data.action==='start'){try{return reply(await db('rpc/fsj_iniciar_tarefa',{method:'POST',body:JSON.stringify({p_token:token})}));}catch{return reply({erro:'Não foi possível iniciar: confira se o link está vigente e a tarefa disponível.'},409);}}
   if(data.action!=='submit')return reply({erro:'Ação inválida'},400);
