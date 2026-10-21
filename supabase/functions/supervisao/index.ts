@@ -22,7 +22,20 @@ Deno.serve(async req=>{
      const result=await db('rpc/fsj_supervisor_demandas',{p_token:data.token});
      // Only enrich tasks already authorized by the token-scoped RPC.
      const tasks=result.tarefas||[];
-     if(tasks.length){const ids=tasks.map((t:any)=>JSON.stringify(t.id)).join(',');const priorities=await db('tarefas?id=in.'+encodeURIComponent('('+ids+')')+'&select=id,prioridade,codigo_tarefa');for(const t of tasks){const stored=priorities.find((p:any)=>p.id===t.id);t.prioridade=stored?.prioridade||'normal';t.codigo_tarefa=stored?.codigo_tarefa||null;}}
+     if(tasks.length){
+      const ids=tasks.map((t:any)=>JSON.stringify(t.id)).join(',');
+      const priorities=await db('tarefas?id=in.'+encodeURIComponent('('+ids+')')+'&select=id,prioridade,codigo_tarefa,periodicidade');
+      const progress=await db('rpc/fsj_progresso_diario',{p_tarefas:tasks.map((t:any)=>t.id),p_escopo:(result.pessoas||[]).map((p:any)=>p.id)});
+      // Per-person denominators are returned only for this supervisor's authorized people.
+      const byPerson:any={};
+      for(const p of result.pessoas||[])byPerson[p.id]=await db('rpc/fsj_progresso_diario',{p_tarefas:tasks.map((t:any)=>t.id),p_pessoa:p.id,p_escopo:(result.pessoas||[]).map((p:any)=>p.id)});
+      for(const t of tasks){
+       const stored=priorities.find((p:any)=>p.id===t.id);
+       t.prioridade=stored?.prioridade||'normal';t.codigo_tarefa=stored?.codigo_tarefa||null;t.periodicidade=stored?.periodicidade||'pontual';
+       t.progresso_mensal=progress[t.id]||null;
+       t.progresso_por_pessoa=Object.fromEntries(Object.entries(byPerson).filter(([,v]:any)=>v[t.id]).map(([id,v]:any)=>[id,v[t.id]]));
+      }
+     }
      return reply(result);
     }
     catch{return reply({erro:'Acesso de supervisao indisponivel ou link expirado. Solicite ao gestor a verificacao do cadastro.'},403);}
@@ -37,6 +50,16 @@ Deno.serve(async req=>{
   const auth=await fetch(base+'/auth/v1/user',{headers:{apikey:key,Authorization:authorization},signal:AbortSignal.timeout(10000)});
   if(!auth.ok)return reply({erro:'Sessao expirada; entre novamente'},401);
   const user=await auth.json();if(String(user.email||'').toLowerCase()!=='urbanopos@yahoo.com.br')return reply({erro:'Acesso exclusivo do gestor'},403);
+  if(data.action==='daily-progress'){
+   if(data.mes!=null&&!/^\d{4}-(0[1-9]|1[0-2])$/.test(String(data.mes)))return reply({erro:'Mês inválido'},400);
+   if(data.pessoa_id!=null&&(typeof data.pessoa_id!=='string'||data.pessoa_id.length>200))return reply({erro:'Pessoa inválida'},400);
+   // Token-validated owner identity plus central ownership binding.
+   const owners=await db('fsj_titularidade?id=eq.true&auth_user_id=eq.'+encodeURIComponent(user.id)+'&select=pessoa_id');
+   if(!owners.length)return reply({erro:'Acesso exclusivo do Proprietário'},403);
+   const tasks=await db('tarefas?periodicidade=eq.diaria&select=id');
+   const resumos=await db('rpc/fsj_progresso_diario',{p_tarefas:tasks.map((t:any)=>t.id),p_mes:data.mes?data.mes+'-01':null,p_pessoa:data.pessoa_id||null});
+   return reply({resumos});
+  }
   if(data.action==='archive-owner'){
    if(typeof data.tarefa_id!=='string'||data.tarefa_id.length>200)return reply({erro:'Tarefa inválida'},400);
    try{return reply(await db('rpc/fsj_aprovar_arquivamento',{p_tarefa:data.tarefa_id,p_auth:user.id}));}
@@ -53,3 +76,4 @@ Deno.serve(async req=>{
   return reply({erro:'Acao invalida'},400);
  }catch(e){console.error('supervisao',String(e));return reply({erro:'Nao foi possivel atualizar a supervisao. Confira os integrantes e grupos selecionados.'},400);}
 });
+

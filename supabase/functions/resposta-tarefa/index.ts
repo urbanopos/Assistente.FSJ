@@ -6,7 +6,7 @@ async function db(path:string,opt:RequestInit={}){const r=await fetch(base+'/res
 function taskSituation(t:any,answers:any[],day:string){
  if(t.situacao==='Arquivado')return 'Arquivado';
  const start=new Date(day+'T03:00:00Z').getTime(),end=start+86400000;
- const relevant=answers.filter(a=>a.tarefa_id===t.id&&(!t.diaria||(new Date(a.criado_em).getTime()>=start&&new Date(a.criado_em).getTime()<end)));
+ const relevant=answers.filter(a=>a.tarefa_id===t.id&&(!t.diaria||((a.dia_previsto?a.dia_previsto===day:new Date(a.criado_em).getTime()>=start&&new Date(a.criado_em).getTime()<end))));
  if(relevant.some(a=>a.tipo==='sim')||(!t.diaria&&t.situacao==='Concluída'))return 'Concluída';
  const last=relevant[0];return last?.tipo==='nao'?'Pendente':last?.tipo==='pergunta'?'Aguardando gestão':t.diaria?'Em aberto':t.situacao||'Em aberto';
 }
@@ -39,8 +39,8 @@ Deno.serve(async req=>{
    const now=Date.now(),hour=3600000;
    const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now));
    const start=new Date(today+'T07:00:00-03:00').getTime();
-   const answers=ids.length?await db('retornos?tarefa_id=in.('+ids.map(encodeURIComponent).join(',')+')&tipo=eq.sim&select=tarefa_id,criado_em'):[];
-   const done=(t:any,day:string)=>t.situacao==='Concluída'&&!t.diaria||answers.some((a:any)=>a.tarefa_id===t.id&&(!t.diaria||new Date(a.criado_em).toLocaleDateString('en-CA',{timeZone:'America/Recife'})===day));
+   const answers=ids.length?await db('retornos?tarefa_id=in.('+ids.map(encodeURIComponent).join(',')+')&tipo=eq.sim&select=tarefa_id,criado_em,dia_previsto'):[];
+   const done=(t:any,day:string)=>t.situacao==='Concluída'&&!t.diaria||answers.some((a:any)=>a.tarefa_id===t.id&&(!t.diaria||(a.dia_previsto||new Date(a.criado_em).toLocaleDateString('en-CA',{timeZone:'America/Recife'}))===day));
    const pending=tasks.filter((t:any)=>t.situacao!=='Arquivado'&&!done(t,today));
    const latest=Math.max(start,...executions.flatMap((e:any)=>[Date.parse(e.iniciado_em)||0,Date.parse(e.retomado_em)||0]));
    const stale=executions.filter((e:any)=>e.estado!=='concluida'&&!e.concluido_em&&tasks.some((t:any)=>t.id===e.tarefa_id&&t.situacao!=='Arquivado'&&!done(t,e.dia))&&now-Date.parse(e.iniciado_em)>=48*hour);
@@ -57,29 +57,31 @@ Deno.serve(async req=>{
     db('pessoas?id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=identificacao,nome,ativo'),
     db('links_resposta?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+board.dia+'&select=token,tarefa_id,respondido_em,ordem'),
     db('tarefas?select=id,descricao,criada_em,diaria,situacao,prioridade,codigo_tarefa,periodicidade'),
-    db('retornos?select=tarefa_id,tipo,criado_em&order=criado_em.desc'),
+    db('retornos?select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc'),
     db('tarefa_responsaveis?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=tarefa_id'),
     db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+board.dia+'&select=tarefa_id,estado')
    ]);
    if(!people?.length||!people[0].ativo)return reply({erro:'Quadro indisponível'},404);
+   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:assignments.map((a:any)=>a.tarefa_id),p_mes:board.dia.slice(0,7)+'-01',p_pessoa:board.pessoa_id})});
    if(data.situacao==='Arquivado'){
-    const history=tasks.filter((t:any)=>t.situacao==='Arquivado'&&assignments.some((a:any)=>a.tarefa_id===t.id)).map((t:any)=>({tarefa_id:t.id,tarefa:t.descricao,codigo_tarefa:t.codigo_tarefa,periodicidade:t.periodicidade,prioridade:'normal',situacao:'Arquivado',somente_leitura:true}));
+    const history=tasks.filter((t:any)=>t.situacao==='Arquivado'&&assignments.some((a:any)=>a.tarefa_id===t.id)).map((t:any)=>({tarefa_id:t.id,tarefa:t.descricao,codigo_tarefa:t.codigo_tarefa,periodicidade:t.periodicidade,prioridade:'normal',situacao:'Arquivado',somente_leitura:true,progresso_mensal:progress[t.id]||null}));
     return reply({responsavel:people[0].identificacao||people[0].nome,dia:board.dia,tarefas:history});
    }
-   const done=(t:any)=>answers.some((a:any)=>a.tarefa_id===t.id&&a.tipo==='sim'&&(!t.diaria||(new Date(a.criado_em)>=new Date(board.dia+'T03:00:00Z')&&new Date(a.criado_em)<new Date(new Date(board.dia+'T03:00:00Z').getTime()+86400000))));
+   const done=(t:any)=>answers.some((a:any)=>a.tarefa_id===t.id&&a.tipo==='sim'&&(!t.diaria||(a.dia_previsto===board.dia)));
    const available=(t:any)=>!!t&&t.situacao!=='Arquivado'&&(t.diaria||t.situacao!=='Concluída')&&!done(t)&&assignments.some((a:any)=>a.tarefa_id===t.id);
    const missing=tasks.filter((t:any)=>available(t)&&!links.some((l:any)=>l.tarefa_id===t.id)&&new Date(t.criada_em).getTime()<=new Date(board.expira_em).getTime());
    for(const t of missing){const created=await db('links_resposta?select=token,tarefa_id,respondido_em,ordem',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({token:crypto.randomUUID(),tarefa_id:t.id,pessoa_id:board.pessoa_id,dia:board.dia,expira_em:board.expira_em,ordem:links.length+1})});links.push(created[0])}
-   const items=links.map((l:any)=>({token:l.token,tarefa_id:l.tarefa_id,tarefa:tasks.find((t:any)=>t.id===l.tarefa_id)?.descricao||'',codigo_tarefa:tasks.find((t:any)=>t.id===l.tarefa_id)?.codigo_tarefa||'',periodicidade:tasks.find((t:any)=>t.id===l.tarefa_id)?.periodicidade||'pontual',prioridade:tasks.find((t:any)=>t.id===l.tarefa_id)?.prioridade||'normal',situacao:taskSituation(tasks.find((t:any)=>t.id===l.tarefa_id)||{},answers,board.dia),execucao:executions.find((e:any)=>e.tarefa_id===l.tarefa_id)||null,ordem:l.ordem||999,respondido:!!l.respondido_em,concluida:!available(tasks.find((t:any)=>t.id===l.tarefa_id))})).filter((x:any)=>x.tarefa&&!x.concluida).sort((a:any,b:any)=>a.ordem-b.ordem||a.tarefa.localeCompare(b.tarefa));
+   const items=links.map((l:any)=>({token:l.token,tarefa_id:l.tarefa_id,progresso_mensal:progress[l.tarefa_id]||null,tarefa:tasks.find((t:any)=>t.id===l.tarefa_id)?.descricao||'',codigo_tarefa:tasks.find((t:any)=>t.id===l.tarefa_id)?.codigo_tarefa||'',periodicidade:tasks.find((t:any)=>t.id===l.tarefa_id)?.periodicidade||'pontual',prioridade:tasks.find((t:any)=>t.id===l.tarefa_id)?.prioridade||'normal',situacao:taskSituation(tasks.find((t:any)=>t.id===l.tarefa_id)||{},answers,board.dia),execucao:executions.find((e:any)=>e.tarefa_id===l.tarefa_id)||null,ordem:l.ordem||999,respondido:!!l.respondido_em,concluida:!available(tasks.find((t:any)=>t.id===l.tarefa_id))})).filter((x:any)=>x.tarefa&&!x.concluida).sort((a:any,b:any)=>a.ordem-b.ordem||a.tarefa.localeCompare(b.tarefa));
    return reply({responsavel:people[0].identificacao||people[0].nome,dia:board.dia,criado_em:board.criado_em,tarefas:items});
   }
   const links=await db('links_resposta?token=eq.'+token+'&select=*');
   const link=links?.[0];
-  if(!link||new Date(link.expira_em)<new Date())return reply({erro:'Link expirado ou inválido'},404);
+  if(!link||!(await db('rpc/fsj_link_resposta_vigente',{method:'POST',body:JSON.stringify({p_token:token})})))return reply({erro:'Link expirado ou inválido'},404);
   const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,prioridade,diaria,codigo_tarefa,periodicidade'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return reply({erro:'Tarefa indisponível'},404);
-  const detail={tarefa:tasks[0].descricao,codigo_tarefa:tasks[0].codigo_tarefa,periodicidade:tasks[0].periodicidade||'pontual',prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:link.dia,respondido:!!link.respondido_em||tasks[0].situacao==='Arquivado'};
-  if(data.action==='detail'){const [executions,answers]=await Promise.all([db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+link.dia+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em'),db('retornos?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=tarefa_id,tipo,criado_em&order=criado_em.desc')]);return reply({...detail,situacao:taskSituation(tasks[0],answers,link.dia),execucao:executions[0]||null});}
+  const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:link.dia.slice(0,7)+'-01',p_pessoa:link.pessoa_id})});
+  const detail={progresso_mensal:progress[link.tarefa_id]||null,tarefa:tasks[0].descricao,codigo_tarefa:tasks[0].codigo_tarefa,periodicidade:tasks[0].periodicidade||'pontual',prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:link.dia,respondido:!!link.respondido_em||tasks[0].situacao==='Arquivado'};
+  if(data.action==='detail'){const [executions,answers]=await Promise.all([db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+link.dia+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em'),db('retornos?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc')]);return reply({...detail,situacao:taskSituation(tasks[0],answers,link.dia),execucao:executions[0]||null});}
   if(tasks[0].situacao==='Arquivado')return reply({erro:'Tarefa arquivada: disponível somente para consulta.'},403);
   if(data.action==='start'){try{return reply(await db('rpc/fsj_iniciar_tarefa',{method:'POST',body:JSON.stringify({p_token:token})}));}catch{return reply({erro:'Não foi possível iniciar: confira se o link está vigente e a tarefa disponível.'},409);}}
   if(data.action!=='submit')return reply({erro:'Ação inválida'},400);
@@ -101,3 +103,4 @@ Deno.serve(async req=>{
   return reply({ok:true,tarefa_proprietario_id:saved.tarefa_proprietario_id,anexos_nao_salvos:errors});
  }catch(e){console.error('form error',String(e));return reply({erro:'Não foi possível registrar a resposta. Tente novamente.'},500)}
 });
+
