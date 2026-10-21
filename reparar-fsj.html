@@ -15,8 +15,8 @@ async function executarReparoAutomatico(){
   if('caches' in window){const keys=await caches.keys();for(const key of keys){if(/fsj|assistente/i.test(key)){try{if(await caches.delete(key))n++}catch(e){avisos.push('Cache '+key+' não pôde ser renovado')}}}}
  }catch(e){avisos.push('Reparo parcial: '+e.message)}
  const u=new URL('./index.html',location.href);u.searchParams.set('_fsj_repair',Date.now().toString());document.getElementById('open').href=u.href;
- log.textContent='Página principal: '+pagina+'\\nArquivo de manutenção: '+arquivo+'\\nCaches renovados: '+n+(avisos.length?'\\n'+avisos.join('; '):'')+'\\nAbrindo o aplicativo...';
- if(pagina.startsWith('OK')){setTimeout(()=>location.replace(u.href),1200)}
+ log.textContent='Página principal: '+pagina+'\\nArquivo de manutenção: '+arquivo+'\\nCaches renovados: '+n+(avisos.length?'\\n'+avisos.join('; '):'')+'\\nReparo finalizado.';
+ if(pagina.startsWith('OK')){log.textContent+='\\nDiagnóstico concluído. Esta tela permanecerá aberta. Toque em Abrir Assistente FSJ somente quando desejar.'}
  else{log.textContent+='\\nNão foi possível acessar a página principal. Verifique a conexão e tente novamente.';btns.forEach(b=>b.disabled=false)}
 }
 if(new URLSearchParams(location.search).get('auto')==='1')executarReparoAutomatico();
