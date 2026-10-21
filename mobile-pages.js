@@ -67,7 +67,7 @@
   document.documentElement.style.setProperty('--fsj-visual-height',(visual?.height||innerHeight)+'px');
   document.documentElement.style.setProperty('--fsj-visual-top',(visual?.offsetTop||0)+'px');
   document.documentElement.classList.toggle('fsj-mobile',mobile.matches);
-  if(!mobile.matches&&manager){const assistant=document.querySelector('.brisa-fab');if(assistant?.parentElement?.classList.contains('fsj-page-navigation'))document.body.append(assistant);}
+  if(manager&&typeof window.fsjPlaceBrisa==='function')window.fsjPlaceBrisa();
   for(const state of states.values()){
    if(reset)state.index=0;
    if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;if(state.answer){state.flow.append(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}continue;}
@@ -78,9 +78,8 @@
    const top=Math.max(0,state.root.getBoundingClientRect().top-(visual?.offsetTop||0));
    const available=Math.max(96,(visual?.height||innerHeight)-top-8);
    state.root.style.height=available+'px';
-   // A Brisa ocupa uma celula propria no rodape da tela ativa.
-   const assistant=manager&&document.querySelector('.brisa-fab');
-   if(assistant&&assistant.parentElement!==state.footer)state.footer.append(assistant);
+   // A Brisa fica junto ao seletor Ir para; o rodapé contém apenas navegação.
+   if(manager&&typeof window.fsjPlaceBrisa==='function')window.fsjPlaceBrisa();
 
    // Always reserve navigation height, so showing it cannot alter page count.
    state.footer.hidden=false;
