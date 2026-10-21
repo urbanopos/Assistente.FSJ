@@ -18,3 +18,7 @@
 body.fsj-tv-playback #content #pageControls{display:none!important}
 #fsjTVLibraryPage,#institutionalUpload>h2{display:none!important}
 #projection:not(.fsj-tv-media)>:not(#videoStage):not(#projectionTitle):not(#showInstitutional){display:none!important}
+
+#videoStage{position:relative}
+#videoStage #fsjStageDeleteVideo{position:absolute;z-index:30;right:12px;bottom:12px;width:auto;max-width:45%;padding:9px 13px;border-radius:8px;border:1px solid #fff;background:rgba(115,15,15,.88);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+#videoStage #fsjStageDeleteVideo[hidden]{display:none!important}
