@@ -27,6 +27,10 @@ def install(ns):
   with db() as c:
    c.execute('CREATE TABLE IF NOT EXISTS library_metadata(video_id TEXT PRIMARY KEY,theme TEXT NOT NULL DEFAULT \'\',description TEXT NOT NULL DEFAULT \'\')')
    c.execute('CREATE TABLE IF NOT EXISTS tv_library_sources(video_id TEXT PRIMARY KEY,youtube_id TEXT,created_by TEXT NOT NULL)')
+   # Recupera a classificação dos vídeos anteriores à biblioteca por temas.
+   # Não altera vídeos já classificados, arquivos ou links existentes.
+   c.execute("INSERT INTO library_metadata(video_id,theme,description) SELECT v.id,'Outros','' FROM videos v LEFT JOIN library_metadata m ON m.video_id=v.id WHERE m.video_id IS NULL")
+   c.execute("UPDATE library_metadata SET theme='Outros' WHERE theme IS NULL OR TRIM(theme)=''")
  ns['init']=init
  def identity(self):
   u=self.user()
