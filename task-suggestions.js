@@ -19,13 +19,23 @@
  document.body.append(dialog);
  if(participant){
   dialog.classList.add('fsj-participant-request');
+  const sourceHeader=document.querySelector('body>header');
+  if(sourceHeader){const header=sourceHeader.cloneNode(true);header.querySelectorAll('[data-fsj-screen-back]').forEach(x=>x.remove());header.querySelectorAll('[id]').forEach(x=>x.removeAttribute('id'));dialog.querySelector('header').replaceWith(header);}
+  const taskCode=document.createElement('p');taskCode.id='fsjSuggestionTaskCode';taskCode.hidden=true;el('fsjSuggestionChoice').before(taskCode);
   const css=document.createElement('style');
   css.textContent=`
   #fsjTaskQuestions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
   #fsjTaskQuestions button{margin:0;min-width:0;background:#235d41;color:white;border:0;border-radius:9px;padding:10px 8px;font:600 14px system-ui}
   dialog.fsj-participant-request{width:min(620px,100vw)!important;height:100dvh;max-height:100dvh!important;margin:0 auto;padding:0!important;border-radius:0!important}
   dialog.fsj-participant-request[open]{display:flex;flex-direction:column}
-  dialog.fsj-participant-request>header{flex:none}
+  #fsjSuggestionDialog.fsj-participant-request>header{display:block!important;flex:none;background:#e4f1e6!important;color:#213d2d!important;border-top:8px solid #174b3b;padding:12px!important}
+  #fsjSuggestionDialog.fsj-participant-request>header .response-brand{display:flex;align-items:center;gap:10px;font-size:20px}
+  #fsjSuggestionDialog.fsj-participant-request>header img{width:48px;height:48px;object-fit:contain}
+  #fsjSuggestionDialog.fsj-participant-request>header>div{font-size:13px;margin-top:6px}
+  #fsjSuggestionTaskCode{background:#e4f1e6;border-radius:8px;padding:11px;font-weight:600}
+  #fsjSuggestionDialog.fsj-participant-request{max-height:100dvh!important;width:min(620px,100vw)!important}
+  #fsjSuggestionDialog.fsj-participant-request .fsj-request-navigation button{margin:0!important;flex:none}
+  
   dialog.fsj-participant-request>section{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
   dialog.fsj-participant-request h2{font-size:20px;margin:4px 0}
   dialog.fsj-participant-request p{margin:4px 0}
@@ -61,12 +71,18 @@
   el('fsjSuggestionDecision').hidden=!manager||!item||item.estado!=='aguardando';
   document.querySelectorAll('[name=fsjSuggestionDecision]').forEach(x=>x.checked=x.value===item?.estado);
   const question=(item?.tipo||kind)==='duvida';
+  if(participant){
+   el('fsjSuggestionChoice').hidden=question;
+   dialog.querySelector('label[for="fsjSuggestionChoice"]').hidden=question;
+   const code=el('fsjSuggestionTaskCode');code.hidden=!question;
+   code.textContent=typeof info!=='undefined'&&info?.codigo_tarefa?fsjResponseTaskNumber(info.codigo_tarefa,info.periodicidade):'Tarefa sem número';
+  }
   el('fsjSuggestionHeading').textContent=manager?'Análise do gestor':question?'Dúvidas sobre a tarefa':'Sugestão de Tarefa';
   el('fsjSuggestionText').previousElementSibling.textContent=question?'Descreva sua dúvida':'Descreva sua sugestão';
   el('fsjSuggestionSave').textContent=question?'Enviar resposta':'Enviar decisão';
   el('fsjSuggestionSend').textContent=question?'Enviar dúvida':'Enviar sugestão';
   el('fsjSuggestionDecision').querySelectorAll('label').forEach(label=>label.hidden=question);
-  el('fsjSuggestionState').textContent=item?(question&&item.estado==='aprovada'?'RESPONDIDA':labels[item.estado]):(manager?'Selecione uma sugestão.':'O envio cria uma tarefa urgente para o gestor.');
+  el('fsjSuggestionState').textContent=item?(question&&item.estado==='aprovada'?'RESPONDIDA':labels[item.estado]):(manager?'Selecione uma sugestão.':question?'A dúvida será encaminhada ao proprietário e ficará disponível aos supervisores responsáveis.':'O envio cria uma tarefa urgente para o gestor.');
   el('fsjSuggestionState').style.color=item?.estado==='aprovada'?'#14532d':item?.estado==='rejeitada'?'#b91c1c':'#735900';
   el('fsjSuggestionIdentity').textContent=manager&&item?'URGENTE · Solicitante: '+(typeof person==='function'?(person(item.pessoa_id).nick||person(item.pessoa_id).name||item.pessoa_id):item.pessoa_id):!manager&&typeof info!=='undefined'&&info?'Participante: '+info.responsavel:'';
  }
@@ -89,9 +105,9 @@
   recognition=new R();recognition.lang='pt-BR';recognition.onresult=e=>{el('fsjSuggestionText').value=(el('fsjSuggestionText').value+' '+e.results[0][0].transcript).trim().slice(0,2000);feedback('Texto preenchido. Confira antes de enviar.');};recognition.onerror=()=>feedback('Não foi possível capturar voz. Você pode digitar.');recognition.onend=()=>{el('fsjSuggestionVoice').disabled=false;};el('fsjSuggestionVoice').disabled=true;try{recognition.start();feedback('Ouvindo…');}catch{el('fsjSuggestionVoice').disabled=false;feedback('Microfone indisponível.');}
  };
  el('fsjSuggestionSend').onclick=async()=>{
-  if(working||selected)return;const texto=el('fsjSuggestionText').value.trim();const categoria=category.querySelector('button[data-active="1"]')?.textContent;const descricao=categoria&&kind==='sugestao'?'['+categoria+'] '+texto:texto;if(!texto)return feedback('Descreva sua sugestão antes de enviar.');
+  if(working||selected)return;const texto=el('fsjSuggestionText').value.trim();const categoria=category.querySelector('button[data-active="1"]')?.textContent;const descricao=categoria&&kind==='sugestao'?'['+categoria+'] '+texto:texto;if(!texto)return feedback(kind==='duvida'?'Descreva sua dúvida antes de enviar.':'Descreva sua sugestão antes de enviar.');
   requestId ||= crypto.randomUUID();working=true;el('fsjSuggestionSend').disabled=true;
-  try{const data=await call({action:kind==='duvida'?'enviar_duvida':'enviar',descricao,requisicao:requestId});selected=data.sugestao.id;await refresh();el('fsjSuggestionChoice').value=selected;show();feedback('Registro enviado. Foi criada uma tarefa urgente para o gestor.');requestId=null;}catch(e){feedback(e.message+' Sua descrição foi preservada.');}finally{working=false;el('fsjSuggestionSend').disabled=false;}
+  try{const data=await call({action:kind==='duvida'?'enviar_duvida':'enviar',descricao,requisicao:requestId});selected=data.sugestao.id;await refresh();el('fsjSuggestionChoice').value=selected;show();feedback(kind==='duvida'?'Dúvida encaminhada ao proprietário e disponível aos supervisores responsáveis.':'Registro enviado. Foi criada uma tarefa urgente para o gestor.');requestId=null;}catch(e){feedback(e.message+' Sua descrição foi preservada.');}finally{working=false;el('fsjSuggestionSend').disabled=false;}
  };
  el('fsjSuggestionSave').onclick=async()=>{
   if(working||!selected)return;const estado=rows.find(s=>s.id===selected)?.tipo==='duvida'?'aprovada':document.querySelector('[name=fsjSuggestionDecision]:checked')?.value,observacoes=el('fsjSuggestionNotes').value.trim();if(!estado||!observacoes)return feedback('Escolha aprovar ou rejeitar e preencha a justificativa.');
