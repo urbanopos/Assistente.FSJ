@@ -19,11 +19,8 @@ function show(mode='vm'){
  link('Atualizar aplicativo existente','./instalar-fsj-vm.html?manutencao=1');
  const note=document.createElement('p');note.textContent='Se os dois endereços falharem, o servidor ou a conexão precisam de manutenção. Reinstalar o aplicativo não corrige uma falha de rede. No Android, atualize sem desinstalar para preservar o acesso.';actions.append(note);
  }else{
- const b=document.createElement('button');b.type='button';b.textContent='Reparar telas do FSJ.Web';b.onclick=()=>{
- if(typeof window.fsjCanUpdate==='function'&&!window.fsjCanUpdate()){panel.querySelector('[data-message]').textContent='Conclua ou salve a edição antes do reparo. Seus dados foram preservados.';return;}
- panel.querySelector('[data-message]').textContent='Buscando as telas atuais. Sua sessão e seus registros serão preservados.';
- const url=new URL(location.href);url.searchParams.set('_fsj_repair',Date.now().toString());location.replace(url.href);
- };actions.append(b);
+ const b=document.createElement('button');b.type='button';b.textContent='Diagnosticar e reparar FSJ.Web';b.onclick=()=>{window.open('./reparar-fsj.html','FSJ_REPARO','noopener');};actions.append(b);
+ link('Reparo independente (se a tela travar)','./reparar-fsj.html');
  link('Orientações de instalação','./instalar-fsj-web.html');
  }
  if(!panel.open)panel.showModal();
