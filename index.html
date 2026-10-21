@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente FSJ - Tarefa</title>
-<meta name="fsj-build" content="20261021-compartilhar-web-03">
+<meta name="fsj-build" content="20261021-saida-real-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -142,7 +142,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261021-compartilhar-web-03';
+const FSJ_BUILD='20261021-saida-real-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -662,7 +662,19 @@ async function renovarSessao(){if(refreshPromise)return refreshPromise;refreshPr
 async function api(path,opt={}){let tok=localStorage.getItem('fsj_access_token')||'';let h=Object.assign({'apikey':ARMAZ_KEY,'Content-Type':'application/json'},opt.headers||{});if(tok)h.Authorization='Bearer '+tok;let r=await fetch(ARMAZ_URL+path,Object.assign({cache:'no-store',signal:AbortSignal.timeout(30000)},opt,{headers:h}));if(r.status===401&&tok){h.Authorization='Bearer '+await renovarSessao();r=await fetch(ARMAZ_URL+path,Object.assign({cache:'no-store',signal:AbortSignal.timeout(30000)},opt,{headers:h}))}if(!r.ok)throw new Error(await r.text());let body=await r.text();return body?JSON.parse(body):null}
 async function enviarAcesso(){try{loginStatus.textContent='Enviando link seguro...';let r=await fetch(ARMAZ_URL+'/auth/v1/otp?redirect_to='+encodeURIComponent(location.origin+location.pathname),{method:'POST',headers:{'apikey':ARMAZ_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:'urbanopos@yahoo.com.br',create_user:false})});if(!r.ok)throw new Error(await r.text());loginStatus.textContent='Link enviado. Abra o e-mail do Gestor e clique no link de acesso.'}catch(e){loginStatus.textContent='Não foi possível enviar o acesso: '+e.message}}
 function capturarSessao(){let p=new URLSearchParams(location.hash.slice(1)),t=p.get('access_token'),r=p.get('refresh_token');if(t){localStorage.setItem('fsj_access_token',t);if(r)localStorage.setItem('fsj_refresh_token',r);history.replaceState(null,'',location.pathname)}}
-function sairGestor(){brisaEncerrarEscuta();brisaPanel.classList.remove('open');brisaPanel.inert=true;brisaPanel.setAttribute('aria-hidden','true');window.fsjExited=true;let cover=document.createElement('div');cover.style.cssText='position:fixed;inset:0;z-index:100;background:#f5fbfd;display:grid;place-items:center;padding:24px';cover.innerHTML='<div class="card"><h2>Aplicativo encerrado</h2><p>A Brisa está desligada. Seu acesso está preservado neste aparelho.</p><button class="primary" onclick="location.reload()">Entrar como gestor</button></div>';document.body.appendChild(cover)}
+function sairGestor(){
+ // Encerramento real da pagina: nao deixar sobreposicao, tarefas ou verificacoes em execucao.
+ window.fsjExited=true;
+ try{brisaEncerrarEscuta()}catch(e){}
+ try{window.speechSynthesis&&window.speechSynthesis.cancel()}catch(e){}
+ try{if(window.fsjRecognition)window.fsjRecognition.abort()}catch(e){}
+ try{if(window.fsjMediaStream)window.fsjMediaStream.getTracks().forEach(t=>t.stop())}catch(e){}
+ try{if(window.fsjCallStream)window.fsjCallStream.getTracks().forEach(t=>t.stop())}catch(e){}
+ try{window.close()}catch(e){}
+ // Navegar para documento vazio descarrega JS, timers e listeners desta pagina.
+ // Nao limpar localStorage, IndexedDB, sessoes ou registros.
+ location.replace('about:blank');
+}
 async function recuperarAcessoGestor(){
   let token=localStorage.getItem('fsj_access_token');
   if(!token&&localStorage.getItem('fsj_refresh_token'))token=await renovarSessao();
