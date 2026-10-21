@@ -19,7 +19,7 @@ function show(mode='vm'){
  link('Atualizar aplicativo existente','./instalar-fsj-vm.html?manutencao=1');
  const note=document.createElement('p');note.textContent='Se os dois endereços falharem, o servidor ou a conexão precisam de manutenção. Reinstalar o aplicativo não corrige uma falha de rede. No Android, atualize sem desinstalar para preservar o acesso.';actions.append(note);
  }else{
- const b=document.createElement('button');b.type='button';b.textContent='Diagnosticar e reparar FSJ.Web';b.onclick=()=>{window.open('./reparar-fsj.html','FSJ_REPARO','noopener');};actions.append(b);
+ const b=document.createElement('button');b.type='button';b.textContent='Diagnosticar e reparar FSJ.Web';b.onclick=()=>{location.href='./reparar-fsj.html?auto=1';};actions.append(b);
  link('Reparo independente (se a tela travar)','./reparar-fsj.html');
  link('Orientações de instalação','./instalar-fsj-web.html');
  }
@@ -28,5 +28,5 @@ function show(mode='vm'){
 window.fsjOpenMaintenance=show;
 // Vídeos e chamadas preserva a abertura direta e a referência da aba em index.html.
 const section=document.getElementById('reservaInstallShare');
-if(section){const row=section.querySelector('#fsjWebHomeActions')||section.querySelector('.row');if(row){const b=document.createElement('button');b.type='button';b.className='primary';b.textContent='2. Abrir / reparar FSJ.Web';b.onclick=()=>show('web');row.append(b);}}
+if(section){const row=section.querySelector('#fsjWebHomeActions')||section.querySelector('.row');if(row){const b=document.createElement('button');b.type='button';b.className='primary';b.textContent='2. Abrir / reparar FSJ.Web';b.onclick=()=>{location.href='./reparar-fsj.html?auto=1';};row.append(b);}}
 })();
