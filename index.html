@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente FSJ - Tarefa</title>
-<meta name="fsj-build" content="20261021-saida-real-01">
+<meta name="fsj-build" content="20261021-saida-fechar-02">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -142,7 +142,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261021-saida-real-01';
+const FSJ_BUILD='20261021-saida-fechar-02';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -670,10 +670,9 @@ function sairGestor(){
  try{if(window.fsjRecognition)window.fsjRecognition.abort()}catch(e){}
  try{if(window.fsjMediaStream)window.fsjMediaStream.getTracks().forEach(t=>t.stop())}catch(e){}
  try{if(window.fsjCallStream)window.fsjCallStream.getTracks().forEach(t=>t.stop())}catch(e){}
- try{window.close()}catch(e){}
- // Navegar para documento vazio descarrega JS, timers e listeners desta pagina.
+ // Descarrega a pagina sem manter uma tela preta ou tentar fechar uma aba que o Android controla.
  // Nao limpar localStorage, IndexedDB, sessoes ou registros.
- location.replace('about:blank');
+ location.replace('./fsj-encerrado.html');
 }
 async function recuperarAcessoGestor(){
   let token=localStorage.getItem('fsj_access_token');
