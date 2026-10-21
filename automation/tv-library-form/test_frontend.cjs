@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert'),{JSDOM}=require('jsdom');
+(async()=>{
+ const html='<div id="content"><label id="screenPicker">O que deseja fazer?<select id="screenSelect"></select></label><section id="projection"><div id="videoStage"><video id="player"></video></div></section><section id="libraryUpload" hidden></section><section id="institutionalUpload" hidden></section><section id="accountsPanel" hidden></section></div>';const dom=new JSDOM(html,{url:'https://192.168.1.114/?fsj_aba=1',runScripts:'outside-only'}),w=dom.window;
+ w.eval(`const $=id=>document.getElementById(id);let projectedVideo=null;let owner=false,busy=false,library=[{id:'a',title:'Campo',theme:'Campo',can_edit_theme:true},{id:'b',title:'Aves',theme:'Aviário'}];let requests=[];function api(path,data){requests.push({path,data});return Promise.resolve({videos:library});}function refresh(){return Promise.resolve();}function fsjOptions(el,opts){const v=el.value;el.replaceChildren(...opts);if(opts.some(o=>o.value===v))el.value=v;}function project(v){projectedVideo=v;window.played=v;}function status(s){window.message=s;}function fsjTVPageUnits(){return [];}window.fsjChooseVideoScreen=id=>window.screenChosen=id;`+fs.readFileSync(__dirname+'/form.js','utf8'));
+ const d=w.document;d.dispatchEvent(new w.Event('fsj:session'));assert(d.getElementById('institutionalUpload').hidden);assert(d.getElementById('accountsPanel').hidden);
+ d.getElementById('fsjTopicAdd').click();await new Promise(r=>setTimeout(r,0));assert(d.getElementById('fsjTopicMessage').textContent.includes('Escolha um tema'));
+ const theme=d.getElementById('fsjLibraryTopic');theme.value='Aviário';theme.dispatchEvent(new w.Event('change'));assert.equal(d.getElementById('fsjTopicVideo').options.length,2);assert.equal(d.getElementById('fsjTopicVideo').options[1].value,'b');
+ d.getElementById('fsjTopicWatch').click();assert(d.getElementById('fsjTopicMessage').textContent.includes('Selecione um vídeo'));
+ theme.value='Campo';theme.dispatchEvent(new w.Event('change'));d.getElementById('fsjTopicVideo').value='a';d.getElementById('fsjTopicVideo').dispatchEvent(new w.Event('change'));assert(!d.getElementById('fsjTopicEdit').hidden);
+ d.getElementById('fsjEditTopic').value='Limpeza';d.getElementById('fsjTopicSave').click();await new Promise(r=>setTimeout(r,0));assert(d.getElementById('fsjTopicMessage').textContent.includes('Tema alterado'));
+ w.eval("project({id:'inst',institutional:true,youtube_id:'abcdefghijk'});");assert.equal(w.played,null);
+ w.close();console.log('PASS: tema obrigatório, filtro de vídeos, edição de tema e controles exclusivos ocultos');
+})().catch(e=>{console.error(e);process.exit(1)});
