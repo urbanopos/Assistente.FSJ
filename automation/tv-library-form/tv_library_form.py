@@ -113,7 +113,15 @@ def install(ns):
    with db() as c:
     row=c.execute('SELECT v.*,s.created_by FROM videos v LEFT JOIN tv_library_sources s ON s.video_id=v.id WHERE v.id=?',(ident,)).fetchone()
     if not row or not self.allowed(u,row):return self.reply(404,{'error':'Vídeo indisponível.'})
-    if path=='/api/tv-library/theme':
+    if path=='/api/tv-library/delete':
+     if u['role']!='owner':return self.reply(403,{'error':'Somente o Proprietário pode excluir vídeos.'})
+     if row['institutional']:return self.reply(409,{'error':'O vídeo institucional ativo está protegido.'})
+     c.execute('DELETE FROM library_metadata WHERE video_id=?',(ident,))
+     c.execute('DELETE FROM tv_library_sources WHERE video_id=?',(ident,))
+     c.execute('DELETE FROM videos WHERE id=?',(ident,))
+     audit(c,u['id'],ident,'tv-library-delete')
+     # Não remover o arquivo físico enquanto a transação estiver aberta.
+    elif path=='/api/tv-library/theme':
      topic=theme(data.get('theme'))
      if u['role']!='owner' and row['created_by']!=u['id']:return self.reply(403,{'error':'A alteração do tema cabe ao autor do envio ou ao Proprietário.'})
      c.execute('INSERT INTO library_metadata(video_id,theme,description) VALUES(?,?,?) ON CONFLICT(video_id) DO UPDATE SET theme=excluded.theme',(ident,topic,''))
@@ -124,6 +132,9 @@ def install(ns):
      c.execute("UPDATE videos SET institutional=1,allowed='*' WHERE id=?",(ident,))
      audit(c,u['id'],ident,'tv-library-institutional')
     else:return self.reply(404,{'error':'Ação inválida.'})
+   if path=='/api/tv-library/delete' and row['mime']!='text/youtube':
+    # A biblioteca usa o ID aleatório como nome do arquivo armazenado.
+    (DATA/'videos'/ident).unlink(missing_ok=True)
    return self.reply(obj={'ok':True})
   except (ValueError,TypeError) as e:return self.reply(400,{'error':str(e)})
  H._do_POST=post
