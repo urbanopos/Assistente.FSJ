@@ -6,6 +6,7 @@
  async function access(){let token=await recuperarAcessoGestor();if(!token)throw Error('Entre no Assistente FSJ para abrir a TV FSJ.');let exp=0;try{const data=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');exp=JSON.parse(atob(data)).exp||0;}catch{}if(exp<Date.now()/1000+90)token=await renovarSessao();return token;}
  window.addEventListener('message',async event=>{
   if(event.source!==frame.contentWindow||event.origin!==vm.origin||!fsjPainelPronto||window.fsjExited)return;
+  if(event.data?.type==='fsj-tv-tasks'){navTo('demandas');return;}
   const data=event.data;if(!data||typeof data.nonce!=='string'||!/^[0-9a-f-]{36}$/i.test(data.nonce))return;
   if(data.type==='fsj-sso-ready'){
    nonce=data.nonce;if(working)return;working=true;
