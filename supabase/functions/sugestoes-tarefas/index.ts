@@ -15,7 +15,7 @@ Deno.serve(async req=>{
    const r=await fetch(base+'/auth/v1/user',{headers:{apikey:key,Authorization:auth},signal:AbortSignal.timeout(10000)});
    if(!r.ok)return reply({erro:'Entre como gestor'},401);const user=await r.json();
    const owners=await db('fsj_titularidade?auth_user_id=eq.'+encodeURIComponent(user.id)+'&select=pessoa_id');if(!owners.length)return reply({erro:'Acesso exclusivo do gestor'},403);
-   if(d.action==='gestor_listar')return reply({sugestoes:await db('sugestoes_tarefas?select=id,pessoa_id,descricao,estado,observacoes,criado_em,decidido_em,tarefa_gestor_id,tipo&order=criado_em.desc&limit=200')});
+   if(d.action==='gestor_listar')return reply({sugestoes:await db('sugestoes_tarefas?select=id,numero,pessoa_id,descricao,estado,observacoes,criado_em,decidido_em,tarefa_gestor_id,tipo&order=criado_em.desc&limit=200')});
    if(!uuid(d.id)||!['aprovada','rejeitada'].includes(d.estado)||typeof d.observacoes!=='string'||!d.observacoes.trim()||d.observacoes.length>2000)return reply({erro:'Informe a decisão e a justificativa'},400);
    return reply({sugestao:await db('rpc/fsj_decidir_sugestao',{p_id:d.id,p_estado:d.estado,p_observacoes:d.observacoes,p_gestor:user.id})});
   }
@@ -24,7 +24,7 @@ Deno.serve(async req=>{
   if(!link||Date.parse(link.expira_em)<=Date.now())return reply({erro:'Link expirado. Abra o quadro atual para consultar suas sugestões.'},403);
   const [people,assigned]=await Promise.all([db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&ativo=eq.true&select=id'),db('tarefa_responsaveis?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=tarefa_id')]);
   if(!people.length||!assigned.length)return reply({erro:'Acesso indisponível'},403);
-  if(d.action==='listar')return reply({sugestoes:await db('sugestoes_tarefas?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=id,descricao,estado,observacoes,criado_em,decidido_em,tipo&order=criado_em.desc&limit=100')});
+  if(d.action==='listar')return reply({sugestoes:await db('sugestoes_tarefas?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=id,numero,descricao,estado,observacoes,criado_em,decidido_em,tipo&order=criado_em.desc&limit=100')});
   if(!['enviar','enviar_duvida'].includes(d.action)||typeof d.descricao!=='string'||!d.descricao.trim()||d.descricao.length>2000||!uuid(d.requisicao))return reply({erro:'Descreva a sugestão em até 2000 caracteres'},400);
   return reply({sugestao:await db('rpc/fsj_enviar_sugestao_tipo',{p_token:d.token,p_descricao:d.descricao,p_requisicao:d.requisicao,p_tipo:d.action==='enviar_duvida'?'duvida':'sugestao'})});
  }catch(error){return reply({erro:error instanceof SyntaxError?'Pedido inválido':String((error as Error).message||'Falha ao registrar')},400);}
