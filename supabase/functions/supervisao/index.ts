@@ -10,8 +10,13 @@ Deno.serve(async req=>{
  if(!key)return reply({erro:'Servico indisponivel'},503);
  try{
   const data=await req.json();
-  if(['available','demands'].includes(data.action)){
+  if(['available','demands','archive'].includes(data.action)){
    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(data.token||'')))return reply({erro:'Link invalido'},400);
+   if(data.action==='archive'){
+    if(typeof data.tarefa_id!=='string'||data.tarefa_id.length>200)return reply({erro:'Tarefa inválida'},400);
+    try{return reply(await db('rpc/fsj_aprovar_arquivamento',{p_tarefa:data.tarefa_id,p_token:data.token}));}
+    catch(e){return reply({erro:(e as Error).message},403);}
+   }
    if(data.action==='demands'){
     try{
      const result=await db('rpc/fsj_supervisor_demandas',{p_token:data.token});
@@ -32,6 +37,11 @@ Deno.serve(async req=>{
   const auth=await fetch(base+'/auth/v1/user',{headers:{apikey:key,Authorization:authorization},signal:AbortSignal.timeout(10000)});
   if(!auth.ok)return reply({erro:'Sessao expirada; entre novamente'},401);
   const user=await auth.json();if(String(user.email||'').toLowerCase()!=='urbanopos@yahoo.com.br')return reply({erro:'Acesso exclusivo do gestor'},403);
+  if(data.action==='archive-owner'){
+   if(typeof data.tarefa_id!=='string'||data.tarefa_id.length>200)return reply({erro:'Tarefa inválida'},400);
+   try{return reply(await db('rpc/fsj_aprovar_arquivamento',{p_tarefa:data.tarefa_id,p_auth:user.id}));}
+   catch(e){return reply({erro:(e as Error).message},403);}
+  }
   if(data.action==='manager-list'){
    const [supervisores,pessoas,grupos]=await Promise.all([db('supervisores_fsj?select=*'),db('supervisores_pessoas?select=*'),db('supervisores_grupos?select=*')]);
    return reply({supervisores:supervisores.map((s:any)=>({...s,pessoas:pessoas.filter((p:any)=>p.supervisor_id===s.pessoa_id).map((p:any)=>p.pessoa_id),grupos:grupos.filter((g:any)=>g.supervisor_id===s.pessoa_id).map((g:any)=>g.grupo_id)}))});
