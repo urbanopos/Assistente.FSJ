@@ -3,7 +3,7 @@ export function localDay(now = new Date()) {
 }
 export function eligible(tasks, assignments, returns, pid, day) {
   const assigned = new Set(assignments.filter(a=>a.pessoa_id===pid).map(a=>a.tarefa_id));
-  return tasks.filter(t=>assigned.has(t.id) && (t.diaria || t.situacao!=='Concluída') &&
+  return tasks.filter(t=>t.situacao!=='Arquivado' && assigned.has(t.id) && (t.diaria || t.situacao!=='Concluída') &&
     !returns.some(r=>r.tarefa_id===t.id && r.tipo==='sim' && (t.diaria ? localDay(new Date(r.criado_em))===day : true)));
 }
 export function normalizePhone(value) {
