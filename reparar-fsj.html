@@ -3,4 +3,21 @@ const log=document.getElementById('log'),home=new URL('./index.html',location.hr
 async function check(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});return r.ok?'OK ('+r.status+')':'Falha HTTP '+r.status}catch(e){return 'Falha de rede ou tempo excedido: '+e.name}finally{clearTimeout(t)}}
 document.getElementById('check').onclick=async()=>{log.textContent='Verificando conexão...';const a=await check(new URL('./index.html?_fsj_diag='+Date.now(),location.href));const b=await check(new URL('./app-maintenance.js?_fsj_diag='+Date.now(),location.href));log.textContent='Página principal: '+a+'\nArquivos de manutenção: '+b+'\nConexão: '+(navigator.onLine?'dispositivo conectado':'dispositivo sem conexão')+'\nSe ambos estiverem OK, mas a tela continuar travada, pode haver falha na autenticação ou no carregamento de dados.'};
 document.getElementById('repair').onclick=async()=>{if(!confirm('Reparar arquivos temporários? Os dados e a sessão serão preservados.'))return;log.textContent='Verificando arquivos temporários...';try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs){if(r.scope.startsWith(new URL('./',location.href).href))await r.update().catch(()=>{});}}if('caches' in window){const keys=await caches.keys();let n=0;for(const key of keys){if(/fsj|assistente/i.test(key)){await caches.delete(key);n++;}}log.textContent='Reparo concluído. '+n+' cache(s) do aplicativo renovado(s). Toque em Abrir Assistente FSJ.';}else log.textContent='Reparo concluído sem caches acessíveis. Toque em Abrir Assistente FSJ.';}catch(e){log.textContent='Reparo parcial: '+e.message+'. Não foram apagados dados pessoais.'}const u=new URL('./index.html',location.href);u.searchParams.set('_fsj_repair',Date.now().toString());document.getElementById('open').href=u.href};
+
+async function executarReparoAutomatico(){
+ const btns=[document.getElementById('check'),document.getElementById('repair')];
+ btns.forEach(b=>b.disabled=true);
+ log.textContent='Diagnóstico e reparo automático em andamento...';
+ const [pagina,arquivo]=await Promise.all([check(new URL('./index.html?_fsj_diag='+Date.now(),location.href)),check(new URL('./app-maintenance.js?_fsj_diag='+Date.now(),location.href))]);
+ let n=0,avisos=[];
+ try{
+  if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const reg of regs){if(reg.scope.startsWith(new URL('./',location.href).href)){try{await reg.update()}catch(e){avisos.push('Atualização do serviço indisponível')}}}}
+  if('caches' in window){const keys=await caches.keys();for(const key of keys){if(/fsj|assistente/i.test(key)){try{if(await caches.delete(key))n++}catch(e){avisos.push('Cache '+key+' não pôde ser renovado')}}}}
+ }catch(e){avisos.push('Reparo parcial: '+e.message)}
+ const u=new URL('./index.html',location.href);u.searchParams.set('_fsj_repair',Date.now().toString());document.getElementById('open').href=u.href;
+ log.textContent='Página principal: '+pagina+'\\nArquivo de manutenção: '+arquivo+'\\nCaches renovados: '+n+(avisos.length?'\\n'+avisos.join('; '):'')+'\\nAbrindo o aplicativo...';
+ if(pagina.startsWith('OK')){setTimeout(()=>location.replace(u.href),1200)}
+ else{log.textContent+='\\nNão foi possível acessar a página principal. Verifique a conexão e tente novamente.';btns.forEach(b=>b.disabled=false)}
+}
+if(new URLSearchParams(location.search).get('auto')==='1')executarReparoAutomatico();
 </script></body></html>
