@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assistente FSJ - Tarefa</title>
-<meta name="fsj-build" content="20261021-saida-fechar-02">
+<meta name="fsj-build" content="20261021-watchdog-03">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Assistente FSJ">
@@ -142,7 +142,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261021-saida-fechar-02';
+const FSJ_BUILD='20261021-watchdog-03';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -770,7 +770,24 @@ async function fsjVerificarVersao(){
 }
 
 async function carregarArmazenagem(){fsjPainelPronto=false;gestor.classList.add('hidden');document.querySelectorAll('.topnav button').forEach(b=>b.disabled=true);capturarSessao();loginBox.classList.remove('hidden');let tok;try{tok=await recuperarAcessoGestor()}catch(e){loginStatus.textContent='Não foi possível recuperar sua sessão. Tente novamente ou abra um novo link de acesso.';return}if(!tok){loginStatus.textContent='Entre como Gestor para carregar a Armazenagem.';gestor.classList.add('hidden');return}let etapa='verificação da versão';try{if(!(await fsjVerificarVersao()))return;etapa='consulta dos cadastros e tarefas';loginStatus.textContent='Carregando dados atuais...';let [ps,gs,gms,ts,trs]=await Promise.all([api('/rest/v1/pessoas?select=*'),api('/rest/v1/grupos?select=*'),api('/rest/v1/grupo_membros?select=*'),api('/rest/v1/tarefas?select=*'),api('/rest/v1/tarefa_responsaveis?select=*')]);if((!ps.length&&S.people.length)||(!ts.length&&S.tasks.length))throw new Error('A Armazenagem retornou uma lista vazia. A cópia local foi preservada.');S.people=ps.map(x=>({id:x.id,name:x.nome,nick:x.identificacao,phone:x.whatsapp,type:x.tipo,active:x.ativo===true,videosChamadas:x.videos_chamadas===true,whatsapp7h:x.receber_tarefas_whatsapp===true,requireWeeklyOff:x.exigir_folga_semanal!==false,daysOff:x.folgas_semanais||[],datesOff:x.folgas_datas||[],vacationStart:x.ferias_inicio||null,vacationEnd:x.ferias_fim||null,workStart:(x.jornada_inicio||'07:00').slice(0,5),lunchStart:x.almoco_inicio?x.almoco_inicio.slice(0,5):'12:00'}));S.groups=gs.map(g=>({id:g.id,name:g.nome,members:gms.filter(m=>m.grupo_id===g.id).map(m=>m.pessoa_id)}));S.tasks=ts.map(t=>({id:t.id,code:t.codigo_tarefa,text:t.descricao,personIds:trs.filter(r=>r.tarefa_id===t.id).map(r=>r.pessoa_id),groupId:t.grupo_id||'',daily:!!t.diaria,frequency:t.periodicidade||(t.diaria?'diaria':'pontual'),priority:t.prioridade||'normal',status:t.situacao,created:t.criada_em,response:'',question:'',completedBy:t.concluida_por||'',attachments:[]}));rollover();etapa='consulta das respostas e execuções';await fsjAtualizarRetornos(false);save();loginStatus.textContent='Gestor autenticado • Armazenagem conectada: '+S.people.length+' pessoas, '+S.groups.length+' grupos, '+S.tasks.length+' tarefas.';brisaDadosCarregados=true;loginBox.classList.add('hidden');fsjPainelPronto=true;document.querySelectorAll('.topnav button').forEach(b=>b.disabled=false);gestor.classList.remove('hidden');etapa='organização das telas';render();syncInfo();if(typeof carregarFolgas==='function')carregarFolgas();if(typeof fsjLoadSupervisors==='function')fsjLoadSupervisors();if(typeof fsjLoadOwnership==='function')fsjLoadOwnership();navTo('dashboard',document.querySelector('.topnav button'));fsjRestoreAppReturn()}catch(e){console.error('Falha no carregamento FSJ:',etapa,e);loginBox.classList.remove('hidden');fsjPainelPronto=false;gestor.classList.add('hidden');document.querySelectorAll('.topnav button').forEach(b=>b.disabled=true);ultimaAtualizacao.textContent='Atualização não concluída';loginStatus.textContent='Carregamento interrompido na etapa: '+etapa+'. '+(e.name==='TimeoutError'||e.name==='AbortError'?'A consulta demorou além do esperado. ':e instanceof TypeError?'Não foi possível concluir a conexão ou preparar a tela. ':'Não foi possível concluir a consulta. ')+'Clique em Tentar novamente. Se o acesso tiver expirado, solicite um novo link. A cópia local foi preservada.'}}
+// Protecao contra carregamento interminavel: nunca apagar registros locais automaticamente.
+let fsjWatchdogTimer=setTimeout(()=>{
+ if(window.fsjExited||fsjPainelPronto)return;
+ let panel=document.getElementById('fsjRecoveryPanel');
+ if(!panel){
+  panel=document.createElement('section');panel.id='fsjRecoveryPanel';
+  panel.setAttribute('role','alert');
+  panel.style.cssText='position:fixed;z-index:2147483647;inset:auto 12px 16px;background:#fff;color:#173a2a;border:2px solid #176341;border-radius:14px;padding:16px;box-shadow:0 4px 30px #0005;font:16px system-ui;max-height:65dvh;overflow:auto';
+  panel.innerHTML='<strong>Assistente FSJ: carregamento demorado</strong><p>A verificação ultrapassou 25 segundos. Seus dados não foram apagados. Você pode tentar novamente ou abrir o diagnóstico sem perder o acesso.</p><p><a href="./reparar-fsj.html" style="display:inline-block;padding:12px;background:#176341;color:white;border-radius:8px">ABRIR DIAGNÓSTICO</a> <button type="button" id="fsjRecoveryRetry" style="padding:12px">TENTAR NOVAMENTE</button></p>';
+  document.body.appendChild(panel);
+  panel.querySelector('#fsjRecoveryRetry').addEventListener('click',()=>location.reload());
+ }
+},25000);
 const brisaCargaInicial=carregarArmazenagem();
+Promise.resolve(brisaCargaInicial).finally(()=>{
+ clearTimeout(fsjWatchdogTimer);
+ if(fsjPainelPronto)document.getElementById('fsjRecoveryPanel')?.remove();
+});
 brisaVerificarIA();
 
 let fsjUpdatePending=false,fsjUpdateChecking=false,fsjPendingVersion=null;
