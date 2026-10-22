@@ -11,3 +11,11 @@ Antes de modificar ou publicar, leia docs/decisoes/atualizacao-automatica.md.
 - Nao alterar esta decisao sem nova instrucao explicita do proprietario. Nao perguntar novamente sobre uma preferencia ja definida.
 - Antes de publicar mudancas em atualizacao, navegacao, instaladores ou versao, executar `node tests/automatic-update-contract.cjs` na raiz. Corrigir falhas antes de prosseguir.
 - Se o teste acusar regressao, reparar o mecanismo; nao enfraquecer o teste para aprovar a alteracao.
+
+## Manual de operação e manutenção obrigatório
+
+- Toda melhoria, correção ou mudança de comportamento deve atualizar docs/MANUAL-OPERACAO-MANUTENCAO.md e o documento do módulo na mesma entrega, antes de declarar o trabalho concluído.
+- Documentar fluxo de operação, perfis/permissões, versão ou commit, validações, instalação, backup e recuperação aplicáveis.
+- Separar solicitado, publicado, instalado e validado; não apresentar critérios planejados como funcionalidades implantadas.
+- Preservar decisões substituídas como histórico com indicação clara da decisão vigente; nunca orientar restauração de cartões PDF abandonados.
+- Mudanças exclusivamente documentais não autorizam testes de envio, alteração de agendamentos ou reinício de serviços.

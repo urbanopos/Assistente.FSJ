@@ -14,6 +14,8 @@ O repositório permanece público para a hospedagem atual. Os termos do GitHub p
 
 ## Operação
 
+Manual vigente: [Manual de operação e manutenção](./docs/MANUAL-OPERACAO-MANUTENCAO.md). Toda melhoria deve atualizar este manual e a documentação do módulo na mesma entrega, distinguindo publicação, instalação e validação.
+
 - Automação diária: [automation/README.md](./automation/README.md).
 - Folgas e feriados: [docs/folgas-semana-feriados.md](./docs/folgas-semana-feriados.md).
 - Supervisores: [docs/supervisores-demandas.md](./docs/supervisores-demandas.md).
