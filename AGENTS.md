@@ -19,3 +19,9 @@ Antes de modificar ou publicar, leia docs/decisoes/atualizacao-automatica.md.
 - Separar solicitado, publicado, instalado e validado; não apresentar critérios planejados como funcionalidades implantadas.
 - Preservar decisões substituídas como histórico com indicação clara da decisão vigente; nunca orientar restauração de cartões PDF abandonados.
 - Mudanças exclusivamente documentais não autorizam testes de envio, alteração de agendamentos ou reinício de serviços.
+
+## Perfil Gestor
+
+- Ler docs/decisoes/perfil-gestor.md antes de alterar permissões. A decisão de 22/10/2026 substitui a limitação anterior de apenas acompanhar/orientar, mas não equivale a implantação.
+- Gestor operacional não recebe administração técnica, titularidade, credenciais privilegiadas nem poder de nomear Gestores. Validar permissões no servidor, sem ampliar acesso apenas por ocultação de botões.
+- Não prometer impedir cópia de código público ou entregue ao navegador. Registrar honestamente o estado de implantação e validação.

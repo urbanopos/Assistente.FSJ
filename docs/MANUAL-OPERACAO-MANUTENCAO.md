@@ -21,7 +21,7 @@ Toda melhoria, correção ou mudança de fluxo deve atualizar este manual e o do
 
 O Proprietário administra o sistema e também pode ser responsável por tarefas pessoais. A atividade não precisa representar uma ordem para funcionário. Uma tarefa deve ter o responsável correto no cadastro.
 
-Funcionários e visitantes usam seu acesso pessoal para consultar e responder às tarefas permitidas. Supervisão permite acompanhar tarefas de terceiros dentro do escopo autorizado, sem presumir poder de execução, cadastro ou administração. Gestor orienta e acompanha; não recebe automaticamente poder de criar tarefas. Delegações dependem de autorização explícita e validação no servidor.
+Funcionários e visitantes usam seu acesso pessoal para consultar e responder às tarefas permitidas. Supervisão permite acompanhar tarefas de terceiros dentro do escopo autorizado, sem presumir poder de execução, cadastro ou administração. A nova definição do Proprietário amplia o Gestor para atuação operacional, inclusive criação de tarefas, preservando a administração técnica exclusiva. Essa ampliação ainda depende de implantação e testes; consultar [perfil Gestor](decisoes/perfil-gestor.md). As permissões existentes não foram ampliadas por esta revisão documental. Delegações dependem de autorização explícita e validação no servidor.
 
 A autorização de Vídeos e Chamadas é controlada em Pessoas e não amplia as permissões de tarefas. Não compartilhar links pessoais nem credenciais.
 
@@ -120,3 +120,5 @@ GitHub Actions depende do executor conectado. A verificação verificar-ponte-vm
 22/10/2026: consolidação dos fluxos pessoais e administrativos, SIM/NÃO no desktop, indicador diário, revisão de conclusão, biblioteca por nome/tema e estado real do canal remoto. Instituída atualização obrigatória do manual a cada melhoria. Esta revisão documental não executa rotinas, instala pacotes ou altera dados operacionais.
 
 22/10/2026: corrigido retorno à lista do Proprietário após resposta confirmada SIM ou NÃO, preservando responsável/filtro e mantendo erros e falhas de anexos visíveis. Testes de interface usam respostas simuladas; validação no aparelho permanece necessária.
+
+22/10/2026: registrada nova definição do Gestor operacional, substituindo acompanhamento/orientação apenas. Administração técnica e titularidade exclusivas do Proprietário. Ampliação de permissões pendente de implantação; limites de confidencialidade do repositório público e do código cliente documentados.
