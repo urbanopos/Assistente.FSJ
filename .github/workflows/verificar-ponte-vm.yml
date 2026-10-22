@@ -1,0 +1,38 @@
+name: Verificar ponte Desktop VM
+on:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  verificar:
+    runs-on: [self-hosted, fsj-whatsapp]
+    timeout-minutes: 2
+    steps:
+      - name: Verificar acesso existente sem alterar o computador
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zonaFSJ = [TimeZoneInfo]::FindSystemTimeZoneById("SA Eastern Standard Time")
+          $horaFSJ = [TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcNow, $zonaFSJ)
+          if ($horaFSJ.Hour -lt 8) {
+            throw "Verificacao permitida somente a partir das 8h de Recife para preservar a rotina das 7h."
+          }
+          $tarefaFSJ = Get-ScheduledTask -TaskName "FSJ-Tarefas-07h" -ErrorAction SilentlyContinue
+          if ($null -ne $tarefaFSJ -and $tarefaFSJ.State -eq "Running") {
+            throw "Rotina de tarefas em execucao. Verificacao interrompida."
+          }
+          "Desktop recebeu a verificacao." >> $env:GITHUB_STEP_SUMMARY
+          if ($null -eq $tarefaFSJ) {
+            "Agendamento local nao localizado nesta conta; situacao nao confirmada." >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            "Agendamento local localizado. Nenhuma alteracao realizada." >> $env:GITHUB_STEP_SUMMARY
+          }
+          $sshFSJ = Join-Path $env:WINDIR "System32\OpenSSH\ssh.exe"
+          if (-not (Test-Path $sshFSJ)) { throw "Cliente SSH nao localizado." }
+          $saidaFSJ = & $sshFSJ -T -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=5 -o ConnectionAttempts=1 -o ServerAliveInterval=5 -o ServerAliveCountMax=1 urbano@192.168.77.2 "printf FSJ_VM_OK" 2>&1
+          $codigoFSJ = $LASTEXITCODE
+          if ($codigoFSJ -eq 0 -and ($saidaFSJ -join "") -eq "FSJ_VM_OK") {
+            "SSH Desktop para VM confirmado com autenticacao existente." >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            "SSH automatico nao confirmado. Pode faltar chave autorizada, identidade do servidor conhecida ou conectividade. Nenhuma senha solicitada e nenhum arquivo alterado." >> $env:GITHUB_STEP_SUMMARY
+            exit 1
+          }
