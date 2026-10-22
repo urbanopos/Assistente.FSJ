@@ -1,0 +1,32 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom');
+(async()=>{
+ const html='<div id="content"><label id="screenPicker">O que deseja fazer?<select id="screenSelect"></select></label><section id="projection"><div id="videoStage"><video id="player"></video></div></section><section id="libraryUpload"></section><section id="institutionalUpload"></section><section id="accountsPanel"></section></div>';
+ const dom=new JSDOM(html,{url:'https://192.168.1.114/?fsj_aba=1',runScripts:'outside-only'}),w=dom.window,d=w.document;
+ let fileRequest;
+ w.fetch=async(url,options)=>{fileRequest={url,options};return {ok:true,json:async()=>({ok:true,id:'uploaded'})};};
+ w.eval("let owner=true,busy=false,projectedVideo=null,library=[{id:'a',title:'Treinamento',theme:'Outros',youtube_id:'abcdefghijk',can_edit_theme:true},{id:'b',title:'Treinamento',theme:'Outros',youtube_id:'abcdefghijk',can_edit_theme:true},{id:'c',title:'Treinamento',theme:'Outros',youtube_id:'lmnopqrstuv',can_edit_theme:true},{id:'legacy',title:'Antigo',theme:'Outros',can_edit_theme:true}];let requests=[];function api(path,data){requests.push({path,data});if(path==='/api/tv-library/youtube')library.push({id:'new',title:data.title,theme:data.theme,youtube_id:'12345678901'});if(path==='/api/tv-library/theme')library.find(v=>v.id===data.id).theme=data.theme;return Promise.resolve({videos:library});}function refresh(){return Promise.resolve();}function fsjOptions(el,opts){const old=el.value;el.replaceChildren(...opts);if(opts.some(o=>o.value===old))el.value=old;}function project(v){projectedVideo=v;}function status(){}function fsjTVPageUnits(){return [];}window.testRequests=requests;window.testLibrary=()=>library;"+fs.readFileSync(__dirname+'/form.js','utf8'));
+ d.dispatchEvent(new w.Event('fsj:session'));
+ const theme=d.getElementById('fsjLibraryTopic'),select=d.getElementById('fsjTopicVideo');
+ theme.value='Outros';theme.dispatchEvent(new w.Event('change'));
+ assert.equal(select.options.length,4);assert(![...select.options].some(o=>o.value==='b'));
+ assert.equal(new Set([...select.options].map(o=>o.text)).size,select.options.length);
+ assert(d.getElementById('fsjStageDeleteVideo'));assert(d.getElementById('fsjInstitutionalCheckbox'));
+ d.getElementById('fsjTopicYoutube').value='https://youtu.be/12345678901';
+ d.getElementById('fsjTopicAdd').click();await new Promise(r=>setTimeout(r,0));
+ assert.match(d.getElementById('fsjTopicMessage').textContent,/nome do vídeo/);
+ assert.equal(w.testRequests.filter(r=>r.path==='/api/tv-library/youtube').length,0);
+ d.getElementById('fsjTopicTitle').value='Manejo dos pintinhos';d.getElementById('fsjTopicAdd').click();await new Promise(r=>setTimeout(r,0));
+ assert.equal(w.testRequests.find(r=>r.path==='/api/tv-library/youtube').data.title,'Manejo dos pintinhos');
+ const file=new w.File(['video'],'captura.mp4',{type:'video/mp4'});
+ Object.defineProperty(d.getElementById('fsjTopicFile'),'files',{configurable:true,value:[file]});
+ d.getElementById('fsjTopicFile').dispatchEvent(new w.Event('change'));
+ assert.equal(d.getElementById('fsjTopicTitle').value,'captura');
+ d.getElementById('fsjTopicTitle').value='Limpeza dos bebedouros';d.getElementById('fsjTopicAdd').click();await new Promise(r=>setTimeout(r,0));
+ assert.equal(new URL(fileRequest.url,w.location.href).searchParams.get('title'),'Limpeza dos bebedouros');
+ select.value='legacy';select.dispatchEvent(new w.Event('change'));assert(!d.getElementById('fsjTopicEdit').hidden);assert(d.getElementById('fsjTopicEdit').open);
+ d.getElementById('fsjEditTopic').value='Campo';d.getElementById('fsjTopicSave').click();await new Promise(r=>setTimeout(r,0));
+ assert.equal(w.testLibrary().find(v=>v.id==='legacy').theme,'Campo');
+ assert(w.testLibrary().some(v=>v.id==='a')&&w.testLibrary().some(v=>v.id==='b'));
+ dom.window.close();console.log('PASS: unique selections, same-title distinct videos kept, names for link/file, old-theme edit and existing owner controls');
+})().catch(e=>{console.error(e);process.exitCode=1;});
+

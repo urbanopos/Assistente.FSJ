@@ -19,6 +19,9 @@ def youtube(value):
  else:ident=''
  if not re.fullmatch(r'[a-zA-Z0-9_-]{11}',ident):raise ValueError('Link de vídeo do YouTube inválido.')
  return ident
+def fill_legacy_themes(c):
+ c.execute("INSERT INTO library_metadata(video_id,theme,description) SELECT v.id,'Outros','' FROM videos v WHERE NOT EXISTS(SELECT 1 FROM library_metadata m WHERE m.video_id=v.id)")
+ c.execute("UPDATE library_metadata SET theme='Outros' WHERE theme IS NULL OR lower(trim(theme)) IN ('','sem tema','sem classificação','sem classificacao','sem categoria')")
 def install(ns):
  H=ns['Handler'];db=ns['db'];DATA=ns['DATA'];ROOT=ns['ROOT'];audit=ns['audit']
  old_init=ns['init']
@@ -27,10 +30,7 @@ def install(ns):
   with db() as c:
    c.execute('CREATE TABLE IF NOT EXISTS library_metadata(video_id TEXT PRIMARY KEY,theme TEXT NOT NULL DEFAULT \'\',description TEXT NOT NULL DEFAULT \'\')')
    c.execute('CREATE TABLE IF NOT EXISTS tv_library_sources(video_id TEXT PRIMARY KEY,youtube_id TEXT,created_by TEXT NOT NULL)')
-   # Recupera a classificação dos vídeos anteriores à biblioteca por temas.
-   # Não altera vídeos já classificados, arquivos ou links existentes.
-   c.execute("INSERT INTO library_metadata(video_id,theme,description) SELECT v.id,'Outros','' FROM videos v LEFT JOIN library_metadata m ON m.video_id=v.id WHERE m.video_id IS NULL")
-   c.execute("UPDATE library_metadata SET theme='Outros' WHERE theme IS NULL OR TRIM(theme)=''")
+   fill_legacy_themes(c)
  ns['init']=init
  def identity(self):
   u=self.user()
@@ -142,3 +142,4 @@ def install(ns):
    return self.reply(obj={'ok':True})
   except (ValueError,TypeError) as e:return self.reply(400,{'error':str(e)})
  H._do_POST=post
+
