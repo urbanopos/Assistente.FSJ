@@ -181,6 +181,15 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 #fichaPessoa.fsj-ficha-editando #personBasicFields .checks>.muted{grid-column:1/5!important;min-width:0!important}
 @media(max-width:1100px){#fichaPessoa.fsj-ficha-editando #personBasicFields .checks{grid-template-columns:repeat(2,minmax(0,1fr))!important}#fichaPessoa.fsj-ficha-editando #personBasicFields .checks>.fsj-ficha-botoes{grid-column:1/-1!important;grid-row:auto!important;justify-content:flex-start!important;width:100%!important}#fichaPessoa.fsj-ficha-editando #personBasicFields .checks>.muted{grid-column:1/-1!important}}
 @media(max-width:700px){#fichaPessoa.fsj-ficha-editando #personBasicFields .checks>.fsj-ficha-botoes{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important}#fichaPessoa.fsj-ficha-editando #personBasicFields .checks>.fsj-ficha-botoes button{width:100%!important;padding:7px 2px!important;font-size:11px!important;white-space:normal!important}}
+
+/* Correção definitiva: comandos ficam diretamente sob os botões WhatsApp, no mesmo bloco. */
+#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-end!important;gap:9px!important}
+#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo>.fsj-ficha-envio{margin:0!important;align-self:stretch!important}
+#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo>.fsj-ficha-botoes{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:center!important;gap:5px!important;margin:0!important;padding:0!important;width:100%!important;max-width:100%!important;justify-content:stretch!important;flex-wrap:nowrap!important}
+#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo>.fsj-ficha-botoes button{display:block!important;box-sizing:border-box!important;min-width:0!important;width:100%!important;min-height:36px!important;padding:7px 3px!important;font-size:12px!important;white-space:nowrap!important}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .checks{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:9px!important}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .checks>.fsj-ficha-botoes{display:none!important}
+@media(max-width:700px){#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo>.fsj-ficha-botoes button{font-size:11px!important;padding:7px 2px!important}}
 </style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-brisa-menu-02">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
@@ -1023,7 +1032,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
    const fields=basic.querySelector('.person-fields');
    const save=document.getElementById('savePersonSettingsBtn');
    const actionRow=save&&save.parentElement;
-   if(actionRow){actionRow.classList.add('fsj-ficha-botoes');if(check&&actionRow.parentElement!==check)check.append(actionRow);}
+   if(actionRow){actionRow.classList.add('fsj-ficha-botoes');if(!pessoaSelecionada&&check&&actionRow.parentElement!==check)check.append(actionRow);}
    const marker=people.querySelector('[data-owner-person]');
    const linha=marker&&marker.closest('div');
    if(linha){
@@ -1034,7 +1043,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
     if(envio&&fields){
      let slot=document.getElementById('fsjFichaEnvioAoLadoTipo');
      if(!slot){slot=document.createElement('div');slot.id='fsjFichaEnvioAoLadoTipo';fields.append(slot);}
-     envio.classList.add('fsj-ficha-envio');if(envio.parentElement!==slot)slot.append(envio);
+     envio.classList.add('fsj-ficha-envio');if(envio.parentElement!==slot)slot.prepend(envio);if(actionRow&&actionRow.parentElement!==slot)slot.append(actionRow);
      const confirmacao=envio.querySelector('button:not(.primary)');
      if(confirmacao&&!confirmacao.dataset.fsjStatusText){confirmacao.dataset.fsjStatusText='1';confirmacao.setAttribute('aria-label','Confirmar envio realizado no WhatsApp');}
     }
