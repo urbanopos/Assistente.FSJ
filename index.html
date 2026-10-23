@@ -547,12 +547,15 @@ function fsjTargetSelectionSync(){
  }
 }
 function renderTargets(){
+ // Preservar responsáveis já escolhidos quando a interface é redesenhada.
+ const selecionadosAntes=[...targetBox.querySelectorAll('.tm:checked')].map(x=>x.value);
+ const grupoAntes=targetBox.querySelector('.tg:checked')?.value||'';
  if(execType.value==='group'){
- targetBox.innerHTML='<label>Responsável pela tarefa — grupo existente</label><div class="checks">'+(S.groups.length?S.groups.map(g=>'<label><input class="tg" type="radio" name="taskGroup" value="'+g.id+'"> <b>'+esc(g.name)+'</b> — '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+'</label>').join(''):'<span class="muted">Nenhum grupo cadastrado.</span>')+'</div>';return;
+ targetBox.innerHTML='<label>Responsável pela tarefa — grupo existente</label><div class="checks">'+(S.groups.length?S.groups.map(g=>'<label><input class="tg" type="radio" name="taskGroup" value="'+g.id+'"> <b>'+esc(g.name)+'</b> — '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+'</label>').join(''):'<span class="muted">Nenhum grupo cadastrado.</span>')+'</div>';if(grupoAntes){const radio=[...targetBox.querySelectorAll('.tg')].find(x=>x.value===grupoAntes);if(radio)radio.checked=true;}return;
  }
  targetBox.replaceChildren();const label=document.createElement('label');label.htmlFor='taskPersonPicker';label.textContent='Selecione responsáveis';
  const select=document.createElement('select');select.id='taskPersonPicker';const hidden=document.createElement('div');hidden.hidden=true;
- for(const p of S.people){const input=document.createElement('input');input.type='checkbox';input.className='tm';input.value=p.id;hidden.append(input);}
+ for(const p of S.people){const input=document.createElement('input');input.type='checkbox';input.className='tm';input.value=p.id;input.checked=selecionadosAntes.includes(p.id);hidden.append(input);}
  const chosen=document.createElement('div');chosen.id='taskPeopleChosen';chosen.className='row';chosen.setAttribute('aria-label','Responsáveis selecionados');
  const hint=document.createElement('p');hint.className='muted';hint.textContent='Escolha uma pessoa. Para responsabilidade compartilhada, adicione outros participantes na mesma lista.';
  targetBox.append(label,select,chosen,hint,hidden);
