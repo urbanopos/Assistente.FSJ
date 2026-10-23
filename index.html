@@ -72,6 +72,11 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 
 
 
+
+/* Campo Tipo: mostrar integralmente Funcionário e demais categorias. */
+#fichaPessoa.fsj-ficha-editando .person-fields>div:has(#ptype){flex:1 1 190px!important;min-width:190px!important;max-width:100%}
+#fichaPessoa.fsj-ficha-editando #ptype{width:100%!important;min-width:0!important;box-sizing:border-box;padding-right:30px!important;text-overflow:clip!important}
+@media(max-width:700px){#fichaPessoa.fsj-ficha-editando .person-fields>div:has(#ptype){flex:1 1 170px!important;min-width:170px!important}}
 /* Contorno reforçado apenas no bloco cadastral da ficha selecionada. */
 #fichaPessoa.fsj-ficha-editando #personBasicFields{border:3px solid #243746!important;border-radius:11px!important;padding:12px!important;box-sizing:border-box;max-width:100%;overflow-wrap:anywhere}
 #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields{max-width:100%}
