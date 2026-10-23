@@ -70,6 +70,22 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 }
 #reservaInstallShare #fsjWebHomeActions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:stretch}#reservaInstallShare #fsjWebHomeActions>a,#reservaInstallShare #fsjWebHomeActions>button{display:flex!important;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:100%;min-width:0;margin:0!important;background:#176341;color:#fff;border:0;border-radius:10px;padding:10px 8px!important;min-height:54px;font:600 14px system-ui;text-align:center;text-decoration:none;white-space:normal;overflow-wrap:anywhere}#reservaInstallShare #fsjWebHomeActions img{width:25px!important;height:25px!important;flex:none;margin:0!important}@media(max-width:380px){#reservaInstallShare #fsjWebHomeActions>a,#reservaInstallShare #fsjWebHomeActions>button{font-size:12px}}
 
+
+/* Layout aprovado: ficha emoldurada, comandos na linha das marcações e envio ao lado de Tipo. */
+#fichaPessoa.fsj-ficha-editando{border:1px solid #b9d6e4;border-radius:14px;padding:14px;box-shadow:0 1px 3px #00000008}
+#fichaPessoa.fsj-ficha-editando .fsj-ficha-cabecalho{display:block;border:0;padding:0;margin:0}
+#fichaPessoa.fsj-ficha-editando #personBasicDetails{display:none}
+#fichaPessoa.fsj-ficha-editando #personBasicFields{border:1px solid #d1e3ed;border-radius:10px;padding:12px;margin:8px 0;background:#fff}
+#fichaPessoa.fsj-ficha-editando .person-fields{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px}
+#fichaPessoa.fsj-ficha-editando .person-fields>div{min-width:0}
+#fsjFichaEnvioAoLadoTipo{flex:2 1 310px!important;display:flex;align-items:flex-end}
+#fsjFichaEnvioAoLadoTipo .fsj-ficha-envio{padding:0!important;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#fsjFichaEnvioAoLadoTipo .fsj-ficha-envio button{min-height:38px!important}
+#fsjFichaEnvioAoLadoTipo .fsj-ficha-envio .muted{flex-basis:100%;font-size:12px}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .checks{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .checks .fsj-ficha-botoes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 0 auto!important}
+#fichaPessoa.fsj-ficha-editando #fsjFichaResumo{margin-top:8px}
+@media(max-width:700px){#fichaPessoa.fsj-ficha-editando{padding:8px}#fichaPessoa.fsj-ficha-editando #personBasicFields{padding:8px}#fsjFichaEnvioAoLadoTipo{flex:1 1 100%!important}#fsjFichaEnvioAoLadoTipo .fsj-ficha-envio{width:100%;display:grid;grid-template-columns:1fr 1fr}#fsjFichaEnvioAoLadoTipo .fsj-ficha-envio button{width:100%;font-size:12px;padding:6px}#fsjFichaEnvioAoLadoTipo .fsj-ficha-envio .muted{grid-column:1/-1}#fichaPessoa.fsj-ficha-editando #personBasicFields .checks .fsj-ficha-botoes{margin:0!important;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}#fichaPessoa.fsj-ficha-editando #personBasicFields .checks .fsj-ficha-botoes button{font-size:12px;padding:7px 2px;min-width:0}}
 /* Aba Pessoas: identificação e ações no mesmo cabeçalho da ficha. */
 .fsj-ficha-cabecalho{display:grid;grid-template-columns:minmax(240px,1fr) minmax(350px,auto);gap:12px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px}
 .fsj-ficha-identificacao{min-width:0}.fsj-ficha-identificacao h2{margin-bottom:8px}
@@ -864,30 +880,50 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 </script>
 
 <script>
-/* Reaproveita os controles existentes, sem duplicar ações nem alterar regras de envio. */
+/* Ficha de Pessoas: formulário emoldurado e ações nas linhas solicitadas. */
 (function(){
+ let ocupado=false;
  function organizar(){
-  const ficha=document.getElementById('fichaPessoa'),resumo=document.getElementById('fsjFichaResumo'),acoes=document.getElementById('fsjFichaAcoes'),people=document.getElementById('people');
-  if(!ficha||!resumo||!acoes||!people)return;
-  if(people.parentElement!==resumo)resumo.appendChild(people);
-  const save=document.getElementById('savePersonSettingsBtn');
-  const original=save&&save.parentElement;
-  if(original&&!original.classList.contains('fsj-ficha-botoes')){
-    original.classList.add('fsj-ficha-botoes');acoes.prepend(original);
-  }
-  const pessoa=people.querySelector('[data-owner-person]');
-  const linha=pessoa&&pessoa.closest('div');
-  if(linha){
-   const edit=linha.querySelector('button[onclick^="editPerson"]');
-   const del=linha.querySelector('button[onclick^="delPerson"]');
-   const botoes=acoes.querySelector('.fsj-ficha-botoes');
-   if(botoes){if(edit)botoes.append(edit);if(del)botoes.append(del);}
-   const envio=linha.querySelector('[data-fsj-individual]');
-   if(envio){envio.classList.add('fsj-ficha-envio');acoes.append(envio);}
-  }
-  acoes.hidden=!pessoa;
+  if(ocupado)return;ocupado=true;
+  try{
+   const ficha=document.getElementById('fichaPessoa'),basic=document.getElementById('personBasicFields'),resumo=document.getElementById('fsjFichaResumo'),people=document.getElementById('people'),acoes=document.getElementById('fsjFichaAcoes');
+   if(!ficha||!basic||!resumo||!people||!acoes)return;
+   const origem=document.getElementById('personBasicHome');
+   const pessoaSelecionada=!!document.getElementById('pid')?.value;
+   if(pessoaSelecionada&&basic.parentElement!==ficha){ficha.querySelector('.fsj-ficha-cabecalho').after(basic);}
+   if(!pessoaSelecionada&&origem&&basic.parentElement!==origem){origem.prepend(basic);}
+   if(people.parentElement!==resumo)resumo.append(people);
+   const check=basic.querySelector('.checks');
+   const fields=basic.querySelector('.person-fields');
+   const save=document.getElementById('savePersonSettingsBtn');
+   const actionRow=save&&save.parentElement;
+   if(actionRow){actionRow.classList.add('fsj-ficha-botoes');if(check&&actionRow.parentElement!==check)check.append(actionRow);}
+   const marker=people.querySelector('[data-owner-person]');
+   const linha=marker&&marker.closest('div');
+   if(linha){
+    const edit=linha.querySelector('button[onclick^="editPerson"]');
+    const del=linha.querySelector('button[onclick^="delPerson"]');
+    if(actionRow){if(edit)actionRow.append(edit);if(del)actionRow.append(del);}
+    const envio=linha.querySelector('[data-fsj-individual]');
+    if(envio&&fields){
+     let slot=document.getElementById('fsjFichaEnvioAoLadoTipo');
+     if(!slot){slot=document.createElement('div');slot.id='fsjFichaEnvioAoLadoTipo';fields.append(slot);}
+     envio.classList.add('fsj-ficha-envio');if(envio.parentElement!==slot)slot.append(envio);
+     const confirmacao=envio.querySelector('button:not(.primary)');
+     if(confirmacao&&!confirmacao.dataset.fsjStatusText){confirmacao.dataset.fsjStatusText='1';confirmacao.setAttribute('aria-label','Confirmar envio realizado no WhatsApp');}
+    }
+   }
+   if(acoes)acoes.hidden=true;
+   ficha.classList.toggle('fsj-ficha-editando',pessoaSelecionada);
+  }finally{ocupado=false;}
  }
- document.addEventListener('DOMContentLoaded',function(){organizar();const target=document.getElementById('people');if(target){new MutationObserver(()=>{if(!window.fsjFichaOrganizando){window.fsjFichaOrganizando=true;queueMicrotask(()=>{organizar();window.fsjFichaOrganizando=false;});}}).observe(target,{childList:true});}});
+ document.addEventListener('DOMContentLoaded',()=>{
+  organizar();
+  const target=document.getElementById('people');
+  if(target)new MutationObserver(()=>queueMicrotask(organizar)).observe(target,{childList:true});
+  const ficha=document.getElementById('fichaPessoa');
+  if(ficha)new MutationObserver(()=>queueMicrotask(organizar)).observe(ficha,{attributes:true,attributeFilter:['class']});
+ });
 })();
 </script>
 </body></html>
