@@ -71,6 +71,11 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 #reservaInstallShare #fsjWebHomeActions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:stretch}#reservaInstallShare #fsjWebHomeActions>a,#reservaInstallShare #fsjWebHomeActions>button{display:flex!important;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:100%;min-width:0;margin:0!important;background:#176341;color:#fff;border:0;border-radius:10px;padding:10px 8px!important;min-height:54px;font:600 14px system-ui;text-align:center;text-decoration:none;white-space:normal;overflow-wrap:anywhere}#reservaInstallShare #fsjWebHomeActions img{width:25px!important;height:25px!important;flex:none;margin:0!important}@media(max-width:380px){#reservaInstallShare #fsjWebHomeActions>a,#reservaInstallShare #fsjWebHomeActions>button{font-size:12px}}
 
 
+
+/* Contorno reforçado apenas no bloco cadastral da ficha selecionada. */
+#fichaPessoa.fsj-ficha-editando #personBasicFields{border:3px solid #243746!important;border-radius:11px!important;padding:12px!important;box-sizing:border-box;max-width:100%;overflow-wrap:anywhere}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields{max-width:100%}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .muted{overflow-wrap:anywhere}
 /* Layout aprovado: ficha emoldurada, comandos na linha das marcações e envio ao lado de Tipo. */
 #fichaPessoa.fsj-ficha-editando{border:1px solid #b9d6e4;border-radius:14px;padding:14px;box-shadow:0 1px 3px #00000008}
 #fichaPessoa.fsj-ficha-editando .fsj-ficha-cabecalho{display:block;border:0;padding:0;margin:0}
