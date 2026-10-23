@@ -73,6 +73,19 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 
 
 
+/* Layout definitivo aprovado para Pessoas — área interna do contorno. */
+#fichaPessoa.fsj-ficha-editando #personBasicFields{border:3px solid #243746!important;border-radius:11px!important;padding:12px!important;box-sizing:border-box;width:100%;max-width:100%;overflow:visible;background:#fff}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields{display:grid!important;grid-template-columns:minmax(145px,1fr) minmax(145px,1fr) minmax(145px,1fr) minmax(190px,1.05fr) minmax(280px,2fr);gap:8px;align-items:end;width:100%}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields>div{width:auto!important;min-width:0!important;max-width:none!important;flex:none!important}
+#fichaPessoa.fsj-ficha-editando #personBasicFields #ptype{min-width:0!important;width:100%!important;padding-right:28px!important}
+#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo{width:100%!important;min-width:0!important;flex:none!important}
+#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo .fsj-ficha-envio{display:flex!important;flex-direction:row;align-items:center;gap:6px;flex-wrap:wrap;width:100%}
+#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo .fsj-ficha-envio button{min-height:38px!important;white-space:normal}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .checks{display:flex!important;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .checks .fsj-ficha-botoes{display:flex!important;flex-wrap:wrap;gap:6px;margin:0 0 0 auto!important;align-items:center}
+#fichaPessoa.fsj-ficha-editando #personBasicFields .muted{max-width:100%;overflow-wrap:anywhere}
+@media(max-width:1100px){#fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields{grid-template-columns:repeat(2,minmax(0,1fr))}#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo{grid-column:1/-1}}
+@media(max-width:700px){#fichaPessoa.fsj-ficha-editando #personBasicFields{padding:9px!important}#fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields{grid-template-columns:repeat(2,minmax(0,1fr))}#fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields>div:has(#ptype){min-width:0!important}#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo .fsj-ficha-envio{display:grid!important;grid-template-columns:1fr 1fr}#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo .fsj-ficha-envio button{width:100%;font-size:12px}#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo .fsj-ficha-envio .muted{grid-column:1/-1}#fichaPessoa.fsj-ficha-editando #personBasicFields .checks .fsj-ficha-botoes{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;margin:4px 0 0!important}#fichaPessoa.fsj-ficha-editando #personBasicFields .checks .fsj-ficha-botoes button{min-width:0;padding:7px 2px;font-size:12px}}
 /* Campo Tipo: mostrar integralmente Funcionário e demais categorias. */
 #fichaPessoa.fsj-ficha-editando .person-fields>div:has(#ptype){flex:1 1 190px!important;min-width:190px!important;max-width:100%}
 #fichaPessoa.fsj-ficha-editando #ptype{width:100%!important;min-width:0!important;box-sizing:border-box;padding-right:30px!important;text-overflow:clip!important}
