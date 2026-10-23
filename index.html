@@ -1094,6 +1094,35 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  fsjSetSimpleMode(valor!=='convencional');
 })();
 </script>
+<script>
+/* Uma aba FSJ ativa por navegador/perfil; outras abas não iniciam operação duplicada. */
+(function(){
+ if(!('BroadcastChannel' in window))return;
+ const channel=new BroadcastChannel('fsj-aba-unica-v1');
+ const tabId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+'-'+Math.random();
+ let principal=true, aviso=null, pedido=null;
+ function telaDuplicada(){
+  if(aviso)return;
+  aviso=document.createElement('div');aviso.id='fsjAbaDuplicada';
+  aviso.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#f4fafc;display:flex;align-items:center;justify-content:center;padding:20px;font:16px system-ui,sans-serif;color:#14374b';
+  aviso.innerHTML='<section style="max-width:430px;background:white;border:1px solid #bad4df;border-radius:12px;padding:24px;text-align:center;box-shadow:0 8px 28px #0002"><h2>Assistente FSJ já está aberto</h2><p>Para evitar várias páginas do mesmo aplicativo, utilize a aba que já estava aberta.</p><button id="fsjAbaVoltar" style="padding:12px;margin:6px">Voltar à aba anterior</button><button id="fsjAbaAssumir" style="padding:12px;margin:6px">Usar esta aba</button></section>';
+  document.body.append(aviso);
+  aviso.querySelector('#fsjAbaVoltar').onclick=()=>{channel.postMessage({type:'focus',from:tabId});try{window.close()}catch(e){}};
+  aviso.querySelector('#fsjAbaAssumir').onclick=()=>{principal=true;aviso.remove();aviso=null;channel.postMessage({type:'takeover',from:tabId});};
+ }
+ channel.onmessage=e=>{
+  const m=e.data||{};if(m.from===tabId)return;
+  if(m.type==='hello'&&principal)channel.postMessage({type:'present',from:tabId,to:m.from});
+  if(m.type==='present'&&m.to===tabId&&pedido){clearTimeout(pedido);pedido=null;principal=false;telaDuplicada();}
+  if(m.type==='takeover'&&principal){principal=false;telaDuplicada();}
+  if(m.type==='focus'&&principal){try{window.focus()}catch(e){}}
+ };
+ function verificar(){if(!principal)return;channel.postMessage({type:'hello',from:tabId});pedido=setTimeout(()=>{pedido=null;},500);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',verificar,{once:true});else verificar();
+ window.addEventListener('pageshow',e=>{if(e.persisted&&principal)verificar()});
+ window.addEventListener('beforeunload',()=>channel.close());
+})();
+</script>
 </body></html>
 
 
