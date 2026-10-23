@@ -17,10 +17,25 @@
  });
  abrirVideosReserva=function(button){
   if(!fsjPainelPronto||window.fsjExited)return;
+  // Sempre selecionar a tela principal da TV, inclusive após navegar por outras páginas.
   navTo('videosChamadas',button);
-  if(!frame.dataset.ssoLoaded){const url=new URL(vm);url.searchParams.set('fsj_aba','1');frame.dataset.ssoLoaded='1';state.textContent='Conectando à TV FSJ com seu acesso…';frame.src=url.href;}
-  else state.textContent=frame.dataset.ssoReady?'TV FSJ conectada. Sua reprodução e suas chamadas foram preservadas.':'Aguardando validação do acesso pela VM…';
+  const selector=document.getElementById('fsjSimpleSelect');
+  if(selector)selector.value='videosChamadas';
+  const panel=document.getElementById('videosChamadas');
+  if(panel)panel.classList.remove('hidden');
+  window.scrollTo({top:0,left:0,behavior:'instant'});
+  if(!frame.dataset.ssoLoaded){
+   const url=new URL(vm);url.searchParams.set('fsj_aba','1');
+   frame.dataset.ssoLoaded='1';
+   state.hidden=false;state.textContent='Conectando à TV FSJ com seu acesso…';
+   frame.src=url.href;
+  }else{
+   state.textContent=frame.dataset.ssoReady?'TV FSJ conectada.':'Aguardando validação do acesso pela VM…';
+   state.hidden=frame.dataset.ssoReady==='1';
+  }
+  if(typeof window.fsjPersonLayout==='function')window.fsjPersonLayout(true);
  };
+
  const previousExit=sairGestor;
  sairGestor=function(){if(nonce)frame.contentWindow?.postMessage({type:'fsj-sso-logout',nonce},vm.origin);return previousExit();};
 })();
