@@ -897,6 +897,8 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  const icone=document.getElementById('fsjFotoUsuarioIcone');
  const rotulo=document.getElementById('fsjFotoUsuarioBotao');
  const chaveLegada='fsj_foto_cabecalho_local_v1';
+ const status=document.createElement('span');status.id='fsjFotoStatus';status.setAttribute('role','status');status.style.cssText='font-size:11px;max-width:145px;line-height:1.2;color:#355366';rotulo.parentElement.insertBefore(status,rotulo);
+ function situacao(t){status.textContent=t;status.title=t;}
  let usuarioId=null, ultimaConsulta=0, consultando=false;
  function mostrar(src){imagem.style.display=src?'block':'none';icone.style.display=src?'none':'block';if(src)imagem.src=src;else imagem.removeAttribute('src');}
  function aviso(t){rotulo.title=t;rotulo.setAttribute('aria-label',t);}
@@ -919,16 +921,17 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
    const {h,id}=await credenciais();
    if(usuarioId!==id){usuarioId=id;mostrar(null);}
    const res=await fetch(ARMAZ_URL+'/storage/v1/object/authenticated/fsj-avatares/'+caminho(id)+'?v='+Date.now(),{headers:h,cache:'no-store'});
-   if(res.ok){const blob=await res.blob();const url=URL.createObjectURL(blob);const anterior=imagem.dataset.objectUrl;mostrar(url);imagem.dataset.objectUrl=url;if(anterior)URL.revokeObjectURL(anterior);aviso('Alterar foto do usuário — sincronizada entre aparelhos');}
-   else if(res.status===404||res.status===400){mostrar(null);aviso('Inserir foto do usuário — sincronizada entre aparelhos');}
+   if(res.ok){situacao('Foto sincronizada');const blob=await res.blob();const url=URL.createObjectURL(blob);const anterior=imagem.dataset.objectUrl;mostrar(url);imagem.dataset.objectUrl=url;if(anterior)URL.revokeObjectURL(anterior);aviso('Alterar foto do usuário — sincronizada entre aparelhos');}
+   else if(res.status===404||res.status===400){mostrar(null);situacao('Sem foto na nuvem');aviso('Inserir foto do usuário — sincronizada entre aparelhos');}
    else throw Error('Erro ao consultar a foto na Armazenagem ('+res.status+').');
    ultimaConsulta=Date.now();
-  }catch(e){aviso('Foto não sincronizada: '+e.message);}
+  }catch(e){situacao('Sincronização indisponível');aviso('Foto não sincronizada: '+e.message);}
   finally{consultando=false;}
  }
  campo.addEventListener('change',async function(){
   const arquivo=campo.files&&campo.files[0];if(!arquivo)return;
   if(!arquivo.type.startsWith('image/')||arquivo.size>12*1024*1024){alert('Escolha uma imagem de até 12 MB.');campo.value='';return;}
+  situacao('Enviando foto...');
   try{
    const {h,id}=await credenciais();
    const bitmap=await createImageBitmap(arquivo);
@@ -937,12 +940,14 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
    ctx.drawImage(bitmap,(bitmap.width-lado)/2,(bitmap.height-lado)/2,lado,lado,0,0,256,256);bitmap.close();
    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('Falha ao processar foto.')),'image/jpeg',0.78));
    if(blob.size>262144)throw Error('A fotografia excedeu o tamanho permitido.');
-   const upload=await fetch(ARMAZ_URL+'/storage/v1/object/fsj-avatares/'+caminho(id),{method:'POST',headers:{...h,'Content-Type':'image/jpeg','x-upsert':'true','cache-control':'0'},body:blob});
+   let upload=await fetch(ARMAZ_URL+'/storage/v1/object/fsj-avatares/'+caminho(id),{method:'POST',headers:{...h,'Content-Type':'image/jpeg','cache-control':'0'},body:blob});
+   if(upload.status===409){upload=await fetch(ARMAZ_URL+'/storage/v1/object/fsj-avatares/'+caminho(id),{method:'PUT',headers:{...h,'Content-Type':'image/jpeg','cache-control':'0'},body:blob});}
    if(!upload.ok)throw Error('Falha ao salvar na Armazenagem ('+upload.status+'): '+(await upload.text()).slice(0,180));
    localStorage.removeItem(chaveLegada);
    usuarioId=id;ultimaConsulta=0;await buscar();
+   situacao('Foto salva na nuvem');
    aviso('Foto salva na Armazenagem e disponível em outros aparelhos');
-  }catch(e){alert('Não foi possível sincronizar a foto: '+e.message);}
+  }catch(e){situacao('Foto não enviada');alert('Não foi possível sincronizar a foto: '+e.message);}
   finally{campo.value='';}
  });
  // Ao abrir, retornar ao app ou mudar de dispositivo, consultar a mesma foto central.
