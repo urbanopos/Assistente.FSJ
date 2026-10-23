@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Assistente FSJ - Tarefa</title>
+<title>FSJ</title>
 <meta name="fsj-build" content="20261022-retorno-resposta-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Assistente FSJ">
+<meta name="apple-mobile-web-app-title" content="FSJ">
 <link rel="icon" type="image/x-icon" href="./icons/assistente-fsj-casa.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="./icons/assistente-fsj-casa-180.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -133,6 +133,20 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 #fichaPessoa.fsj-ficha-editando #personBasicFields .checks .fsj-ficha-botoes{margin-left:auto!important}
 @media(max-width:1050px){#fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields{grid-template-columns:repeat(2,minmax(0,1fr))!important}#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo{grid-column:1/-1!important}#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo .fsj-ficha-envio{flex-wrap:wrap!important}}
 @media(max-width:700px){#fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields{grid-template-columns:repeat(2,minmax(0,1fr))!important}#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo .fsj-ficha-envio{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}#fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo .fsj-ficha-envio button{white-space:normal!important;width:100%!important}#fichaPessoa.fsj-ficha-editando #personBasicFields .checks .fsj-ficha-botoes{margin:4px 0 0!important}}
+
+/* Cabeçalho móvel: encostado ao topo e sem título textual duplicado. */
+@media(max-width:700px){
+ html,body{margin:0!important;padding:0!important}
+ body>header{position:sticky!important;top:0!important;left:0;right:0;width:100%;box-sizing:border-box;height:64px!important;min-height:64px!important;padding:4px 8px!important;gap:7px!important;z-index:80!important}
+ body>header .fsj-logo{width:min(36vw,135px)!important;height:52px!important;object-fit:contain!important}
+ body>header .header-info{min-width:0!important;flex:1!important;overflow:hidden!important}
+ body>header .header-info>div{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:10px!important}
+ body>header .fsj-ambiente-acoes{gap:5px!important;margin-left:auto!important}
+ body>header #fsjFotoUsuarioBotao{width:38px!important;height:38px!important}
+ body>header .fsj-ambiente-acoes button{min-height:38px!important;padding:6px 9px!important}
+ body>header #fsjFotoStatus{display:none!important}
+ .topnav{top:64px!important}
+}
 </style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-brisa-menu-02">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
