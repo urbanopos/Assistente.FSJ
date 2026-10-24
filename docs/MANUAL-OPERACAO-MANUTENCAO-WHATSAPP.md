@@ -35,7 +35,7 @@ Consultar a ação da tarefa agendada, a versão local de `automation/manual-his
 - O Windows Desktop continua sendo a interface de operação e administração do Assistente FSJ, normalmente pelo Chrome. Não é necessário migrar a operação cotidiana do usuário para uma área de trabalho Linux.
 - O aplicativo FSJ já hospedado na VM Debian permanece na VM, independente do executor WhatsApp.
 - **Estado atual em produção:** o agendamento `FSJ-Tarefas-07h` e o executor de WhatsApp continuam no Windows. Não desativar nem transferir essa tarefa enquanto a VM não estiver vinculada, testada e aprovada.
-- **Estado futuro planejado:** apenas a automação de envio do WhatsApp passa para a VM; a administração permanece no Windows, com uma página própria de vinculação e estado de conexão, acessível de forma autenticada pela VPN. Essa página ainda não está implementada.
+- **Estado futuro planejado:** apenas a automação de envio do WhatsApp passa para a VM; a administração permanece no Windows, com uma página própria de vinculação e estado de conexão, acessível de forma autenticada pela VPN. O painel web foi preparado e extraído na VM, mas ainda não foi iniciado nem testado no navegador.
 - Windows e VM estão no mesmo computador físico, mas são sistemas operacionais isolados: fechar a sessão do Windows não implica desligar a VM; desligar ou suspender o computador físico interrompe ambos. Verificar energia, suspensão e reinicialização antes de declarar autonomia 24h.
 
 ### Preparação da VM concluída
@@ -77,3 +77,14 @@ O proprietário executou `Get-VM | Select-Object Name,State,AutomaticStartAction
 
 ### Verificação dos serviços Debian em 24/10/2026
 Consulta remota, sem modificações: `systemctl --user is-enabled fsj-reserva.service` retornou `enabled`; `systemctl --user is-active fsj-reserva.service` retornou `active`; `loginctl show-user urbano -p Linger` retornou `Linger=yes`. Isso confirma que o serviço principal está habilitado, ativo e pode funcionar sem sessão interativa do usuário. Com `AutomaticStartAction=Start` no Hyper-V, a configuração favorece recuperação após reinício do host. **Não foi realizado teste de reinicialização real** e o executor WhatsApp na VM ainda não está em produção. Preservar o agendamento WhatsApp atual do Windows até migração validada.
+
+## Andamento da interface WhatsApp em 24/10/2026
+- Confirmado `qrcode` instalado no executor da VM e sintaxe do módulo validada com Node 24.
+- Consulta `ss -ltnp` não encontrou serviços escutando nas portas 3000, 3001, 8765 e 8766 naquele momento.
+- Pacote `FSJ-WhatsApp-Painel.zip` transferido por SCP e listado: contém `fsj-whatsapp-interface/fsj-whatsapp-painel.mjs` (4055 bytes).
+- Arquivo extraído em `/home/urbano/fsj-whatsapp/painel/fsj-whatsapp-interface/fsj-whatsapp-painel.mjs`; `node --check` com Node 24 terminou sem erro.
+- Revisão do código: servidor HTTP Node escuta **somente** em `127.0.0.1:8765`, fornece página com cabeçalho FSJ, botão de vinculação, QR Code e estado. Utiliza Chromium headless e `whatsapp-web.js`, sessão `LocalAuth` com `clientId=fsj` sob `FSJ_STATE_DIR/auth`. **O painel não envia mensagens**.
+- **Ainda não executado:** definir e validar `FSJ_STATE_DIR` privado/persistente e exclusivo da VM, confirmar ausência de processos concorrentes, iniciar painel, abrir via túnel SSH, vincular QR, testar reconexão. Não declarar a migração concluída.
+- **Atenção técnica antes do uso:** validar tratamento de falhas, estados de conexão e reinicialização antes de tornar o serviço permanente. O painel não tem autenticação HTTP própria: manter acesso somente via túnel SSH, sem publicar a porta.
+- Consulta `sudo ufw status verbose` e `sudo ss -ltnp` não foi concluída porque SSH sem terminal interativo não permitiu solicitar senha do sudo. A pedido do proprietário, adiar alterações de firewall/portas até a migração estar plenamente funcional. Não abrir portas públicas agora.
+- Preservar integralmente o agendamento das 7h no Windows, registros e autenticação. Não iniciar envio pela VM antes de transição controlada.
