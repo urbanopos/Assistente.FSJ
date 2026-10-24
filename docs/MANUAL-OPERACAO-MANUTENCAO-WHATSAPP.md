@@ -61,3 +61,13 @@ Consultar a ação da tarefa agendada, a versão local de `automation/manual-his
 
 ### Comandos de verificação (sem disparo)
 No PowerShell: `Get-ScheduledTaskInfo -TaskName "FSJ-Tarefas-07h"` e `Get-Content "$env:LOCALAPPDATA\\FSJ\\whatsapp\\agendamento.log" -Tail 35`. Na VM, via SSH, consultar processos e registros do futuro executor antes de qualquer alteração. Não usar `Start-ScheduledTask` como teste de conectividade.
+
+## Recuperação após falta de energia ou reinicialização do Desktop
+
+- O Desktop Windows e a VM Debian compartilham o hardware físico. Falta de energia interrompe ambos. Em geral, discos virtuais e configurações persistem após reinicialização; interrupção durante gravação pode corromper arquivos ou bancos, portanto não há garantia absoluta.
+- Reiniciar o Windows **não garante** que a VM será iniciada automaticamente: verificar e configurar o hipervisor, o início automático da VM e a política de desligamento seguro. O tipo de hipervisor e a configuração atual ainda não foram verificados.
+- No Debian, verificar habilitação e política de reinício do serviço `fsj-reserva.service` e, quando implantado, do executor WhatsApp; `active` antes da queda não comprova retorno automático depois.
+- Autenticação WhatsApp persistente em disco facilita reconexão, mas pode expirar ou exigir novo QR Code. Preservar diretórios de sessão com permissões restritas e backup seguro; não copiar segredos para o repositório.
+- Se o computador ficar desligado às 7h, não presumir que o disparo ocorrerá depois: a política de recuperação deve conciliar registros por data/destinatário, confirmar conectividade e solicitar autorização para envios atrasados quando houver incerteza.
+- Para reduzir riscos, usar desligamento normal sempre que possível, backup consistente da VM e dos dados, proteção contra queda de energia (nobreak, se disponível) e teste controlado de reinício. Não alterar configurações de produção sem verificar o ambiente.
+- **Pendente de validação:** hipervisor, opção de autostart, serviço após reboot, integridade de armazenamento e plano de recuperação. Não afirmar que a retomada automática já está implantada.
