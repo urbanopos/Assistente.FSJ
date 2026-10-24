@@ -4,7 +4,7 @@ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].ma
 const s=scripts.find(s=>s.includes('function brisaInterpretar'));
 assert(s,'Interpretador existente localizado');
 assert.match(html,/<b>MarIA<\/b>/);assert.match(html,/Olá, sou MarIA/);assert.match(html,/aria-label="Abrir MarIA"/);
-assert.match(html,/src="brisa-avatar.webp"/);assert(!/\bBrisa\b/.test(html),'Rótulos com nome antigo removidos');
+assert.match(html,/src="maria-avatar.webp"/);assert(!/\bBrisa\b/.test(html),'Rótulos com nome antigo removidos');
 assert.match(s,/Sou a MarIA/);assert.match(s,/Você é MarIA/);
 const ctx=vm.createContext({});vm.runInContext(s.slice(s.indexOf('function brisaNormalizar'),s.indexOf('async function brisaPerguntar')),ctx);
 const data={carregado:true,page:'dashboard',people:[{id:'1',name:'Carlos',nick:'Carlos'}],groups:[],tasks:[{id:'t1',text:'Cuidar das aves',personIds:['1'],status:'Em aberto'}]};
