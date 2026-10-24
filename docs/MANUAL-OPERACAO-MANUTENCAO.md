@@ -224,3 +224,7 @@ Validação: sintaxe, rotação local e contrato de atualização; captura real 
 
 ### Decisão vigente: gravar a pergunta e a resposta — versão 20261024-maria-gravar-pergunta-09
 Substitui a apresentação automática descrita na versão 08. Acione Gravar diagnóstico, confirme a seleção de tela com áudio no navegador e, após aparecer Gravando, faça a pergunta por voz ou texto. Nenhuma apresentação é disparada automaticamente. A gravação termina ao final da primeira resposta falada da MarIA e mostra o download. Limites de um minuto/12 MB, cinco posições locais e saída manual preservados. Captura real de áudio permanece dependente do navegador e da validação no dispositivo; não se promete captura da voz do sistema sem essa verificação. Testes: término e erro de fala, armazenamento e atualização automática. Publicação web não confirma atualização em cada aparelho.
+
+
+## Filtro de tarefas — 20261024-maria-filtro-tarefas-10
+Corrigida consulta em aberto, incluindo abertas/abertos: exige situação Em aberto. Pendentes exige Pendente; em andamento exige Em andamento; concluídas exige Concluída. Arquivadas só aparecem se solicitadas explicitamente. Consultas comuns excluem Arquivado. Contagem da resposta usa a lista filtrada. Não altera tarefas, permissões ou banco. Validação com situações distintas e nomes flexionados; teste de atualização. Publicação não equivale à validação no dispositivo. Recuperação: reverter interface e versão em conjunto, sem restaurar registros.
