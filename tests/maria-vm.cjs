@@ -9,6 +9,6 @@ async function main(){
  const script=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('async function brisaConsultarIA'));
  vm.runInContext(script.slice(script.indexOf('async function brisaConsultarIA'),script.indexOf('async function brisaVerificarIA')),ctx);
  ctx.mariaConsultarVM=async()=>{throw Error('Não deveria acessar VM para consulta já respondida.')};assert.equal(await ctx.brisaConsultarIA('tarefas',{answer:'Há duas tarefas verificadas.'}),'Há duas tarefas verificadas.');
- assert(!html.includes("api('/functions/v1/brisa-chat'"));assert(!html.includes("fetch(ARMAZ_URL+'/functions/v1/brisa-chat'"));assert(html.includes('maria-vm.js?v=20261024-maria-gravar-visivel-07'));
+ assert(!html.includes("api('/functions/v1/brisa-chat'"));assert(!html.includes("fetch(ARMAZ_URL+'/functions/v1/brisa-chat'"));assert(html.includes('maria-vm.js?v=20261024-maria-gravar-direto-08'));
  console.log('PASS: consulta documental, autenticação, resposta sem ações, cancelamento e tarefas locais sem consulta ao modelo.');
 }main().catch(e=>{console.error(e);process.exit(1)});

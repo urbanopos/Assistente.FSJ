@@ -62,8 +62,9 @@ function install(){
   starting=true;busy(true);status.textContent='Escolha o que será gravado na janela do navegador…';failed=false;chunks=[];bytes=0;
   try{
    // Deve ocorrer diretamente no clique; a escolha e a autorização pertencem ao navegador.
-   screen=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:12,width:{max:1280},height:{max:720}},audio:true,systemAudio:'include'});
+   screen=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:12,width:{max:1280},height:{max:720}},audio:true,systemAudio:'include',preferCurrentTab:true});
    if(!screen.getVideoTracks().length)throw Error('Nenhuma tela selecionada.');
+   if(!screen.getAudioTracks().length)throw Error('Áudio não compartilhado. Escolha a aba ou tela do Assistente e marque Compartilhar áudio para gravar a voz da MarIA.');
    let output=screen;
    if(checkbox.checked){
     mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
@@ -81,17 +82,19 @@ function install(){
     try{
      if(failed)return;
      const blob=new Blob(chunks,{type:recorder.mimeType||mime||'video/webm'}),db=await database();
-     const saved=await saveRecording(db,blob);status.textContent='Vídeo '+saved.slot+' salvo neste navegador. Se essa posição já existia, foi substituída. Nenhum arquivo foi enviado à VM.';
+     const saved=await saveRecording(db,blob);box.open=true;box.scrollIntoView({block:'start',behavior:'smooth'});status.textContent='Vídeo '+saved.slot+' salvo neste navegador. Se essa posição já existia, foi substituída. Nenhum arquivo foi enviado à VM.';
      await refreshList();
     }catch(error){status.textContent=error.message;}
     finally{release()}
    };
    screen.getVideoTracks()[0].addEventListener('ended',finish,{once:true});
    recorder.start(1000);starting=false;busy(true);timer=setTimeout(finish,MAX_MS);
-   status.textContent='Gravando · limite de 1 minuto. '+(screen.getAudioTracks().length?'Áudio compartilhado incluído.':'O navegador não forneceu áudio da tela; '+(mic?'somente sua voz será captada.':'este vídeo ficará sem som.'));
+   status.textContent='Gravação iniciada. Será encerrada ao final da resposta da MarIA · limite de 1 minuto. '+(screen.getAudioTracks().length?'Áudio compartilhado incluído.':'O navegador não forneceu áudio da tela; '+(mic?'somente sua voz será captada.':'este vídeo ficará sem som.'));
+   if(typeof root.brisaApresentar==='function')root.brisaApresentar();
   }catch(error){status.textContent=error.name==='NotAllowedError'?'Gravação cancelada ou não autorizada. Nenhum vídeo anterior foi alterado.':error.message;release()}
  }
- root.mariaOpenDiagnostic=()=>{if(recorder&&recorder.state!=='inactive'){finish();return}box.open=true;box.scrollIntoView({block:'start',behavior:'smooth'})};
+ root.mariaOpenDiagnostic=()=>{if(recorder&&recorder.state!=='inactive'){finish();return}box.open=true;box.scrollIntoView({block:'start',behavior:'smooth'});capture()};
+ root.addEventListener('maria-speech-finished',()=>{if(recorder&&recorder.state==='recording')finish()});
  start.onclick=capture;stop.onclick=finish;
  box.addEventListener('toggle',()=>{if(box.open&&!root.mariaDiagnosticBusy)refreshList().catch(e=>status.textContent=e.message)});
  root.addEventListener('beforeunload',event=>{if(root.mariaDiagnosticBusy){event.preventDefault();event.returnValue=''}});
