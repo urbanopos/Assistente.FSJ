@@ -1,0 +1,11 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync('index.html','utf8');const s=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x=>x[1]).find(x=>x.includes('const MARIA_EXPRESSOES'));
+const layers=[{style:{}},{style:{}}],timers=new Map(),styles={},classes=new Set();let seq=0;
+const panel={dataset:{state:'falando',expression:'neutra'},style:{setProperty:(k,v)=>styles[k]=v},querySelector:()=>({querySelectorAll:()=>layers}),classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}};
+const ctx=vm.createContext({brisaPanel:panel,brisaVoz:null,BRISA_VOICE_STYLE:{rate:1},window:{matchMedia:()=>({matches:false})},setTimeout:(fn,delay)=>{const id=++seq;timers.set(id,{fn,delay});return id},clearTimeout:id=>timers.delete(id),brisaNormalizar:x=>x});
+vm.runInContext(s.slice(s.indexOf('const MARIA_EXPRESSOES'),s.indexOf('function configurarVozBrisa')),ctx);
+ctx.brisaMostrarQuadro('0% 50%');assert.equal(layers[1].style.backgroundPosition,'0% 50%');assert.equal(layers[1].style.opacity,'1');assert.equal(layers[0].style.opacity,'0');ctx.brisaMostrarQuadro('100% 0%');assert.equal(layers[0].style.backgroundPosition,'100% 0%');assert.equal(layers[0].style.opacity,'1');assert.equal(layers[1].style.opacity,'0');
+const voice={text:'extraordinariamente'};ctx.brisaVoz=voice;ctx.brisaAnimarPalavra(voice,{name:'word',charIndex:0});assert(timers.size<=3);assert([...timers.values()].some(t=>t.delay>=320));
+ctx.brisaLimparLabios();assert.equal(timers.size,0);assert(!classes.has('brisa-lip-sync'));
+assert(html.includes('transition:opacity 140ms ease-in-out'));assert(!html.includes('animation:brisaTalk'));assert(!html.includes('animation:brisaRespirar'));assert(!html.includes('animation:brisaFace'));assert(!html.includes('animation:brisaBlink'));
+console.log('PASS: transição por opacidade, dois movimentos por palavra, cancelamento e ausência de ciclos artificiais.');
