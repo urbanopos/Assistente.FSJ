@@ -89,8 +89,7 @@ function install(){
    };
    screen.getVideoTracks()[0].addEventListener('ended',finish,{once:true});
    recorder.start(1000);starting=false;busy(true);timer=setTimeout(finish,MAX_MS);
-   status.textContent='Gravação iniciada. Será encerrada ao final da resposta da MarIA · limite de 1 minuto. '+(screen.getAudioTracks().length?'Áudio compartilhado incluído.':'O navegador não forneceu áudio da tela; '+(mic?'somente sua voz será captada.':'este vídeo ficará sem som.'));
-   if(typeof root.brisaApresentar==='function')root.brisaApresentar();
+   status.textContent='Gravação iniciada. Faça sua pergunta agora. Será encerrada ao final da resposta da MarIA · limite de 1 minuto. '+(screen.getAudioTracks().length?'Áudio compartilhado incluído.':'O navegador não forneceu áudio da tela; '+(mic?'somente sua voz será captada.':'este vídeo ficará sem som.'));
   }catch(error){status.textContent=error.name==='NotAllowedError'?'Gravação cancelada ou não autorizada. Nenhum vídeo anterior foi alterado.':error.message;release()}
  }
  root.mariaOpenDiagnostic=()=>{if(recorder&&recorder.state!=='inactive'){finish();return}box.open=true;box.scrollIntoView({block:'start',behavior:'smooth'});capture()};

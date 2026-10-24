@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261024-maria-gravar-direto-08">
+<meta name="fsj-build" content="20261024-maria-gravar-pergunta-09">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -393,7 +393,7 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 </style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-brisa-menu-02">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
-<script src="./maria-vm.js?v=20261024-maria-gravar-direto-08"></script>
+<script src="./maria-vm.js?v=20261024-maria-gravar-pergunta-09"></script>
 <script src="./daily-progress.js?v=20261021-1"></script><script>
 const FSJ_WEB_INSTALL_LINK='https://urbanopos.github.io/Assistente.FSJ/instalar-fsj-web.html';
 function fsjMostrarCompartilhamentoWeb(){const p=document.getElementById('fsjWebShareOptions');p.hidden=!p.hidden;}
@@ -471,7 +471,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261024-maria-gravar-direto-08';
+const FSJ_BUILD='20261024-maria-gravar-pergunta-09';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1390,7 +1390,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  window.addEventListener('beforeunload',()=>channel.close());
 })();
 </script>
-<script src="./maria-diagnostic.js?v=20261024-maria-gravar-direto-08"></script>
+<script src="./maria-diagnostic.js?v=20261024-maria-gravar-pergunta-09"></script>
 </body></html>
 
 
