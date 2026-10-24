@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261024-maria-expressoes-03">
+<meta name="fsj-build" content="20261024-maria-vm-04">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -395,6 +395,7 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 </style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-brisa-menu-02">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
+<script src="./maria-vm.js?v=20261024-maria-vm-04"></script>
 <script src="./daily-progress.js?v=20261021-1"></script><script>
 const FSJ_WEB_INSTALL_LINK='https://urbanopos.github.io/Assistente.FSJ/instalar-fsj-web.html';
 function fsjMostrarCompartilhamentoWeb(){const p=document.getElementById('fsjWebShareOptions');p.hidden=!p.hidden;}
@@ -471,7 +472,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261024-maria-expressoes-03';
+const FSJ_BUILD='20261024-maria-vm-04';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -596,10 +597,11 @@ if(a.acao==='editar_tarefa'){if(!S.tasks.some(t=>t.id===a.id))throw Error('Taref
 if(a.acao==='preparar_tarefa'){if(typeof a.descricao!=='string'||!a.descricao.trim())throw Error('Informe a descrição.');const p=S.people.find(p=>p.id===a.id);if(!p)throw Error('Informe o responsável cadastrado.');clearTaskForm();navTo('novaTarefa');execType.value='individual';renderTargets();taskText.value=a.descricao.slice(0,4000);document.querySelectorAll('.tm').forEach(x=>x.checked=x.value===p.id);fsjTargetSelectionSync();return 'Preparei a tarefa para '+(p.nick||p.name)+'. Revise o formulário e toque em Adicionar para salvar.'}
 throw Error('Essa ação ainda não está disponível.');
 }
-async function brisaConsultarIA(texto){
+async function brisaConsultarIA(texto,resultadoLocal){
+if(resultadoLocal?.answer&&!/^Ainda não entendi/.test(resultadoLocal.answer))return resultadoLocal.answer;
 const controller=new AbortController();brisaChatController=controller;const timer=setTimeout(()=>controller.abort(),45000);
 try{
-const r=await api('/functions/v1/brisa-chat',{method:'POST',body:JSON.stringify({message:texto,history:brisaHistorico}),signal:controller.signal});
+const r=await mariaConsultarVM(texto,controller.signal);
 if(controller.signal.aborted)throw Error('Consulta interrompida.');
 let answer=r.answer||'';
 if(r.actions?.length)answer=await brisaExecutarAcao(r.actions[0]);
@@ -607,10 +609,8 @@ if(!answer)throw Error('Não recebi uma resposta.');
 brisaHistorico.push({role:'user',content:texto},{role:'assistant',content:answer});brisaHistorico=brisaHistorico.slice(-8);return answer;
 }finally{clearTimeout(timer);if(brisaChatController===controller)brisaChatController=null}
 }
-async function brisaVerificarIA(){
-const info=document.getElementById('brisaIAStatus');if(!info)return;
-try{const r=await fetch(ARMAZ_URL+'/functions/v1/brisa-chat',{signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error();const d=await r.json();info.textContent=d.ready?'Conexão de IA configurada. Consultas usam os registros centrais.':'IA aguardando ativação no servidor. Comandos locais continuam disponíveis.'}catch{info.textContent='Não consegui verificar a conexão de IA.'}
-}
+async function brisaVerificarIA(){return mariaVerificarVM()}
+
 
 async function brisaPerguntar(texto){
 brisaBotaoAtivo(true);brisaEstadoAtual('pensando');
@@ -627,8 +627,8 @@ let answer=resultado.answer;
 const q=brisaNormalizar(texto).replace(/\b(?:maria|brisa)\b/g,'').trim();
 const comandoLocal=resultado.page||resultado.voltar||/^(oi|ola|bom dia|boa tarde|boa noite|voce esta ai|esta ai|me escuta|voce me ouve|esta me ouvindo)?$/.test(q);
 if(!comandoLocal&&brisaDadosCarregados&&localStorage.getItem('fsj_access_token')){
-try{answer=await brisaConsultarIA(texto)}catch(e){if(e.name==='AbortError'){brisaEstadoAtual('pronta');return}
-answer=(String(e.message).includes('AI_NOT_CONFIGURED')||String(e.message).includes('OPENAI_API_KEY')?'A inteligência da MarIA ainda aguarda ativação no servidor. ':'Não consegui consultar a inteligência agora. ')+(resultado.answer?'Consulta local: '+resultado.answer:'Tente novamente.')}
+try{answer=await brisaConsultarIA(texto,resultado)}catch(e){if(e.name==='AbortError'){brisaEstadoAtual('pronta');return}
+answer=('Não consegui consultar a base técnica da VM. ')+(resultado.answer?'Consulta local: '+resultado.answer:'Tente novamente.')}
 }
 brisaResposta.textContent='Você: '+texto+'\n\nBrisa: '+answer;await speak(answer,true)
 }

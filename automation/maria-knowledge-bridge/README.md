@@ -21,3 +21,14 @@ Nenhum banco, sessão persistente, vídeo, WhatsApp, certificado, credencial ou 
 Backup em `fsj-video-v001/backups/maria-documental-DATA`. Reverter somente o server.py e módulo correspondentes, com o servidor livre, preservando bancos e mídias. Nunca restaurar dados de negócio a partir deste backup de código. Pacotes assinados futuros devem preservar/reaplicar a integração; não assumir que um pacote legado contém o módulo. Código publicado, ponte instalada, autenticação real e chat conectado devem ser registrados separadamente.
 
 Testes isolados: respostas factuais, limitação de conhecimento, credenciais recusadas, preservação de rotas anteriores, instalação idempotente do adaptador, rejeição de origem e ausência de autenticação antes da leitura da base. Instalação/HTTPS/autenticação reais na VM aguardam confirmação; teste local não substitui o teste pelo navegador.
+
+
+## Conexão ao painel — versão `20261024-maria-vm-04`
+
+Em 24/10/2026 o Proprietário confirmou a instalação da ponte, com backup `maria-documental-20261024T212723297786Z`. O frontend passa a usar maria-vm.js para consultas documentais autenticadas, aproveitando os endereços HTTPS já utilizados pelo sistema. As respostas locais de tarefas e orientação programada têm prioridade. Perguntas não reconhecidas localmente são encaminhadas à ponte; não há chamada ao endpoint de IA paga nessa conversa. A opção manual de encaminhamento ao ChatGPT continua distinta.
+
+A interface envia somente a pergunta à ponte; não envia o histórico completo, a lista de tarefas nem credenciais em URL. O token central é transmitido no cabeçalho Authorization, por HTTPS, somente a uma lista fixa de origens do sistema. Não há desvio de erros de certificado, cookies de terceiros ou execução de ações retornadas. A base técnica é exclusiva do Proprietário; atendimento de outros perfis por esta ponte não foi implantado.
+
+Após o Pages concluir a publicação, abrir a MarIA e conferir o estado da conexão. Testar “Qual a memória disponível na VM?” e uma consulta de tarefa conhecida. A primeira deve indicar a data da medição; a segunda deve conservar o resultado autorizado do aplicativo. CORS, roteamento, confiança no certificado e permissões de rede local devem ser confirmados no navegador do Proprietário. Testes simulados não comprovam esse acesso real.
+
+Recuperação da interface: reverter apenas maria-vm.js e as chamadas correspondentes em index.html, com alinhamento do identificador de versão. Não apagar dados, sessões ou preferências. A base documental e a ponte podem permanecer instaladas sem serem usadas pelo painel.
