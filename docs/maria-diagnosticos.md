@@ -27,3 +27,10 @@ Teste `node tests/maria-diagnostic.cjs` cobre rotação e falhas usando um adapt
 Recuperação de código: reverter somente maria-diagnostic.js e a inclusão/proteção de gravação em index.html, com versão coerente. Não apagar o IndexedDB para corrigir uma falha de captura. Nenhum banco operacional ou serviço da VM deve ser restaurado/reiniciado por esta mudança.
 
 Fontes: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia e https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB .
+
+
+### Controle visível — `20261024-maria-gravar-visivel-07`
+
+Após relato de dificuldade para localizar a seção recolhida, adicionado botão fixo “Gravar diagnóstico” imediatamente abaixo do cabeçalho MarIA, antes do retrato e fora da área rolável. O botão abre a seção de gravação e leva os controles à vista. Durante a gravação, muda para “Parar e salvar”; preparação/salvamento impedem cliques concorrentes. A seleção/autorização de tela continua pertencendo ao navegador, ao clicar Iniciar gravação. A rotação de cinco posições permanece inalterada.
+
+Se o módulo não carregar, o botão exibe aviso em vez de ficar sem efeito. Validar botão visível no desktop/celular e abertura da seção; a captura real ainda requer confirmação do usuário. Nenhum serviço na VM foi alterado.

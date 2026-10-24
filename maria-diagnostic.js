@@ -41,7 +41,7 @@ function install(){
  const listing=document.createElement('div');listing.setAttribute('aria-label','Vídeos de diagnóstico salvos');box.append(listing);
  const note=document.createElement('p');note.className='muted';note.textContent='Baixe o vídeo e anexe no chat da Brisa. Cópias baixadas na pasta Downloads e gravações feitas pelo Windows não entram nesta rotação. Nenhum vídeo é enviado à VM.';box.append(note);
  body.insertBefore(box,document.getElementById('brisaContaChatGPT')||body.firstChild);
- function busy(value){root.mariaDiagnosticBusy=value;start.disabled=value;stop.disabled=!value||starting||saving;checkbox.disabled=value;}
+ function busy(value){root.mariaDiagnosticBusy=value;start.disabled=value;stop.disabled=!value||starting||saving;checkbox.disabled=value;const top=document.getElementById('mariaRecordOpen');if(top){top.textContent=value?(starting?'Preparando gravação…':saving?'Salvando vídeo…':'Parar e salvar'):'Gravar diagnóstico';top.disabled=starting||saving}}
  function release(){clearTimeout(timer);timer=null;for(const stream of [screen,mic])stream?.getTracks().forEach(track=>track.stop());screen=mic=null;mix?.close().catch(()=>{});mix=null;chunks=[];bytes=0;recorder=null;starting=saving=false;busy(false)}
  async function refreshList(){
   for(const url of urls)URL.revokeObjectURL(url);urls.length=0;listing.replaceChildren();
@@ -91,6 +91,7 @@ function install(){
    status.textContent='Gravando · limite de 1 minuto. '+(screen.getAudioTracks().length?'Áudio compartilhado incluído.':'O navegador não forneceu áudio da tela; '+(mic?'somente sua voz será captada.':'este vídeo ficará sem som.'));
   }catch(error){status.textContent=error.name==='NotAllowedError'?'Gravação cancelada ou não autorizada. Nenhum vídeo anterior foi alterado.':error.message;release()}
  }
+ root.mariaOpenDiagnostic=()=>{if(recorder&&recorder.state!=='inactive'){finish();return}box.open=true;box.scrollIntoView({block:'start',behavior:'smooth'})};
  start.onclick=capture;stop.onclick=finish;
  box.addEventListener('toggle',()=>{if(box.open&&!root.mariaDiagnosticBusy)refreshList().catch(e=>status.textContent=e.message)});
  root.addEventListener('beforeunload',event=>{if(root.mariaDiagnosticBusy){event.preventDefault();event.returnValue=''}});
