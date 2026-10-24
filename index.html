@@ -196,6 +196,46 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 /* Calendário Pessoas sempre visível quando ficha aberta, com controle explícito. */
 #personSettings:not([hidden]) #fsjCalendarioFolgas{display:grid!important;visibility:visible!important;opacity:1!important;min-height:260px!important;width:100%!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
 #personSettings:not([hidden]) .fsj-cal-refresh{display:inline-block!important;margin:4px 0 10px!important}
+/* FSJ: alinhamento da ficha individual e controles WhatsApp */
+#fsjFichaAcoes,
+#fsjFichaAcoes .fsj-ficha-envio {
+  min-width: 0;
+  max-width: 100%;
+}
+#fsjFichaAcoes .fsj-ficha-envio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+#fsjFichaAcoes .fsj-ficha-envio .muted,
+#fsjFichaAcoes .fsj-ficha-envio [role="status"] {
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 240px;
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: normal;
+  text-align: left;
+}
+#fsjFichaAcoes .fsj-ficha-envio button {
+  flex: 0 0 auto;
+  white-space: normal;
+}
+@media (max-width: 800px) {
+  .fsj-ficha-cabecalho {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #fsjFichaAcoes {
+    width: 100%;
+    align-items: stretch;
+  }
+  #fsjFichaAcoes .fsj-ficha-envio {
+    justify-content: flex-start;
+  }
+}
 </style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-brisa-menu-02">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
