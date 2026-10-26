@@ -969,9 +969,16 @@ function fsjRenderIndividualList(){
  list.append(fsjIndividualControls(p,true));fsjRefreshManualStatus();
 }
 function fsjAttachPersonSendButtons(){
+ // Descartar controles de fichas anteriores antes de criar novos.
+ for(const c of fsjManualControls){
+  if(!c.row.isConnected)fsjManualControls.delete(c);
+ }
  document.querySelectorAll('#people [data-owner-person]').forEach(marker=>{
   const p=S.people.find(person=>person.id===marker.dataset.ownerPerson),row=marker.closest('div');
-  if(!p||!row||row.querySelector('[data-fsj-individual]'))return;
+  if(!p||!row)return;
+  const existentes=[...row.querySelectorAll('[data-fsj-individual]')];
+  existentes.slice(1).forEach(el=>el.remove());
+  if(existentes.length)return;
   const controls=fsjIndividualControls(p);controls.dataset.fsjIndividual='1';row.append(controls);
  });
 }
@@ -1351,9 +1358,13 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('DOMContentLoaded',()=>{
   organizar();
   const target=document.getElementById('people');
-  if(target)new MutationObserver(()=>queueMicrotask(organizar)).observe(target,{childList:true});
-  const ficha=document.getElementById('fichaPessoa');
-  if(ficha)new MutationObserver(()=>queueMicrotask(organizar)).observe(ficha,{attributes:true,attributeFilter:['class']});
+  // A lista é recriada por renderPersonRecord; não observar nem reorganizar
+  // a ficha a cada inserção de botão, evitando reentrância e instabilidade.
+  // A seleção muda pelo próprio fluxo de navegação, não pela classe da ficha.
+  // Manter somente uma atualização explícita após editar/limpar a pessoa.
+  document.getElementById('personSelect')?.addEventListener('change',()=>queueMicrotask(organizar));
+  document.getElementById('savePersonSettingsBtn')?.addEventListener('click',()=>queueMicrotask(organizar));
+  document.querySelector('#personBasicFields button[onclick^="clearPerson"]')?.addEventListener('click',()=>queueMicrotask(organizar));
  });
 })();
 </script>
