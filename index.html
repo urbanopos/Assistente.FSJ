@@ -1342,21 +1342,8 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
    const save=document.getElementById('savePersonSettingsBtn');
    const actionRow=save&&save.parentElement;
    if(actionRow){actionRow.classList.add('fsj-ficha-botoes');if(!pessoaSelecionada&&check&&actionRow.parentElement!==check)check.append(actionRow);}
-   const marker=people.querySelector('[data-owner-person]');
-   const linha=marker&&marker.closest('div');
-   if(linha){
-    const edit=linha.querySelector('button[onclick^="editPerson"]');
-    const del=linha.querySelector('button[onclick^="delPerson"]');
-    if(actionRow){if(edit)actionRow.append(edit);if(del)actionRow.append(del);}
-    const envio=linha.querySelector('[data-fsj-individual]');
-    if(envio&&fields){
-     let slot=document.getElementById('fsjFichaEnvioAoLadoTipo');
-     if(!slot){slot=document.createElement('div');slot.id='fsjFichaEnvioAoLadoTipo';fields.append(slot);}
-     envio.classList.add('fsj-ficha-envio');if(envio.parentElement!==slot)slot.prepend(envio);if(actionRow&&actionRow.parentElement!==envio)envio.append(actionRow);
-     const confirmacao=envio.querySelector('button:not(.primary)');
-     if(confirmacao&&!confirmacao.dataset.fsjStatusText){confirmacao.dataset.fsjStatusText='1';confirmacao.setAttribute('aria-label','Confirmar envio realizado no WhatsApp');}
-    }
-   }
+   // Controles da lista são gerados dinamicamente. Não movê-los para a ficha:
+   // isso deixa botões antigos na tela quando a lista é reconstruída.
    if(acoes)acoes.hidden=true;
    ficha.classList.toggle('fsj-ficha-editando',pessoaSelecionada);
   }finally{ocupado=false;}
