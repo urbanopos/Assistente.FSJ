@@ -12,44 +12,47 @@
    nonce=data.nonce;if(working)return;working=true;
    try{const token=await access();if(window.fsjExited)return;frame.contentWindow.postMessage({type:'fsj-sso-token',nonce,access_token:token},vm.origin);state.textContent='Validando o acesso na VM…';}
    catch(error){state.hidden=false;state.textContent=error.message;}finally{working=false;}
-  }else if(data.nonce===nonce&&data.type==='fsj-sso-ok'){state.hidden=true;state.textContent='TV FSJ conectada com seu acesso do Assistente FSJ.';frame.dataset.ssoReady='1';}
-  else if(data.nonce===nonce&&data.type==='fsj-sso-error'){state.hidden=false;state.textContent=String(data.message||'Acesso não autorizado.');delete frame.dataset.ssoReady;}
+  }else if(data.nonce===nonce&&data.type==='fsj-sso-ok'){state.hidden=true;state.textContent='TV FSJ conectada com seu acesso do Assistente FSJ.';frame.dataset.ssoReady='1';frame.hidden=false;if(loading)loading.hidden=true;}
+  else if(data.nonce===nonce&&data.type==='fsj-sso-error'){state.hidden=false;state.textContent=String(data.message||'Acesso não autorizado.');delete frame.dataset.ssoReady;showPending('Acesso à TV não autorizado. Utilize Reconectar TV após verificar a conexão.');}
  });
+ const loading=document.getElementById('fsjTvLoading');
+ const loadingText=document.getElementById('fsjTvLoadingText');
+ function showPending(message){
+  frame.hidden=true;
+  if(loading)loading.hidden=false;
+  if(loadingText)loadingText.textContent=message;
+ }
+ function connectTV(force=false){
+  if(!fsjPainelPronto||window.fsjExited)return;
+  if(frame.dataset.ssoLoaded&&!force)return;
+  const url=new URL(vm);url.searchParams.set('fsj_aba','1');
+  frame.dataset.ssoLoaded='1';delete frame.dataset.ssoReady;
+  showPending('Conectando à biblioteca e às chamadas…');
+  state.hidden=true;
+  frame.src=url.href;
+ }
+ frame.addEventListener('load',()=>{
+  // O documento da VM pode carregar antes de concluir a autenticação SSO.
+  if(frame.dataset.ssoReady==='1'){frame.hidden=false;if(loading)loading.hidden=true;}
+  else if(loadingText)loadingText.textContent='Validando o acesso à TV FSJ…';
+ });
+ window.fsjRecarregarVideo=function(){connectTV(true);};
  abrirVideosReserva=function(button){
   if(!fsjPainelPronto||window.fsjExited)return;
-  // Sempre selecionar a tela principal da TV, inclusive após navegar por outras páginas.
   navTo('videosChamadas',button);
   const selector=document.getElementById('fsjSimpleSelect');
   if(selector)selector.value='videosChamadas';
   const panel=document.getElementById('videosChamadas');
   if(panel)panel.classList.remove('hidden');
   window.scrollTo({top:0,left:0,behavior:'instant'});
-  if(!frame.dataset.ssoLoaded){
-   const url=new URL(vm);url.searchParams.set('fsj_aba','1');
-   frame.dataset.ssoLoaded='1';
-   state.hidden=false;state.textContent='Conectando à TV FSJ com seu acesso…';
-   frame.src=url.href;
+  if(frame.dataset.ssoReady==='1'){
+   frame.hidden=false;if(loading)loading.hidden=true;state.hidden=true;
   }else{
-   state.textContent=frame.dataset.ssoReady?'TV FSJ conectada.':'Aguardando validação do acesso pela VM…';
-   state.hidden=frame.dataset.ssoReady==='1';
+   showPending('Conectando à biblioteca e às chamadas…');
+   connectTV();
   }
   if(typeof window.fsjPersonLayout==='function')window.fsjPersonLayout(true);
  };
-
- // Pré-aquecer a TV em segundo plano após a autenticação do gestor.
- // A aba continua instantânea e a mesma sessão do iframe é reutilizada.
- function preloadTV(){
-  if(!fsjPainelPronto||window.fsjExited||frame.dataset.ssoLoaded)return;
-  const url=new URL(vm);url.searchParams.set('fsj_aba','1');
-  frame.dataset.ssoLoaded='1';
-  frame.loading='eager';
-  frame.src=url.href;
- }
- window.addEventListener('load',()=>{
-  const warm=()=>{if(fsjPainelPronto&&!window.fsjExited)preloadTV();};
-  if('requestIdleCallback' in window)requestIdleCallback(warm,{timeout:4000});
-  else setTimeout(warm,2500);
- },{once:true});
  const previousExit=sairGestor;
  sairGestor=function(){if(nonce)frame.contentWindow?.postMessage({type:'fsj-sso-logout',nonce},vm.origin);return previousExit();};
 })();
