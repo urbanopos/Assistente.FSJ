@@ -36,6 +36,20 @@
   if(typeof window.fsjPersonLayout==='function')window.fsjPersonLayout(true);
  };
 
+ // Pré-aquecer a TV em segundo plano após a autenticação do gestor.
+ // A aba continua instantânea e a mesma sessão do iframe é reutilizada.
+ function preloadTV(){
+  if(!fsjPainelPronto||window.fsjExited||frame.dataset.ssoLoaded)return;
+  const url=new URL(vm);url.searchParams.set('fsj_aba','1');
+  frame.dataset.ssoLoaded='1';
+  frame.loading='eager';
+  frame.src=url.href;
+ }
+ window.addEventListener('load',()=>{
+  const warm=()=>{if(fsjPainelPronto&&!window.fsjExited)preloadTV();};
+  if('requestIdleCallback' in window)requestIdleCallback(warm,{timeout:4000});
+  else setTimeout(warm,2500);
+ },{once:true});
  const previousExit=sairGestor;
  sairGestor=function(){if(nonce)frame.contentWindow?.postMessage({type:'fsj-sso-logout',nonce},vm.origin);return previousExit();};
 })();
