@@ -33,6 +33,10 @@
  body.fsj-reader:has(#taskAnswer) #taskAnswer strong{order:2!important;font-size:12px}
 }
 
+/* Dúvidas e sugestões alinhadas ao botão de início, em desktop e celular. */
+#executionControl #fsjTaskQuestions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}
+#executionControl #fsjTaskQuestions button{height:42px!important;min-height:42px!important;max-height:42px!important;padding:0 12px!important;display:inline-flex;align-items:center;justify-content:center;line-height:1.15;box-sizing:border-box}
+@media(max-width:700px){#executionControl #fsjTaskQuestions{gap:6px}#executionControl #fsjTaskQuestions button{font-size:13px;padding:0 9px!important}}
 /* Altura uniforme dos botões de andamento e conclusão. */
 #executionControl .fsj-execution-actions>button,
 #executionControl .fsj-execution-actions .fsj-answer-buttons button{
@@ -137,5 +141,5 @@ document.addEventListener('click',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('change',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckReaderVersion()});
 window.addEventListener('pageshow',fsjCheckReaderVersion);
-</script><script src="./mobile-pages.js?v=20261025-conclusao-inline-01"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261020-compact-suggestions-05"></script></body></html>
+</script><script src="./mobile-pages.js?v=20261025-conclusao-inline-01"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261025-actions-inline-01"></script></body></html>
 
