@@ -1005,10 +1005,11 @@ function monthly(){let ym=month.value||FSJDaily.month();FSJDaily.ensure(ym,'',mo
 function employeeView(){let id=employee.value;if(!id){employeeTasks.innerHTML='<p class="muted">Cadastre um funcionário.</p>';return}let xs=S.tasks.filter(t=>ids(t).includes(id)&&(t.daily||t.status!=='Concluída'||(t.status==='Concluída'&&(t.created||'').slice(0,10)===dateKey()))).sort(fsjCompareTaskPriority);FSJDaily.ensure(null,id,employeeView);employeeTasks.innerHTML=xs.length?'<div class="table"><table><thead><tr><th>Atividade</th><th>Situação</th><th>Ação</th><th>Comunicação</th></tr></thead><tbody>'+xs.map(t=>'<tr><td><b>'+fsjTaskName(t,true)+'</b>'+(fsjFrequency(t)!=='pontual'?' <span class="pill">'+fsjFrequencyLabel(t)+'</span>':'')+'<br><span class="muted">'+esc(names(t))+'</span></td><td><span class="pill">'+esc(FSJDaily.ownerText(t,null,id))+'</span></td><td>'+(t.status==='Concluída'?'<button disabled>'+esc(FSJDaily.ownerText(t,null,id))+'</button>':'<button class="primary" onclick="act(\''+t.id+'\',\'done\')">Concluir</button>')+'</td><td><div class="actions">'+(t.status==='Concluída'?'':'<button onclick="act(\''+t.id+'\',\'why\')">Justificar</button><button onclick="act(\''+t.id+'\',\'ask\')">Perguntar à gestão</button>')+'<label style="margin:0"><span class="pill">📎 Foto/Vídeo</span><input type="file" accept="image/*,video/*" capture="environment" style="display:none" onchange="attach(\''+t.id+'\',this)"></label></div></td></tr>').join('')+'</tbody></table></div>':'<p class="muted">Nenhuma tarefa ativa.</p>'}
 function atualizarFiltroDemandas(){let filtro=document.getElementById('demandaFuncionario'),atual=filtro.value;filtro.innerHTML='<option value="">Selecione um funcionário</option>'+[...S.people].sort((a,b)=>(a.nick||a.name).localeCompare(b.nick||b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nick&&p.nick!==p.name?p.nick+' — '+p.name:p.name)+'</option>').join('');filtro.value=S.people.some(p=>p.id===atual)?atual:''}
 function filtrarDemandas(tarefas,responsavel){return responsavel?tarefas.filter(t=>ids(t).includes(responsavel)):[]}
-let fsjPerguntaIndice=0;
+let fsjPerguntaIndice=0,fsjRespostasPerguntas=[];
 function fsjPerguntasLista(){
- const rows=(Array.isArray(retornosDia)?retornosDia:[]).filter(r=>r.tipo==='pergunta'&&!r.cancelado_por_revisao);
- return rows.sort((a,b)=>new Date(b.criado_em||0)-new Date(a.criado_em||0));
+ const answered=new Set(fsjRespostasPerguntas.map(r=>r.pergunta_id));
+ return (Array.isArray(retornosDia)?retornosDia:[]).filter(r=>r.tipo==='pergunta'&&!r.cancelado_por_revisao)
+ .sort((a,b)=>Number(answered.has(a.id))-Number(answered.has(b.id))||new Date(b.criado_em||0)-new Date(a.criado_em||0));
 }
 function fsjPerguntaMover(delta){const rows=fsjPerguntasLista();fsjPerguntaIndice=Math.max(0,Math.min(rows.length-1,fsjPerguntaIndice+delta));fsjRenderPerguntas();}
 function fsjRenderPerguntas(){
@@ -1016,13 +1017,28 @@ function fsjRenderPerguntas(){
  if(!box||!status||!position)return;
  const rows=fsjPerguntasLista();if(!rows.length){status.textContent='Nenhuma pergunta recebida.';box.replaceChildren();position.textContent='';return;}
  fsjPerguntaIndice=Math.max(0,Math.min(rows.length-1,fsjPerguntaIndice));
- const r=rows[fsjPerguntaIndice],p=person(r.pessoa_id),t=S.tasks.find(t=>String(t.id)===String(r.tarefa_id));
- status.textContent=rows.length+' pergunta(s) recebida(s).';position.textContent=(fsjPerguntaIndice+1)+' de '+rows.length;
- box.innerHTML='<div class="card"><p><strong>Quem perguntou:</strong> '+esc(p.nick||p.name||'Pessoa não identificada')+'</p><p><strong>Recebida em:</strong> '+esc(r.criado_em?fsjDataHora(r.criado_em):'Data não informada')+'</p><p><strong>Tarefa:</strong> '+esc(t?(t.code||t.text||t.id):r.tarefa_id||'Não identificada')+'</p><div class="msg">'+esc(r.conteudo||'Pergunta sem texto')+'</div><label for="fsjRespostaPergunta">Resposta à pergunta</label><textarea id="fsjRespostaPergunta" placeholder="Escreva a resposta para esta pessoa"></textarea><p class="muted">O envio permanece desabilitado até confirmar o serviço de entrega e o vínculo da resposta no banco central. O texto digitado não é enviado.</p><button type="button" disabled aria-label="Enviar resposta indisponível até configurar entrega">Enviar resposta (em preparação)</button></div>';
+ const r=rows[fsjPerguntaIndice],p=person(r.pessoa_id),t=S.tasks.find(t=>String(t.id)===String(r.tarefa_id)),answered=fsjRespostasPerguntas.find(a=>a.pergunta_id===r.id);
+ const remaining=rows.filter(x=>!fsjRespostasPerguntas.some(a=>a.pergunta_id===x.id)).length;
+ status.textContent=remaining+' sem resposta · '+rows.length+' no histórico.';position.textContent=(fsjPerguntaIndice+1)+' de '+rows.length;
+ box.innerHTML='<div class="card"><p><strong>Quem perguntou:</strong> '+esc(p.nick||p.name||'Pessoa não identificada')+'</p><p><strong>Recebida em:</strong> '+esc(r.criado_em?fsjDataHora(r.criado_em):'Data não informada')+'</p><p><strong>Tarefa:</strong> '+esc(t?(t.code||t.text||t.id):r.tarefa_id||'Não identificada')+'</p><div class="msg">'+esc(r.conteudo||'Pergunta sem texto')+'</div>'+(answered?'<p><strong>Respondida em:</strong> '+esc(fsjDataHora(answered.respondida_em))+'</p><div class="msg">'+esc(answered.resposta)+'</div>':'<label for="fsjRespostaPergunta">Sua resposta</label><textarea id="fsjRespostaPergunta" maxlength="4000" placeholder="Escreva a resposta para esta pessoa"></textarea><div class="row"><button type="button" class="primary" id="fsjEnviarRespostaPergunta">Salvar e disponibilizar resposta</button><span id="fsjRespostaEstado" role="status"></span></div>')+'</div>';
+ const send=document.getElementById('fsjEnviarRespostaPergunta');if(send)send.onclick=()=>fsjEnviarRespostaPergunta(r);
+}
+async function fsjCarregarRespostasPerguntas(){
+ fsjRespostasPerguntas=await api('/rest/v1/respostas_perguntas_gestor?select=pergunta_id,pessoa_id,tarefa_id,resposta,respondida_em&order=respondida_em.desc');
+}
+async function fsjEnviarRespostaPergunta(pergunta){
+ const campo=document.getElementById('fsjRespostaPergunta'),btn=document.getElementById('fsjEnviarRespostaPergunta'),state=document.getElementById('fsjRespostaEstado'),resposta=campo?.value.trim();
+ if(!resposta){if(state)state.textContent='Escreva a resposta antes de enviar.';return;}
+ if(!confirm('Salvar esta resposta para '+(person(pergunta.pessoa_id).nick||person(pergunta.pessoa_id).name)+'?'))return;
+ btn.disabled=true;state.textContent='Salvando na Armazenagem...';
+ try{
+  await api('/rest/v1/respostas_perguntas_gestor',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({pergunta_id:pergunta.id,pessoa_id:pergunta.pessoa_id,tarefa_id:pergunta.tarefa_id,resposta})});
+  await fsjCarregarRespostasPerguntas();fsjPerguntaIndice=0;fsjRenderPerguntas();
+ }catch(e){state.textContent='Falha ao salvar. A resposta não foi confirmada; confira a conexão.';btn.disabled=false;}
 }
 async function fsjAbrirPerguntas(){
  navTo('perguntasGestor');const status=document.getElementById('fsjPerguntasStatus');status.textContent='Atualizando perguntas recebidas...';
- try{await fsjAtualizarRetornos(false);fsjPerguntaIndice=0;fsjRenderPerguntas();}
+ try{await Promise.all([fsjAtualizarRetornos(false),fsjCarregarRespostasPerguntas()]);fsjPerguntaIndice=0;fsjRenderPerguntas();}
  catch(e){status.textContent='Não foi possível carregar as perguntas. Confira a conexão e tente novamente.';}
 }
 function abrirDemandasSituacao(situacao){document.getElementById('demandaFuncionario').value='';document.getElementById('demandaSituacao').value=situacao;renderDemandas();navTo('demandas')}
