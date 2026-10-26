@@ -1157,9 +1157,15 @@ document.getElementById('fsjPessoaGruposParticipantes').textContent=coletivas.le
 grupoRows.innerHTML=coletivas.map(t=>{
  const g=S.groups.find(g=>g.id===t.groupId);
  const participantes=g?(g.members||[]).map(id=>{const p=S.people.find(p=>p.id===id);return p?(p.nick||p.name):'';}).filter(Boolean).join(' + '):names(t);
- return '<tr><td>'+fsjTaskName(t)+'</td><td>'+esc((g?.name||'Grupo')+' — '+(participantes||'Participantes não informados'))+'</td><td>'+fsjFrequencyLabel(t)+' / Grupo</td><td>'+esc(FSJDaily.ownerText(t,null,responsavel))+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions">'+(t.status==='Concluída'?'<button type="button" data-fsj-archive="'+esc(t.id)+'">Aprovar e arquivar</button>':'')+(t.status==='Arquivado'?'Somente consulta':'<button onclick="editTask(\\''+t.id+'\\')">Editar</button><button class="danger" onclick="delTask(\\''+t.id+'\\')">Excluir</button><label class="fsj-supervision-toggle"><input type="checkbox" data-fsj-supervision="'+esc(t.id)+'" '+(t.supervision?'checked':'')+'>Supervisão</label>')+'</div></td></tr>';
+ return '<tr><td>'+fsjTaskName(t)+'</td><td>'+esc((g?.name||'Grupo')+' — '+(participantes||'Participantes não informados'))+'</td><td>'+fsjFrequencyLabel(t)+' / Grupo</td><td>'+esc(FSJDaily.ownerText(t,null,responsavel))+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions">'+(t.status==='Concluída'?'<button type="button" data-fsj-archive="'+esc(t.id)+'">Aprovar e arquivar</button>':'')+(t.status==='Arquivado'?'Somente consulta':'<button type="button" data-fsj-edit="'+esc(t.id)+'">Editar</button><button type="button" class="danger" data-fsj-delete="'+esc(t.id)+'">Excluir</button><label class="fsj-supervision-toggle"><input type="checkbox" data-fsj-supervision="'+esc(t.id)+'" '+(t.supervision?'checked':'')+'>Supervisão</label>')+'</div></td></tr>';
 }).join('');
 }
+document.addEventListener('click',event=>{
+ const edit=event.target.closest('button[data-fsj-edit]');
+ const remove=event.target.closest('button[data-fsj-delete]');
+ if(edit)editTask(edit.dataset.fsjEdit);
+ if(remove)delTask(remove.dataset.fsjDelete);
+});
 document.addEventListener('change',async event=>{
  const box=event.target.closest('input[data-fsj-supervision]');if(!box)return;
  const task=S.tasks.find(t=>t.id===box.dataset.fsjSupervision);if(!task)return;
