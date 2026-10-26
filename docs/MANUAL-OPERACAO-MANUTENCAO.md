@@ -3,6 +3,14 @@
 Revisão operacional: 26/10/2026 (complementa histórico de 22–24/10/2026). Responsável pelo sistema: Urbano. Nome de uso: Assistente FSJ — Tarefa.
 Este é o ponto de entrada vigente para operação e manutenção. Os documentos vinculados detalham cada módulo. Decisões antigas permanecem como histórico; não devem ser usadas isoladamente para restaurar funcionalidades substituídas.
 
+## Manuais por tipo de usuário — regra vigente (26/10/2026)
+
+**Consultar primeiro o [índice de manuais por perfil](manuais/README.md):** [Proprietário](manuais/PROPRIETARIO.md), [Gestor](manuais/GESTOR.md), [Funcionário](manuais/FUNCIONARIO.md), [Visitante](manuais/VISITANTE.md), [Outros](manuais/OUTROS.md).
+
+**Regra prevalente sobre propostas antigas deste histórico:** Proprietário e Gestor compartilham a mesma configuração **operacional**, no escopo delegado. **Somente o Proprietário** tem acesso a manutenção, VM, arquitetura, código-fonte, repositórios, segredos e implantação. Funcionário, Visitante e Outros entram por **link pessoal** com as limitações configuradas pelo Proprietário/Gestor, sem senha administrativa. Visitante não tem supervisão. Outros é um visitante com facilidades específicas explicitamente concedidas. Essas regras precisam ser implementadas e testadas no servidor; o manual não é comprovação de implantação.
+
+Cada seção dos manuais individuais deve começar com **captura real atual** da tela; as imagens ainda estão pendentes de incorporação, e não devem ser inventadas nem expor dados privados.
+
 ## Guia visual vigente — desktop e celular (26/10/2026)
 
 **Ordem obrigatória da documentação de cada tela:** (1) captura real da tela na versão publicada, identificada como **Desktop** ou **Celular**; (2) finalidade e caminho de acesso; (3) campos e botões; (4) permissões por perfil; (5) origem e atualização dos dados; (6) testes e recuperação. **As capturas reais ainda não foram incorporadas ao repositório**: não utilizar imagens fictícias, telas antigas nem afirmar que existe um print atualizado. Após capturar e conferir, inserir imagem Markdown no início da seção correspondente, por exemplo `![Página Pessoas — desktop](imagens/pessoas-desktop.png)` e `![Página Pessoas — celular](imagens/pessoas-celular.png)`. Os caminhos são **exemplos de organização, não arquivos já existentes**. Não publicar prints com telefone, token de WhatsApp, senha, nomes privados ou dados pessoais sem ocultação.
