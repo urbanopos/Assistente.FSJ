@@ -1025,6 +1025,8 @@ function fsjRenderPerguntas(){
 }
 async function fsjCarregarRespostasPerguntas(){
  fsjRespostasPerguntas=await api('/rest/v1/respostas_perguntas_gestor?select=pergunta_id,pessoa_id,tarefa_id,resposta,respondida_em&order=respondida_em.desc');
+ const pending=fsjPerguntasLista().filter(q=>!fsjRespostasPerguntas.some(a=>a.pergunta_id===q.id)).length;
+ const badge=document.getElementById('kq');if(badge)badge.textContent=pending;
 }
 async function fsjEnviarRespostaPergunta(pergunta){
  const campo=document.getElementById('fsjRespostaPergunta'),btn=document.getElementById('fsjEnviarRespostaPergunta'),state=document.getElementById('fsjRespostaEstado'),resposta=campo?.value.trim();
