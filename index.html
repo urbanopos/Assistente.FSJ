@@ -1426,6 +1426,21 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  window.fsjSimpleGo=function(id){if(typeof navTo==='function')navTo(id);};
  window.fsjSimpleSelectGo=function(id){if(id==='__manutencao'){const s=document.getElementById('fsjSimpleSelect');if(s&&typeof currentPage!=='undefined'&&[...s.options].some(o=>o.value===currentPage))s.value=currentPage;window.open('https://10.203.77.1:9443/','_blank','noopener,noreferrer');return;}if(id==='videosChamadas'){abrirVideosReserva();return;}fsjSimpleGo(id);};
  window.fsjSimpleBack=function(){if(typeof window.fsjGoBack==='function')window.fsjGoBack();else if(typeof voltarPagina==='function')voltarPagina();setTimeout(()=>{const s=document.getElementById('fsjSimpleSelect');if(s&&typeof currentPage!=='undefined'&&[...s.options].some(o=>o.value===currentPage))s.value=currentPage;},0);};
+ // Sincronizar o menu com a seção efetivamente visível, inclusive quando
+ // rotinas de Folgas/Pessoas alterarem classes sem passar por navTo.
+ const fsjSyncVisibleMenu=()=>{
+  const menu=document.getElementById('fsjSimpleSelect'),host=document.getElementById('gestor');
+  if(!menu||!host||host.classList.contains('hidden'))return;
+  const visiveis=[...host.children].filter(el=>el.id&&!el.classList.contains('hidden')&&!el.hidden&&getComputedStyle(el).display!=='none');
+  if(visiveis.length!==1)return;
+  const id=visiveis[0].id==='fichaPessoa'?'cadPessoas':visiveis[0].id;
+  if([...menu.options].some(o=>o.value===id)&&menu.value!==id)menu.value=id;
+ };
+ const fsjHost=document.getElementById('gestor');
+ if(fsjHost)new MutationObserver(fsjSyncVisibleMenu).observe(fsjHost,{subtree:false,childList:true});
+ if(fsjHost){for(const sec of fsjHost.children)new MutationObserver(fsjSyncVisibleMenu).observe(sec,{attributes:true,attributeFilter:['class','hidden']});}
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjSyncVisibleMenu();});
+ window.addEventListener('pageshow',fsjSyncVisibleMenu);
  const restore=document.createElement('button');restore.id='fsjModoRestaurar';restore.type='button';restore.textContent='Ativar navegação simplificada';restore.style.cssText='margin:6px 12px;display:block';restore.onclick=()=>fsjSetSimpleMode(true);
  const bar=document.getElementById('fsjSimpleBar');bar.insertAdjacentElement('afterend',restore);
  const valor=(()=>{try{return localStorage.getItem(chave);}catch(e){return null}})();
