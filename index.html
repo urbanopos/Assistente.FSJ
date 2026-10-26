@@ -204,6 +204,23 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 @media(max-width:1049px){
  #fichaPessoa #personSettings>fieldset:has(#fsjCalendarioFolgas){position:static;max-width:100%}
 }
+/* Pessoas desktop: supervisão acima; jornada e férias lado a lado,
+   alinhadas à altura do calendário para reduzir a rolagem vertical. */
+@media(min-width:1050px){
+ #fichaPessoa.fsj-ficha-editando #personSettings:not([hidden]){
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(325px,365px);
+  column-gap:12px;row-gap:8px;
+ }
+ #fichaPessoa #personSettingsTitle{grid-column:1/-1}
+ #fichaPessoa #personSettings>fieldset:has(#pSupervisor){grid-column:1 / span 2;grid-row:2;margin:4px 0!important}
+ #fichaPessoa #personSettings>fieldset:has(#pworkstart){grid-column:1;grid-row:3;margin:4px 0!important}
+ #fichaPessoa #personSettings>fieldset:has(#pVacationStart){grid-column:2;grid-row:3;margin:4px 0!important}
+ #fichaPessoa #personSettings>fieldset:has(#fsjCalendarioFolgas){grid-column:3;grid-row:2 / span 2;margin:4px 0!important}
+ #fichaPessoa #personSettings>.row:last-child{grid-column:1 / span 2}
+ #fichaPessoa #personSettings>fieldset:has(#pworkstart) .row{gap:5px}
+ #fichaPessoa #personSettings>fieldset:has(#pworkstart) .row>div{flex:1 1 95px;min-width:0}
+ #fichaPessoa #personSettings>fieldset:has(#pworkstart) input[type=time]{max-width:100%;width:100%}
+}
 /* Calendário Pessoas sempre visível quando ficha aberta, com controle explícito. */
 #personSettings:not([hidden]) #fsjCalendarioFolgas{display:grid!important;visibility:visible!important;opacity:1!important;min-height:260px!important;width:100%!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
 #personSettings:not([hidden]) .fsj-cal-refresh{display:inline-block!important;margin:4px 0 10px!important}
