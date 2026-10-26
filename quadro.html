@@ -11,13 +11,21 @@ function fsjRenderOpenTasks(tasks){
  const target=document.getElementById('tasks');target.replaceChildren();
  const visible=(Array.isArray(tasks)?tasks:[]).filter(t=>document.getElementById('boardSituation').value==='Arquivado'?t.situacao==='Arquivado':!t.concluida&&t.situacao!=='Concluída'&&t.situacao!=='Arquivado').sort(fsjCompareTaskPriority);
  if(!visible.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Nenhuma tarefa nesta situação.';target.append(empty);return;}
- for(const t of visible){
-  const a=document.createElement('a');a.className='task';a.href='./responder.html#token='+encodeURIComponent(t.token)+'&quadro='+encodeURIComponent(token);
-  const name=document.createElement('span');name.className='name';
-  const code=document.createElement('strong');code.textContent=fsjTaskListLabel(t.codigo_tarefa,t.tarefa,t.periodicidade);
-  if(t.somente_leitura){a.href='#';a.onclick=event=>{event.preventDefault();fsjOpenTaskDetails(t.codigo_tarefa,t.tarefa,'Arquivado • somente consulta',null,t.periodicidade);};}
-  name.append(code);fsjApplyTaskColor(name,t.prioridade,t.situacao,t.execucao?.estado==='em_andamento');
-  a.setAttribute('aria-label',code.textContent+' — abrir detalhes');a.append(name);if(t.progresso_mensal){const progress=document.createElement('span');progress.className='status';progress.style.whiteSpace='nowrap';progress.textContent=t.progresso_mensal.rotulo;progress.title=FSJDaily.hint(t.progresso_mensal);a.append(progress);}target.append(a);
+ const sections=[{title:'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},{title:'Tarefas de grupo',items:visible.filter(t=>!!t.grupo_id)}];
+ for(const section of sections){
+  if(!section.items.length)continue;
+  const heading=document.createElement('h2');heading.textContent=section.title;heading.style.cssText='font-size:17px;margin:18px 0 10px';target.append(heading);
+  for(const t of section.items){
+   const a=document.createElement('a');a.className='task';a.href='./responder.html#token='+encodeURIComponent(t.token)+'&quadro='+encodeURIComponent(token);
+   const name=document.createElement('span');name.className='name';
+   const code=document.createElement('strong');code.textContent=fsjTaskListLabel(t.codigo_tarefa,t.tarefa,t.periodicidade);
+   if(t.somente_leitura){a.href='#';a.onclick=event=>{event.preventDefault();fsjOpenTaskDetails(t.codigo_tarefa,t.tarefa,'Arquivado • somente consulta',null,t.periodicidade);};}
+   name.append(code);fsjApplyTaskColor(name,t.prioridade,t.situacao,t.execucao?.estado==='em_andamento');
+   a.setAttribute('aria-label',code.textContent+' — abrir detalhes');a.append(name);
+   if(t.grupo_id){const participants=document.createElement('small');participants.style.cssText='display:block;font-size:12px;margin-top:5px;line-height:1.4';participants.textContent='Grupo: '+(t.grupo_nome||'Não identificado')+' • Participantes: '+((t.participantes||[]).join(', ')||'Não informados');a.append(participants);}
+   if(t.progresso_mensal){const progress=document.createElement('span');progress.className='status';progress.style.whiteSpace='nowrap';progress.textContent=t.progresso_mensal.rotulo;progress.title=FSJDaily.hint(t.progresso_mensal);a.append(progress);}
+   target.append(a);
+  }
  }
 }
 
