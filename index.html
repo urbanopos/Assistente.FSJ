@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261026-supervisao-fases-01">
+<meta name="fsj-build" content="20261026-supervisao-linha-02">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -419,6 +419,11 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
     grid-template-columns: repeat(2,minmax(0,1fr)) !important;
   }
 }
+
+/* Demandas: maior largura, linhas compactas e supervisão diretamente nas ações. */
+@media(min-width:901px){body:has(#gestor:not(.hidden) #demandas:not(.hidden)) main{max-width:calc(100vw - 32px);width:100%;}body:has(#gestor:not(.hidden) #demandas:not(.hidden)) .topnav .inner{max-width:calc(100vw - 32px)}}
+#demandaTabela{width:100%;overflow-x:auto}#demandaTabela table{width:100%;border-collapse:collapse}#demandaTabela th,#demandaTabela td{padding:5px 7px!important;vertical-align:middle;line-height:1.25}#demandaTabela tbody tr{height:auto!important}#demandaTabela .actions{display:flex;gap:5px;align-items:center;flex-wrap:nowrap}#demandaTabela .actions button{padding:5px 7px!important;min-height:30px;white-space:nowrap}#demandaTabela .fsj-supervision-toggle{display:inline-flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;cursor:pointer;margin:0}#demandaTabela .fsj-supervision-toggle input{width:17px;height:17px;margin:0;flex:none}#demandaTabela .fsj-task-number{max-width:290px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:700px){#demandaTabela #taskRows>tr>td:last-child{display:table-cell!important;padding:5px!important}#demandaTabela #taskRows>tr>td:last-child .actions{flex-wrap:wrap}#demandaTabela #taskRows>tr>td:first-child{display:table-cell!important}}
 </style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-brisa-menu-02">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
@@ -503,7 +508,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261026-supervisao-fases-01';
+const FSJ_BUILD='20261026-supervisao-linha-02';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1114,7 +1119,17 @@ async function fsjOpenEmployeeTask(t,button){
   location.assign('./responder.html#'+params.toString());
  }catch{alert('Não foi possível abrir a tarefa. Confira sua conexão e o acesso de proprietário.');button.disabled=false;}
 }
-function renderDemandas(){let responsavel=document.getElementById('demandaFuncionario').value;document.getElementById('demandaTabela').hidden=!responsavel;document.getElementById('demandaEscolha').hidden=!!responsavel;if(!responsavel){taskRows.innerHTML='';document.getElementById('demandaContagem').textContent='';return;}FSJDaily.ensure(null,responsavel,renderDemandas);let tarefas=filtrarDemandas(S.tasks,responsavel).filter(t=>!document.getElementById('demandaSituacao').value||t.status===document.getElementById('demandaSituacao').value).sort(fsjCompareTaskPriority);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+fsjFrequencyLabel(t)+(t.groupId?' / Grupo':'')+'</td><td>'+esc(FSJDaily.ownerText(t,null,responsavel))+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions">'+(t.status==='Concluída'?'<button type="button" data-fsj-archive="'+esc(t.id)+'">Aprovar e arquivar</button>':'')+(t.status==='Arquivado'?'Somente consulta':'<button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button>')+'</div></td></tr>').join('');document.getElementById('demandaContagem').textContent=tarefas.length+' de '+S.tasks.length+' tarefa(s)';if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="9" class="muted">'+'Nenhuma tarefa encontrada com estes filtros.'+'</td></tr>'}
+function renderDemandas(){let responsavel=document.getElementById('demandaFuncionario').value;document.getElementById('demandaTabela').hidden=!responsavel;document.getElementById('demandaEscolha').hidden=!!responsavel;if(!responsavel){taskRows.innerHTML='';document.getElementById('demandaContagem').textContent='';return;}FSJDaily.ensure(null,responsavel,renderDemandas);let tarefas=filtrarDemandas(S.tasks,responsavel).filter(t=>!document.getElementById('demandaSituacao').value||t.status===document.getElementById('demandaSituacao').value).sort(fsjCompareTaskPriority);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+fsjFrequencyLabel(t)+(t.groupId?' / Grupo':'')+'</td><td>'+esc(FSJDaily.ownerText(t,null,responsavel))+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions">'+(t.status==='Concluída'?'<button type="button" data-fsj-archive="'+esc(t.id)+'">Aprovar e arquivar</button>':'')+(t.status==='Arquivado'?'Somente consulta':'<button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button><label class="fsj-supervision-toggle" title="Marcar esta tarefa para acompanhamento e fiscalização pelo supervisor"><input type="checkbox" data-fsj-supervision="'+esc(t.id)+'" '+(t.supervision?'checked':'')+'><span>Supervisão</span></label>')+'</div></td></tr>').join('');document.getElementById('demandaContagem').textContent=tarefas.length+' de '+S.tasks.length+' tarefa(s)';if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="9" class="muted">'+'Nenhuma tarefa encontrada com estes filtros.'+'</td></tr>'}
+document.addEventListener('change',async event=>{
+ const box=event.target.closest('input[data-fsj-supervision]');if(!box)return;
+ const task=S.tasks.find(t=>t.id===box.dataset.fsjSupervision);if(!task)return;
+ const previous=!!task.supervision,next=box.checked;box.disabled=true;
+ try{
+  await api('/rest/v1/tarefas?id=eq.'+encodeURIComponent(task.id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({exige_supervisao:next})});
+  task.supervision=next;save();renderDemandas();renderListaSupervisao();
+ }catch(error){box.checked=previous;alert('Não foi possível alterar a supervisão: '+(error.message||error));}
+ finally{box.disabled=false;}
+});
 document.addEventListener('click',async event=>{
  const b=event.target.closest('[data-fsj-archive]');if(!b)return;
  if(!confirm('Aprovar a conclusão e arquivar esta tarefa? O histórico será preservado.'))return;
