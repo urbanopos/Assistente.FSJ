@@ -33,6 +33,11 @@
  body.fsj-reader:has(#taskAnswer) #taskAnswer strong{order:2!important;font-size:12px}
 }
 
+/* Uma única fileira de ações, sem centralização vertical em coluna. */
+#executionControl .fsj-execution-actions{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;flex-wrap:wrap!important;gap:8px!important}
+#executionControl #fsjTaskQuestions{display:contents!important}
+#executionControl #fsjTaskQuestions button{margin:0!important;width:auto!important;flex:0 0 auto!important}
+@media(max-width:700px){#executionControl .fsj-execution-actions{gap:6px!important}#executionControl #fsjTaskQuestions button{font-size:12px!important;padding:0 7px!important}}
 /* Dúvidas e sugestões alinhadas ao botão de início, em desktop e celular. */
 #executionControl #fsjTaskQuestions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}
 #executionControl #fsjTaskQuestions button{height:42px!important;min-height:42px!important;max-height:42px!important;padding:0 12px!important;display:inline-flex;align-items:center;justify-content:center;line-height:1.15;box-sizing:border-box}
@@ -141,5 +146,5 @@ document.addEventListener('click',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('change',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckReaderVersion()});
 window.addEventListener('pageshow',fsjCheckReaderVersion);
-</script><script src="./mobile-pages.js?v=20261025-conclusao-inline-01"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261025-actions-inline-01"></script></body></html>
+</script><script src="./mobile-pages.js?v=20261025-acoes-alinhadas-02"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261025-actions-inline-01"></script></body></html>
 
