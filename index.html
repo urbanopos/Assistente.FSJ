@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261026-nav-unblock-03">
+<meta name="fsj-build" content="20261026-nav-light-04">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -509,7 +509,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261026-nav-unblock-03';
+const FSJ_BUILD='20261026-nav-light-04';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -522,36 +522,21 @@ let S=migrateState();const save=()=>localStorage.setItem(K,JSON.stringify(S)),ui
 function rollover(){let d=dateKey();if(S.day&&S.day!==d)S.tasks.forEach(t=>{if(t.daily&&t.status==='Concluída'){t.status='Em aberto';t.response='';t.question='';t.completedBy='';t.created=new Date().toISOString()}});S.day=d;save()}
 function view(v){if(!fsjPainelPronto)return;gestor.classList.remove('hidden');window.scrollTo({top:0,behavior:'auto'})}
 let currentPage='dashboard',pageHistory=[],pageHistoryState=[];
+// Navegação leve: os dados gerais são carregados na entrada do sistema.
+// A troca de página não deve recarregar todas as tabelas da Armazenagem.
 let fsjNavSequence=0;
-async function navTo(id,b,record=true){
+function navTo(id,b,record=true){
  if(!fsjPainelPronto)return;
  const seq=++fsjNavSequence;
- const current=document.querySelector('#gestor>div:not(.hidden):not(#fsjPageFreshness)');
- if(current)current.classList.add('hidden');
- let notice=document.getElementById('fsjPageFreshness');
- if(!notice){notice=document.createElement('div');notice.id='fsjPageFreshness';notice.setAttribute('role','status');notice.style.cssText='margin:20px auto;padding:18px;max-width:900px;border:1px solid #cee3eb;border-radius:10px;background:white;text-align:center;font-weight:600';document.getElementById('gestor').prepend(notice);}
- notice.classList.remove('hidden');notice.hidden=false;notice.textContent='Atualizando dados da Armazenagem antes de abrir a página...';
- try{
-  const [ps,gs,gms,ts,trs]=await Promise.race([Promise.all([
-   api('/rest/v1/pessoas?select=*'),api('/rest/v1/grupos?select=*'),
-   api('/rest/v1/grupo_membros?select=*'),api('/rest/v1/tarefas?select=*'),
-   api('/rest/v1/tarefa_responsaveis?select=*')
-  ]),new Promise((_,reject)=>setTimeout(()=>reject(Error('Tempo limite da consulta: 12 segundos.')),12000))]);
-  if(seq!==fsjNavSequence)return;
-  if((!ps.length&&S.people.length)||(!ts.length&&S.tasks.length))throw Error('A Armazenagem devolveu dados inesperadamente vazios.');
-  const oldPeople=new Map(S.people.map(p=>[p.id,p]));
-  S.people=ps.map(x=>({...(oldPeople.get(x.id)||{}),id:x.id,name:x.nome,nick:x.identificacao,phone:x.whatsapp,type:x.tipo,active:x.ativo===true,videosChamadas:x.videos_chamadas===true,whatsapp7h:x.receber_tarefas_whatsapp===true,requireWeeklyOff:x.exigir_folga_semanal!==false,daysOff:x.folgas_semanais||[],datesOff:x.folgas_datas||[],dayOffReasons:x.folgas_motivos||{},vacationStart:x.ferias_inicio||null,vacationEnd:x.ferias_fim||null,workStart:(x.jornada_inicio||'07:00').slice(0,5),lunchStart:(x.almoco_inicio||'12:00').slice(0,5),lunchReturn:(x.almoco_retorno||'14:00').slice(0,5),workFinish:(x.jornada_fim||'16:20').slice(0,5)}));
-  S.groups=gs.map(g=>({id:g.id,name:g.nome,members:gms.filter(m=>m.grupo_id===g.id).map(m=>m.pessoa_id)}));
-  const oldTasks=new Map(S.tasks.map(t=>[t.id,t]));
-  S.tasks=ts.map(t=>({...(oldTasks.get(t.id)||{}),id:t.id,code:t.codigo_tarefa,text:t.descricao,personIds:trs.filter(x=>x.tarefa_id===t.id).map(x=>x.pessoa_id),groupId:t.grupo_id||'',daily:!!t.diaria,frequency:t.periodicidade||(t.diaria?'diaria':'pontual'),priority:t.prioridade||'normal',supervision:!!t.exige_supervisao,status:t.situacao,created:t.criada_em,completedBy:t.concluida_por||''}));
-  render();
-  if(seq!==fsjNavSequence)return;
-  notice.hidden=true;notice.classList.add('hidden');
-  fsjNavToShow(id,b,record);
-  if(id==='fichaPessoa'&&pid.value&&typeof editPerson==='function')editPerson(pid.value);
-  if(id==='cadPessoas'&&typeof fsjLoadSupervisors==='function')fsjLoadSupervisors().catch(e=>console.warn('Supervisão não atualizada:',e));
-  fsjAtualizarRetornos(false).catch(e=>console.warn('Retornos não atualizados:',e));
- }catch(e){if(seq!==fsjNavSequence)return;notice.textContent='Não foi possível atualizar esta página ('+(e?.message||'falha na consulta')+'). Confira a conexão e selecione novamente a página. Nenhum dado foi alterado.';console.warn('FSJ: atualização obrigatória antes da navegação',e);}
+ const notice=document.getElementById('fsjPageFreshness');
+ if(notice){notice.hidden=true;notice.classList.add('hidden');}
+ fsjNavToShow(id,b,record);
+ // Atualização seletiva e não bloqueante. Nunca trocar a página após a consulta.
+ if(id==='cadPessoas'&&!document.getElementById('pid').value&&typeof atualizarPessoas==='function'){
+  Promise.resolve().then(()=>{if(seq===fsjNavSequence&&currentPage===id&&!document.getElementById('pid').value)return atualizarPessoas();}).catch(e=>console.warn('FSJ: atualização de pessoas',e));
+ }else if(['demandas','demandasGrupos','supervisao','dashboard'].includes(id)&&typeof fsjAtualizarRetornos==='function'){
+  Promise.resolve().then(()=>{if(seq===fsjNavSequence&&currentPage===id)return fsjAtualizarRetornos(true);}).catch(e=>console.warn('FSJ: atualização de tarefas',e));
+ }
 }
 function fsjNavToShow(id,b,record=true){if(!fsjPainelPronto)return;if(currentPage==='novaTarefa'&&id!=='novaTarefa'&&typeof fsjLimparSelecaoResponsaveis==='function')fsjLimparSelecaoResponsaveis();if(id==='demandas'&&(b||currentPage!=='demandas')){document.getElementById('demandaFuncionario').value='';if(b)document.getElementById('demandaSituacao').value='Em aberto';renderDemandas();}if(id==='cadPessoas'||id==='fichaPessoa'){document.getElementById(id==='fichaPessoa'?'personBasicDetails':'personBasicHome').appendChild(document.getElementById('personBasicFields'));}if(record&&id!==currentPage){pageHistory.push(currentPage);pageHistoryState.push({employee:document.getElementById('demandaFuncionario').value,situation:document.getElementById('demandaSituacao').value});}currentPage=id;const fsjMenu=document.getElementById('fsjSimpleSelect');if(fsjMenu){const menuId=(id==='fichaPessoa'?'cadPessoas':id);if([...fsjMenu.options].some(o=>o.value===menuId))fsjMenu.value=menuId;}try{sessionStorage.setItem('fsj_ultima_aba_v1',id);if(id==='cadPessoas'||id==='fichaPessoa')sessionStorage.setItem('fsj_ultima_pessoa_v1',document.getElementById('pid').value||'');}catch(e){}if(id==='cadPessoas'&&!document.getElementById('pid').value)clearPerson();view('gestor');setTimeout(brisaContextoAtual,0);document.querySelectorAll('.topnav button').forEach(x=>x.classList.remove('active'));let selected=b||[...document.querySelectorAll('.topnav button')].find(x=>x.getAttribute('onclick')==="navTo('"+(id==='fichaPessoa'?'cadPessoas':id)+"',this)");if(selected)selected.classList.add('active');document.querySelectorAll('#gestor>div').forEach(x=>x.classList.add('hidden'));let el=document.getElementById(id);if(el)el.classList.remove('hidden');if(typeof fsjPersonLayout==='function')fsjPersonLayout(true);if(id==='novaTarefa'){restaurarRascunhoTarefa();carregarHistoricoTarefas()}if(id==='whatsapp'){carregarConfirmacoesEnvio();fsjRenderIndividualList();}if(id==='disparoEmergencia')fsjRenderEmergenciaPessoas();if(id==='folgasGestor')carregarFolgas();window.scrollTo({top:0,left:0,behavior:'auto'})}
 
