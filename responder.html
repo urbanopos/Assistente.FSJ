@@ -33,6 +33,16 @@
  body.fsj-reader:has(#taskAnswer) #taskAnswer strong{order:2!important;font-size:12px}
 }
 
+/* Altura uniforme dos botões de andamento e conclusão. */
+#executionControl .fsj-execution-actions>button,
+#executionControl .fsj-execution-actions .fsj-answer-buttons button{
+ height:42px!important;min-height:42px!important;max-height:42px!important;
+ box-sizing:border-box!important;padding:0 14px!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ line-height:1.15!important;vertical-align:middle!important;
+}
+#executionControl .fsj-execution-actions>button[hidden]{display:none!important}
+#executionControl .fsj-execution-actions .fsj-answer-buttons{align-items:center}
 /* Controles de conclusão junto ao estado de execução, sem ocupar o rodapé. */
 #executionControl .fsj-execution-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:8px 0}
 #executionControl .fsj-task-answer{display:flex;flex-direction:row;align-items:center;gap:8px;margin:0}
