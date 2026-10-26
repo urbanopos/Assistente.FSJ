@@ -17,7 +17,8 @@
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   const answer=location.pathname.endsWith('/responder.html')?flow.querySelector('#taskAnswer'):null;
   const navRow=element('div','fsj-page-nav-row');navRow.append(prev,status,next);if(answer){const execution=flow.querySelector('#executionControl');if(execution)execution.append(answer);else footer.append(answer);}footer.append(navRow);
-  // Os botões de dúvidas e sugestões permanecem na linha de execução da tarefa.root.append(viewport,footer);root.classList.add('fsj-page-shell');
+  // Preservar a estrutura original de páginas e a navegação móvel.
+  root.append(viewport,footer);root.classList.add('fsj-page-shell');
   const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null,answer};states.set(root,state);
   prev.onclick=()=>{if(state.index>0)turn(state,state.index-1);else goBack();};next.onclick=()=>turn(state,state.index+1);
   viewport.addEventListener('scroll',()=>{if(!mobile.matches)return;const index=Math.round(viewport.scrollLeft/state.stride);if(Number.isFinite(index)&&index!==state.index){state.index=index;update(state);}});
