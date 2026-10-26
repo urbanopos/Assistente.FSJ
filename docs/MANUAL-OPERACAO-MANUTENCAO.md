@@ -1,7 +1,61 @@
 # Assistente FSJ — Manual de operação e manutenção
 
-Revisão: 22/10/2026. Responsável pelo sistema: Urbano. Nome de uso: Assistente FSJ — Tarefa.
+Revisão operacional: 26/10/2026 (complementa histórico de 22–24/10/2026). Responsável pelo sistema: Urbano. Nome de uso: Assistente FSJ — Tarefa.
 Este é o ponto de entrada vigente para operação e manutenção. Os documentos vinculados detalham cada módulo. Decisões antigas permanecem como histórico; não devem ser usadas isoladamente para restaurar funcionalidades substituídas.
+
+## Guia visual vigente — desktop e celular (26/10/2026)
+
+**Ordem obrigatória da documentação de cada tela:** (1) captura real da tela na versão publicada, identificada como **Desktop** ou **Celular**; (2) finalidade e caminho de acesso; (3) campos e botões; (4) permissões por perfil; (5) origem e atualização dos dados; (6) testes e recuperação. **As capturas reais ainda não foram incorporadas ao repositório**: não utilizar imagens fictícias, telas antigas nem afirmar que existe um print atualizado. Após capturar e conferir, inserir imagem Markdown no início da seção correspondente, por exemplo `![Página Pessoas — desktop](imagens/pessoas-desktop.png)` e `![Página Pessoas — celular](imagens/pessoas-celular.png)`. Os caminhos são **exemplos de organização, não arquivos já existentes**. Não publicar prints com telefone, token de WhatsApp, senha, nomes privados ou dados pessoais sem ocultação.
+
+### 1. Menu Principal e Pessoas
+**Print inicial:** captura real da página Pessoas desktop e celular — **pendente**.
+
+No desktop, Menu Principal → Pessoas → selecionar pessoa → ficha. O botão **Salvar alterações** foi acrescentado logo após os dados cadastrais da pessoa selecionada; mantém o salvamento da ficha. A seleção da pessoa e da página deve ser preservada. A página não deve ficar bloqueada em “Atualizando dados da Armazenagem”. A versão de navegação leve **20261026-nav-light-04** abre a página imediatamente, usa dados já disponíveis e atualiza apenas recursos relevantes em segundo plano. Não exigir Ctrl + F5 como rotina. **Publicação confirmada; validação final no navegador pendente.**
+
+Categorias e regras: Proprietário administra; Funcionário executa tarefas próprias e pode ter acompanhamento autorizado; Gestor acompanha e orienta sem criar tarefas; Visitante **não possui supervisão**. O checkbox “Atua como supervisor” não deve ser oferecido nem aceito para Visitante, inclusive em cadastros antigos. A imagem enviada em 26/10 mostrou um Visitante ainda marcado como supervisor; **essa correção específica na ficha e no servidor permanece pendente de validação/implementação completa**. Não confundir decisão de produto com permissão já comprovada.
+
+### 2. Demandas e retornos — painel administrativo
+**Print inicial:** captura real do filtro por responsável e dos dois quadros — **pendente**.
+
+Selecionar funcionário/responsável e situação. A lista de **tarefas individuais** aparece primeiro. As **tarefas de grupo** atribuídas ao responsável aparecem em quadro próprio abaixo, com nome do grupo e participantes, sem duplicar as individuais. Manter colunas de situação, retorno, R/I, E/C, conclusão, edição/exclusão e supervisão conforme autorização. A separação foi publicada no `index.html`, commit `64832cbf1bbaf0768afef805abeceb3ba12f3e73`; **teste visual e funcional pendente**. A tela “Demandas e retornos — Grupos” continua disponível para filtrar por grupo. Não usar o filtro administrativo como prova de que o link do WhatsApp está atualizado.
+
+### 3. Quadro diário recebido pelo WhatsApp
+**Print inicial:** captura real de `quadro.html#token=...` com token e dados privados ocultados, no desktop e celular — **pendente**.
+
+O usuário abre o link diário e vê **Tarefas individuais** primeiro e **Tarefas de grupo** abaixo. Para cada tarefa coletiva, exibir **grupo e participantes**, mantendo código Tar, cores, prioridade e andamento. O quadro não deve repetir uma tarefa na seção individual. O front-end `quadro.html` foi publicado nos commits `0607f333cbf609892cfa4689f842f61117f93ca7` e `4d1e78e9131090f2363e3c05758d149ecf4ae6da`; a função Supabase `resposta-tarefa` foi implantada na versão **23** para retornar `grupo_id`, `grupo_nome` e `participantes`. **Conferência em link real e ambos os dispositivos pendente**. Não alterar por isso a rotina de disparo das 7h.
+
+### 4. Resposta individual da tarefa
+**Print inicial:** captura real de `responder.html` com tarefa válida, no desktop e celular — **pendente**.
+
+O formulário vigente tem **três botões verdes**: **Iniciar tarefa**, **Dúvidas sobre a tarefa**, **Sugestão de tarefas**. Abaixo, o botão **← Página anterior**, centralizado, retorna pela navegação do navegador quando existe histórico; link direto pode não ter página anterior. A versão antiga com apenas dois botões **não é padrão válido**. Em link sem token, mostrar apenas erro de link inválido, sem formulário de tarefa ou controles de sugestão soltos. Correções publicadas em `responder.html` e `task-suggestions.js`; conferir o comportamento real antes de dar a remoção por validada. Não restaurar telas antigas para resolver incidentes.
+
+**Visitante — demonstração sem gravação:** os controles apresentam apenas estas mensagens:
+- Iniciar: “Se executor, iniciaria a tarefa.”
+- Concluir — SIM: “Se executor, concluiria a tarefa.”
+- Concluir — NÃO: “Se executor, justificaria a não execução.”
+- Finalizar: “Se executor, informaria a conclusão.”
+
+Nenhuma dessas ações deve alterar situação, execução, conclusão, justificativa, anexo ou envio de WhatsApp. O bloqueio de escrita foi acrescentado à função `resposta-tarefa`; validar com link de visitante real. Os quatro botões demonstrativos e a autorização no servidor são regras complementares.
+
+### 5. Painel de Manutenção e acesso à VM
+**Print inicial:** captura da autenticação sem credenciais nem informações sensíveis — **pendente**.
+
+O acesso de manutenção é exclusivo do Proprietário autenticado. A tela HTTPS da VM (porta 9443) **não deve ser aberta automaticamente** por navegação ou atualização do aplicativo: o caminho previsto é o botão **Manutenção da VM**, dentro do **Painel de Manutenção**. Acesso direto por URL continua sujeito à VPN e autenticação no servidor; ocultar botão não é controle suficiente. **Restrição de abertura exclusiva pelo botão ainda não foi implementada/validada.** Não remover a senha nem expor credenciais.
+
+### 6. Atualização, preservação da tela e manutenção de versões
+Não recarregar todas as tabelas a cada seleção de página. Priorizar atualização seletiva e assíncrona dos elementos funcionais, sem bloquear a página. Preservar página, pessoa selecionada e posição de leitura durante atualização automática. Não apagar dados de formulários não salvos. As correções intermediárias `20261026-nav-stay-auto-01`, `nav-fix-02` e `nav-unblock-03` foram substituídas pelo padrão leve `20261026-nav-light-04`; **não restaurar a espera geral bloqueante**. Validar especialmente seleção de Pessoas, filtros, mudanças de versão e ausência de Ctrl + F5.
+
+### 7. Matriz de apresentação e testes
+| Recurso | Desktop | Celular | Estado |
+| --- | --- | --- | --- |
+| Pessoas e Salvar alterações | Ficha com botão sob cadastro | Mesma função com layout adaptado | Publicado; teste pendente |
+| Demandas individuais e de grupo | Quadros separados | Mesma separação, layout responsivo | Publicado; teste pendente |
+| Link diário WhatsApp | Individuais e grupos com participantes | Mesmo conteúdo com adaptação móvel | Publicado; teste pendente |
+| Resposta individual | Três ações + Página anterior | Três ações + Página anterior | Publicado; teste pendente |
+| Visitante | Simulação, sem escrita | Simulação, sem escrita | Parcialmente publicado; validar bloqueios e cadastro |
+| Manutenção VM | Autenticação exclusiva | Acesso somente se autorizado | Acesso pelo botão ainda pendente |
+
+**Regra de recuperação:** preservar backup, sessão WhatsApp, banco e histórico. Antes de restaurar, comparar a versão com este guia; não ressuscitar PDF de cartões, telas antigas de dois botões, navegação bloqueante ou permissões antigas de Visitante. Publicação no GitHub/Supabase não comprova validação em todos os aparelhos.
 
 ## Controle de versão e implantação
 
@@ -21,7 +75,7 @@ Toda melhoria, correção ou mudança de fluxo deve atualizar este manual e o do
 
 O Proprietário administra o sistema e também pode ser responsável por tarefas pessoais. A atividade não precisa representar uma ordem para funcionário. Uma tarefa deve ter o responsável correto no cadastro.
 
-Funcionários e visitantes usam seu acesso pessoal para consultar e responder às tarefas permitidas. Supervisão permite acompanhar tarefas de terceiros dentro do escopo autorizado, sem presumir poder de execução, cadastro ou administração. A nova definição do Proprietário amplia o Gestor para atuação operacional, inclusive criação de tarefas, preservando a administração técnica exclusiva. Essa ampliação ainda depende de implantação e testes; consultar [perfil Gestor](decisoes/perfil-gestor.md). As permissões existentes não foram ampliadas por esta revisão documental. Delegações dependem de autorização explícita e validação no servidor.
+Funcionários acessam as próprias tarefas pelo link individual do WhatsApp e registram execução conforme autorização; podem consultar tarefas de terceiros se expressamente autorizados como supervisores, sem modificá-las. **Visitantes não são supervisores:** apenas consultam as tarefas autorizadas e experimentam os botões demonstrativos, sem qualquer gravação. **Gestores:** definição vigente solicitada pelo Proprietário é acompanhar e orientar a execução, **sem criar tarefas**; a implementação integral e as permissões efetivas precisam de validação. O Proprietário mantém a administração técnica e as decisões exclusivas. O documento [perfil Gestor](decisoes/perfil-gestor.md) pode conter propostas anteriores e não prevalece sobre esta regra. Toda permissão precisa ser verificada no servidor, não apenas ocultada na tela.
 
 A autorização de Vídeos e Chamadas é controlada em Pessoas e não amplia as permissões de tarefas. Não compartilhar links pessoais nem credenciais.
 
