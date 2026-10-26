@@ -192,6 +192,18 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 
 .fsj-calendario-folgas{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:9px 0 12px}.fsj-cal-head{text-align:center;font-weight:700;font-size:12px}.fsj-dia-folga{min-width:0!important;min-height:48px!important;padding:5px 2px!important;background:#f5faf8;border:1px solid #bdcec9;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px}.fsj-dia-folga.marcado{background:#d3ead9!important;border:2px solid #197642!important}.fsj-dia-folga small{font-size:9px;line-height:1.1;overflow-wrap:anywhere}#fsjFolgaMotivoEditor{margin:8px 0;padding:8px;border:1px solid #a8c2d2;border-radius:7px}#fsjFolgaMotivoEditor[hidden]{display:none!important}#fsjFolgaMotivo{width:100%;max-width:380px}@media(max-width:700px){.fsj-calendario-folgas{gap:2px}.fsj-dia-folga{min-height:43px!important;font-size:12px}.fsj-dia-folga small{font-size:8px}}
 
+/* Ficha Pessoas: calendário na coluna direita, sem invadir o avatar MarIA. */
+@media(min-width:1050px){
+ main:has(#fichaPessoa:not(.hidden)){max-width:1510px;padding-right:108px}
+ #fichaPessoa.fsj-ficha-editando #personSettings:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(325px,365px);column-gap:16px;align-items:start}
+ #fichaPessoa #personSettingsTitle{grid-column:1/-1}
+ #fichaPessoa #personSettings>fieldset{min-width:0}
+ #fichaPessoa #personSettings>fieldset:has(#fsjCalendarioFolgas){grid-column:2;grid-row:2 / span 3;margin:10px 0!important;align-self:start}
+ #fichaPessoa #personSettings>.row:last-child{grid-column:1}
+}
+@media(max-width:1049px){
+ #fichaPessoa #personSettings>fieldset:has(#fsjCalendarioFolgas){position:static;max-width:100%}
+}
 /* Calendário Pessoas sempre visível quando ficha aberta, com controle explícito. */
 #personSettings:not([hidden]) #fsjCalendarioFolgas{display:grid!important;visibility:visible!important;opacity:1!important;min-height:260px!important;width:100%!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
 #personSettings:not([hidden]) .fsj-cal-refresh{display:inline-block!important;margin:4px 0 10px!important}
