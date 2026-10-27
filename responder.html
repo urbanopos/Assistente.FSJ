@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta name="copyright" content="© 2026 Urbano Possidônio de Carvalho Junior — direitos reservados sobre o material próprio do Assistente FSJ"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+<html lang="pt-BR"><head><meta name="copyright" content="© 2026 Urbano Possidônio de Carvalho Junior — direitos reservados sobre o material próprio do Assistente FSJ"><meta charset="utf-8"><meta name="fsj-reader-version" content="20261027-mobile-entrega-04"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src https://awrxnzbfrsaurzpunuko.supabase.co; img-src 'self' data:; form-action 'none'">
 <title>Responder tarefa • Fazenda São José</title><link rel="icon" href="./icon-512.png">
 <style>
@@ -185,7 +185,7 @@ async function fsjCheckReaderVersion(){
   if(!response.ok)return;
   const page=await response.text();
   const version=page.match(/mobile-pages\\.js\\?v=([^"']+)/)?.[1]||'';
-  if(version&&version!=='20261025-leitor-restaurado-03'&&version!==fsjVersionLast){
+  if(version&&version!=='20261027-mobile-entrega-04'&&version!==fsjVersionLast){
    fsjVersionLast=version;
    // Atualiza automaticamente apenas quando não há resposta em edição.
    const dirty=!!(document.querySelector('input[name="resposta"]:checked')||document.getElementById('why')?.value?.trim()||document.getElementById('missing')?.value?.trim()||document.getElementById('files')?.files?.length);
@@ -205,5 +205,5 @@ document.addEventListener('click',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('change',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckReaderVersion()});
 window.addEventListener('pageshow',fsjCheckReaderVersion);
-</script><script src="./mobile-pages.js?v=20261025-leitor-restaurado-03"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261027-resposta-voz-03"></script></body></html>
+</script><script src="./mobile-pages.js?v=20261027-mobile-entrega-04"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261027-resposta-voz-03"></script></body></html>
 
