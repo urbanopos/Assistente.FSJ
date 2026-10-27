@@ -67,6 +67,32 @@
   nav.append(back,count,next);dialog.querySelector('section').append(nav);
  }
  let rows=[],selected='',requestId=null,working=false,recognition=null,kind='sugestao';
+if(manager){
+ const tabs=document.createElement('div');tabs.id='fsjManagerRequestTabs';tabs.setAttribute('role','group');tabs.setAttribute('aria-label','Tipo de solicitação');
+ for(const [value,label] of [['todas','Todas'],['duvida','Dúvidas'],['sugestao','Sugestões']]){
+  const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.kind=value;
+  b.onclick=()=>{tabs.dataset.filter=value;selected='';refresh().then(()=>{show();feedback('');}).catch(e=>feedback(e.message));};
+  tabs.append(b);
+ }
+ tabs.dataset.filter='todas';el('fsjSuggestionChoice').before(tabs);
+ const style=document.createElement('style');style.textContent=`
+ #fsjSuggestionDialog{width:min(620px,100vw)!important;max-height:100dvh!important}
+ #fsjSuggestionDialog>section{overflow-y:auto;max-height:calc(100dvh - 58px);display:flex;flex-direction:column;gap:8px}
+ #fsjSuggestionDialog h2{font-size:20px;margin:3px 0}
+ #fsjSuggestionDialog p{margin:4px 0}
+ #fsjManagerRequestTabs{display:flex;gap:7px}
+ #fsjManagerRequestTabs button{flex:1;min-width:0;background:#e5efe7;color:#17523d;border:1px solid #9abda7;border-radius:8px;padding:9px 4px;font:600 13px system-ui}
+ #fsjManagerRequestTabs[data-filter="todas"] [data-kind="todas"],#fsjManagerRequestTabs[data-filter="duvida"] [data-kind="duvida"],#fsjManagerRequestTabs[data-filter="sugestao"] [data-kind="sugestao"]{background:#17523d;color:white}
+ #fsjSuggestionReview{background:#fff5dd;border-radius:9px;padding:10px}
+ #fsjSuggestionNotes{min-height:80px}
+ #fsjSuggestionDialog button{cursor:pointer}
+ #fsjSuggestionSave{background:#175b40;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700}
+ #fsjManagerAnswerMic{background:#d8e7ff;color:#1757a2;border:0;border-radius:8px;padding:9px}
+ #fsjSuggestionBack{align-self:flex-start;background:#175b40;color:white;border:0;border-radius:8px;padding:7px 18px;font-size:23px}
+ @media(max-width:700px){#fsjSuggestionDialog{height:100dvh!important;border-radius:0!important}#fsjSuggestionDialog>section{padding:10px!important}}
+ `;document.head.append(style);
+}
+
  const labels={aguardando:'Aguardando análise do gestor',aprovada:'APROVADA',rejeitada:'REJEITADA'};
  async function call(data){
   if(manager)return api('/functions/v1/sugestoes-tarefas',{method:'POST',body:JSON.stringify(data)});
@@ -106,7 +132,7 @@
   el('fsjSuggestionIdentity').textContent=manager&&item?'URGENTE · Solicitante: '+(typeof person==='function'?(person(item.pessoa_id).nick||person(item.pessoa_id).name||item.pessoa_id):item.pessoa_id):!manager&&typeof info!=='undefined'&&info?'Participante: '+info.responsavel:'';
  }
  async function refresh(){
-  const data=await call({action:manager?'gestor_listar':'listar'});rows=data.sugestoes.filter(s=>manager||s.tipo===kind);
+  const data=await call({action:manager?'gestor_listar':'listar'});rows=data.sugestoes.filter(s=>manager?(el('fsjManagerRequestTabs')?.dataset.filter==='todas'||s.tipo===el('fsjManagerRequestTabs')?.dataset.filter):s.tipo===kind);
   const pick=el('fsjSuggestionChoice');pick.replaceChildren(new Option(manager?'Selecione…':'Nova sugestão',''),...rows.map(s=>new Option(participant&&kind==='sugestao'?suggestionCode(s):(labels[s.estado]||s.estado)+' — '+s.descricao.slice(0,65),s.id)));pick.value=selected;
   if(selected&&rows.some(s=>s.id===selected))show();
  }
