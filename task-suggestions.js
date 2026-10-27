@@ -98,7 +98,7 @@
   }
   el('fsjSuggestionHeading').textContent=manager?'Análise do gestor':question?'Dúvidas sobre a tarefa':'Sugestão de Tarefa';
   dialog.querySelector('label[for="fsjSuggestionText"]').textContent=question?'Descreva sua dúvida':'Descreva sua sugestão';
-  el('fsjSuggestionSave').textContent=question?'Enviar resposta':'Enviar decisão';
+  el('fsjSuggestionSave').textContent=question?'Enviar resposta':'Enviar decisão';if(manager){const mic=el('fsjManagerAnswerMic');if(mic)mic.hidden=!question||!item||item.estado!=='aguardando';}
   el('fsjSuggestionSend').textContent=question?'Enviar dúvida':'Enviar sugestão';
   el('fsjSuggestionDecision').querySelectorAll('label').forEach(label=>label.hidden=question);
   el('fsjSuggestionState').textContent=item?(question&&item.estado==='aprovada'?'RESPONDIDA':labels[item.estado]):(manager?'Selecione uma sugestão.':question?'A dúvida será encaminhada ao proprietário e ficará disponível aos supervisores responsáveis.':'O envio cria uma tarefa urgente para o gestor.');
@@ -135,6 +135,18 @@
   try{await call(rows.find(s=>s.id===selected)?.tipo==='duvida'?{action:'responder_duvida',id:selected,resposta:observacoes}:{action:'decidir',id:selected,estado,observacoes});await refresh();show();feedback('Decisão registrada e disponível no formulário do participante.');}catch(e){feedback(e.message);}finally{working=false;el('fsjSuggestionSave').disabled=false;}
  };
  if(manager){
+  const mic=document.createElement('button');
+  mic.type='button';mic.id='fsjManagerAnswerMic';mic.textContent='🎙 Captar voz';mic.hidden=true;
+  el('fsjSuggestionNotes').after(mic);
+  mic.onclick=()=>{
+    const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!R){feedback('Ditado indisponível. Digite a resposta.');return;}
+    const rec=new R();rec.lang='pt-BR';
+    rec.onresult=e=>{const field=el('fsjSuggestionNotes');field.value=(field.value+' '+e.results[0][0].transcript).trim().slice(0,2000);feedback('Confira o texto antes de enviar.');};
+    rec.onerror=()=>feedback('Não foi possível captar a voz.');
+    mic.disabled=true;rec.onend=()=>{mic.disabled=false;};
+    try{rec.start();}catch{mic.disabled=false;}
+  };
   const button=document.createElement('button');button.type='button';button.textContent='Analisar sugestões de tarefas';button.onclick=()=>open();el('dashboard').prepend(button);
   const load=fsjLoadTaskDetails;
   fsjLoadTaskDetails=async function(id){const details=await load(id);if(String(id).startsWith('sugestao-'))details.sections.unshift({title:'Sugestão de tarefa',entries:[{text:'Analise a sugestão, aprove ou rejeite e justifique a decisão.',actions:[{label:'Analisar sugestão',run:()=>open(id)}]}]});return details;};
