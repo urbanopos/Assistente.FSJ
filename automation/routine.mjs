@@ -39,7 +39,7 @@ if(!boards.length)boards=await db('quadros_do_dia?pessoa_id=eq.'+person.id+'&dia
 const items=eligible(tasks,assignments,returns,person.id,day);
 if(items.length)await db('links_resposta?on_conflict=tarefa_id,pessoa_id,dia',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(items.map((t,i)=>({tarefa_id:t.id,pessoa_id:person.id,dia:day,expira_em:dayEnd,ordem:i+1})))});
 const supervisionLink=await db('rpc/fsj_link_supervisao',{method:'POST',body:JSON.stringify({p_pessoa:person.id,p_token:boards[0].token})});
-const boardUrl='https://urbanopos.github.io/Assistente.FSJ/quadro.html#token='+boards[0].token;
+const boardUrl='https://urbanopos.github.io/Assistente.FSJ/inicio-usuario.html#token='+boards[0].token;
 const url=day>=DAILY_LAYOUT_START?dailyMessage({day,name:person.nome,boardUrl,supervisionUrl:supervisionLink}):boardUrl+(supervisionLink?'\n\nSUPERVISAO: DEMANDAS DOS SUPERVISIONADOS\n'+supervisionLink:'');
 const previousEvent=events.find(e=>e.whatsapp_message_id);
 const previous=previousEvent?{messageId:previousEvent.whatsapp_message_id}:Object.entries(all).filter(([k,v])=>k.startsWith(person.id+'|')&&k<journalKey&&v.messageId).sort(([a],[b])=>b.localeCompare(a))[0]?.[1];
