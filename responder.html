@@ -75,7 +75,7 @@ const endpoint='https://awrxnzbfrsaurzpunuko.supabase.co/functions/v1/resposta-t
 const responseParams=new URLSearchParams(location.hash.slice(1));
 const token=responseParams.get('token')||'';
 const boardToken=responseParams.get('quadro')||'';
-if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(boardToken)){const back=document.getElementById('screenPrevious');const page=responseParams.get('pagina');back.href='./quadro.html#token='+encodeURIComponent(boardToken)+(/^\d{1,5}$/.test(page||'')&&Number(page)>0?'&pagina='+page:'');back.hidden=false;}
+if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(boardToken)){const back=document.getElementById('screenPrevious');const page=responseParams.get('pagina');back.href='./quadro.html#token='+encodeURIComponent(boardToken)+'&origem=inicio'+(/^\d{1,5}$/.test(page||'')&&Number(page)>0?'&pagina='+page:'');back.hidden=false;}
 if(responseParams.get('gestor')==='1'){
  const back=document.getElementById('screenPrevious');back.href='./index.html?fsj_return=1';back.hidden=false;
  document.querySelector('header>div').textContent='Proprietário • registro para o responsável selecionado';
