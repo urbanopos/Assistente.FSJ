@@ -98,6 +98,7 @@ if(responseParams.get('gestor')==='1'){
 history.replaceState(null,'',location.pathname);
 const status=document.getElementById('status'),detail=document.getElementById('detail'),form=document.getElementById('form'),done=document.getElementById('done'),why=document.getElementById('why'),files=document.getElementById('files');
 let info=null,responseStep='detail';
+document.getElementById('executionControl').after(form);
 const galleryFiles=document.getElementById('galleryFiles');
 document.getElementById('openGallery').addEventListener('click',()=>galleryFiles.click());
 galleryFiles.addEventListener('change',()=>{if(!galleryFiles.files.length)return;try{const transfer=new DataTransfer();for(const file of files.files)transfer.items.add(file);for(const file of galleryFiles.files)transfer.items.add(file);if(transfer.files.length>3){status.textContent='Selecione até 3 arquivos no total.';return;}files.files=transfer.files;status.textContent=transfer.files.length+' arquivo(s) selecionado(s) para anexar.';galleryFiles.value='';}catch(e){status.textContent='Não foi possível anexar a foto. Use o campo Fotos, vídeos ou áudios para selecioná-la.';}});
