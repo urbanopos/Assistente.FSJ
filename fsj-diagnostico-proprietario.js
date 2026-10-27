@@ -13,7 +13,7 @@ status.style.cssText='position:sticky;top:0;z-index:99999;background:#e0f1e7;col
 const label=document.createElement('strong'),button=document.createElement('button');
 button.type='button';button.style.cssText='margin-left:10px;padding:7px 12px;border-radius:8px;background:#175c40;color:#fff;border:0;font:inherit';
 status.append(label,button);
-function show(){label.textContent=mode==='checking'?'Verificando acesso do Proprietário…':mode==='readonly'?'MODO DIAGNÓSTICO · Somente consulta':mode==='unlocked'?'AÇÕES DESBLOQUEADAS · Proprietário':'Não foi possível validar o Proprietário';button.hidden=mode==='checking'||mode==='failed';button.textContent=mode==='readonly'?'Desbloquear ações':'Voltar ao diagnóstico';}
+function show(){document.documentElement.dataset.fsjOwnerMode=mode;document.dispatchEvent(new CustomEvent('fsj:owner-mode'));label.textContent=mode==='checking'?'Verificando acesso do Proprietário…':mode==='readonly'?'MODO DIAGNÓSTICO · Somente consulta':mode==='unlocked'?'AÇÕES DESBLOQUEADAS · Proprietário':'Não foi possível validar o Proprietário';button.hidden=mode==='checking'||mode==='failed';button.textContent=mode==='readonly'?'Desbloquear ações':'Voltar ao diagnóstico';}
 function mount(){if(!document.getElementById(status.id))document.body.prepend(status);show();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 function guarded(e){if(mode==='unlocked'||mode==='failed'&&e.target.closest('#fsjOwnerDiagnostic'))return;
