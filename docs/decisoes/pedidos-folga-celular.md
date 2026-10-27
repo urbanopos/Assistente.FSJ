@@ -28,3 +28,12 @@
 
 ## Revisão de modelo necessária
 O SQL inicial `docs/sql/fsj-pedidos-folga.sql` foi concebido para decisões por dia e **não deve ser aplicado**. Será substituído por modelo com cabeçalho de pedido semanal (pessoa, segunda-feira, versão, situação, decisor e datas) e itens dos dias marcados. A aprovação será uma operação única e transacional.
+
+## Calendário mensal com preenchimento semanal (decisão de 26/10/2026)
+- A interface mostra **o mês inteiro** e permite navegar entre meses.
+- A unidade de preenchimento e aprovação continua sendo **uma semana completa de segunda a domingo**, identificada pela data da segunda-feira.
+- A partir de cada segunda-feira o funcionário preenche a semana correspondente; não envia nem aprova o mês inteiro.
+- Cada semana no calendário mensal mostra separadamente: não preenchida, aguardando aprovação, aprovada ou devolvida para correção.
+- Semanas que atravessam meses pertencem a uma única solicitação semanal, sem duplicação; exibir os dias de ambos os meses quando necessário.
+- Apenas folgas de semanas aprovadas integram a agenda autorizada. Alterações de semana aprovada exigem nova solicitação e decisão, preservando histórico.
+- Não modificar a rotina de WhatsApp das 7h nem ativar código antes da API segura e testes.
