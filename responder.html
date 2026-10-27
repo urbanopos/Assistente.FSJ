@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta name="copyright" content="© 2026 Urbano Possidônio de Carvalho Junior — direitos reservados sobre o material próprio do Assistente FSJ"><meta charset="utf-8"><meta name="fsj-reader-version" content="20261027-mobile-aprovada-09"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+<html lang="pt-BR"><head><meta name="copyright" content="© 2026 Urbano Possidônio de Carvalho Junior — direitos reservados sobre o material próprio do Assistente FSJ"><meta charset="utf-8"><meta name="fsj-reader-version" content="20261027-mobile-aprovada-10"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src https://awrxnzbfrsaurzpunuko.supabase.co; img-src 'self' data:; form-action 'none'">
 <title>Responder tarefa • Fazenda São José</title><link rel="icon" href="./icon-512.png">
 <style>
@@ -128,7 +128,29 @@ function fsjVisitorDemo(){
  form.style.display='none';
 }
 function fsjExecutionStarted(){return ['em_andamento','suspensa'].includes(info?.execucao?.estado);}
-function showResponseStep(step){if(info?.visitante){fsjVisitorDemo();return;}responseStep=step;taskScreen.hidden=false;form.style.display=(step==='reason'||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode))?'block':'none';taskAnswer.hidden=step!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido||!fsjExecutionStarted()));document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:step==='reason'?form:taskScreen}));}
+function showResponseStep(step){if(info?.visitante){fsjVisitorDemo();return;}responseStep=step;taskScreen.hidden=false;form.style.display=(step==='reason'||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode))?'block':'none';taskAnswer.hidden=step!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido));fsjSyncAnswerFields();document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:step==='reason'?form:taskScreen}));}
+function fsjSyncAnswerFields(){
+ const mode=document.documentElement.dataset.fsjOwnerMode;
+ const diagnostic=mode==='readonly'||mode==='checking';
+ const completed=!!info?.respondido;
+ const started=fsjExecutionStarted();
+ const visible=!!info&&!completed&&!info.visitante;
+ if(visible){
+  form.style.display='block';
+  form.classList.toggle('fsj-justification-preview',responseStep!=='reason');
+  const reasonSelected=responseStep==='reason';
+  why.readOnly=diagnostic||!started||!reasonSelected;
+  document.getElementById('missing').readOnly=diagnostic||!started||!reasonSelected;
+  document.getElementById('send').disabled=diagnostic||!started||!reasonSelected;
+  document.getElementById('answerYes').disabled=!started||diagnostic;
+  document.getElementById('answerNo').disabled=!started||diagnostic;
+  const note=document.getElementById('fsjAnswerStartNotice')||document.createElement('p');
+  note.id='fsjAnswerStartNotice';note.className='muted';
+  note.textContent=diagnostic?'Modo diagnóstico: somente consulta.':started?'Escolha SIM ou NÃO para responder.':'Inicie a tarefa para habilitar SIM, NÃO e justificativa.';
+  taskAnswer.append(note);
+ }else if(responseStep!=='reason'){form.style.display='none';}
+}
+document.addEventListener('fsj:execution-updated',fsjSyncAnswerFields);
 document.addEventListener('fsj:owner-mode',()=>{
  const mode=document.documentElement.dataset.fsjOwnerMode;
  const readonly=mode==='readonly'||mode==='checking';
@@ -144,9 +166,10 @@ document.addEventListener('fsj:owner-mode',()=>{
   if(responseStep!=='reason')form.style.display='none';
  }
  if(info)renderExecution(info.execucao);
+ fsjSyncAnswerFields();
 });
 
-window.fsjTaskAnswerVisible=()=>responseStep==='detail'&&(['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)||(!info?.respondido&&fsjExecutionStarted()));
+window.fsjTaskAnswerVisible=()=>responseStep==='detail'&&(['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)||(!info?.respondido));
 window.fsjCanGoBack=()=>responseStep==='reason'||!!document.getElementById('screenPrevious').getAttribute('href');
 window.fsjGoBack=()=>{if(responseStep==='reason'){showResponseStep('detail');return;}const back=document.getElementById('screenPrevious');if(back.getAttribute('href'))location.assign(back.href);};
 document.getElementById('reasonBack').onclick=()=>showResponseStep('detail');
@@ -175,7 +198,7 @@ function fsjShowCompletionReview(){
  label.hidden=!info?.revisao;
  label.textContent=info?.revisao?'Última revisão do Proprietário: '+info.revisao.motivo:'';
 }
-function renderExecution(e){fsjShowCompletionReview();if(info?.visitante){fsjVisitorDemo();document.getElementById('executionStatus').textContent='Somente consulta • demonstração';return;}if(info)info.execucao=e;const label=document.getElementById('executionStatus'),button=document.getElementById('startTask');button.hidden=!!info?.respondido||e?.estado==='concluida';button.disabled=e?.estado==='em_andamento';button.textContent=e?.estado==='suspensa'?'Retomar tarefa':e?.estado==='em_andamento'?'Tarefa em andamento':'Iniciar tarefa';taskAnswer.hidden=responseStep!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido||!fsjExecutionStarted()));document.dispatchEvent(new CustomEvent('fsj:execution-updated'));label.textContent=!e?'Ainda não iniciada.':e.estado==='em_andamento'?'Em andamento • Início: '+executionTime(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+executionTime(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+executionTime(e.suspenso_em)+' • Início: '+executionTime(e.iniciado_em):'Concluída em '+executionTime(e.concluido_em);}
+function renderExecution(e){fsjShowCompletionReview();if(info?.visitante){fsjVisitorDemo();document.getElementById('executionStatus').textContent='Somente consulta • demonstração';return;}if(info)info.execucao=e;const label=document.getElementById('executionStatus'),button=document.getElementById('startTask');button.hidden=!!info?.respondido||e?.estado==='concluida';button.disabled=e?.estado==='em_andamento';button.textContent=e?.estado==='suspensa'?'Retomar tarefa':e?.estado==='em_andamento'?'Tarefa em andamento':'Iniciar tarefa';taskAnswer.hidden=responseStep!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido));document.dispatchEvent(new CustomEvent('fsj:execution-updated'));label.textContent=!e?'Ainda não iniciada.':e.estado==='em_andamento'?'Em andamento • Início: '+executionTime(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+executionTime(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+executionTime(e.suspenso_em)+' • Início: '+executionTime(e.iniciado_em):'Concluída em '+executionTime(e.concluido_em);}
 async function refreshExecution(){if(!token)return;const d=await post({action:'detail',token});const wasResponded=!!info?.respondido;info=d;fsjExibirRespostasGestor(d);const progress=document.getElementById('dailyProgress');if(progress&&d.progresso_mensal)progress.textContent=d.progresso_mensal.rotulo+' • '+d.progresso_mensal.mes;if(responseParams.get('gestor')==='1'&&responseParams.get('concluida')==='1')info.respondido=true;renderExecution(d.execucao);if(wasResponded&&!d.respondido){done.style.display='none';showResponseStep('detail');}if(d.respondido&&!d.visitante){form.style.display='none';done.style.display='block';taskAnswer.hidden=true;}if(d.visitante)fsjVisitorDemo();}
 document.getElementById('startTask').onclick=async()=>{
  if(info?.visitante){fsjVisitorDemo();return;}
