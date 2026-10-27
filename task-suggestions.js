@@ -75,6 +75,13 @@ if(manager){
   tabs.append(b);
  }
  tabs.dataset.filter='todas';el('fsjSuggestionChoice').before(tabs);
+ const nav=document.createElement('nav');nav.className='fsj-manager-response-nav';nav.setAttribute('aria-label','Navegação de solicitações');
+ const prev=document.createElement('button');prev.type='button';prev.textContent='←';
+ const count=document.createElement('span');count.id='fsjManagerResponseCount';count.textContent='0 / 0';
+ const next=document.createElement('button');next.type='button';next.textContent='→';
+ const step=delta=>{const index=rows.findIndex(x=>x.id===selected);const target=rows[Math.max(0,Math.min(rows.length-1,(index<0?0:index)+delta))];if(!target)return;selected=target.id;el('fsjSuggestionChoice').value=selected;show();};
+ prev.onclick=()=>step(-1);next.onclick=()=>step(1);
+ nav.append(prev,count,next);dialog.querySelector('section').append(nav);
  const style=document.createElement('style');style.textContent=`
  #fsjSuggestionDialog{width:min(620px,100vw)!important;max-height:100dvh!important}
  #fsjSuggestionDialog>section{overflow-y:auto;max-height:calc(100dvh - 58px);display:flex;flex-direction:column;gap:8px}
@@ -88,7 +95,7 @@ if(manager){
  #fsjSuggestionDialog button{cursor:pointer}
  #fsjSuggestionSave{background:#175b40;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700}
  #fsjManagerAnswerMic{background:#d8e7ff;color:#1757a2;border:0;border-radius:8px;padding:9px}
- #fsjSuggestionBack{align-self:flex-start;background:#175b40;color:white;border:0;border-radius:8px;padding:7px 18px;font-size:23px}
+ .fsj-manager-response-nav{display:grid;grid-template-columns:50px 1fr 50px;align-items:center;gap:8px;text-align:center;margin-top:auto;padding-top:8px} .fsj-manager-response-nav button{background:#175b40;color:white;border:0;border-radius:8px;min-height:42px;font-size:23px} #fsjSuggestionBack{align-self:flex-start;background:#175b40;color:white;border:0;border-radius:8px;padding:7px 18px;font-size:23px}
  @media(max-width:700px){#fsjSuggestionDialog{height:100dvh!important;border-radius:0!important}#fsjSuggestionDialog>section{padding:10px!important}}
  `;document.head.append(style);
 }
@@ -103,7 +110,7 @@ if(manager){
  el('fsjSuggestionText').addEventListener('input',updateCounter);
  function feedback(text){el('fsjSuggestionFeedback').textContent=text;}
  function show(){
-  const item=rows.find(s=>s.id===selected),locked=!!item;
+  const item=rows.find(s=>s.id===selected),locked=!!item;if(manager&&el('fsjManagerResponseCount'))el('fsjManagerResponseCount').textContent=(selected?Math.max(1,rows.findIndex(x=>x.id===selected)+1):0)+' / '+rows.length;
   category.hidden=manager||locked||kind==='duvida';
   el('fsjSuggestionText').readOnly=manager||locked;
   el('fsjSuggestionText').value=item?.descricao||'';
