@@ -147,7 +147,7 @@ if(manager){
   if(!manager&&(typeof info==='undefined'||!info)){return;}
   el('fsjSuggestionHeading').textContent=manager?'Análise de sugestões':'Sugestão de tarefas';
   show();dialog.showModal();feedback('Consultando registros…');
-  try{await refresh();if(taskId)selected=rows.find(s=>s.tarefa_gestor_id===taskId)?.id||'';el('fsjSuggestionChoice').value=selected;if(selected)show();feedback('');}catch(e){feedback(e.message);}
+  try{await refresh();if(taskId)selected=rows.find(s=>s.tarefa_gestor_id===taskId)?.id||'';if(manager&&!selected&&rows.length)selected=rows[0].id;el('fsjSuggestionChoice').value=selected;if(selected)show();feedback('');}catch(e){feedback(e.message);}
  }
  el('fsjSuggestionChoice').onchange=()=>{selected=el('fsjSuggestionChoice').value;requestId=null;show();feedback('');};
  el('fsjSuggestionBack').onclick=()=>{recognition?.stop();dialog.close();};
@@ -180,7 +180,7 @@ if(manager){
     mic.disabled=true;rec.onend=()=>{mic.disabled=false;};
     try{rec.start();}catch{mic.disabled=false;}
   };
-  const button=document.createElement('button');button.type='button';button.textContent='Analisar sugestões de tarefas';button.onclick=()=>open();el('dashboard').prepend(button);
+  const button=document.createElement('button');button.type='button';button.textContent='Responder dúvidas e sugestões';button.id='fsjOpenManagementResponses';button.style.cssText='background:#175b40;color:white;border:0;border-radius:9px;padding:12px 18px;font-weight:700;margin:8px';button.onclick=()=>open();el('dashboard').prepend(button);
   const load=fsjLoadTaskDetails;
   fsjLoadTaskDetails=async function(id){const details=await load(id);if(String(id).startsWith('sugestao-'))details.sections.unshift({title:'Sugestão de tarefa',entries:[{text:'Analise a sugestão, aprove ou rejeite e justifique a decisão.',actions:[{label:'Analisar sugestão',run:()=>open(id)}]}]});return details;};
  }else{
