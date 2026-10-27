@@ -1,11 +1,11 @@
 -- FSJ | PROPOSTA NÃO APLICADA: solicitação e aprovação de calendário SEMANAL.
 -- O mês é apenas a forma de exibição. Semana = segunda a domingo.
--- IMPORTANTE: confirmar o tipo real de public.pessoas.id antes de executar.
+-- Tipo conferido no projeto: public.pessoas.id = text; auth.users.id = uuid.
 -- Não altera folgas_semana, folgas_historico ou envio WhatsApp das 7h.
 begin;
 create table if not exists public.fsj_calendarios_folga (
  id uuid primary key default gen_random_uuid(),
- pessoa_id uuid not null references public.pessoas(id),
+ pessoa_id text not null references public.pessoas(id),
  semana date not null,
  versao integer not null default 1 check (versao >= 1),
  situacao text not null default 'pendente'
