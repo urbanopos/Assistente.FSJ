@@ -41,6 +41,9 @@ function fsjRenderOpenTasks(tasks){
 
 const params=new URLSearchParams(location.hash.slice(1));
 const token=params.get('token')||'';
+/* Links antigos do WhatsApp entram primeiro no extrato individual; retorno do extrato ou de resposta permanece no quadro. */
+if(token && params.get('origem')!=='inicio' && !params.has('filtro') && !params.has('pagina') && !params.has('gestor')){location.replace('./inicio-usuario.html#token='+encodeURIComponent(token));}
+
 const fsjFiltro=['aberto','andamento','pendente','perguntas'].includes(params.get('filtro'))?params.get('filtro'):'aberto';
 function fsjEstado(t){const status=String(t.situacao||'').trim().toLowerCase();if(status==='arquivado'||status==='concluída'||status==='concluida'||t.concluida)return 'concluida';if(status==='em andamento'||t.execucao?.estado==='em_andamento')return 'andamento';if(status==='pendente')return 'pendente';return 'aberto';}
 function fsjTituloFiltro(){return ({aberto:'TAREFAS EM ABERTO',andamento:'TAREFAS EM ANDAMENTO',pendente:'TAREFAS PENDENTES',perguntas:'PERGUNTAS'})[fsjFiltro];}
