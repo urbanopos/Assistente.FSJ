@@ -38,7 +38,7 @@
  function previousURL(){
   const link=document.querySelector('[data-fsj-screen-back]:not([hidden])');
   if(!link?.getAttribute('href'))return null;
-  try{const url=new URL(link.getAttribute('href'),location.href),base=new URL('.',location.href);if(url.origin===base.origin&&[new URL('index.html',base).pathname,new URL('quadro.html',base).pathname].includes(url.pathname))return url.href;}catch{}
+  try{const url=new URL(link.getAttribute('href'),location.href),base=new URL('.',location.href);if(url.origin===base.origin&&[new URL('index.html',base).pathname,new URL('quadro.html',base).pathname,new URL('inicio-usuario.html',base).pathname].includes(url.pathname))return url.href;}catch{}
   return null;
  }
  function canGoBack(){return typeof window.fsjCanGoBack==='function'?window.fsjCanGoBack():!!previousURL();}
@@ -106,10 +106,18 @@
   new MutationObserver(records=>{if(records.some(record=>record.target===manager||states.has(record.target)))schedule();}).observe(manager,{attributes:true,subtree:true,attributeFilter:['class','hidden']});
  }else{
   document.body.classList.add('fsj-reader');
-  // A direct task link may lack board context. Only an existing manager session
-  // offers a return to the app; employee links never grant manager access.
+  // Navegação de leitura individual nunca herda a sessão administrativa
+  // do mesmo navegador. O token do quadro define a identidade do usuário.
   const back=document.getElementById('screenPrevious');
-  if(back&&back.hidden){try{if(localStorage.getItem('fsj_access_token')||localStorage.getItem('fsj_refresh_token')){back.href='./index.html?fsj_return=1';back.hidden=false;}}catch{}}
+  if(location.pathname.endsWith('/quadro.html')){
+   const token=new URLSearchParams(location.hash.slice(1)).get('token')||'';
+   if(/^[0-9a-f-]{36}$/i.test(token)){
+    const home='./inicio-usuario.html?v=20261027-9#token='+encodeURIComponent(token);
+    if(back){back.href=home;back.hidden=false;}
+    window.fsjCanGoBack=()=>true;
+    window.fsjGoBack=()=>location.assign(home);
+   }else if(back){back.hidden=true;}
+  }
 
   const main=document.querySelector('main');if(main){const copyright=document.querySelector('body>footer');if(copyright)main.append(copyright);const state=setup(main);if(location.pathname.endsWith('/quadro.html')){const page=new URLSearchParams(location.hash.slice(1)).get('pagina');if(/^\d{1,5}$/.test(page||''))state.pendingIndex=Number(page);}}
  }
