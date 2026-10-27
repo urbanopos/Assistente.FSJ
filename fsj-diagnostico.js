@@ -3,6 +3,7 @@
 const endpoint='https://awrxnzbfrsaurzpunuko.supabase.co/functions/v1/resposta-tarefa';
 const token=new URLSearchParams(location.hash.slice(1)).get('token')||'';
 const access=localStorage.getItem('fsj_access_token')||'';
+// Ativo apenas nas paginas de links individuais, nunca no aplicativo principal.
 let active=false,checking=!!access;
 const original=window.fetch.bind(window);
 function mutates(body){if(body instanceof FormData)return /^(start|submit)$/i.test(String(body.get('action')||''));if(typeof body==='string'){try{return /^(start|submit)$/i.test(String(JSON.parse(body).action||''))}catch{}}return false;}
@@ -25,7 +26,7 @@ function decorate(){
  const badge=document.createElement('span');badge.id='fsjDiagnosticBadge';badge.textContent='Modo Diagnóstico';
  badge.style.cssText='display:inline-block;margin:5px;padding:5px 9px;border-radius:9px;background:#eef6ef;color:#174b3b;font:600 12px system-ui';
  (document.querySelector('header .brand,.top .brand,header')||document.body).append(badge);
- const note=document.createElement('p');note.textContent='Somente consulta — ações executivas desativadas.';
+ const note=document.createElement('p');note.textContent='Consulta da interface do destinatário — ações executivas desativadas.';
  note.style.cssText='padding:7px;text-align:center;background:#eef6ef;color:#174b3b;font:12px system-ui';
  (document.querySelector('header,.top')||document.body).insertAdjacentElement('afterend',note);
  document.querySelectorAll('#startTask,#taskAnswer,#send,#dictate,#files,#why,#missing').forEach(x=>{x.hidden=true;x.disabled=true;});
