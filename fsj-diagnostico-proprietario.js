@@ -38,11 +38,11 @@ document.addEventListener('change',block,true);
 document.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation();},true);
 function hideActions(){
  for(const selector of ['#startTask','#taskAnswer','#send','#dictate','#files','#why','#missing']){
-  const el=document.querySelector(selector);if(el){el.hidden=true;el.style.display='none';if('disabled' in el)el.disabled=true;}
+  const el=document.querySelector(selector);if(el){if(!el.hidden)el.hidden=true;if(el.style.display!=='none')el.style.display='none';if('disabled' in el&&!el.disabled)el.disabled=true;}
  }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hideActions,{once:true});else hideActions();
-new MutationObserver(()=>{if(mode!=='failed')hideActions();}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['hidden','style','disabled']});
+new MutationObserver(()=>hideActions()).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['hidden','style','disabled']});
 async function renew(){
  if(refreshing)return refreshing;
  refreshing=(async()=>{
