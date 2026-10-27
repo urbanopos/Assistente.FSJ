@@ -48,7 +48,7 @@ async function verify(jwt){const r=await nativeFetch(endpoint,{method:'POST',hea
     if(await verify(jwt)){verified=true;window.fsjOwnerDiagnosticToken=jwt;mode='readonly';show();return;}
    }
   }
-  mode='failed';label.textContent='Acesso do Proprietário não validado. Reabra o acesso de gestão.';show();
+  mode='failed';show();
  }catch{mode='failed';show();}
 })();
 })();
