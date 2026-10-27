@@ -8,7 +8,7 @@
  function monthDays(month){if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))throw Error('Mês inválido');const [year,m]=month.split('-').map(Number);return new Date(Date.UTC(year,m,0)).getUTCDate();}
  function makeCalendar(container,adapter,options={}){
   if(!container||typeof adapter?.submit!=='function'||typeof adapter?.list!=='function')throw Error('A API de solicitações autenticada é obrigatória');
-  const selected=new Set(),state={month:options.month||new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit'}).format(new Date()).slice(0,7),busy:false};
+  let lastRecords=[];const selected=new Set(),state={month:options.month||new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit'}).format(new Date()).slice(0,7),busy:false};
   const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
   const status=el('p');status.setAttribute('role','status');
   function render(){
@@ -37,17 +37,20 @@
     finally{state.busy=false;send.disabled=!selected.size;}
    };
    container.append(send,status);
+   renderRecords();
   }
   async function refresh(){
    const records=await adapter.list();if(!Array.isArray(records))throw Error('Resposta inválida');
-   const old=container.querySelector('.fsj-folgas-situacao');if(old)old.remove();
+   lastRecords=records;renderRecords();return records;
+  }
+  function renderRecords(){
+   const records=lastRecords;const old=container.querySelector('.fsj-folgas-situacao');if(old)old.remove();
    const section=el('section');section.className='fsj-folgas-situacao';
    section.append(el('h3','Situação dos pedidos'));
    for(const r of records){if(!validDay(r.dia)||!['pendente','aprovada','recusada'].includes(r.situacao))continue;
     section.append(el('p',r.dia.split('-').reverse().join('/')+' — '+({pendente:'Aguardando aprovação',aprovada:'Aprovada',recusada:'Recusada'}[r.situacao])));
    }
    container.append(section);
-   return records;
   }
   render();return {refresh,selected};
  }
