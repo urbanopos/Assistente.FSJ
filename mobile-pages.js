@@ -45,7 +45,7 @@
  function goBack(){if(typeof window.fsjGoBack==='function')window.fsjGoBack();else{const url=previousURL();if(url)location.assign(url);}}
  function update(state){
   state.index=Math.max(0,Math.min(state.count-1,state.index));
-  state.prev.disabled=state.index===0&&!canGoBack();state.next.disabled=state.index===state.count-1;
+  state.prev.disabled=state.index===0&&location.pathname.endsWith('/quadro.html')?false:state.index===0&&!canGoBack();state.next.disabled=state.index===state.count-1;
   state.status.textContent=(state.index+1)+' / '+state.count;
   state.status.setAttribute('aria-label','Página '+(state.index+1)+' de '+state.count);
   const showAnswer=!!state.answer&&!!window.fsjTaskAnswerVisible?.()&&state.index===state.count-1;
