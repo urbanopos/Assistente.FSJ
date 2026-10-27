@@ -128,7 +128,7 @@ function fsjVisitorDemo(){
  form.style.display='none';
 }
 function fsjExecutionStarted(){return ['em_andamento','suspensa'].includes(info?.execucao?.estado);}
-function showResponseStep(step){if(info?.visitante){fsjVisitorDemo();return;}responseStep=step;taskScreen.hidden=false;form.style.display=step==='reason'?'block':'none';taskAnswer.hidden=step!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido||!fsjExecutionStarted()));document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:step==='reason'?form:taskScreen}));}
+function showResponseStep(step){if(info?.visitante){fsjVisitorDemo();return;}responseStep=step;taskScreen.hidden=false;form.style.display=(step==='reason'||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode))?'block':'none';taskAnswer.hidden=step!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido||!fsjExecutionStarted()));document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:step==='reason'?form:taskScreen}));}
 document.addEventListener('fsj:owner-mode',()=>{
  const mode=document.documentElement.dataset.fsjOwnerMode;
  const readonly=mode==='readonly'||mode==='checking';
