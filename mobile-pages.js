@@ -16,7 +16,7 @@
   prev.type=next.type='button';prev.textContent='←';next.textContent='→';prev.className=next.className='fsj-nav-arrow';prev.setAttribute('aria-label','Anterior');next.setAttribute('aria-label','Próximo');
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   const answer=location.pathname.endsWith('/responder.html')?flow.querySelector('#taskAnswer'):null;
-  const navRow=element('div','fsj-page-nav-row');navRow.append(prev,status,next);if(answer){const execution=flow.querySelector('#executionControl');if(execution)execution.append(answer);else footer.append(answer);}footer.append(navRow);
+  const navRow=element('div','fsj-page-nav-row');navRow.append(prev,status,next);footer.append(navRow);
   // Preservar a estrutura original de páginas e a navegação móvel.
   root.append(viewport,footer);root.classList.add('fsj-page-shell');
   const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null,answer};states.set(root,state);
