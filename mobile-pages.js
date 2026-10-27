@@ -20,7 +20,7 @@
   // Preservar a estrutura original de páginas e a navegação móvel.
   root.append(viewport,footer);root.classList.add('fsj-page-shell');
   const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null,answer};states.set(root,state);
-  prev.onclick=()=>{if(state.index>0){turn(state,state.index-1);return;}if(location.pathname.endsWith('/quadro.html')){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.replace('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));return;}return;}goBack();};next.onclick=()=>turn(state,state.index+1);
+  prev.onclick=()=>{if(location.pathname.endsWith('/quadro.html')&&state.index===0){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.assign('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));}return;}if(state.index>0){turn(state,state.index-1);return;}if(location.pathname.endsWith('/quadro.html')){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.replace('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));return;}return;}goBack();};next.onclick=()=>turn(state,state.index+1);
   viewport.addEventListener('scroll',()=>{if(!mobile.matches)return;const index=Math.round(viewport.scrollLeft/state.stride);if(Number.isFinite(index)&&index!==state.index){state.index=index;update(state);}});
   flow.addEventListener('focusin',event=>{if(!mobile.matches)return;reveal(state,event.target);});
   flow.addEventListener('load',schedule,true);
