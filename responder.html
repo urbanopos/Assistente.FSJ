@@ -131,7 +131,29 @@ function fsjShowCompletionReview(){
 }
 function renderExecution(e){fsjShowCompletionReview();if(info?.visitante){fsjVisitorDemo();document.getElementById('executionStatus').textContent='Somente consulta • demonstração';return;}if(info)info.execucao=e;const label=document.getElementById('executionStatus'),button=document.getElementById('startTask');button.hidden=!!info?.respondido||e?.estado==='concluida';button.disabled=e?.estado==='em_andamento';button.textContent=e?.estado==='suspensa'?'Retomar tarefa':e?.estado==='em_andamento'?'Tarefa em andamento':'Iniciar tarefa';taskAnswer.hidden=responseStep!=='detail'||!!info?.respondido||!fsjExecutionStarted();document.dispatchEvent(new CustomEvent('fsj:execution-updated'));label.textContent=!e?'Ainda não iniciada.':e.estado==='em_andamento'?'Em andamento • Início: '+executionTime(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+executionTime(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+executionTime(e.suspenso_em)+' • Início: '+executionTime(e.iniciado_em):'Concluída em '+executionTime(e.concluido_em);}
 async function refreshExecution(){if(!token)return;const d=await post({action:'detail',token});const wasResponded=!!info?.respondido;info=d;fsjExibirRespostasGestor(d);const progress=document.getElementById('dailyProgress');if(progress&&d.progresso_mensal)progress.textContent=d.progresso_mensal.rotulo+' • '+d.progresso_mensal.mes;if(responseParams.get('gestor')==='1'&&responseParams.get('concluida')==='1')info.respondido=true;renderExecution(d.execucao);if(wasResponded&&!d.respondido){done.style.display='none';showResponseStep('detail');}if(d.respondido&&!d.visitante){form.style.display='none';done.style.display='block';taskAnswer.hidden=true;}if(d.visitante)fsjVisitorDemo();}
-document.getElementById('startTask').onclick=async()=>{if(info?.visitante){fsjVisitorDemo();return;}const button=document.getElementById('startTask');button.disabled=true;try{const d=await post({action:'start',token});renderExecution(d.execucao);status.textContent=d.suspensas?.length?'Tarefa iniciada. Suspensa: '+d.suspensas.map(x=>x.tarefa+' em '+executionTime(x.suspenso_em)).join('; '):'Início registrado.';}catch(e){button.disabled=false;fail(e.message);}};
+document.getElementById('startTask').onclick=async()=>{
+ if(info?.visitante){fsjVisitorDemo();return;}
+ const button=document.getElementById('startTask');
+ if(button.dataset.fsjStarting==='1')return;
+ button.dataset.fsjStarting='1';button.disabled=true;
+ const executionStatus=document.getElementById('executionStatus');
+ status.textContent='Registrando início da tarefa...';
+ executionStatus.textContent='Aguarde: comunicando com o servidor.';
+ try{
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),15000);
+  let d;
+  try{const r=await fetch(endpoint,{method:'POST',body:JSON.stringify({action:'start',token}),headers:{'Content-Type':'application/json'},signal:controller.signal});d=await r.json();if(!r.ok)throw Error(d.erro||'O servidor não autorizou o início.');}
+  finally{clearTimeout(timer);}
+  renderExecution(d.execucao);
+  status.textContent=d.suspensas?.length?'Tarefa iniciada. Suspensa: '+d.suspensas.map(x=>x.tarefa+' em '+executionTime(x.suspenso_em)).join('; '):'Início registrado.';
+ }catch(e){
+  button.disabled=false;
+  const msg=e.name==='AbortError'?'O servidor demorou mais de 15 segundos. Verifique a conexão e atualize a tarefa antes de tentar novamente.':e.message;
+  executionStatus.textContent='Não foi possível confirmar o início.';
+  fail(msg);
+ }finally{button.dataset.fsjStarting='0';}
+};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshExecution().catch(()=>{})});
 setInterval(()=>{if(!document.hidden)refreshExecution().catch(()=>{})},15000);
 document.getElementById('listen').onclick=()=>{if(!window.speechSynthesis){fail('Leitura em voz indisponível neste aparelho.');return}speechSynthesis.cancel();const s=new SpeechSynthesisUtterance(info.tarefa);s.lang='pt-BR';s.rate=.85;speechSynthesis.speak(s)};
