@@ -96,9 +96,9 @@
    el('fsjSuggestionText').maxLength=question||locked?2000:500;
    updateCounter();
   }
-  el('fsjSuggestionHeading').textContent=manager?'Análise do gestor':question?'Dúvidas sobre a tarefa':'Sugestão de Tarefa';
+  el('fsjSuggestionHeading').textContent=manager?(question?'Resposta à dúvida':'Análise de sugestão'):question?'Dúvidas sobre a tarefa':'Sugestão de Tarefa';
   dialog.querySelector('label[for="fsjSuggestionText"]').textContent=question?'Descreva sua dúvida':'Descreva sua sugestão';
-  el('fsjSuggestionSave').textContent=question?'Enviar resposta':'Enviar decisão';if(manager){const mic=el('fsjManagerAnswerMic');if(mic)mic.hidden=!question||!item||item.estado!=='aguardando';}
+  el('fsjSuggestionSave').textContent=question?'Enviar resposta':'Enviar decisão';if(manager){const mic=el('fsjManagerAnswerMic');if(mic)mic.hidden=!item||item.estado!=='aguardando';}
   el('fsjSuggestionSend').textContent=question?'Enviar dúvida':'Enviar sugestão';
   el('fsjSuggestionDecision').querySelectorAll('label').forEach(label=>label.hidden=question);
   el('fsjSuggestionState').textContent=item?(question&&item.estado==='aprovada'?'RESPONDIDA':labels[item.estado]):(manager?'Selecione uma sugestão.':question?'A dúvida será encaminhada ao proprietário e ficará disponível aos supervisores responsáveis.':'O envio cria uma tarefa urgente para o gestor.');
@@ -130,7 +130,7 @@
   try{const data=await call({action:kind==='duvida'?'enviar_duvida':'enviar',descricao,requisicao:requestId});selected=data.sugestao.id;rows=[data.sugestao,...rows.filter(x=>x.id!==selected)];show();await refresh();el('fsjSuggestionChoice').value=selected;show();feedback(kind==='duvida'?'Dúvida encaminhada ao proprietário e disponível aos supervisores responsáveis.':'Registro enviado. Foi criada uma tarefa urgente para o gestor.');requestId=null;}catch(e){feedback(e.message+' Sua descrição foi preservada.');}finally{working=false;el('fsjSuggestionSend').disabled=false;}
  };
  el('fsjSuggestionSave').onclick=async()=>{
-  if(working||!selected)return;const estado=rows.find(s=>s.id===selected)?.tipo==='duvida'?'aprovada':document.querySelector('[name=fsjSuggestionDecision]:checked')?.value,observacoes=el('fsjSuggestionNotes').value.trim();if(!estado||!observacoes)return feedback('Escolha aprovar ou rejeitar e preencha a justificativa.');
+  if(working||!selected)return;const estado=rows.find(s=>s.id===selected)?.tipo==='duvida'?'aprovada':document.querySelector('[name=fsjSuggestionDecision]:checked')?.value,observacoes=el('fsjSuggestionNotes').value.trim();if(!estado||!observacoes)return feedback(rows.find(s=>s.id===selected)?.tipo==='duvida'?'Preencha a resposta à dúvida.':'Escolha aprovar ou rejeitar e preencha a orientação.');
   working=true;el('fsjSuggestionSave').disabled=true;
   try{await call(rows.find(s=>s.id===selected)?.tipo==='duvida'?{action:'responder_duvida',id:selected,resposta:observacoes}:{action:'decidir',id:selected,estado,observacoes});await refresh();show();feedback('Decisão registrada e disponível no formulário do participante.');}catch(e){feedback(e.message);}finally{working=false;el('fsjSuggestionSave').disabled=false;}
  };
