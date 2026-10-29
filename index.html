@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261029-emergencia-abertura-direta-11">
+<meta name="fsj-build" content="20261029-emergencia-aba-unica-12">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -561,7 +561,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261029-emergencia-abertura-direta-11';
+const FSJ_BUILD='20261029-emergencia-aba-unica-12';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1082,8 +1082,9 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
  const control=[...fsjManualControls].find(c=>c.p.id===pid&&c.button===button);
  if(!control)return;
  const fallback=control.fallback;
- let tab=null,opened=false;
- try{tab=window.open('about:blank','_blank');if(tab)tab.opener=null;}catch{}
+ const tabName='fsjWhatsAppEmergencial';
+ let tab=window.fsjEmergencyWhatsAppTab&&!window.fsjEmergencyWhatsAppTab.closed?window.fsjEmergencyWhatsAppTab:null,opened=false;
+ if(!tab){try{tab=window.open('',tabName);if(tab){tab.opener=null;window.fsjEmergencyWhatsAppTab=tab;}}catch{}}
  fsjIndividualBusy.add(pid);button.disabled=true;fallback.hidden=true;
  status.textContent='Preparando mensagem para o destinatário selecionado...';
  try{
@@ -1091,12 +1092,13 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
   if(!/^55[0-9]{10,11}$/.test(String(d.phone||''))||typeof d.text!=='string'||!d.text.trim())throw Error('Telefone ou mensagem indisponível no cadastro.');
   const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const url=mobile?'https://wa.me/'+d.phone+'?text='+encodeURIComponent(d.text):'https://web.whatsapp.com/send?phone='+encodeURIComponent(d.phone)+'&text='+encodeURIComponent(d.text);
-  fallback.href=url;fallback.target='_blank';fallback.rel='noopener noreferrer';fallback.textContent='Abrir conversa de '+(control.p.nick||control.p.name)+' com a mensagem';fallback.hidden=false;
+  fallback.href=url;fallback.target=tabName;fallback.rel='';fallback.referrerPolicy='no-referrer';fallback.textContent='Abrir conversa de '+(control.p.nick||control.p.name)+' com a mensagem';fallback.hidden=false;
+  fallback.onclick=event=>{event.preventDefault();try{let target=window.fsjEmergencyWhatsAppTab;if(target&&!target.closed){target.location.replace(url);}else{target=window.open(url,tabName);if(target){target.opener=null;window.fsjEmergencyWhatsAppTab=target;}}if(target)target.focus();}catch{status.textContent='Permita a abertura do WhatsApp neste navegador e tente o link novamente.';}};
   control.confirm.hidden=false;
-  if(tab&&!tab.closed){tab.location.replace(url);opened=true;}
+  if(tab&&!tab.closed){tab.location.replace(url);opened=true;try{tab.focus();}catch{}}
   status.textContent=(d.confirmado||d.ja_registrado?'Já há envio registrado hoje; confira a conversa para evitar duplicidade. ':'')+(opened?'WhatsApp aberto para o destinatário selecionado. Confira a mensagem e pressione Enviar.':'Toque em Abrir conversa abaixo para abrir o destinatário com a mensagem preenchida.');
  }catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}status.textContent='Não foi possível preparar: '+message;}
- finally{if(tab&&!opened){try{tab.close();}catch{}}fsjIndividualBusy.delete(pid);fsjApplyManualState();}
+ finally{if(tab&&!opened){try{if(tab.location.href==='about:blank'){tab.close();window.fsjEmergencyWhatsAppTab=null;}}catch{}}fsjIndividualBusy.delete(pid);fsjApplyManualState();}
 }
 async function fsjEmergenciaProprietario(){
  if(!fsjPainelPronto||window.fsjExited)return;
@@ -1686,7 +1688,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('fsjPreviewOverlay').hidden)fsjPreviewClose();});
  if(preview){document.addEventListener('DOMContentLoaded',()=>{const btn=document.getElementById('fsjPreviewButton');if(btn)btn.hidden=true;});}
 })();
-</script><script src="./disparo-emergencial/executor-client.js?v=20261029-emergencia-abertura-direta-11"></script></body></html>
+</script><script src="./disparo-emergencial/executor-client.js?v=20261029-emergencia-aba-unica-12"></script></body></html>
 
 
 
