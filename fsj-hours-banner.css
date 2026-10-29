@@ -1,0 +1,13 @@
+/* Banner aprovado pelo proprietário — exibição depende de bloqueio do servidor. */
+.fsj-hours-banner{box-sizing:border-box;display:flex;align-items:center;gap:18px;padding:22px;border-radius:16px;background:#175541;color:#fff;border-bottom:5px solid #d6b665;margin:20px 0;font-family:Arial,sans-serif}
+.fsj-hours-banner[hidden]{display:none!important}
+.fsj-hours-clock{display:flex;align-items:center;justify-content:center;flex:0 0 52px;width:52px;height:52px;background:#ffffff16;border:1px solid #d6b66580;border-radius:50%;color:#edcf86}
+.fsj-hours-clock svg{width:28px;height:28px}
+.fsj-hours-copy{min-width:0;flex:1}
+.fsj-hours-eyebrow{font-size:12px;font-weight:500;letter-spacing:1.3px;margin:0 0 8px;color:#e8edeb}
+.fsj-hours-text{font-size:22px;font-weight:500;margin:0;line-height:1.28;color:#fff;text-align:justify;text-align-last:left;overflow-wrap:normal}
+.fsj-hours-time{color:#f3d794;white-space:nowrap}
+.fsj-hours-note{font-size:14px;font-weight:400;margin:9px 0 0;color:#e1eae6}
+body.fsj-afterhours #error,body.fsj-afterhours #status{display:none!important}
+body.fsj-afterhours #content,body.fsj-afterhours #taskScreen,body.fsj-afterhours #form,body.fsj-afterhours #done,body.fsj-afterhours #demandas,body.fsj-afterhours #fsjDuvidasSupervisao{display:none!important}
+@media(max-width:400px){.fsj-hours-banner{gap:12px;padding:18px 15px}.fsj-hours-clock{flex-basis:42px;width:42px;height:42px}.fsj-hours-text{font-size:20px}}

@@ -11,8 +11,7 @@ Deno.serve(async req=>{
  try{
   const data=await req.json();
   if(['available','demands','questions','answer-question','archive','review'].includes(data.action)){
-  const consultationHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'America/Recife',hour:'2-digit',hourCycle:'h23'}).format(new Date()));
-  if(consultationHour<7)return reply({erro:'As tarefas estarão disponíveis para consulta a partir das 7h, no horário de Pernambuco.',codigo:'consulta_antes_7h'},403);
+  if(await db('rpc/fsj_horario_resposta',{p_instante:new Date().toISOString()})!==true)return reply({erro:'A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.',codigo:'fora_expediente'},403);
 
    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(data.token||'')))return reply({erro:'Link invalido'},400);
    if(data.action==='review'){

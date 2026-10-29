@@ -42,8 +42,7 @@ Deno.serve(async req=>{
     if(!people[0]?.ativo)return reply({erro:'Pessoa indisponivel'},404);
     return reply({diagnostico:true});
   }
-  const consultationHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'America/Recife',hour:'2-digit',hourCycle:'h23'}).format(new Date()));
-  if(consultationHour<7)return reply({erro:'As tarefas estarão disponíveis para consulta a partir das 7h, no horário de Pernambuco.',codigo:'consulta_antes_7h'},403);
+  if(await db('rpc/fsj_horario_resposta',{method:'POST',body:JSON.stringify({p_instante:new Date().toISOString()})})!==true)return reply({erro:'A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.',codigo:'fora_expediente'},403);
   if(owner&&(data.action==='start'||data.action==='submit'))return reply({erro:'Modo Diagnostico: registro bloqueado'},403);
   if(data.action==='reminders'){
    const boards=await db('quadros_do_dia?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
