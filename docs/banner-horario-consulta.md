@@ -12,3 +12,10 @@ Os recursos do banner preservam formulários e rascunhos ao ocultar o conteúdo 
 Separação determinada pelo proprietário: envio antecipado entre 6:30 e 7:00 é independente do horário de consulta. Esta entrega publica o banner e o bloqueio de consulta; NÃO configura nem comprova mudança dos agendamentos de envio, executor online ou disparos para todos. O transporte emergencial no GitHub Actions ainda depende de credenciais, sessão vinculada e configuração inicial. Publicação do banner não deve ser apresentada como validação do apagamento/envio emergencial.
 
 Verificações: testes em oito limites de horário para board/detail/start/submit/reminders e ações de supervisão, sem leitura de tarefas fora do expediente; consulta real à regra SQL em nove limites; sintaxe e inclusão dos recursos em quatro páginas; contrato de atualização passou. Sem mensagens enviadas/apagadas. Recuperação: reverter o commit dos recursos visuais e reimplantar as versões anteriores das duas funções, mediante decisão do proprietário; não promover esta alteração como backup completo das instalações isoladas da VM.
+
+
+### Exceção permanente do proprietário — 29/10/2026
+
+O proprietário está dispensado do bloqueio de expediente. O servidor reconhece a identidade pela titularidade oficial e por sessão autenticada válida ou token válido vinculado à pessoa titular ativa; não confia em nome, parâmetro de URL ou sinalizador enviado pelo cliente. Outros perfis continuam sujeitos às faixas de expediente. Validade dos tokens, atribuições e âmbito de supervisão são preservados.
+
+Resposta-tarefa v29 e supervisao v14 implantadas com o indicador de horário livre retornado pelo servidor. O banner respeita esse indicador e não bloqueia o proprietário por relógio local. O banco já possuía exceção do proprietário em fsj_registrar_resposta; nenhuma função SQL ou permissão foi alterada nesta correção. Testes cobrem titular ativo, outro usuário, inativo, link inválido e expirado. O painel autenticado do proprietário continua podendo preparar o disparo antes das 7h.

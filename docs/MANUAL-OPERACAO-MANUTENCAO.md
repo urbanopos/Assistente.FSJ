@@ -420,3 +420,10 @@ Versão 20261029-emergencia-abertura-direta-11. Por determinação do proprietá
 O envio final é manual no WhatsApp; confirmar no Assistente somente após envio real. Registro prévio é informado para evitar duplicidade. O apagamento automático NÃO é executado por este fluxo; permanece pendente da ativação real do executor. Corrige a ligação prematura ao executor não configurado, que impedia abrir a conversa. A ação GitHub preparada permanece separada e não foi executada nesta entrega. Permissões, calendário e bloqueios dos demais perfis não alterados. Pastas da VM não atualizadas nesta sessão.
 
 Validação: contrato de atualização e teste emergency-direct-open.cjs passaram em simulações Windows/Android/iPhone com destinatário, mensagem, abertura antes da consulta e alternativa para pop-up bloqueado. Nenhum envio ou apagamento real. Recuperação: reverter este commit se necessário, sem repetir mensagens já enviadas.
+
+
+### Exceção permanente do proprietário — 29/10/2026
+
+O proprietário está dispensado do bloqueio de expediente. O servidor reconhece a identidade pela titularidade oficial e por sessão autenticada válida ou token válido vinculado à pessoa titular ativa; não confia em nome, parâmetro de URL ou sinalizador enviado pelo cliente. Outros perfis continuam sujeitos às faixas de expediente. Validade dos tokens, atribuições e âmbito de supervisão são preservados.
+
+Resposta-tarefa v29 e supervisao v14 implantadas com o indicador de horário livre retornado pelo servidor. O banner respeita esse indicador e não bloqueia o proprietário por relógio local. O banco já possuía exceção do proprietário em fsj_registrar_resposta; nenhuma função SQL ou permissão foi alterada nesta correção. Testes cobrem titular ativo, outro usuário, inativo, link inválido e expirado. O painel autenticado do proprietário continua podendo preparar o disparo antes das 7h.

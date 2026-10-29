@@ -2,7 +2,7 @@
 (()=>{
  const endpoint=/^https:\/\/awrxnzbfrsaurzpunuko\.supabase\.co\/functions\/v1\/(resposta-tarefa|supervisao)(?:\?|$)/;
  const nativeFetch=window.fetch.bind(window);
- let validated=false,lastOpen=null;
+ let validated=false,lastOpen=null,ownerExempt=false;
  function isOpen(now=new Date()){
   const p=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Recife',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(now);
   const value=k=>Number(p.find(x=>x.type===k).value),t=value('hour')*3600+value('minute')*60+value('second');
@@ -10,6 +10,7 @@
  }
  window.fsjConsultaEmExpediente=isOpen;
  function notice(show){
+  if(ownerExempt)show=false;
   if(!document.body)return;
   document.body.classList.toggle('fsj-afterhours',show);
   let banner=document.getElementById('fsjHoursBanner');
@@ -31,7 +32,7 @@
     try{
      const data=await response.clone().json();
      if(response.status===403&&['fora_expediente','consulta_antes_7h'].includes(data.codigo)){validated=true;notice(true);}
-     else if(response.ok){validated=true;notice(false);}
+     else if(response.ok){validated=true;ownerExempt=data.proprietario_horario_livre===true;notice(false);}
     }catch{}
    }
   }
