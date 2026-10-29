@@ -4,7 +4,7 @@ if(!folgaBox){folgaBox=document.createElement('section');folgaBox.id='folgaSeman
 let folgaLiberada=false;
 function folgaGate(){
  folgaLiberada=folgaAgenda?.exigir_folga_semanal===false||!!folgaAgenda?.dia;
- for(const id of ['taskAnswer','form']){const e=document.getElementById(id);if(e)e.inert=!folgaLiberada;}
+ for(const id of ['taskAnswer','form']){const e=document.getElementById(id);if(e)e.inert=false;}
  document.dispatchEvent(new CustomEvent('fsj:folga',{detail:{liberada:folgaLiberada}}));
 }
 let folgaWarningWeek=null,folgaWarning=null,folgaWarningCount=0,folgaWarningNext=0;
@@ -37,7 +37,7 @@ async function folgaRepetirAviso(){
 }
 function folgaMostrarAviso(){
  if(folgaLiberada){folgaCancelarAvisos();return;}
- if(!folgaAgenda||!location.pathname.endsWith('/responder.html'))return;
+ if(!folgaAgenda||!location.pathname.endsWith('/responder.html'))return; return; // avisos apenas nas operações
  if(folgaWarningWeek!==folgaAgenda.semana){folgaCancelarAvisos();folgaWarningWeek=folgaAgenda.semana;folgaWarningCount=0;folgaWarningNext=0;}
  if(document.hidden||folgaWarningCount>=3||Date.now()<folgaWarningNext)return;
  folgaEnsureWarning();folgaWarningCount++;folgaWarningNext=Date.now()+30000;
@@ -46,7 +46,14 @@ function folgaMostrarAviso(){
  clearTimeout(folgaHideTimer);folgaHideTimer=setTimeout(()=>{if(folgaWarning?.open)folgaWarning.close();},5000);
  clearTimeout(folgaRepeatTimer);if(folgaWarningCount<3)folgaRepeatTimer=setTimeout(folgaRepetirAviso,30000);
 }
-document.addEventListener('click',event=>{if(folgaLiberada||folgaBox.contains(event.target))return;if(event.target.closest('#startTask,#taskAnswer button,#form button')){event.preventDefault();event.stopImmediatePropagation();folgaAvisar();}},true);
+document.addEventListener('click',event=>{
+ if(folgaLiberada||folgaBox.contains(event.target))return;
+ if(!event.target.closest('#startTask,#taskAnswer button,#form button'))return;
+ let aviso=document.getElementById('fsjFolgaAvisoOperacao');
+ if(!aviso){aviso=document.createElement('div');aviso.id='fsjFolgaAvisoOperacao';aviso.setAttribute('role','status');aviso.style.cssText='position:fixed;z-index:99999;left:12px;right:12px;top:12px;max-width:560px;margin:auto;background:#fff7dd;color:#493400;border:2px solid #b58a00;border-radius:10px;padding:12px;box-shadow:0 3px 12px #0003';document.body.append(aviso);}
+ aviso.textContent='ATENÇÃO: Sua folga semanal ainda não foi registrada. Providencie o registro. Esta situação não impede o início ou a conclusão das tarefas.';
+ clearTimeout(aviso.fsjTimer);aviso.fsjTimer=setTimeout(()=>aviso.remove(),4500);
+},true);
 folgaGate();
 const folgaEndpoint='https://awrxnzbfrsaurzpunuko.supabase.co/functions/v1/folgas-semana';
 function folgaDate(day,n=0){const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
@@ -54,7 +61,7 @@ function folgaLabel(day){return new Date(day+'T12:00:00Z').toLocaleDateString('p
 async function folgaPost(body){const r=await fetch(folgaEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,token}),signal:AbortSignal.timeout(30000)});const d=await r.json();if(!r.ok)throw Error(d.erro||'Não foi possível registrar a folga');return d.agenda;}
 function renderFolga(){
  folgaGate();
- folgaMostrarAviso();
+ folgaCancelarAvisos();
  folgaBox.replaceChildren();
  folgaBox.hidden=folgaAgenda?.exigir_folga_semanal===false;
  if(folgaBox.hidden)return;
@@ -82,7 +89,7 @@ function renderFolga(){
   try{folgaAgenda=await folgaPost({action:'choose',dia:day});folgaEditing=false;renderFolga();document.getElementById('folgaStatus').textContent='Folga salva: '+folgaLabel(folgaAgenda.dia)+'.';}catch(e){status.textContent=e.message;b.disabled=false;}finally{folgaBusy=false;}
  };folgaBox.append(b);}
 }
-async function carregarFolgaEmpregado(){if(!token||folgaBusy)return;try{folgaAgenda=await folgaPost({action:'calendar'});renderFolga();}catch(e){folgaAgenda=null;folgaGate();folgaBox.hidden=false;folgaBox.textContent='Registros bloqueados: não foi possível consultar a folga. '+e.message;const retry=document.createElement('button');retry.textContent='Consultar e escolher folga';retry.onclick=carregarFolgaEmpregado;folgaBox.append(retry);}}
+async function carregarFolgaEmpregado(){if(!token||folgaBusy)return;try{folgaAgenda=await folgaPost({action:'calendar'});renderFolga();}catch(e){folgaAgenda=null;folgaGate();folgaBox.hidden=false;folgaBox.textContent='Consulta de folga indisponível: não foi possível consultar a folga. '+e.message;const retry=document.createElement('button');retry.textContent='Consultar e escolher folga';retry.onclick=carregarFolgaEmpregado;folgaBox.append(retry);}}
 carregarFolgaEmpregado();document.addEventListener('visibilitychange',()=>{if(!document.hidden)carregarFolgaEmpregado()});
 
 setInterval(()=>{if(!document.hidden&&!folgaBusy&&!folgaEditing&&!document.getElementById('folgaDia')?.value)carregarFolgaEmpregado()},60000);
