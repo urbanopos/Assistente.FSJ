@@ -56,7 +56,6 @@ Deno.serve(async req=>{
   const pid=String(data.pessoa_id||'');
   if(!pid||pid.length>100)return reply({erro:'Selecione o funcionário'},400);
   const now=new Date(),day=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(now);
-  if(Number(new Intl.DateTimeFormat('en-GB',{timeZone:'America/Recife',hour:'2-digit',hourCycle:'h23'}).format(now))<7)return reply({erro:'Envio disponível a partir das 7h'},409);
   await db('rpc/fsj_preparar_calendario',{p_dia:day});
   if(await db('rpc/fsj_pode_enviar',{p_pessoa:pid,p_dia:day})!==true)return reply({erro:'Envio bloqueado: confira cadastro ativo, recebimento às 7h, folgas, férias e feriados.'},409);
   const people=await db('pessoas?id=eq.'+encodeURIComponent(pid)+'&select=nome,identificacao,whatsapp');
