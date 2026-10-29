@@ -1,0 +1,41 @@
+name: Compilar APK de teste — Agente Android FSJ
+on:
+  push:
+    paths:
+      - 'android/agente-fsj/**'
+      - '.github/workflows/compilar-agente-android-fsj.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  apk-debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Obter código
+        uses: actions/checkout@v4
+      - name: Preparar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Instalar SDK Android
+        uses: android-actions/setup-android@v3
+      - name: Instalar plataforma Android 35
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Compilar APK de teste sem credenciais
+        working-directory: android/agente-fsj
+        run: gradle --no-daemon :app:assembleDebug
+      - name: Verificar APK gerado
+        run: test -s android/agente-fsj/app/build/outputs/apk/debug/app-debug.apk
+      - name: Disponibilizar APK para instalação no Galaxy S23
+        uses: actions/upload-artifact@v4
+        with:
+          name: Agente-FSJ-Galaxy-S23-APK-Teste
+          path: android/agente-fsj/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
