@@ -1,0 +1,79 @@
+name: Disparo Emergencial FSJ
+run-name: Disparo Emergencial FSJ — ${{ inputs.modo }}
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "Validar código ou executar o componente já vinculado"
+        required: true
+        default: validar
+        type: choice
+        options: [validar, executar]
+      minutos:
+        description: "Janela do executor (5 a 60 minutos)"
+        required: true
+        default: "15"
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: fsj-disparo-emergencial
+  cancel-in-progress: false
+jobs:
+  emergencia:
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      FSJ_EMERGENCY_STATE_DIR: ${{ runner.temp }}/fsj-emergency-state
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      FSJ_EMERGENCY_STATE_BUCKET: ${{ vars.FSJ_EMERGENCY_STATE_BUCKET || 'fsj-emergency-state' }}
+      FSJ_EMERGENCY_CONFIG_VERSION: ${{ vars.FSJ_EMERGENCY_CONFIG_VERSION }}
+      FSJ_EMERGENCY_MAX_SECONDS: "900"
+      MODE: ${{ inputs.modo }}
+      DURATION_MINUTES: ${{ inputs.minutos }}
+    steps:
+      - name: Obter pacote
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Preparar Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24"
+      - name: Validar duração e configuração
+        run: |
+          python3 - <<'PY'
+          import os
+          value=os.environ['DURATION_MINUTES']
+          if not value.isdigit() or not 5 <= int(value) <= 60:
+              raise SystemExit('Escolha duração entre 5 e 60 minutos.')
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('FSJ_EMERGENCY_MAX_SECONDS='+str(int(value)*60)+'\n')
+          if os.environ['MODE']=='executar':
+              if not os.environ.get('SUPABASE_SERVICE_ROLE_KEY'):
+                  raise SystemExit('Falta configurar a credencial protegida do executor.')
+              if os.environ.get('FSJ_EMERGENCY_CONFIG_VERSION')!='manual-final-v1':
+                  raise SystemExit('Configuração inicial pendente: banco, sessão vinculada e envio final manual devem ser validados antes da execução.')
+          PY
+      - name: Testar preparação sem envio automático
+        run: |
+          node --check automation/emergency-agent/worker.mjs
+          node --check disparo-emergencial/executor-client.js
+          node --test tests/emergency-manual-preparation.test.mjs tests/emergency-action.test.mjs
+      - name: Instalar dependências fixadas
+        if: inputs.modo == 'executar'
+        working-directory: automation
+        run: npm ci --omit=dev
+      - name: Restaurar sessão privada já vinculada
+        if: inputs.modo == 'executar'
+        run: python3 automation/emergency-agent/github-state.py restore
+      - name: Executar preparação emergencial
+        if: inputs.modo == 'executar'
+        run: node automation/emergency-agent/worker.mjs
+      - name: Preservar sessão privada após encerramento
+        if: always() && inputs.modo == 'executar'
+        run: python3 automation/emergency-agent/github-state.py save
+      - name: Registrar estado da ação
+        if: always()
+        run: |
+          echo "Esta ação nunca envia a nova mensagem automaticamente; o envio final é feito pelo proprietário no WhatsApp." >> "$GITHUB_STEP_SUMMARY"
+          echo "Executar exige sessão previamente vinculada e configuração técnica concluída. Validar não apaga nem envia mensagens." >> "$GITHUB_STEP_SUMMARY"
