@@ -450,3 +450,14 @@ Preservar envio final manual, confirmação posterior, seleção explícita de d
 
 Validações: contrato de atualização, destinatário/mensagem em Windows/Android/iPhone, dois disparos reutilizando uma aba, abertura após fechamento e destino fixo no link alternativo. Testes simulados; validar no navegador do proprietário. Recuperação: reverter este commit. Cópias isoladas da VM não atualizadas nem promovidas a backup nesta sessão.
 
+
+
+## Correção da execução própria do Proprietário — 29/10/2026
+
+Versão 20261029-titular-executor-14. Urbano estava cadastrado como Visitante; o desbloqueio do diagnóstico não permitia gravar suas tarefas. A API e a RPC de suspensão reconhecem a titularidade persistida no servidor e o token da própria pessoa antes da limitação de Visitante. Outros visitantes permanecem sem gravação. Não altera cadastro, folgas, responsabilidades, expediente ou auditoria. Detalhes, testes e recuperação em docs/inicio-suspensao-tarefas.md. Consulta de produção sem concluir/iniciar tarefas reais; nenhuma instalação na VM nesta entrega.
+
+
+Complemento 20261029-proprietario-acesso-15: entrada individual reconhece automaticamente a sessão do titular por RLS e abre o painel completo. O menu do Proprietário mantém todas as abas originais em celular e desktop, inclusive após mudar de módulo. Validação de identidade vem do servidor, sem promoção por nome, categoria ou parâmetro. Sem sessão autenticada não se concede administração; instalação na VM permanece fora desta publicação. Testes de propriedade, menu em 390/1280 pixels, entrada automática e negação a não titular em tests/owner-mobile-access.cjs.
+
+
+Nas tarefas próprias do titular, o reconhecimento autenticado libera automaticamente as ações; inspeção de terceiros preserva desbloqueio explícito. O diagnóstico retorna apenas a confirmação do vínculo, sem credenciais ou dados administrativos.

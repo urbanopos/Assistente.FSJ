@@ -37,15 +37,16 @@ window.fetch=(input,init={})=>{
  return nativeFetch(input,init);
 };
 button.onclick=()=>{if(!verified)return;mode=mode==='readonly'?'unlocked':'readonly';show();};
-async function verify(jwt){const r=await nativeFetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+jwt},body:JSON.stringify({action:'diagnostic',token})});return r.ok&&(await r.json()).diagnostico===true;}
+async function verify(jwt){const r=await nativeFetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+jwt},body:JSON.stringify({action:'diagnostic',token})});if(!r.ok)return null;const d=await r.json();return d.diagnostico===true?d:null;}
 (async()=>{
  try{
   let jwt=access;
-  if(jwt&&await verify(jwt)){verified=true;window.fsjOwnerDiagnosticToken=jwt;mode='readonly';show();return;}
+  let identity=jwt?await verify(jwt):null;
+  if(identity){verified=true;window.fsjOwnerDiagnosticToken=jwt;mode=identity.propria_tarefa===true?'unlocked':'readonly';show();return;}
   if(refresh){
    const r=await nativeFetch(auth,{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:refresh})});
    if(r.ok){const d=await r.json();jwt=d.access_token;localStorage.setItem('fsj_access_token',d.access_token);localStorage.setItem('fsj_refresh_token',d.refresh_token);
-    if(await verify(jwt)){verified=true;window.fsjOwnerDiagnosticToken=jwt;mode='readonly';show();return;}
+    identity=await verify(jwt);if(identity){verified=true;window.fsjOwnerDiagnosticToken=jwt;mode=identity.propria_tarefa===true?'unlocked':'readonly';show();return;}
    }
   }
   mode='failed';show();

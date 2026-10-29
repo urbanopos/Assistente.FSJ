@@ -5,7 +5,7 @@ declare l public.links_resposta; t public.tarefas; r public.execucoes_tarefa;
 begin
  select * into l from public.links_resposta where token=p_token for update;
  if l.token is null or not public.fsj_link_resposta_vigente(p_token) then raise exception 'Link expirado ou invalido'; end if;
- if not exists(select 1 from public.pessoas where id=l.pessoa_id and ativo and tipo is distinct from 'Visitante')
+ if not exists(select 1 from public.pessoas where id=l.pessoa_id and ativo and (tipo is distinct from 'Visitante' or exists(select 1 from public.fsj_titularidade titular where titular.id=true and titular.pessoa_id=l.pessoa_id)))
  or not exists(select 1 from public.tarefa_responsaveis where tarefa_id=l.tarefa_id and pessoa_id=l.pessoa_id) then raise exception 'Tarefa indisponivel'; end if;
  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('execucao|'||l.pessoa_id,0));
  select * into t from public.tarefas where id=l.tarefa_id for update;

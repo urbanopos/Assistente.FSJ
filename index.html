@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261029-emergencia-aba-unica-12">
+<meta name="fsj-build" content="20261029-proprietario-acesso-15">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -561,7 +561,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261029-emergencia-aba-unica-12';
+const FSJ_BUILD='20261029-proprietario-acesso-15';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1497,7 +1497,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261016-prioridade-cabecalho-01"></script>
+</script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
 <script src="./mobile-pages.js?v=20261020-brisa-menu-02"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261020-brisa-menu-02"></script>
@@ -1626,13 +1626,14 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  window.fsjAtualizarMenuContextual=function(pagina){
   const menu=document.getElementById('fsjSimpleSelect');if(!menu)return;
   const atual=pagina==='fichaPessoa'?'cadPessoas':(pagina||'dashboard');
-  const opcoes=fsjModulos[pagina]||[atual];
+  const opcoes=window.fsjOwnerVerified===true?fsjOpcoesOriginais.map(o=>o.value):(fsjModulos[pagina]||[atual]);
   const existentes=[...menu.options].map(o=>o.value);
   if(existentes.join('|')!==opcoes.join('|')){
    menu.replaceChildren(...opcoes.map(id=>{const item=fsjOpcoesOriginais.find(o=>o.value===id);const o=document.createElement('option');o.value=id;o.textContent=item?item.label:id;return o;}));
   }
   if(opcoes.includes(atual))menu.value=atual;
  };
+ document.addEventListener('fsj:ownership-updated',()=>window.fsjAtualizarMenuContextual(typeof currentPage==='undefined'?'dashboard':currentPage));
  window.fsjSimpleGo=function(id){if(id==='disparoEmergencia'){fsjAbrirDisparoEmergencial();return;}if(typeof navTo==='function')navTo(id);};
  window.fsjSimpleSelectGo=function(id){if(id==='__manutencao'){const s=document.getElementById('fsjSimpleSelect');const destino=window.open('https://10.203.77.1:9443/','_blank','noopener,noreferrer');if(!destino){/* O navegador pode bloquear a nova aba. */}if(s){const atual=(typeof currentPage!=='undefined'&&currentPage==='fichaPessoa')?'cadPessoas':(typeof currentPage!=='undefined'?currentPage:'dashboard');if([...s.options].some(o=>o.value===atual))s.value=atual;}return;}if(id==='videosChamadas'){abrirVideosReserva();return;}fsjSimpleGo(id);};
  window.fsjSimpleStep=function(direction){
@@ -1688,7 +1689,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('fsjPreviewOverlay').hidden)fsjPreviewClose();});
  if(preview){document.addEventListener('DOMContentLoaded',()=>{const btn=document.getElementById('fsjPreviewButton');if(btn)btn.hidden=true;});}
 })();
-</script><script src="./disparo-emergencial/executor-client.js?v=20261029-emergencia-aba-unica-12"></script></body></html>
+</script><script src="./disparo-emergencial/executor-client.js?v=20261029-proprietario-acesso-15"></script></body></html>
 
 
 

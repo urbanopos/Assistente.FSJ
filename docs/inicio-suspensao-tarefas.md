@@ -24,3 +24,16 @@ O banco mantém todas as datas em timestamptz e a interface apresenta America/Re
 
 Validação: testes SQL em transações revertidas para idempotência, alternância, retomada, limite único, independência entre empregados e conclusão/NAO; testes de formulário/painel/serviço; regressões de respostas, itens faltantes, supervisão, folgas e férias. Nenhuma tarefa real foi iniciada por teste.
 
+
+
+## Titularidade nas tarefas próprias — 29/10/2026
+
+Correção 20261029-titular-executor-14: o servidor identifica o Proprietário pela fsj_titularidade e pelo token vigente da própria pessoa antes de aplicar a limitação demonstrativa de Visitante. O cadastro de Urbano estava como Visitante; desbloquear o diagnóstico não removia essa limitação. A exceção vale somente para a pessoa titular vinculada ao token, sem usar nome ou dados enviados pelo navegador como prova de titularidade. Não altera categorias de pessoas nem libera outros visitantes. A inspeção de tarefas de terceiros continua exigindo desbloqueio; vigência, responsabilidade, folga e demais validações são preservadas.
+
+A RPC de suspensão aplica a mesma precedência da titularidade. A tela remove a demonstração anterior quando a consulta seguinte reconhece execução autorizada. Testes de API incluem titular cadastrado como Visitante e tentativa com token de outra pessoa; a verificação de produção usa apenas consulta, sem iniciar/concluir tarefas reais. Publicação web/API não instala versões na VM. Recuperação por reversão desta entrega, sem apagar tarefas nem auditoria.
+
+
+Menu e entrada do Proprietário, versão 20261029-proprietario-acesso-15: proprietario.js reconhece a sessão pela consulta fsj_titularidade, cuja RLS exige auth.uid()=auth_user_id. Após validação, o menu mantém todas as opções originais em qualquer aba e tamanho de tela, sem reduzi-las ao módulo atual. Outros perfis não recebem essa ampliação. A entrada inicio-usuario.html encaminha automaticamente a sessão validada do titular para index.html; token individual, nome Urbano ou parâmetro de URL não concedem administração. Sem sessão válida, permanece o acesso individual; a recuperação usa apenas o refresh token já salvo. A interface continua sujeita às autorizações de servidor e às restrições técnicas de serviços externos/VPN.
+
+
+Nas tarefas da própria pessoa titular, o diagnóstico autenticado informa propria_tarefa e habilita as ações automaticamente após verificar identidade e vínculo no servidor. A inspeção de tarefas de terceiros conserva o modo diagnóstico com desbloqueio explícito. Não se decide titularidade apenas pelo token ou pelo nome no navegador.

@@ -1,14 +1,14 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{JSDOM}=require('jsdom');
 const root=path.resolve(__dirname,'..'),html=fs.readFileSync(path.join(root,'responder.html'),'utf8');
 const tick=()=>new Promise(r=>setImmediate(r));
-async function setup({stale=false,owner=false,failSubmit=false,visitor=false}={}){
+async function setup({stale=false,owner=false,ownerOwn=false,failSubmit=false,visitor=false}={}){
  const dom=new JSDOM(html,{runScripts:'outside-only',url:'https://urbanopos.github.io/Assistente.FSJ/responder.html#token=00000000-0000-4000-8000-000000000061'}),w=dom.window;
  w.setInterval=()=>0;w.Headers=Headers;let execution=null,responded=false;const calls=[];
  w.fetch=async(url,opt={})=>{
   if(String(url).startsWith('./responder.html?'))return {ok:true,text:async()=>html};
   const body=opt.body instanceof w.FormData?Object.fromEntries(opt.body.entries()):JSON.parse(opt.body||'{}');
   calls.push(body);
-  if(body.action==='diagnostic')return {ok:owner,json:async()=>({diagnostico:owner})};
+  if(body.action==='diagnostic')return {ok:owner,json:async()=>({diagnostico:owner,propria_tarefa:ownerOwn})};
   if(body.action==='start')execution={estado:'em_andamento',iniciado_em:'2026-10-29T10:00:00Z',retomado_em:'2026-10-29T10:00:00Z'};
   if(body.action==='suspend')execution={...execution,estado:'suspensa',suspenso_em:'2026-10-29T10:05:00Z'};
   if(body.action==='submit'){
@@ -52,6 +52,13 @@ test('sessão antiga não bloqueia o token de execução do funcionário',async(
   el('answerYes').click();await tick();assert(calls.some(x=>x.action==='submit'));
  }finally{dom.window.close();}
 });
+test('titular reconhecido em tarefa própria inicia e conclui sem desbloqueio manual',async()=>{
+ const {dom,w,calls,el}=await setup({owner:true,ownerOwn:true});try{
+  assert.equal(w.document.documentElement.dataset.fsjOwnerMode,'unlocked');
+  el('startTask').click();await tick();el('answerYes').click();await tick();
+  assert(calls.some(x=>x.action==='start'));assert(calls.some(x=>x.action==='submit'));
+ }finally{dom.window.close();}
+});
 test('Proprietário permanece em diagnóstico até desbloquear; visitante não grava',async()=>{
  const ctx=await setup({owner:true});try{
   ctx.el('startTask').click();await tick();assert(!ctx.calls.some(x=>x.action==='start'));
@@ -59,3 +66,4 @@ test('Proprietário permanece em diagnóstico até desbloquear; visitante não g
  }finally{ctx.dom.window.close();}
  const visitor=await setup({visitor:true});try{await visitor.el('startTask').onclick();assert(!visitor.calls.some(x=>x.action==='start'));}finally{visitor.dom.window.close();}
 });
+

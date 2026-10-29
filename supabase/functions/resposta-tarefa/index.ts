@@ -38,13 +38,13 @@ Deno.serve(async req=>{
   const token=String(data.token||'');
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token))return respond({erro:'Link inválido'},400);
   const authHeader=req.headers.get('authorization')||'';
-  let owner=false;
+  let owner=false,ownerPersonId='';
   if(authHeader.startsWith('Bearer ')){
     const authResponse=await fetch(base+'/auth/v1/user',{headers:{apikey:key,Authorization:authHeader}});
     if(!authResponse.ok)return respond({erro:'Autenticacao invalida'},401);
     const authUser=await authResponse.json();
     const ownership=await db('fsj_titularidade?id=eq.true&auth_user_id=eq.'+encodeURIComponent(authUser.id)+'&select=pessoa_id');
-    owner=ownership.length>0;
+    owner=ownership.length>0;ownerPersonId=ownership[0]?.pessoa_id||'';
   }
   if(data.action==='diagnostic'){
     if(!owner)return respond({diagnostico:false});
@@ -54,9 +54,10 @@ Deno.serve(async req=>{
     if(!target||Date.parse(target.expira_em)<Date.now())return respond({erro:'Link expirado'},404);
     const people=await db('pessoas?id=eq.'+encodeURIComponent(target.pessoa_id)+'&select=ativo');
     if(!people[0]?.ativo)return respond({erro:'Pessoa indisponivel'},404);
-    return respond({diagnostico:true});
+    return respond({diagnostico:true,propria_tarefa:target.pessoa_id===ownerPersonId});
   }
-  ownerScheduleAccess=owner||await fsjOwnerAccessToken(token,path=>db(path));
+  const ownerTokenAccess=await fsjOwnerAccessToken(token,path=>db(path));
+  ownerScheduleAccess=owner||ownerTokenAccess;
   if(!ownerScheduleAccess&&await db('rpc/fsj_horario_resposta',{method:'POST',body:JSON.stringify({p_instante:new Date().toISOString()})})!==true)return respond({erro:'A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.',codigo:'fora_expediente'},403);
   if(owner&&(data.action==='start'||data.action==='suspend'||data.action==='submit'))return respond({erro:'Modo Diagnostico: registro bloqueado'},403);
   if(data.action==='reminders'){
@@ -104,7 +105,7 @@ Deno.serve(async req=>{
    const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:assignments.map((a:any)=>a.tarefa_id),p_mes:board.dia.slice(0,7)+'-01',p_pessoa:board.pessoa_id})});
    if(data.situacao==='Arquivado'){
     const history=tasks.filter((t:any)=>t.situacao==='Arquivado'&&assignments.some((a:any)=>a.tarefa_id===t.id)).map((t:any)=>({tarefa_id:t.id,tarefa:t.descricao,codigo_tarefa:t.codigo_tarefa,periodicidade:t.periodicidade,prioridade:'normal',situacao:'Arquivado',somente_leitura:true,...groupInfo(t),progresso_mensal:progress[t.id]||null}));
-    return respond({responsavel:people[0].identificacao||people[0].nome,visitante:String(people[0].tipo||'').toLowerCase()==='visitante',dia:board.dia,tarefas:history});
+    return respond({responsavel:people[0].identificacao||people[0].nome,visitante:!ownerTokenAccess&&String(people[0].tipo||'').toLowerCase()==='visitante',dia:board.dia,tarefas:history});
    }
    const done=(t:any)=>answers.some((a:any)=>a.tarefa_id===t.id&&a.tipo==='sim'&&(!t.diaria||(a.dia_previsto===board.dia)));
    const available=(t:any)=>!!t&&t.situacao!=='Arquivado'&&(t.diaria||t.situacao!=='Concluída')&&!done(t)&&assignments.some((a:any)=>a.tarefa_id===t.id);
@@ -119,7 +120,7 @@ Deno.serve(async req=>{
   const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,exige_supervisao,reaberta_dia,reaberta_em,reabertura_motivo,prioridade,diaria,codigo_tarefa,periodicidade'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo,tipo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return respond({erro:'Tarefa indisponível'},404);
   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:link.dia.slice(0,7)+'-01',p_pessoa:link.pessoa_id})});
-  const visitante=String(people[0].tipo||'').trim().toLowerCase()==='visitante';
+  const visitante=!ownerTokenAccess&&String(people[0].tipo||'').trim().toLowerCase()==='visitante';
   const detail={visitante,revisao:tasks[0].reaberta_em?{dia:tasks[0].reaberta_dia,em:tasks[0].reaberta_em,motivo:tasks[0].reabertura_motivo}:null,progresso_mensal:progress[link.tarefa_id]||null,tarefa:tasks[0].descricao,codigo_tarefa:tasks[0].codigo_tarefa,periodicidade:tasks[0].periodicidade||'pontual',prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:link.dia,respondido:!!link.respondido_em||tasks[0].situacao==='Arquivado'};
   if(data.action==='detail'){const [executions,answers,gestorReplies]=await Promise.all([db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+link.dia+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em'),db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc'),db('respostas_perguntas_gestor?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=pergunta_id,resposta,respondida_em&order=respondida_em.desc')]);return respond({...detail,situacao:taskSituation(tasks[0],answers,link.dia),execucao:executions[0]||null, respostas_gestor:gestorReplies});}
   if(visitante)return respond({erro:'Perfil Visitante: acesso demonstrativo, sem registro de ações.'},403);
