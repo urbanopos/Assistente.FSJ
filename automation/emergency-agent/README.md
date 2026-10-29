@@ -1,40 +1,18 @@
-# Pacote Disparo de Emergência — executor integrado
+# Disparo Emergencial FSJ no GitHub Actions
 
-O proprietário usa um único botão, pelo Desktop ou Celular. O executor é componente interno do pacote: nenhuma tarefa operacional adicional, nenhum comando por disparo e nenhuma necessidade de manter o celular com um executor aberto.
+Ação: https://github.com/urbanopos/Assistente.FSJ/actions/workflows/disparo-emergencial.yml
 
-## Componentes e separação
+A interface pode ser acessada pelo laptop ou celular em https://urbanopos.github.io/Assistente.FSJ/?fsj_acao=disparo-emergencial . O proprietário seleciona o destinatário; o executor apaga a anterior e prepara a conversa. O envio final é manual. Não é necessário acessar a rede da fazenda quando o runner GitHub estiver configurado e em execução.
 
-- automation/emergency-agent/component.mjs: ciclo de vida interno do executor.
-- automation/emergency-agent/worker.mjs: sessão exclusiva do WhatsApp do proprietário e processamento da fila.
-- supabase/functions/emergency-agent/index.ts: pedidos autenticados exclusivamente pela titularidade; não aceita texto ou telefone fornecidos pelo navegador.
-- database/emergency-agent.sql: fila privada e presença do executor, sem leitura/escrita por anon/authenticated.
-- disparo-emergencial/executor-client.js: comando único e acompanhamento do resultado.
-- desktop/disparo-emergencial.js: adaptador para /home/urbano/fsj-instalacoes-isoladas/desktop.
-- celular/disparo-emergencial.js: adaptador para /home/urbano/fsj-instalacoes-isoladas/celular.
 
-Os adaptadores não substituem as interfaces existentes. Carregar o cliente comum antes do adaptador correto e ligar o botão da respectiva instalação à função correspondente. Não copiar index.html público sobre o Desktop da VM. A sessão do proprietário na página é obrigatória e a autorização é novamente verificada no servidor.
+## GitHub Actions — implementação vigente em 29/10/2026
 
-## Sequência
+A ação **Disparo Emergencial FSJ**, arquivo .github/workflows/disparo-emergencial.yml, executa em runner hospedado no GitHub, sem usar a rede da fazenda. workflow_dispatch restrito ao proprietário, concorrência única, modo padrão validar sem exclusão/envio. O modo executar tem duração de 5 a 60 minutos e não é um serviço permanente. O envio final é manual no WhatsApp do proprietário, para a pessoa explicitamente selecionada.
 
-1. Validar sessão do proprietário, destinatário, calendário e executor conectado.
-2. Registrar pedido idempotente e específico para uma pessoa/dia.
-3. O executor verifica que sua conta é a do proprietário; reconcilia mensagem anterior e exige identificador real.
-4. Usar o revoke existente, com confirmação de Apagar para todos.
-5. Somente após confirmação, enviar a mensagem diária preparada pelo serviço existente.
-6. Registrar ID da mensagem nova e confirmação; retornar o resultado à mesma tela.
+A execução exige SUPABASE_SERVICE_ROLE_KEY em secret, FSJ_EMERGENCY_CONFIG_VERSION=manual-final-v1 em variável somente após configuração validada, e sessão já vinculada em arquivo executor.tar.gz no bucket privado fsj-emergency-state (ou nome definido em FSJ_EMERGENCY_STATE_BUCKET). O arquivo de sessão não é publicado no repositório, cache ou artefatos GitHub. O serviço de armazenamento deve permanecer privado; chave somente no runner/servidor. Não criar ou guardar sessão por dispositivo do proprietário: o executor é central e a interface Desktop/Celular comanda o mesmo pacote. Vínculo inicial pode exigir autorização no WhatsApp.
 
-Mensagem anterior não localizada, ambiguidade ou exclusão sem confirmação bloqueiam o novo envio. Timeout de envio gera estado incerto; não repetir automaticamente. Se não houver mensagem anterior identificável, não presumir primeiro envio. A consulta das tarefas continua bloqueada antes das 7h de Pernambuco.
+O worker foi alterado para preparar/apagar e nunca executar send. Após confirmação do apagamento, registra pronto_para_envio, permitindo ao navegador abrir o número e a mensagem preparados. O usuário pressiona Enviar. O worker pode identificar depois o envio manual pelo código exato, remetente, conversa e horário, sem declarar envio apenas pela abertura do link.
 
-## Configuração técnica inicial e funcionamento
+Estado: workflow e código publicados; seis testes da ação/preparação e contrato de atualização passaram. A ação NÃO foi disparada nesta entrega. Credencial, bucket privado e sessão vinculada NÃO configurados nem comprovados. Banco em produção ainda precisa receber database/emergency-agent-manual-send.sql para admitir pronto_para_envio; a trava manual-final-v1 impede executar antes dessa configuração. A publicação da função emergency-agent v2 já admite retornar o preparo. O início da ação pelo botão da página ainda depende de configurar um mecanismo autenticado de acionamento GitHub; nenhum token GitHub foi criado ou exposto nesta sessão. O link da página está disponível pela internet, mas isso não comprova executor online.
 
-A instalação técnica do pacote aplica o SQL, publica a função, configura uma pasta privada FSJ_EMERGENCY_STATE_DIR distinta do executor diário, a chave protegida e as dependências já fixadas em automation/package.json. O WhatsApp do proprietário precisa ser vinculado uma vez a esta sessão dedicada. Não usar a pasta de autenticação da rotina diária.
-
-O processo que hospeda o pacote chama startEmergencyComponent ao iniciar e stop ao encerrar. Deve ser iniciado pelo serviço que hospeda o pacote, sem exigir outra ação do proprietário. O computador hospedeiro deve permanecer ligado e conectado à internet; celular e laptop apenas comandam a fila pela internet, sem VPN. A chave privilegiada permanece no servidor/computador executor, nunca no navegador.
-
-Não ativar o novo transporte nos botões até verificar presença conectada, instalação nas duas pastas e teste real restrito ao proprietário. O front-end observa o resultado por até três minutos; expirar essa observação não cancela nem reenvia o pedido.
-
-## Estado desta entrega
-
-Código e pacote preparados no GitHub. Testes do núcleo de substituição passaram. SQL, nova função e executor dedicado NÃO instalados/ativados nesta sessão; VM inacessível e sem executor conectado. Os adaptadores NÃO foram aplicados às pastas da VM nem aos botões em produção. A instalação é pendência técnica do pacote, não tarefa operacional do proprietário. Nenhuma mensagem foi apagada/enviada por estes testes.
-
-Recuperação: parar o componente integrado e manter o fluxo manual existente; conservar fila/diário para analisar pedidos incertos. Não apagar logs nem reiniciar envios incertos automaticamente. Não alterar agendamentos da rotina diária.
+A regra atual substitui a intenção anterior de envio integralmente automático: o envio final é SEMPRE manual. O teste real deve limitar-se a Urbano após configurar e vincular o executor. Rotina das 7h e pastas isoladas da VM não foram alteradas. Recuperação: desativar a ação e reverter o commit; conservar fila/diários para analisar qualquer operação incerta.

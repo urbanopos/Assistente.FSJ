@@ -23,15 +23,15 @@ Deno.serve(async req=>{
   if(data.action==='status')return reply({online});
   if(data.action==='job'){
    if(!/^[0-9a-f-]{36}$/i.test(String(data.id||'')))return reply({erro:'Pedido inválido'},400);
-   const rows=await db('fsj_emergency_jobs?id=eq.'+encodeURIComponent(data.id)+'&select=id,estado,resultado,whatsapp_message_id');
-   return reply({job:rows[0]||null,online});
+   const rows=await db('fsj_emergency_jobs?id=eq.'+encodeURIComponent(data.id)+'&select=id,estado,resultado,whatsapp_message_id,phone,mensagem,codigo');
+   const job=rows[0];if(job&&job.estado!=='pronto_para_envio'){delete job.phone;delete job.mensagem;delete job.codigo;}return reply({job:job||null,online});
   }
   if(data.action!=='submit')return reply({erro:'Ação inválida'},400);
   const pid=String(data.pessoa_id||''),request=String(data.request_id||'');
   if(!pid||pid.length>100||!/^[0-9a-f-]{36}$/i.test(request))return reply({erro:'Destinatário ou pedido inválido'},400);
   const existing=await db('fsj_emergency_jobs?request_id=eq.'+encodeURIComponent(request)+'&select=id,estado');
   if(existing[0])return reply({job:existing[0]});
-  const active=await db('fsj_emergency_jobs?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&estado=in.(pendente,executando,enviado,incerto)&select=id,estado');
+  const active=await db('fsj_emergency_jobs?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&estado=in.(pendente,executando,pronto_para_envio,enviado,incerto)&select=id,estado');
   if(active[0])return reply({job:active[0]});
   if(!online)return reply({erro:'Executor de Emergência desconectado. Nenhuma mensagem apagada ou enviada.'},503);
   // Reutiliza autenticação, calendário, telefone oficial, código e mensagem do envio vigente.

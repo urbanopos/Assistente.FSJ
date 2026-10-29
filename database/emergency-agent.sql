@@ -12,14 +12,14 @@ create table public.fsj_emergency_jobs (
  phone text not null check(phone ~ '^55[0-9]{10,11}$'),
  mensagem text not null,
  codigo text not null,
- estado text not null default 'pendente' check(estado in ('pendente','executando','enviado','bloqueado','incerto','expirado')),
+ estado text not null default 'pendente' check(estado in ('pendente','executando','pronto_para_envio','enviado','bloqueado','incerto','expirado')),
  criado_em timestamptz not null default now(),
  iniciado_em timestamptz,
  finalizado_em timestamptz,
  resultado text,
  whatsapp_message_id text
 );
-create unique index fsj_emergency_job_once_day on public.fsj_emergency_jobs(pessoa_id,dia) where estado in ('pendente','executando','enviado','incerto');
+create unique index fsj_emergency_job_once_day on public.fsj_emergency_jobs(pessoa_id,dia) where estado in ('pendente','executando','pronto_para_envio','enviado','incerto');
 alter table public.fsj_emergency_agent enable row level security;
 alter table public.fsj_emergency_jobs enable row level security;
 revoke all on public.fsj_emergency_agent,public.fsj_emergency_jobs from public,anon,authenticated;

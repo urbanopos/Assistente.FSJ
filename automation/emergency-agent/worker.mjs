@@ -1,10 +1,11 @@
 import {mkdir,readFile,writeFile,rename,rmdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {randomUUID} from 'node:crypto';
-import {connect,revoke,send} from '../wa.mjs';
+import {connect,revoke} from '../wa.mjs';
 import {reconcileManual} from '../manual-history.mjs';
 import {normalizePhone,localDay} from '../core.mjs';
-import {replaceEmergency} from '../emergency-replacement.mjs';
+import {identifyPrevious} from '../emergency-replacement.mjs';
+import {prepareEmergencyManual} from '../emergency-manual-preparation.mjs';
 
 const dir=process.env.FSJ_EMERGENCY_STATE_DIR;
 const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -65,11 +66,26 @@ async function processJob(job){
   state.eventIds ||= {};state.eventIds[type] ||= randomUUID();await persist(state);
   await db('mensagens_whatsapp?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:state.eventIds[type],pessoa_id:job.pessoa_id,direcao:'saida',tipo:type==='substituicao_emergencial'?'quadro_manual_identificado':type,conteudo:JSON.stringify({dia:job.dia,codigo_mensagem:job.codigo,...details}),whatsapp_message_id:details.messageId||null})});
  };
- await replaceEmergency({state,previousMessageId:previous,chatId,text:job.mensagem,persist,
- revoke:async(id,chat)=>{await eligible();return revoke(client,id,chat);},
- send:async(chat,text)=>{await eligible();return send(client,chat,text);},record});
- await patch('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(job.pessoa_id)+'&dia=eq.'+job.dia,{confirmado_em:new Date().toISOString(),whatsapp_message_id:state.messageId,mensagem_em:new Date().toISOString(),resultado_reconciliacao:'Enviado pelo Executor de Emergência após apagamento confirmado.'});
- await patch('fsj_emergency_jobs?id=eq.'+job.id,{estado:'enviado',finalizado_em:new Date().toISOString(),whatsapp_message_id:state.messageId,resultado:'Mensagem anterior apagada para todos; nova mensagem enviada.'});
+ await prepareEmergencyManual({state,previousMessageId:previous,chatId,persist,
+ revoke:async(id,chat)=>{await eligible();return revoke(client,id,chat);},record});
+ await patch('fsj_emergency_jobs?id=eq.'+job.id,{estado:'pronto_para_envio',finalizado_em:new Date().toISOString(),resultado:'Mensagem anterior apagada para todos. Abra a conversa do destinatário e envie a mensagem nova manualmente.'});
+}
+async function confirmManualJobs(){
+ const jobs=await db('fsj_emergency_jobs?estado=eq.pronto_para_envio&dia=eq.'+localDay()+'&select=*&limit=20');
+ for(const job of jobs){
+  await identity();
+  const number=await client.getNumberId(job.phone);if(!number?._serialized)continue;
+  const chat=await client.getChatById(number._serialized);
+  const messages=await chat.fetchMessages({limit:200,fromMe:true});
+  let messageId;
+  try{messageId=identifyPrevious(messages,{chatId:number._serialized,code:job.codigo});}catch{continue;}
+  const message=messages.find(m=>m.id?._serialized===messageId);
+  if(!message||message.timestamp*1000<Date.parse(job.finalizado_em))continue;
+  const when=new Date(message.timestamp*1000).toISOString();
+  await db('mensagens_whatsapp?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:job.id,pessoa_id:job.pessoa_id,direcao:'saida',tipo:'quadro_manual_identificado',whatsapp_message_id:messageId,criado_em:when,conteudo:JSON.stringify({dia:job.dia,codigo_mensagem:job.codigo,status:'envio_manual_identificado'})})});
+  await patch('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(job.pessoa_id)+'&dia=eq.'+job.dia,{confirmado_em:when,whatsapp_message_id:messageId,mensagem_em:when,resultado_reconciliacao:'Envio manual identificado após preparo emergencial.'});
+  await patch('fsj_emergency_jobs?id=eq.'+job.id,{estado:'enviado',whatsapp_message_id:messageId,resultado:'Mensagem enviada manualmente pelo proprietário e identificada na conversa correta.'});
+ }
 }
 try{
  client=await connect(process.argv.includes('--link'));
@@ -79,7 +95,11 @@ try{
   await beat(true);
   heartbeat=setInterval(()=>identity().then(()=>beat(true)).catch(()=>beat(false)).catch(()=>{}),10000);
   process.on('SIGTERM',()=>{stopping=true;});process.on('SIGINT',()=>{stopping=true;});
-  while(!stopping){
+  const maxSeconds=Number(process.env.FSJ_EMERGENCY_MAX_SECONDS||900);
+  if(!Number.isFinite(maxSeconds)||maxSeconds<300||maxSeconds>3600)throw Error('Janela de execução inválida.');
+  const deadline=Date.now()+maxSeconds*1000;
+  while(!stopping&&Date.now()<deadline){
+   await confirmManualJobs();
    const jobs=await post('rpc/fsj_emergency_claim',{});
    if(jobs?.[0]){
     const job=jobs[0];
