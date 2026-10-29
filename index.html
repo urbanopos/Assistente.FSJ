@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261029-whatsapp-nova-aba-03">
+<meta name="fsj-build" content="20261029-emergencia-destino-04">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -561,7 +561,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261029-whatsapp-nova-aba-03';
+const FSJ_BUILD='20261029-emergencia-destino-04';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1056,7 +1056,7 @@ async function fsjRefreshManualStatus(){
  try{await fsjManualRefresh;}finally{fsjManualRefresh=null;}
 }
 async function fsjConfirmarManual(pid,name){
- if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid)||fsjManualConfirmed(pid))return;
+ if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid)||fsjManualConfirmed(pid)){if(preparedTab){try{preparedTab.close();}catch{}}return;}
  if(!confirm('Confirma que você já enviou o quadro de hoje para '+name+' pelo WhatsApp? Essa declaração não comprova entrega ou leitura.'))return;
  fsjIndividualBusy.add(pid);fsjApplyManualState();
  try{const d=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'confirmar',pessoa_id:pid,dia:fsjManualDay()})});fsjManualVersion++;fsjManualStates.set(pid,d.envio);}
@@ -1077,16 +1077,24 @@ function fsjIndividualControls(p,showName=false){
 }
 async function fsjEmergenciaProprietario(){
  if(!fsjPainelPronto||window.fsjExited)return;
- await fsjLoadOwnership();
- const id=fsjProprietario?.pessoa_id;
- const p=S.people.find(p=>p.id===id);
- if(!p){alert('Não foi possível identificar o proprietário no cadastro central. Nenhuma mensagem foi preparada.');return;}
- const select=document.getElementById('fsjEmergenciaPessoa');
- fsjRenderEmergenciaPessoas();
- select.value=p.id;
- fsjRenderEmergenciaPessoas();
- const button=document.querySelector('#fsjEmergenciaControles button');
- if(button&&!button.disabled)button.click();
+ let tab;
+ if(!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+  tab=null;try{tab=window.open('about:blank','_blank');if(tab)tab.opener=null;}catch{}
+ }
+ let handedOff=false;
+ try{
+  await fsjLoadOwnership();
+  const id=fsjProprietario?.pessoa_id,p=S.people.find(p=>p.id===id);
+  if(!p){alert('Não foi possível identificar o proprietário no cadastro central. Nenhuma mensagem foi preparada.');return;}
+  const select=document.getElementById('fsjEmergenciaPessoa');
+  fsjRenderEmergenciaPessoas();select.value=p.id;fsjRenderEmergenciaPessoas();
+  const box=document.getElementById('fsjEmergenciaControles');
+  const control=[...fsjManualControls].find(c=>c.p.id===p.id&&box.contains(c.row));
+  if(!control||control.button.disabled)return;
+  handedOff=true;
+  await fsjEnviarIndividual(p.id,control.button,control.status,control.fallback,tab);
+ }catch{alert('Não foi possível preparar o disparo. Tente novamente.');}
+ finally{if(tab&&!handedOff){try{tab.close();}catch{}}}
 }
 function fsjRenderEmergenciaPessoas(){
  const select=document.getElementById('fsjEmergenciaPessoa'),box=document.getElementById('fsjEmergenciaControles');if(!select||!box)return;
@@ -1126,12 +1134,12 @@ function fsjAttachPersonSendButtons(){
   const controls=fsjIndividualControls(p);controls.dataset.fsjIndividual='1';row.append(controls);
  });
 }
-async function fsjEnviarIndividual(pid,button,status,fallback){
+async function fsjEnviarIndividual(pid,button,status,fallback,preparedTab){
  if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid)||fsjManualConfirmed(pid))return;
  const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
  // Reservar a aba durante o clique evita o bloqueio após a preparação assíncrona.
- let whatsappTab=null,opened=false;
- if(!mobile){try{whatsappTab=window.open('about:blank','_blank');if(whatsappTab)whatsappTab.opener=null;}catch{}}
+ let whatsappTab=preparedTab||null,opened=false;
+ if(!mobile&&preparedTab===undefined){try{whatsappTab=window.open('about:blank','_blank');if(whatsappTab)whatsappTab.opener=null;}catch{}}
  fsjIndividualBusy.add(pid);button.disabled=true;fallback.hidden=true;status.textContent='Preparando link individual de hoje...';
  try{
   const d=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'individual',pessoa_id:pid})});

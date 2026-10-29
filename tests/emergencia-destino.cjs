@@ -1,0 +1,8 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync(process.argv[2]||'index.html','utf8');
+const fn=html.slice(html.indexOf('async function fsjEmergenciaProprietario'),html.indexOf('function fsjRenderEmergenciaPessoas'));
+(async()=>{const events=[],tab={close:()=>events.push('close')},control={p:{id:'owner'},row:{},button:{disabled:false},status:{},fallback:{}},select={};
+const ctx={fsjPainelPronto:true,window:{open:()=>{events.push('open');return tab}},navigator:{userAgent:'Windows'},fsjLoadOwnership:async()=>events.push('identity'),fsjProprietario:{pessoa_id:'owner'},S:{people:[{id:'owner'}]},fsjRenderEmergenciaPessoas:()=>{},fsjManualControls:new Set([control]),document:{getElementById:id=>id==='fsjEmergenciaPessoa'?select:{contains:r=>r===control.row}},fsjEnviarIndividual:async(id,b,s,f,t)=>{assert.equal(id,'owner');assert.equal(t,tab);events.push('send');},alert:()=>{}};
+vm.createContext(ctx);vm.runInContext(fn,ctx);await ctx.fsjEmergenciaProprietario();assert.deepEqual(events,['open','identity','send']);assert.equal(select.value,'owner');
+events.length=0;ctx.fsjProprietario=null;await ctx.fsjEmergenciaProprietario();assert.deepEqual(events,['open','identity','close']);
+console.log('PASS: nova aba no clique antes da consulta, encaminhamento ao proprietário e fechamento sem titularidade.');})().catch(e=>{console.error(e);process.exitCode=1;});
