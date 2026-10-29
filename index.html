@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261029-emergencia-proprietario-01">
+<meta name="fsj-build" content="20261029-whatsapp-web-02">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -561,7 +561,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261029-emergencia-proprietario-01';
+const FSJ_BUILD='20261029-whatsapp-web-02';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1128,24 +1128,32 @@ function fsjAttachPersonSendButtons(){
 }
 async function fsjEnviarIndividual(pid,button,status,fallback){
  if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid)||fsjManualConfirmed(pid))return;
+ const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+ // Reservar a aba durante o clique evita o bloqueio após a preparação assíncrona.
+ let whatsappTab=null,opened=false;
+ if(!mobile){try{whatsappTab=window.open('about:blank','fsjWhatsAppWeb');if(whatsappTab)whatsappTab.opener=null;}catch{}}
  fsjIndividualBusy.add(pid);button.disabled=true;fallback.hidden=true;status.textContent='Preparando link individual de hoje...';
  try{
   const d=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'individual',pessoa_id:pid})});
   if(d.confirmado){fsjManualVersion++;fsjManualStates.set(pid,{pessoa_id:pid,dia:d.dia,confirmado_em:d.confirmado_em});return;}
   if(d.ja_registrado&&!confirm('Já existe envio automático registrado hoje para esta pessoa. Confira a conversa para evitar duplicidade. Deseja abrir a mensagem mesmo assim?')){status.textContent='Abertura cancelada. Nenhuma mensagem enviada por este botão.';return;}
   if(!confirm('Antes de enviar a nova mensagem, confira no WhatsApp a mensagem anterior deste destinatário e apague-a para todos, se a opção estiver disponível. O Assistente FSJ não consegue apagar mensagens da sessão pessoal do WhatsApp automaticamente.\n\nDeseja continuar preparando o envio?')){status.textContent='Envio cancelado. Nenhuma mensagem foi apagada ou enviada.';return;}
-  const url='https://wa.me/'+d.phone+'?text='+encodeURIComponent(d.text);
-  const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const url=mobile?'https://wa.me/'+d.phone+'?text='+encodeURIComponent(d.text):'https://web.whatsapp.com/send?phone='+encodeURIComponent(d.phone)+'&text='+encodeURIComponent(d.text);
+  fallback.target=mobile?'_blank':'fsjWhatsAppWeb';fallback.rel='noopener noreferrer';
   fallback.href=url;fallback.hidden=false;
   if(mobile){
    status.textContent='Abra o WhatsApp do celular, envie a mensagem e volte para confirmar.';
    location.assign(url);
   }else{
-   try{await navigator.clipboard.writeText(d.text);status.textContent='Mensagem copiada. Use a aba do WhatsApp Web já autenticada no Chrome, abra a conversa do destinatário, cole e envie. Depois confirme aqui.';}
-   catch{status.textContent='Use a aba do WhatsApp Web já autenticada. Selecione e copie a mensagem pelo link Abrir mensagem no WhatsApp, envie e confirme aqui.';}
+   if(whatsappTab&&!whatsappTab.closed){
+    whatsappTab.location.replace(url);opened=true;
+    status.textContent='Conversa aberta no WhatsApp Web com a mensagem preparada. Confira o destinatário, clique em enviar e depois confirme aqui.';
+   }else{
+    status.textContent='O navegador bloqueou a abertura automática. Clique em Abrir mensagem no WhatsApp abaixo; a conversa abrirá com a mensagem preparada.';
+   }
   }
  }catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}status.textContent='Não foi possível preparar: '+message;}
- finally{fsjIndividualBusy.delete(pid);fsjApplyManualState();}
+ finally{if(whatsappTab&&!opened){try{whatsappTab.close();}catch{}}fsjIndividualBusy.delete(pid);fsjApplyManualState();}
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjRefreshManualStatus();});
 window.addEventListener('focus',fsjRefreshManualStatus);
