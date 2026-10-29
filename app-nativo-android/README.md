@@ -1,0 +1,3 @@
+# FSJ Tarefas — Android nativo (piloto seguro)
+
+Aplicativo Java/Android nativo, sem WebView, que acessa a base Supabase já existente. Sem alterações na base, no GitHub Pages ou no fluxo WhatsApp. A primeira versão permite autenticação por e-mail OTP (exige template de e-mail que envie token numérico) e leitura de tarefas conforme RLS. Atualmente as políticas da base permitem consulta apenas à conta do proprietário; não é seguro distribuir para funcionários até criar identidade e políticas por responsável. Nenhuma escrita está implementada nesta etapa. A compilação gera um APK debug em GitHub Actions; não equivale a um pacote de produção assinado. Testar em dispositivo antes de disponibilizar na seção Comunicação.
