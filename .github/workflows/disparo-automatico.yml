@@ -1,0 +1,61 @@
+name: Disparo Automático FSJ
+run-name: Disparo Automático — ${{ inputs.horario || '06:45' }}
+on:
+  workflow_dispatch:
+    inputs:
+      destinatarios:
+        description: 'IDs das pessoas selecionadas no cadastro FSJ, separados por vírgula (não números de telefone)'
+        required: true
+        type: string
+      horario:
+        description: 'Horário de Pernambuco, HH:MM (00:00 a 23:59)'
+        required: true
+        default: '06:45'
+        type: string
+      modo:
+        description: 'Preparar programação ou validar (sem envio até integração segura)'
+        required: true
+        default: validar
+        type: choice
+        options:
+          - validar
+          - programar
+permissions:
+  contents: read
+concurrency:
+  group: fsj-disparo-automatico-configuracao
+  cancel-in-progress: false
+jobs:
+  configuracao:
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    env:
+      FSJ_DESTINATARIOS: ${{ inputs.destinatarios }}
+      FSJ_HORARIO: ${{ inputs.horario }}
+      FSJ_MODO: ${{ inputs.modo }}
+    steps:
+      - name: Validar destinatários e horário sem enviar mensagens
+        shell: python
+        run: |
+          import os,re
+          from datetime import datetime
+          ids=[x.strip() for x in os.environ['FSJ_DESTINATARIOS'].split(',')]
+          if not ids or any(not re.fullmatch(r'[A-Za-z0-9_-]{1,80}',x) for x in ids):
+              raise SystemExit('Informe somente IDs válidos de pessoas cadastradas.')
+          if len(ids)!=len(set(ids)):
+              raise SystemExit('Destinatários duplicados.')
+          hora=os.environ['FSJ_HORARIO']
+          if not re.fullmatch(r'(?:[01][0-9]|2[0-3]):[0-5][0-9]',hora):
+              raise SystemExit('Horário inválido: utilize HH:MM.')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as f:
+              f.write('## Disparo Automático FSJ — configuração\n\n')
+              f.write(f'- Destinatários selecionados: {len(ids)}\n')
+              f.write(f'- Horário desejado (America/Recife): {hora}\n')
+              f.write(f'- Modo: {os.environ["FSJ_MODO"]}\n')
+              f.write('- Estado: **configuração validada, nenhum WhatsApp enviado**.\n')
+              f.write('- Pendente: integração segura com cadastro completo, fila persistente, executor WhatsApp e confirmação de envio.\n')
+          print('CONFIGURACAO_VALIDADA_SEM_ENVIO')
+# Segurança: este arquivo não executa envio nem agenda mensagens sozinho.
+# A interface com caixas de seleção deverá fornecer os IDs cadastrados.
+# Não copiar a rotina emergencial que exige envio final manual sem validar
+# sessão, destinatários, exclusão, idempotência e permissões no backend.
