@@ -58,7 +58,7 @@ Deno.serve(async req=>{
   }
   ownerScheduleAccess=owner||await fsjOwnerAccessToken(token,path=>db(path));
   if(!ownerScheduleAccess&&await db('rpc/fsj_horario_resposta',{method:'POST',body:JSON.stringify({p_instante:new Date().toISOString()})})!==true)return respond({erro:'A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.',codigo:'fora_expediente'},403);
-  if(owner&&(data.action==='start'||data.action==='submit'))return respond({erro:'Modo Diagnostico: registro bloqueado'},403);
+  if(owner&&(data.action==='start'||data.action==='suspend'||data.action==='submit'))return respond({erro:'Modo Diagnostico: registro bloqueado'},403);
   if(data.action==='reminders'){
    const boards=await db('quadros_do_dia?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
    const links=boards.length?[]:await db('links_resposta?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
@@ -125,6 +125,10 @@ Deno.serve(async req=>{
   if(visitante)return respond({erro:'Perfil Visitante: acesso demonstrativo, sem registro de ações.'},403);
   if(tasks[0].situacao==='Arquivado')return respond({erro:'Tarefa arquivada: disponível somente para consulta.'},403);
   if(data.action==='start'){try{return respond(await db('rpc/fsj_iniciar_tarefa',{method:'POST',body:JSON.stringify({p_token:token})}));}catch(e){if(String(e).includes('FOLGA_SEMANAL_PENDENTE'))return respond({erro:'FOLGA SEMANAL NÃO REGISTRADA. Para iniciar esta tarefa, registre primeiro pelo menos um dia de folga desta semana.',codigo:'folga_semanal_pendente'},409);console.error('Falha ao iniciar tarefa',String(e));return respond({erro:'Não foi possível iniciar: confira se o link está vigente e a tarefa disponível.'},409);}}
+  if(data.action==='suspend'){
+   try{return respond(await db('rpc/fsj_suspender_tarefa',{method:'POST',body:JSON.stringify({p_token:token})}));}
+   catch(e){console.error('Falha ao suspender tarefa',String(e));return respond({erro:'Não foi possível suspender: confira se a tarefa está em andamento e o link está vigente.'},409);}
+  }
   if(data.action!=='submit')return respond({erro:'Ação inválida'},400);
   if(link.respondido_em)return respond({erro:'Esta tarefa já recebeu resposta.'},409);
   const resposta=String(data.resposta||'').toLowerCase(),justificativa=String(data.justificativa||'').trim(),itens=String(data.itens_faltantes||'').trim();
@@ -132,7 +136,7 @@ Deno.serve(async req=>{
   if(!['sim','nao'].includes(resposta)||justificativa.length>2000||(resposta==='nao'&&!justificativa))return respond({erro:'Informe SIM ou NÃO e a justificativa quando escolher NÃO.'},400);
   if(files.length>3||files.some(f=>f.size>10485760||!['image/jpeg','image/png','image/webp','video/mp4','video/webm','audio/mpeg','audio/mp4','audio/ogg','audio/webm'].includes(f.type)))return respond({erro:'Envie até 3 arquivos de foto, vídeo ou áudio, com até 10 MB cada.'},400);
   let saved:any;
-  try{saved=await db('rpc/fsj_registrar_resposta',{method:'POST',body:JSON.stringify({p_token:token,p_resposta:resposta,p_justificativa:justificativa,p_itens_faltantes:itens})});}catch(e){if(String(e).includes('FSJ_FORA_EXPEDIENTE'))return respond({erro:'As tarefas só podem ser respondidas no horário de expediente: das 7h às 12h e das 14h às 16h20, no horário de Pernambuco. Envio bloqueado.',codigo:'fora_expediente'},403);if(String(e).includes('23505'))return respond({erro:'Esta tarefa já recebeu resposta.'},409);if(String(e).includes('22023'))return respond({erro:'Resposta inválida ou link indisponível.'},400);throw e;}
+  try{saved=await db('rpc/fsj_registrar_resposta',{method:'POST',body:JSON.stringify({p_token:token,p_resposta:resposta,p_justificativa:justificativa,p_itens_faltantes:itens})});}catch(e){if(String(e).includes('FOLGA_SEMANAL_PENDENTE'))return respond({erro:'FOLGA SEMANAL NÃO REGISTRADA. Registre pelo menos um dia de folga desta semana no quadro inicial antes de responder.',codigo:'folga_semanal_pendente'},409);if(String(e).includes('FSJ_FORA_EXPEDIENTE'))return respond({erro:'As tarefas só podem ser respondidas no horário de expediente: das 7h às 12h e das 14h às 16h20, no horário de Pernambuco. Envio bloqueado.',codigo:'fora_expediente'},403);if(String(e).includes('23505'))return respond({erro:'Esta tarefa já recebeu resposta.'},409);if(String(e).includes('22023'))return respond({erro:'Resposta inválida ou link indisponível.'},400);throw e;}
   const id=saved.id,errors:string[]=[];
   for(const file of files){
    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-80);
@@ -144,3 +148,4 @@ Deno.serve(async req=>{
   return respond({ok:true,tarefa_proprietario_id:saved.tarefa_proprietario_id,anexos_nao_salvos:errors});
  }catch(e){console.error('form error',String(e));return respond({erro:'Não foi possível registrar a resposta. Tente novamente.'},500)}
 });
+

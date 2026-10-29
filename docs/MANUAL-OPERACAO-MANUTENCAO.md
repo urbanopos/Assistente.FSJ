@@ -440,8 +440,13 @@ Validação local: YAML, contextos e Python da etapa aprovados. A execução Git
 
 ## Aba única do WhatsApp no Disparo Emergencial — 29/10/2026
 
+Correção adicional de tarefas, tela 20261029-acoes-tarefas-13: consultar docs/inicio-suspensao-tarefas.md. Corrige conclusão SIM bloqueada pelo botão oculto/desabilitado de justificativa, interferência de sessão administrativa antiga e mensagem de folga pendente no envio; acrescenta suspensão explícita com auditoria e retomada pelo token. NÃO mantém justificativa obrigatória e preserva rascunho após erro. Mantidos expediente, exceção do Proprietário e permissões de servidor. Validação com DOM/API simulados e contrato de atualização; sem gravar tarefas reais. Publicação web/API não equivale a instalação na VM. Recuperação por reversão dos arquivos/função, sem apagar histórico. Não criar backup parcial.
+
+Decisão adicional do Proprietário: operação acessível pelo GitHub, desenvolvimento/manutenção na VM e proteção do material reservado em repositórios privados. Ver docs/decisoes/operacao-github-manutencao-vm.md. Privacidade por pasta não existe em repositório público. Migração de visibilidade/hospedagem e instalação na VM permanecem pendentes; dados e segredos de servidor não devem ser publicados.
+
 Versão 20261029-emergencia-aba-unica-12. A cada acionamento, reutilizar a referência da aba de WhatsApp aberta pelo Assistente; usar o nome fixo fsjWhatsAppEmergencial também no link alternativo. Atualizar destinatário e mensagem nessa aba e trazê-la à frente, sem abrir uma nova aba sem nome em cada disparo. Se a aba foi fechada, abrir outra para retomar a operação. Não fechar abas antigas ou independentes do usuário. Não recarregar a aba reutilizada em branco durante a preparação; falha de preparação não fecha uma conversa que já estava aberta. Browser isolation/encerramento de contexto pode impedir reaproveitamento de uma aba externa; a referência é mantida durante a operação do Assistente e não se promete localizar qualquer aba pré-existente do navegador.
 
 Preservar envio final manual, confirmação posterior, seleção explícita de destinatário, sessão pessoal do WhatsApp, calendário e permissões. O vínculo da conta não é recriado pelo código. O apagamento automático permanece pendente do executor, separado desta correção de navegação. O fluxo fora da seção de emergência não foi alterado.
 
 Validações: contrato de atualização, destinatário/mensagem em Windows/Android/iPhone, dois disparos reutilizando uma aba, abertura após fechamento e destino fixo no link alternativo. Testes simulados; validar no navegador do proprietário. Recuperação: reverter este commit. Cópias isoladas da VM não atualizadas nem promovidas a backup nesta sessão.
+

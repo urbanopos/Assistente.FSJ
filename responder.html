@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta name="copyright" content="© 2026 Urbano Possidônio de Carvalho Junior — direitos reservados sobre o material próprio do Assistente FSJ"><meta charset="utf-8"><meta name="fsj-reader-version" content="20261027-mobile-aprovada-10"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+<html lang="pt-BR"><head><meta name="copyright" content="© 2026 Urbano Possidônio de Carvalho Junior — direitos reservados sobre o material próprio do Assistente FSJ"><meta charset="utf-8"><meta name="fsj-reader-version" content="20261029-acoes-tarefas-13"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src https://awrxnzbfrsaurzpunuko.supabase.co; img-src 'self' data:; form-action 'none'">
 <title>Responder tarefa • Fazenda São José</title><link rel="icon" href="./icon-512.png">
 <style>
@@ -89,11 +89,11 @@
 #executionControl #fsjTaskQuestions{margin-top:8px!important}
 }
 </style><link rel="stylesheet" href="./fsj-hours-banner.css?v=20261029-expediente-proprietario-02"><script src="./fsj-hours-banner.js?v=20261029-expediente-proprietario-02"></script></head><body><header><a id="screenPrevious" data-fsj-screen-back hidden>Anterior</a><b class="response-brand"><img src="./icon-512.png" width="36" height="36" alt="Ícone da Fazenda São José"> Fazenda São José</b><div>Resposta individual de tarefa</div></header><main>
-<div id="status" role="status">Carregando tarefa...</div><div class="card" id="taskScreen"><h1>Tarefa do dia</h1><div id="detail"></div><div id="executionControl"><p id="executionStatus" role="status" aria-live="polite"></p><div class="fsj-execution-actions"><button id="startTask" type="button" hidden>Iniciar tarefa</button><div id="taskAnswer" class="fsj-task-answer" hidden><strong>Finalizada a tarefa?</strong><div class="fsj-answer-buttons"><button type="button" id="answerYes">SIM</button><button type="button" id="answerNo">NÃO</button></div></div></div><p class="muted">Ao iniciar outra tarefa, a anterior será suspensa automaticamente.</p></div></div>
+<div id="status" role="status">Carregando tarefa...</div><div class="card" id="taskScreen"><h1>Tarefa do dia</h1><div id="detail"></div><div id="executionControl"><p id="executionStatus" role="status" aria-live="polite"></p><div class="fsj-execution-actions"><button id="startTask" type="button" hidden>Iniciar tarefa</button><button id="suspendTask" type="button" hidden>Suspender tarefa</button><div id="taskAnswer" class="fsj-task-answer" hidden><strong>Finalizada a tarefa?</strong><div class="fsj-answer-buttons"><button type="button" id="answerYes">SIM</button><button type="button" id="answerNo">NÃO</button></div></div></div><p class="muted">Ao iniciar outra tarefa, a anterior será suspensa automaticamente.</p></div></div>
 <div id="form" class="card"><button type="button" id="reasonBack" class="fsj-nav-arrow fsj-response-back" aria-label="Anterior">←</button><h2>Justificativa — não concluída</h2><div class="choices" hidden><label><input type="radio" name="resposta" value="sim"> SIM</label><label><input type="radio" name="resposta" value="nao"> NÃO</label></div><label for="why"><b>Justificativa ou observação</b></label><textarea id="why" maxlength="2000" placeholder="Digite o motivo ou use o botão Ditar justificativa"></textarea><div id="missingBox" hidden><label for="missing"><b>Pedidos à administração / Itens faltantes</b></label><textarea id="missing" maxlength="2000" placeholder="Informe materiais, ferramentas ou outras providências necessárias à administração"></textarea><small>Quando preenchido, será criada uma tarefa para o Proprietário e o supervisor poderá consultar o aviso.</small></div><div class="buttons"><button type="button" class="secondary" id="listen">🔊 Ouvir tarefa</button><button type="button" class="secondary" id="dictate">🎙 Ditar justificativa</button></div><label for="files"><b>Fotos, vídeos ou áudios (opcional)</b></label><div class="buttons"><button type="button" class="secondary" id="openGallery">🖼 Escolher foto do Android</button></div><input id="galleryFiles" type="file" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" tabindex="-1" aria-label="Selecionar fotos da galeria"><input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,audio/mpeg,audio/mp4,audio/ogg,audio/webm" multiple><small>Até 3 arquivos, no máximo 10 MB cada.</small><div class="buttons"><button id="send">Enviar justificativa</button></div><p class="muted">Respostas permitidas das 7h às 12h e das 14h às 16h20, no horário de Pernambuco.</p></div>
 <div id="done" class="card"><h2>Resposta registrada</h2><p>Obrigado. Sua resposta foi encaminhada à gestão.</p></div>
 </main>
-<footer style="padding:18px;text-align:center;font-size:12px;color:#546775">© 2026 UPCJr. Todos os direitos reservados. <a href="./direitos.html">Titularidade e condições de uso</a></footer><script src="./fsj-diagnostico-proprietario.js?v=20261027-02"></script>
+<footer style="padding:18px;text-align:center;font-size:12px;color:#546775">© 2026 UPCJr. Todos os direitos reservados. <a href="./direitos.html">Titularidade e condições de uso</a></footer><script src="./fsj-diagnostico-proprietario.js?v=20261029-acoes-13"></script>
 <script>
 function fsjResponseTaskNumber(code,frequency){const m=String(code||'').trim().match(/^Tar\s*-\s*(\d+)$/i);const base=m?'Tar - '+m[1].padStart(7,'0'):String(code||'').replace(/^Tar\s*-\s*/i,'Tar - ');const suffix={pontual:'P',diaria:'D',semanal:'S',mensal:'M',trimestral:'T',semestral:'SM',anual:'A'}[String(frequency||'').toLowerCase()];return suffix?base+' '+suffix:base;}
 function fsjTaskClass(priority,status,running=false){if(status==='Concluída')return 'fsj-task-completed';if(priority==='urgente')return 'fsj-priority fsj-urgent';if(priority==='prioritaria')return 'fsj-priority';if(status!=='Concluída'&&(running||status==='Em andamento'))return 'fsj-task-running';if(status==='Pendente')return 'fsj-task-pending';return 'fsj-task-open';}
@@ -110,7 +110,7 @@ if(responseParams.get('gestor')==='1'){
 }
 history.replaceState(null,'',location.pathname);
 const status=document.getElementById('status'),detail=document.getElementById('detail'),form=document.getElementById('form'),done=document.getElementById('done'),why=document.getElementById('why'),files=document.getElementById('files');
-let info=null,responseStep='detail';
+let info=null,responseStep='detail',responseSending=false;
 document.getElementById('executionControl').after(form);
 const galleryFiles=document.getElementById('galleryFiles');
 document.getElementById('openGallery').addEventListener('click',()=>galleryFiles.click());
@@ -131,7 +131,7 @@ function fsjExecutionStarted(){return ['em_andamento','suspensa'].includes(info?
 function showResponseStep(step){if(info?.visitante){fsjVisitorDemo();return;}responseStep=step;taskScreen.hidden=false;form.style.display=(step==='reason'||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode))?'block':'none';taskAnswer.hidden=step!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido));fsjSyncAnswerFields();document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:step==='reason'?form:taskScreen}));}
 function fsjSyncAnswerFields(){
  const mode=document.documentElement.dataset.fsjOwnerMode;
- const diagnostic=mode==='readonly'||mode==='checking';
+ const diagnostic=mode==='readonly'||mode==='checking'||responseSending;
  const completed=!!info?.respondido;
  const started=fsjExecutionStarted();
  const visible=!!info&&!completed&&!info.visitante;
@@ -175,7 +175,7 @@ window.fsjGoBack=()=>{if(responseStep==='reason'){showResponseStep('detail');ret
 document.getElementById('reasonBack').onclick=()=>showResponseStep('detail');
 document.getElementById('screenPrevious').addEventListener('click',event=>{if(responseStep==='reason'){event.preventDefault();showResponseStep('detail');}});
 document.getElementById('answerNo').onclick=()=>{if(info?.visitante){fsjVisitorDemo();return;}document.querySelector('input[name=resposta][value=nao]').checked=true;document.getElementById('missingBox').hidden=false;showResponseStep('reason');};
-document.getElementById('answerYes').onclick=()=>{if(info?.visitante){fsjVisitorDemo();return;}document.querySelector('input[name=resposta][value=sim]').checked=true;document.getElementById('send').click();};
+document.getElementById('answerYes').onclick=()=>{if(info?.visitante){fsjVisitorDemo();return;}if(document.getElementById('answerYes').disabled)return;document.querySelector('input[name=resposta][value=sim]').checked=true;return submitTaskResponse();};
 
 document.querySelectorAll('input[name=resposta]').forEach(input=>input.addEventListener('change',()=>{document.getElementById('missingBox').hidden=input.value!=='nao';}));
 function fail(s){status.textContent=s;if(!info){document.getElementById('taskScreen').hidden=true;document.getElementById('form').hidden=true;}document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:status}));}
@@ -198,12 +198,12 @@ function fsjShowCompletionReview(){
  label.hidden=!info?.revisao;
  label.textContent=info?.revisao?'Última revisão do Proprietário: '+info.revisao.motivo:'';
 }
-function renderExecution(e){fsjShowCompletionReview();if(info?.visitante){fsjVisitorDemo();document.getElementById('executionStatus').textContent='Somente consulta • demonstração';return;}if(info)info.execucao=e;const label=document.getElementById('executionStatus'),button=document.getElementById('startTask');button.hidden=!!info?.respondido||e?.estado==='concluida';button.disabled=e?.estado==='em_andamento';button.textContent=e?.estado==='suspensa'?'Retomar tarefa':e?.estado==='em_andamento'?'Tarefa em andamento':'Iniciar tarefa';taskAnswer.hidden=responseStep!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido));document.dispatchEvent(new CustomEvent('fsj:execution-updated'));label.textContent=!e?'Ainda não iniciada.':e.estado==='em_andamento'?'Em andamento • Início: '+executionTime(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+executionTime(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+executionTime(e.suspenso_em)+' • Início: '+executionTime(e.iniciado_em):'Concluída em '+executionTime(e.concluido_em);}
+function renderExecution(e){fsjShowCompletionReview();if(info?.visitante){fsjVisitorDemo();document.getElementById('executionStatus').textContent='Somente consulta • demonstração';return;}if(info)info.execucao=e;const label=document.getElementById('executionStatus'),button=document.getElementById('startTask');button.hidden=!!info?.respondido||e?.estado==='concluida';button.disabled=e?.estado==='em_andamento';const pause=document.getElementById('suspendTask');pause.hidden=!!info?.respondido||e?.estado!=='em_andamento';pause.disabled=responseSending||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode);button.textContent=e?.estado==='suspensa'?'Retomar tarefa':e?.estado==='em_andamento'?'Tarefa em andamento':'Iniciar tarefa';taskAnswer.hidden=responseStep!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido));document.dispatchEvent(new CustomEvent('fsj:execution-updated'));label.textContent=!e?'Ainda não iniciada.':e.estado==='em_andamento'?'Em andamento • Início: '+executionTime(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+executionTime(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+executionTime(e.suspenso_em)+' • Início: '+executionTime(e.iniciado_em):'Concluída em '+executionTime(e.concluido_em);}
 async function refreshExecution(){if(!token)return;const d=await post({action:'detail',token});const wasResponded=!!info?.respondido;info=d;fsjExibirRespostasGestor(d);const progress=document.getElementById('dailyProgress');if(progress&&d.progresso_mensal)progress.textContent=d.progresso_mensal.rotulo+' • '+d.progresso_mensal.mes;if(responseParams.get('gestor')==='1'&&responseParams.get('concluida')==='1')info.respondido=true;renderExecution(d.execucao);if(wasResponded&&!d.respondido){done.style.display='none';showResponseStep('detail');}if(d.respondido&&!d.visitante){form.style.display='none';done.style.display='block';taskAnswer.hidden=true;}if(d.visitante)fsjVisitorDemo();}
 document.getElementById('startTask').onclick=async()=>{
  if(info?.visitante){fsjVisitorDemo();return;}
  const button=document.getElementById('startTask');
- if(button.dataset.fsjStarting==='1')return;
+ if(button.disabled||button.dataset.fsjStarting==='1')return;
  button.dataset.fsjStarting='1';button.disabled=true;
  const executionStatus=document.getElementById('executionStatus');
  status.textContent='Registrando início da tarefa...';
@@ -227,7 +227,15 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshExe
 setInterval(()=>{if(!document.hidden)refreshExecution().catch(()=>{})},15000);
 document.getElementById('listen').onclick=()=>{if(!window.speechSynthesis){fail('Leitura em voz indisponível neste aparelho.');return}speechSynthesis.cancel();const s=new SpeechSynthesisUtterance(info.tarefa);s.lang='pt-BR';s.rate=.85;speechSynthesis.speak(s)};
 document.getElementById('dictate').onclick=()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){fail('Ditado indisponível neste navegador. Digite a justificativa.');return}const r=new R();r.lang='pt-BR';r.onerror=()=>fail('Não foi possível usar o microfone. Você pode digitar ou ditar pelo teclado.');r.onresult=e=>{why.value=(why.value+' '+e.results[0][0].transcript).trim()};r.start()};
-document.getElementById('send').onclick=async()=>{if(info?.visitante){fsjVisitorDemo();return;}if(document.getElementById('send').disabled||info?.respondido)return;const selected=document.querySelector('input[name=resposta]:checked');if(!selected){fail('Escolha SIM ou NÃO.');return}if(selected.value==='nao'&&!why.value.trim()){fail('Explique o motivo da resposta NÃO.');why.focus();return}if(selected.value==='nao'&&(files.files.length>3||[...files.files].some(f=>f.size>10485760))){fail('Selecione até 3 arquivos de no máximo 10 MB cada.');return}const b=document.getElementById('send');b.disabled=true;status.textContent='Enviando resposta...';try{const data=new FormData();data.append('action','submit');data.append('token',token);data.append('resposta',selected.value);data.append('justificativa',selected.value==='nao'?why.value.trim():'');data.append('itens_faltantes',selected.value==='nao'?document.getElementById('missing').value.trim():'');if(selected.value==='nao')for(const f of files.files)data.append('arquivo',f);const r=await fetch(endpoint,{method:'POST',body:data});const d=await r.json();if(!r.ok)throw Error(d.erro||'Falha no envio');if(responseParams.get('gestor')==='1'&&!d.anexos_nao_salvos?.length){info.respondido=true;location.replace('./index.html?fsj_return=1');return;}form.style.display='none';done.style.display='block';taskAnswer.hidden=true;info.respondido=true;document.getElementById('startTask').hidden=true;refreshExecution().catch(()=>{});if(d.tarefa_proprietario_id)done.querySelector('p').textContent='Resposta registrada. Os itens faltantes geraram uma tarefa para o Proprietário e estão disponíveis ao supervisor responsável.';status.textContent=d.anexos_nao_salvos?.length?'Resposta registrada, mas alguns anexos falharam: '+d.anexos_nao_salvos.join(', '):'';document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:d.anexos_nao_salvos?.length?status:done}))}catch(e){fail(e.message);b.disabled=false}};
+async function submitTaskResponse(){if(info?.visitante){fsjVisitorDemo();return;}if(responseSending||!fsjExecutionStarted()||info?.respondido||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode))return;const selected=document.querySelector('input[name=resposta]:checked');if(!selected){fail('Escolha SIM ou NÃO.');return}if(selected.value==='nao'&&!why.value.trim()){fail('Explique o motivo da resposta NÃO.');why.focus();return}if(selected.value==='nao'&&(files.files.length>3||[...files.files].some(f=>f.size>10485760))){fail('Selecione até 3 arquivos de no máximo 10 MB cada.');return}const b=document.getElementById('send');responseSending=true;fsjSyncAnswerFields();status.textContent='Enviando resposta...';try{const data=new FormData();data.append('action','submit');data.append('token',token);data.append('resposta',selected.value);data.append('justificativa',selected.value==='nao'?why.value.trim():'');data.append('itens_faltantes',selected.value==='nao'?document.getElementById('missing').value.trim():'');if(selected.value==='nao')for(const f of files.files)data.append('arquivo',f);const r=await fetch(endpoint,{method:'POST',body:data});const d=await r.json();if(!r.ok)throw Error(d.erro||'Falha no envio');if(responseParams.get('gestor')==='1'&&!d.anexos_nao_salvos?.length){info.respondido=true;location.replace('./index.html?fsj_return=1');return;}form.style.display='none';done.style.display='block';taskAnswer.hidden=true;info.respondido=true;document.getElementById('startTask').hidden=true;refreshExecution().catch(()=>{});if(d.tarefa_proprietario_id)done.querySelector('p').textContent='Resposta registrada. Os itens faltantes geraram uma tarefa para o Proprietário e estão disponíveis ao supervisor responsável.';status.textContent=d.anexos_nao_salvos?.length?'Resposta registrada, mas alguns anexos falharam: '+d.anexos_nao_salvos.join(', '):'';document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:d.anexos_nao_salvos?.length?status:done}))}catch(e){fail(e.message)}finally{responseSending=false;fsjSyncAnswerFields();}}
+document.getElementById('send').onclick=submitTaskResponse;
+document.getElementById('suspendTask').onclick=async()=>{
+ const button=document.getElementById('suspendTask');
+ if(button.disabled||button.hidden||info?.visitante||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode))return;
+ button.disabled=true;status.textContent='Registrando suspensão...';
+ try{const d=await post({action:'suspend',token});renderExecution(d.execucao);status.textContent='Tarefa suspensa. Use Retomar tarefa para continuar.';}
+ catch(e){fail(e.message);button.disabled=false;}
+};
 load();
 // Consulta a versao em cada acao, sem interromper respostas ou perder o token do link.
 let fsjVersionBusy=false,fsjVersionLast='';
@@ -238,15 +246,15 @@ async function fsjCheckReaderVersion(){
   const response=await fetch('./responder.html?fsj_check='+Date.now(),{cache:'no-store'});
   if(!response.ok)return;
   const page=await response.text();
-  const version=page.match(/mobile-pages\\.js\\?v=([^"']+)/)?.[1]||'';
-  if(version&&version!=='20261027-mobile-entrega-05'&&version!==fsjVersionLast){
+  const version=page.match(/<meta name="fsj-reader-version" content="([^"]+)"/)?.[1]||'';
+  if(version&&version!==document.querySelector('meta[name=fsj-reader-version]').content&&version!==fsjVersionLast){
    fsjVersionLast=version;
    // Atualiza automaticamente apenas quando não há resposta em edição.
    const dirty=!!(document.querySelector('input[name="resposta"]:checked')||document.getElementById('why')?.value?.trim()||document.getElementById('missing')?.value?.trim()||document.getElementById('files')?.files?.length);
    const key='fsj_reader_auto_reload_'+version;
-   if(!dirty&&!sessionStorage.getItem(key)&&!document.getElementById('startTask')?.dataset.fsjStarting){
+   if(!dirty&&!sessionStorage.getItem(key)&&document.getElementById('startTask')?.dataset.fsjStarting!=='1'&&!responseSending){
     sessionStorage.setItem(key,'1');
-    const url=new URL(location.href);url.searchParams.set('fsj_atualizar',String(Date.now()));
+    const url=new URL(location.href);url.hash=responseParams.toString();url.searchParams.set('fsj_atualizar',String(Date.now()));
     location.replace(url.href);return;
    }
    let note=document.getElementById('fsjReaderUpdateNotice');
@@ -260,4 +268,5 @@ document.addEventListener('change',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckReaderVersion()});
 window.addEventListener('pageshow',fsjCheckReaderVersion);
 </script><script src="./mobile-pages.js?v=20261027-mobile-entrega-05"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261027-respostas-unificadas-09"></script></body></html>
+
 

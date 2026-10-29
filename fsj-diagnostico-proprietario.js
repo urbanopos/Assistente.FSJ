@@ -13,22 +13,22 @@ status.style.cssText='position:sticky;top:0;z-index:99999;background:#e0f1e7;col
 const label=document.createElement('strong'),button=document.createElement('button');
 button.type='button';button.style.cssText='margin-left:10px;padding:7px 12px;border-radius:8px;background:#175c40;color:#fff;border:0;font:inherit';
 status.append(label,button);
-function show(){document.documentElement.dataset.fsjOwnerMode=mode;document.dispatchEvent(new CustomEvent('fsj:owner-mode'));label.textContent=mode==='checking'?'Verificando acesso do Proprietário…':mode==='readonly'?'MODO DIAGNÓSTICO · Somente consulta':mode==='unlocked'?'AÇÕES DESBLOQUEADAS · Proprietário':'Não foi possível validar o Proprietário';button.hidden=mode==='checking'||mode==='failed';button.textContent=mode==='readonly'?'Desbloquear ações':'Voltar ao diagnóstico';}
+function show(){document.documentElement.dataset.fsjOwnerMode=mode;document.dispatchEvent(new CustomEvent('fsj:owner-mode'));label.textContent=mode==='checking'?'Verificando acesso do Proprietário…':mode==='readonly'?'MODO DIAGNÓSTICO · Somente consulta':mode==='unlocked'?'AÇÕES DESBLOQUEADAS · Proprietário':'Acesso pelo link da tarefa · permissões verificadas pelo servidor';button.hidden=mode==='checking'||mode==='failed';button.textContent=mode==='readonly'?'Desbloquear ações':'Voltar ao diagnóstico';}
 function mount(){if(!document.getElementById(status.id))document.body.prepend(status);show();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
-function guarded(e){if(mode==='unlocked'||mode==='failed'&&e.target.closest('#fsjOwnerDiagnostic'))return;
+function guarded(e){if(mode==='unlocked'||mode==='failed')return;
 const el=e.target.closest?.('button,input,select,textarea,a');
 if(!el||status.contains(el))return;
-if(el.matches('#startTask,#answerYes,#answerNo,#send,#dictate,#files,#galleryFiles,#openGallery,#why,#missing,[type=submit],[type=file]')){e.preventDefault();e.stopImmediatePropagation();if(mode==='readonly')label.textContent='Modo Diagnóstico: use Desbloquear ações para registrar.';}}
+if(el.matches('#startTask,#suspendTask,#answerYes,#answerNo,#send,#dictate,#files,#galleryFiles,#openGallery,#why,#missing,[type=submit],[type=file]')){e.preventDefault();e.stopImmediatePropagation();if(mode==='readonly')label.textContent='Modo Diagnóstico: use Desbloquear ações para registrar.';}}
 document.addEventListener('click',guarded,true);
-document.addEventListener('submit',e=>{if(mode!=='unlocked'){e.preventDefault();e.stopImmediatePropagation();}},true);
+document.addEventListener('submit',e=>{if(mode==='readonly'||mode==='checking'){e.preventDefault();e.stopImmediatePropagation();}},true);
 const nativeFetch=window.fetch.bind(window);
 window.fetch=(input,init={})=>{
  const url=typeof input==='string'?input:input?.url||'';
  const method=String(init.method||input?.method||'GET').toUpperCase();
  if(url.startsWith(endpoint)&&method==='POST'){
   let action='';try{action=init.body instanceof FormData?String(init.body.get('action')||''):JSON.parse(init.body||'{}').action||''}catch{}
-  if(mode!=='unlocked'&&['start','submit'].includes(action))return Promise.reject(Error('Modo Diagnóstico: desbloqueie ações primeiro.'));
+  if((mode==='readonly'||mode==='checking')&&['start','suspend','submit'].includes(action))return Promise.reject(Error('Modo Diagnóstico: desbloqueie ações primeiro.'));
   if(mode==='readonly'||mode==='checking'){
    const headers=new Headers(init.headers||{});if(window.fsjOwnerDiagnosticToken)headers.set('Authorization','Bearer '+window.fsjOwnerDiagnosticToken);
    init={...init,headers};
