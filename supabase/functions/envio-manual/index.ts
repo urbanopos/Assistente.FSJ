@@ -69,7 +69,7 @@ Deno.serve(async req=>{
   const link='https://urbanopos.github.io/Assistente.FSJ/quadro.html#token='+boards[0].token;
   const events=await db('mensagens_whatsapp?pessoa_id=eq.'+encodeURIComponent(pid)+'&tipo=eq.quadro_automatico&criado_em=gte.'+encodeURIComponent(day+'T03:00:00Z')+'&whatsapp_message_id=not.is.null&select=id&limit=1');
   const supervision=await db('rpc/fsj_link_supervisao',{p_pessoa:pid,p_token:boards[0].token});
-  const text='Bom dia, '+(person.identificacao||person.nome)+'.\nTarefas do dia '+day.split('-').reverse().join('/')+' — Fazenda São José.\n\nToque no link para abrir suas tarefas:\n'+link+(supervision?'\n\nSUPERVISÃO: DEMANDAS DOS SUPERVISIONADOS\n'+supervision:'')+'\n\nESTA MENSAGEM SUBSTITUI A DO DIA ANTERIOR';
+  const text='*FAZENDA SÃO JOSÉ – Tarefas do Dia '+day.split('-').reverse().join('/')+'*\n\n'+(person.identificacao||person.nome)+'\n\nCONSULTA TAREFAS\n'+link+(supervision?'\n\nTAREFAS DE TERCEIROS\n'+supervision:'')+'\n\nConsulta disponível a partir das 7h, horário de Pernambuco.\n\n*ESTA MENSAGEM CANCELA AS ANTERIORES*';
   await db('fsj_envios_manuais?on_conflict=pessoa_id,dia',{pessoa_id:pid,dia:day,token:boards[0].token,whatsapp:phone});
   const manual=await db('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=confirmado_em');
   return reply({phone,text,ja_registrado:events.length>0,dia:day,confirmado:!!manual[0]?.confirmado_em,confirmado_em:manual[0]?.confirmado_em||null});
