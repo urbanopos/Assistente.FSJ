@@ -290,3 +290,8 @@ Substitui a apresentação automática descrita na versão 08. Acione Gravar dia
 
 ## Filtro de tarefas — 20261024-maria-filtro-tarefas-10
 Corrigida consulta em aberto, incluindo abertas/abertos: exige situação Em aberto. Pendentes exige Pendente; em andamento exige Em andamento; concluídas exige Concluída. Arquivadas só aparecem se solicitadas explicitamente. Consultas comuns excluem Arquivado. Contagem da resposta usa a lista filtrada. Não altera tarefas, permissões ou banco. Validação com situações distintas e nomes flexionados; teste de atualização. Publicação não equivale à validação no dispositivo. Recuperação: reverter interface e versão em conjunto, sem restaurar registros.
+
+
+## Publicador independente de arquivos — entrega 2026-10-28
+
+Adicionado [publicador de arquivos](../publicar.html), com logotipo original, para o Proprietário escolher o arquivo recebido e substituir o caminho correspondente em urbanopos/Assistente.FSJ pela API do GitHub. O caminho é conferido antes da escrita e a substituição usa o SHA atual; o token não é armazenado. Não altera VM, páginas operacionais ou mecanismo de atualização. A versão anterior fica no histórico Git, sem criação de backups parciais. Arquivo salvo no GitHub não comprova conclusão do GitHub Pages. Testes simulados de substituição, criação, cancelamento e bytes aprovados; uso real com token ainda não validado. O contrato de atualização do index atual foi executado e apresenta divergência de versão preexistente, registrada no documento do módulo; não houve alteração desse index. Instruções, limites e recuperação: [publicador](publicador.md).
