@@ -16,10 +16,11 @@
   prev.type=next.type='button';prev.textContent='←';next.textContent='→';prev.className=next.className='fsj-nav-arrow';prev.setAttribute('aria-label','Anterior');next.setAttribute('aria-label','Próximo');
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   const answer=location.pathname.endsWith('/responder.html')?flow.querySelector('#taskAnswer'):null;
-  const navRow=element('div','fsj-page-nav-row');navRow.append(prev,status,next);footer.append(navRow);
+  const answerAnchor=answer?document.createComment('fsj-task-answer-original-position'):null;if(answer)answer.before(answerAnchor);
+   const navRow=element('div','fsj-page-nav-row');navRow.append(prev,status,next);footer.append(navRow);
   // Preservar a estrutura original de páginas e a navegação móvel.
   root.append(viewport,footer);root.classList.add('fsj-page-shell');
-  const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null,answer};states.set(root,state);
+  const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null,answer,answerAnchor};states.set(root,state);
   prev.onclick=()=>{if(location.pathname.endsWith('/quadro.html')&&state.index===0){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.assign('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));}return;}if(state.index>0){turn(state,state.index-1);return;}if(location.pathname.endsWith('/quadro.html')){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.replace('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));return;}return;}goBack();};next.onclick=()=>turn(state,state.index+1);
   viewport.addEventListener('scroll',()=>{if(!mobile.matches)return;const index=Math.round(viewport.scrollLeft/state.stride);if(Number.isFinite(index)&&index!==state.index){state.index=index;update(state);}});
   flow.addEventListener('focusin',event=>{if(!mobile.matches)return;reveal(state,event.target);});
@@ -48,7 +49,7 @@
   state.prev.disabled=state.index===0&&location.pathname.endsWith('/quadro.html')?false:state.index===0&&!canGoBack();state.next.disabled=state.index===state.count-1;
   state.status.textContent=(state.index+1)+' / '+state.count;
   state.status.setAttribute('aria-label','Página '+(state.index+1)+' de '+state.count);
-  const showAnswer=!!state.answer&&!!window.fsjTaskAnswerVisible?.()&&state.index===state.count-1;
+  const showAnswer=!!state.answer&&!!window.fsjTaskAnswerVisible?.();
   if(state.answer){state.answer.hidden=!showAnswer;}state.status.hidden=false;
   state.footer.hidden=false;
  }
@@ -71,8 +72,9 @@
   if(manager&&typeof window.fsjPlaceBrisa==='function')window.fsjPlaceBrisa();
   for(const state of states.values()){
    if(reset)state.index=0;
-   if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;if(state.answer){state.flow.append(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}continue;}
-   // Answer buttons remain in the navigation footer on mobile.
+   if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;if(state.answer){state.answerAnchor?.after(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}continue;}
+   // Botões SIM/NÃO fixos no rodapé móvel, visíveis em todas as páginas da tarefa.
+    if(state.answer&&state.answer.parentElement!==state.footer)state.footer.prepend(state.answer);
    if(!state.root.getClientRects().length)continue;
    for(const table of state.flow.querySelectorAll('table')){const grid=[];[...table.querySelectorAll('thead tr')].forEach((row,r)=>{grid[r]||=[];let c=0;for(const th of row.cells){while(grid[r][c]!==undefined)c++;for(let y=r;y<r+th.rowSpan;y++){grid[y]||=[];for(let x=c;x<c+th.colSpan;x++)grid[y][x]=th.textContent.trim();}c+=th.colSpan;}});const headers=Array.from({length:Math.max(0,...grid.map(row=>row.length))},(_,c)=>[...new Set(grid.map(row=>row[c]).filter(Boolean))].join(' / '));for(const row of table.querySelectorAll('tbody tr'))[...row.cells].forEach((cell,i)=>{if(headers[i])cell.dataset.label=headers[i];});}
    const visual=window.visualViewport;
