@@ -29,3 +29,17 @@ Publicar os arquivos web e implantar a migration e a função primeiro. No compu
 - Regressões existentes de cadastro, voz e confirmação de envio passaram. Os testes antigos `brisa.test.cjs` e `brisa-session-regression.cjs` já falham no commit base 65108a4 (mensagem esperada desatualizada e mock sem `brisaNormalizar`); esta alteração não modificou esse comportamento.
 
 O teste online de leitura do calendário respondeu HTTP 200. A confirmação de supressão no disparo real depende da instalação do ajuste no computador executor.
+
+
+
+## Calendário mensal: salvar e consultar relatórios — 29/10/2026
+
+Versão 20261029-calendario-relatorios-16. Em Folgas e feriados, abrir o calendário, selecionar a pessoa, tocar na data, escolher Folga semanal, Feriado ou Folga compensatória e clicar em Salvar datas. A tela confirma a gravação central. Sem pessoa selecionada ou durante a consulta, a edição fica indisponível. Datas existentes são carregadas do servidor. O salvamento atualiza somente folgas_datas e folgas_motivos da pessoa escolhida, preservando os demais campos cadastrais. Falha mantém as marcações pendentes. É necessário salvar antes de trocar pessoa ou fechar. Marcar um Feriado no calendário mensal registra uma data de folga individual; não cria feriado oficial nem altera a decisão de recebimento no módulo oficial.
+
+Consultar / Imprimir relatório está disponível na seção Folgas e feriados e dentro do calendário. Escolher uma pessoa ou Todas as pessoas e informar data inicial/final inclusivas. Consultar relatório busca novamente a armazenagem central com paginação. Reúne marcações mensais, folgas semanais, feriados oficiais com decisão individual de envio e compensações cuja data esteja no período, inclusive quando o feriado de origem estiver fora dele. Informa origem, tipo, data e pessoa; fontes distintas podem registrar o mesmo dia, por isso a contagem é de registros, não de dias únicos. O relatório retrata registros atualmente salvos, não versões anteriores de marcações excluídas. Imprimir / Salvar PDF usa a impressão do navegador, em A4 paisagem, com cabeçalho repetido. Permitir a janela de impressão se bloqueada no celular.
+
+Permissões: utiliza sessão e RLS existentes de pessoas, folgas_semana, feriados_fsj e feriados_envio. Nenhuma chave privilegiada no cliente, nenhuma alteração de políticas, tabelas ou Edge Functions. A consulta SQL sob papel authenticated confirmou acesso do e-mail proprietário e zero linhas para outro e-mail. A escolha de pessoa no navegador não concede acesso administrativo.
+
+Validações: quatro testes em tests/calendar-records.cjs para gravação restrita de campos, falha e rascunho, troca de pessoa, filtros inclusivos, compensação fora do feriado, paginação, escape de conteúdo e erro de período. Contrato tests/automatic-update-contract.cjs aprovado. Testes usam DOM/API simulados, sem alteração de datas reais; impressão e layout no aparelho do proprietário aguardam validação. O navegador de teste local não possui Chromium instalado.
+
+Instalação: publicação da interface index.html e calendar-records.js no GitHub Pages; atualização automática existente protegida durante edição/gravação do calendário. Nenhuma instalação na VM ou nas pastas isoladas foi executada. Preservados expediente, disparos WhatsApp e permissões dos demais perfis. Não gerar backup parcial nem promover a tela ainda não validada no celular a versão de recuperação aprovada. Recuperação por reversão do commit desta interface; não apagar dados centrais já salvos e não restaurar cartões PDF.
