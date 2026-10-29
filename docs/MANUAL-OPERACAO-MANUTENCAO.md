@@ -363,3 +363,14 @@ Preparação publicada: automation/emergency-replacement.mjs exporta identifyPre
 Validação: cinco testes em tests/emergency-replacement.test.mjs passaram para ordem de exclusão/envio, bloqueio em falha ou incerteza, impedimento de repetição e seleção da mensagem correta. Esses testes usam executor simulado; não comprovam exclusão real.
 
 Estado real: código complementar preparado no GitHub, NÃO integrado aos botões nem instalado/ativado no executor. A consulta ao fsj_executor_emergencia não retornou heartbeat; VM inacessível nesta sessão. Nenhuma mensagem apagada ou enviada por esta entrega. As rotinas de abertura manual Desktop/Celular continuam funcionando. Pendente: conectar o executor autenticado já existente, instalar o complemento respeitando as pastas separadas, ligar a solicitação individual autenticada do botão ao executor e validar com o proprietário. O GitHub por si só não controla a sessão de WhatsApp do laptop ou celular. Recuperação: remover a integração futura ou reverter o commit deste complemento; não modificar agendamentos existentes.
+
+
+## Executor integrado ao pacote — determinação do proprietário em 29/10/2026
+
+O Executor de Emergência é componente interno do pacote Disparo de Emergência; não criar outra tarefa operacional para o proprietário, botão de iniciar executor nem comando diário. Uma única solicitação do Desktop/Celular deve executar e acompanhar a substituição. Configuração técnica inicial e vínculo da sessão continuam necessários uma vez no computador hospedeiro.
+
+Pacote preparado: automation/emergency-agent/{component.mjs,worker.mjs,README.md}; database/emergency-agent.sql; supabase/functions/emergency-agent/index.ts; disparo-emergencial/executor-client.js; adaptadores separados desktop/disparo-emergencial.js e celular/disparo-emergencial.js. Preservar as interfaces próprias das pastas /home/urbano/fsj-instalacoes-isoladas/desktop e /home/urbano/fsj-instalacoes-isoladas/celular. O processo hospedeiro inicia/encerra o componente automaticamente; cliente usa apenas a API autenticada e nunca recebe a chave privilegiada. Fila dedicada não é consumida pela rotina geral antiga.
+
+Validação: nove testes locais passaram para ciclo de vida do componente, configuração, desconexão, comando único, ordem apagar-confirmar-enviar, ausência/ambiguidade, falha e resultado incerto. Sintaxe do worker, cliente e função validada. Não houve envio real nos testes.
+
+Estado: publicado como código preparado; NÃO aplicar SQL ou ativar botões antes da instalação e vínculo do executor no hospedeiro. SQL, nova função, executor e adaptadores ainda não implantados. VM inacessível. Não afirmar funcionamento automático em produção. O fluxo manual existente permanece. Recuperação: desativar o componente futuro sem apagar diários nem repetir pedidos incertos. Não alterar os agendamentos diários como parte desta preparação.
