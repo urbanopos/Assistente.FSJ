@@ -374,3 +374,14 @@ Pacote preparado: automation/emergency-agent/{component.mjs,worker.mjs,README.md
 Validação: nove testes locais passaram para ciclo de vida do componente, configuração, desconexão, comando único, ordem apagar-confirmar-enviar, ausência/ambiguidade, falha e resultado incerto. Sintaxe do worker, cliente e função validada. Não houve envio real nos testes.
 
 Estado: publicado como código preparado; NÃO aplicar SQL ou ativar botões antes da instalação e vínculo do executor no hospedeiro. SQL, nova função, executor e adaptadores ainda não implantados. VM inacessível. Não afirmar funcionamento automático em produção. O fluxo manual existente permanece. Recuperação: desativar o componente futuro sem apagar diários nem repetir pedidos incertos. Não alterar os agendamentos diários como parte desta preparação.
+
+
+## Botões ligados ao executor integrado — 29/10/2026
+
+Versão 20261029-emergencia-integrada-08. Na interface pública responsiva Desktop/Celular, o botão do proprietário e o envio individual dentro da seção Disparo Emergencial chamam emergency-agent via executor-client.js. Não abrem aba WhatsApp, não pedem envio manual nem confirmação manual. A preparação do pedido é autenticada pela titularidade, e só aceita pessoa cadastrada. Mensagem/telefone vêm do serviço envio-manual. Os controles manuais de Pessoas/Comunicação permanecem fora deste fluxo.
+
+Fila e presença dedicadas fsj_emergency_jobs/fsj_emergency_agent foram implantadas no Supabase; RLS ativa, sem privilégios para anon/authenticated, claim permitido apenas a service_role. Função emergency-agent v1 publicada com autenticação própria por validação do usuário e titularidade no servidor. Se não houver executor conectado com presença recente, a solicitação é bloqueada. Repetição de clique é protegida no cliente, por request_id e pelo índice de pedido ativo por pessoa/dia.
+
+Estado real: servidor e ligação dos botões publicados; executor do computador não instalado/vinculado, presença conectada ausente. Não afirmar que o apagamento está operacional. Pastas isoladas da VM continuam pendentes de receber a integração, preservando seus layouts. Teste real determinado pelo proprietário: exclusivamente Urbano, após comprovar conexão do executor. Nenhum outro destinatário autorizado para o teste.
+
+Verificação: contrato de atualização, testes do botão integrado e nove testes de componente/substituição passaram. Checagem HTTP ao endpoint real foi bloqueada pela revisão automática por possível efeito de apagamento/envio; não repetida nem usada como evidência de funcionamento. Sem exclusão/envio real nesta entrega. Para recuperação, reverter o front-end ao fluxo anterior; manter diários e fila para investigar qualquer estado incerto. Não repetir pedidos em execução/incertos automaticamente.
