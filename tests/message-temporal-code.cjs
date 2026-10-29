@@ -1,0 +1,11 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const src=fs.readFileSync(process.argv[2]||'supabase/functions/envio-manual/index.ts','utf8');
+const helper=src.slice(src.indexOf('function fsjCodigoMensagem'),src.indexOf('Deno.serve'));
+const ctx={};vm.createContext(ctx);vm.runInContext(helper,ctx);
+const board={token:'11111111-1111-4111-8111-111111111111',criado_em:'2026-10-29T08:10:20.123Z'};
+const code=ctx.fsjCodigoMensagem(board,'2026-10-29');
+assert.equal(code,'FSJ-20261029T081020123Z-'+board.token);
+assert.equal(ctx.fsjCodigoMensagem(board,'2026-10-29'),code);
+assert.notEqual(ctx.fsjCodigoMensagem({...board,token:'22222222-2222-4222-8222-222222222222'},'2026-10-29'),code);
+assert(src.includes('Código da mensagem: '));assert(src.includes('codigo_mensagem:fsjCodigoMensagem(boards[0],day)'));
+console.log('PASS: código temporal UTC estável, distinto por quadro e registrado na confirmação.');

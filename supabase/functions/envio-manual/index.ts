@@ -3,6 +3,11 @@ const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||JSON.parse(Deno.env.get('SU
 const origin='https://urbanopos.github.io';
 function reply(body,status=200){return new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'content-type,authorization,apikey','Access-Control-Allow-Methods':'POST,OPTIONS'}});}
 async function db(path,body,method=body===undefined?'GET':'POST'){const r=await fetch(base+'/rest/v1/'+path,{method,headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=representation'},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(30000)});if(!r.ok)throw Error('Não foi possível preparar o quadro.');const s=await r.text();return s?JSON.parse(s):null;}
+function fsjCodigoMensagem(board,day){
+ const created=new Date(board.criado_em||day+'T03:00:00Z');
+ const stamp=Number.isFinite(created.getTime())?created.toISOString().replace(/[-:.]/g,''):day.replace(/-/g,'')+'T030000000Z';
+ return 'FSJ-'+stamp+'-'+board.token;
+}
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return reply({});
  if(req.method!=='POST')return reply({erro:'Método inválido'},405);
@@ -40,7 +45,7 @@ Deno.serve(async req=>{
    const pid=String(data.pessoa_id||''),day=today();
    if(data.dia!==day||!pid||pid.length>100)return reply({erro:'Confirme somente o envio de hoje.'},400);
    const people=await db('pessoas?id=eq.'+encodeURIComponent(pid)+'&ativo=eq.true&select=whatsapp');
-   const boards=await db('quadros_do_dia?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=token');
+   const boards=await db('quadros_do_dia?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=token,criado_em');
    if(!people[0]||!boards[0])return reply({erro:'Prepare o quadro de hoje antes de confirmar.'},409);
    let phone=String(people[0].whatsapp||'').replace(/\D/g,'');if(phone.length===10||phone.length===11)phone='55'+phone;
    if(!/^55\d{10,11}$/.test(phone))return reply({erro:'WhatsApp inválido no cadastro.'},400);
@@ -49,7 +54,7 @@ Deno.serve(async req=>{
    await db('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&confirmado_em=is.null',{confirmado_em:new Date().toISOString()},'PATCH');
    const rows=await db('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=id,pessoa_id,dia,confirmado_em,whatsapp_message_id,resultado_reconciliacao');
    const row=rows[0];
-   await db('mensagens_whatsapp?on_conflict=id',{id:row.id,pessoa_id:pid,direcao:'saida',tipo:'quadro_manual_confirmado',conteudo:JSON.stringify({dia:day,status:'confirmado_pelo_gestor',confirmacao_tecnica:false}),criado_em:row.confirmado_em});
+   await db('mensagens_whatsapp?on_conflict=id',{id:row.id,pessoa_id:pid,direcao:'saida',tipo:'quadro_manual_confirmado',conteudo:JSON.stringify({dia:day,status:'confirmado_pelo_gestor',confirmacao_tecnica:false,codigo_mensagem:fsjCodigoMensagem(boards[0],day)}),criado_em:row.confirmado_em});
    return reply({envio:row});
   }
   if(data.action==='individual'){
@@ -69,10 +74,10 @@ Deno.serve(async req=>{
   const link='https://urbanopos.github.io/Assistente.FSJ/quadro.html#token='+boards[0].token;
   const events=await db('mensagens_whatsapp?pessoa_id=eq.'+encodeURIComponent(pid)+'&tipo=eq.quadro_automatico&criado_em=gte.'+encodeURIComponent(day+'T03:00:00Z')+'&whatsapp_message_id=not.is.null&select=id&limit=1');
   const supervision=await db('rpc/fsj_link_supervisao',{p_pessoa:pid,p_token:boards[0].token});
-  const text='*FAZENDA SÃO JOSÉ – Tarefas do Dia '+day.split('-').reverse().join('/')+'*\n\n'+(person.identificacao||person.nome)+'\n\nCONSULTA TAREFAS\n'+link+(supervision?'\n\nTAREFAS DE TERCEIROS\n'+supervision:'')+'\n\nConsulta disponível a partir das 7h, horário de Pernambuco.\n\n*ESTA MENSAGEM CANCELA AS ANTERIORES*';
+  const text='*FAZENDA SÃO JOSÉ – Tarefas do Dia '+day.split('-').reverse().join('/')+'*\n\n'+(person.identificacao||person.nome)+'\n\nCONSULTA TAREFAS\n'+link+(supervision?'\n\nTAREFAS DE TERCEIROS\n'+supervision:'')+'\n\nConsulta disponível a partir das 7h, horário de Pernambuco.\n\nCódigo da mensagem: '+fsjCodigoMensagem(boards[0],day)+'\n\n*ESTA MENSAGEM CANCELA AS ANTERIORES*';
   await db('fsj_envios_manuais?on_conflict=pessoa_id,dia',{pessoa_id:pid,dia:day,token:boards[0].token,whatsapp:phone});
   const manual=await db('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(pid)+'&dia=eq.'+day+'&select=confirmado_em');
-  return reply({phone,text,ja_registrado:events.length>0,dia:day,confirmado:!!manual[0]?.confirmado_em,confirmado_em:manual[0]?.confirmado_em||null});
+  return reply({phone,text,codigo_mensagem:fsjCodigoMensagem(boards[0],day),ja_registrado:events.length>0,dia:day,confirmado:!!manual[0]?.confirmado_em,confirmado_em:manual[0]?.confirmado_em||null});
   }
   if(data.action==='status'){
    const [requests,heartbeat]=await Promise.all([db('fsj_envios_emergencia?order=solicitado_em.desc&limit=1&select=*'),db('fsj_executor_emergencia?select=visto_em&limit=1')]);
