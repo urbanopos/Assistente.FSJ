@@ -175,6 +175,28 @@ window.fsjGoBack=()=>{if(responseStep==='reason'){showResponseStep('detail');ret
 document.getElementById('reasonBack').onclick=()=>showResponseStep('detail');
 document.getElementById('screenPrevious').addEventListener('click',event=>{if(responseStep==='reason'){event.preventDefault();showResponseStep('detail');}});
 document.getElementById('answerNo').onclick=()=>{if(info?.visitante){fsjVisitorDemo();return;}document.querySelector('input[name=resposta][value=nao]').checked=true;document.getElementById('missingBox').hidden=false;showResponseStep('reason');};
+// Atalhos de conclusão junto ao comando Iniciar/Retomar, sem duplicar o envio.
+(function fsjAtalhosConclusao(){
+ const start=document.getElementById('startTask'),actions=start?.parentElement;
+ if(!start||!actions||document.getElementById('fsjQuickAnswer'))return;
+ const quick=document.createElement('div');quick.id='fsjQuickAnswer';
+ quick.style.cssText='display:none;gap:10px;width:100%;margin:8px 0;flex-wrap:wrap';
+ for(const [id,label] of [['answerYes','SIM'],['answerNo','NÃO']]){
+  const button=document.createElement('button');button.type='button';button.textContent=label;
+  button.style.cssText='flex:1 1 110px;min-height:44px;font-weight:700;font-size:17px';
+  button.addEventListener('click',()=>document.getElementById(id)?.click());quick.append(button);
+ }
+ start.after(quick);
+ const sync=()=>{
+  const eligible=!!info&&!info.visitante&&!info.respondido&&fsjExecutionStarted()&&!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode);
+  quick.style.display=eligible?'flex':'none';
+  [...quick.children].forEach((b,i)=>b.disabled=!eligible||!!document.getElementById(i?'answerNo':'answerYes')?.disabled);
+ };
+ document.addEventListener('fsj:execution-updated',sync);
+ document.addEventListener('fsj:owner-mode',sync);
+ document.addEventListener('fsj:page-target',sync);
+ sync();
+})();
 document.getElementById('answerYes').onclick=()=>{if(info?.visitante){fsjVisitorDemo();return;}if(document.getElementById('answerYes').disabled)return;document.querySelector('input[name=resposta][value=sim]').checked=true;return submitTaskResponse();};
 
 document.querySelectorAll('input[name=resposta]').forEach(input=>input.addEventListener('change',()=>{document.getElementById('missingBox').hidden=input.value!=='nao';}));
@@ -267,6 +289,6 @@ document.addEventListener('click',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('change',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckReaderVersion()});
 window.addEventListener('pageshow',fsjCheckReaderVersion);
-</script><script src="./mobile-pages.js?v=20261029-restaurar-sim-nao-01"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261027-respostas-unificadas-09"></script></body></html>
+</script><script src="./mobile-pages.js?v=20261029-conclusao-junto-inicio-02"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261027-respostas-unificadas-09"></script></body></html>
 
 
