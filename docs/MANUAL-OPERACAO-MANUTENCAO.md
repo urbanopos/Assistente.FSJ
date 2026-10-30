@@ -1,5 +1,12 @@
 # Assistente FSJ — Manual de operação e manutenção
 
+## Critérios permanentes de acesso — 30/10/2026
+
+Consultar a decisão [Destinatário e perfil da sessão](decisoes/acesso-destinatario-sessao.md). O link individual determina o perfil destinatário; o Proprietário pode conferi-lo com as restrições daquele usuário. Em seu próprio link, destinatário e perfil coincidem como Proprietário, mediante identidade titular validada. Usuários comuns não podem obter titularidade por link encaminhado, URL, token isolado, estado local ou sessão salva. A autorização deve ser validada no servidor.
+
+Estado: critérios registrados; esta entrega é documental. A correção de precedência do destinatário já foi publicada no commit `5f12ec6`; a exigência de comprovação da identidade de quem abre um link do titular ainda demanda revisão de autenticação no servidor. Não declarar segurança integral validada somente com base neste registro. Sem alteração de banco, sessões, tarefas, disparos ou instalação. Recuperação: reverter o commit documental preservando as correções anteriores.
+
+
 ## Identidade do destinatário no link individual — 30/10/2026
 
 Correção `20261030-destinatario-01`: a entrada `inicio-usuario.html#token=...` preserva o perfil associado ao token recebido. Uma sessão de proprietário no mesmo aparelho não redireciona esse acesso para o painel administrativo; token inválido ou vazio também não causa promoção para proprietário. A entrada sem token mantém o reconhecimento autenticado do titular. O bloqueio de 07:00–12:00 e 14:00–16:20 (America/Recife) e a exceção para links do próprio titular continuam validados pelo servidor.

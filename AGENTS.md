@@ -25,3 +25,10 @@ Antes de modificar ou publicar, leia docs/decisoes/atualizacao-automatica.md.
 - Ler docs/decisoes/perfil-gestor.md antes de alterar permissões. A decisão de 22/10/2026 substitui a limitação anterior de apenas acompanhar/orientar, mas não equivale a implantação.
 - Gestor operacional não recebe administração técnica, titularidade, credenciais privilegiadas nem poder de nomear Gestores. Validar permissões no servidor, sem ampliar acesso apenas por ocultação de botões.
 - Não prometer impedir cópia de código público ou entregue ao navegador. Registrar honestamente o estado de implantação e validação.
+
+## Destinatário e perfil da sessão — regra permanente
+
+- Ler docs/decisoes/acesso-destinatario-sessao.md antes de alterar identificação, entrada, perfis, permissões ou expediente.
+- O link individual mantém o destinatário, inclusive quando aberto pelo Proprietário para conferência. Sessão administrativa salva não substitui esse destinatário.
+- Usuário comum jamais recebe perfil ou privilégios de Proprietário por URL, link encaminhado, token isolado ou estado local. Exigir validação da identidade titular e autorização no servidor; falhar negando o privilégio.
+- Não confundir registro destes critérios com implantação integral. Preservar a distinção entre destinatário do link e identidade autenticada de quem o abre.
