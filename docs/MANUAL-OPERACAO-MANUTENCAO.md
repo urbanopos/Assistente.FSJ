@@ -532,3 +532,10 @@ Versão `20261030-emergencia-tela-folga-20`. Substitui o alerta nativo do navega
 O botão “← Voltar ao Disparo Emergencial” fica no rodapé fixo, inclusive no celular, e fecha a tela, devolvendo o foco ao botão da pessoa selecionada. Voltar não repete a preparação nem abre o WhatsApp. O aviso usa texto seguro e não interpreta nomes ou motivos como HTML. Mantidos perfil Proprietário, consultas autenticadas, decisões do servidor, calendário, confirmações e reuso da aba do WhatsApp.
 
 Validação: contrato de atualização, cenários de folga semanal/mensal/compensação e falha de consulta, reenvio confirmado e abertura/reuso de aba passaram em simulações. Sem envio real. Publicação destinada ao GitHub Pages; implantação e conferência visual no aparelho devem ser distinguidas. Nenhuma instalação na VM, alteração de banco, serviço ou agendamento. Recuperação por reversão deste commit, preservando dados centrais e histórico Git; não promover esta tela a backup validado antes da conferência do proprietário.
+
+
+## Aviso de folga com fonte dourada — 30/10/2026
+
+Versão `20261030-emergencia-aviso-dourado-21`. No Disparo Emergencial, o aviso usa fundo verde e fonte dourada no título, nome, motivos e datas, conforme a minuta aprovada. O botão “← Voltar ao Disparo Emergencial” permanece fixo no rodapé, com texto dourado e espaço reservado no celular para não cobrir a mensagem. A consulta dos motivos, o bloqueio do envio e as permissões existentes permanecem preservados.
+
+Operação: Proprietário → Disparo Emergencial → selecionar destinatário → preparar mensagem. Se houver bloqueio por folga, ler o aviso e voltar pelo botão do rodapé. Validação local: contrato de atualização, testes de folga, reenvio confirmado e abertura/reuso da aba, sem envio real. Publicação no GitHub Pages; conferência no aparelho do proprietário pendente. Sem instalação na VM ou alteração de registros/agendamentos. Código anterior preservado no histórico Git; recuperação por reversão deste commit, sem restaurar cartões PDF.
