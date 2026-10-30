@@ -539,3 +539,8 @@ Validação: contrato de atualização, cenários de folga semanal/mensal/compen
 Versão `20261030-emergencia-aviso-dourado-21`. No Disparo Emergencial, o aviso usa fundo verde e fonte dourada no título, nome, motivos e datas, conforme a minuta aprovada. O botão “← Voltar ao Disparo Emergencial” permanece fixo no rodapé, com texto dourado e espaço reservado no celular para não cobrir a mensagem. A consulta dos motivos, o bloqueio do envio e as permissões existentes permanecem preservados.
 
 Operação: Proprietário → Disparo Emergencial → selecionar destinatário → preparar mensagem. Se houver bloqueio por folga, ler o aviso e voltar pelo botão do rodapé. Validação local: contrato de atualização, testes de folga, reenvio confirmado e abertura/reuso da aba, sem envio real. Publicação no GitHub Pages; conferência no aparelho do proprietário pendente. Sem instalação na VM ou alteração de registros/agendamentos. Código anterior preservado no histórico Git; recuperação por reversão deste commit, sem restaurar cartões PDF.
+
+
+## Publicação do layout Desktop — 30/10/2026
+
+Versão `20261030-desktop-inicio-22`. No desktop/laptop, números de consulta antes das ações, Tarefas em Execução ao lado de Responder dúvidas e sugestões, aplicativos nativos e agenda depois dos botões. Celular mantém o layout anterior. Ver [operação, instalação, validações e recuperação](layout-inicial-desktop.md). Distribuição pelo endereço habitual com atualização automática; sem instalação na VM ou alteração de dados/permissões. Conferência visual na sessão real permanece pendente.
