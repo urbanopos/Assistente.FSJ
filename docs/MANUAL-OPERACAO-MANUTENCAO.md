@@ -1,5 +1,12 @@
 # Assistente FSJ — Manual de operação e manutenção
 
+## Identidade do destinatário no link individual — 30/10/2026
+
+Correção `20261030-destinatario-01`: a entrada `inicio-usuario.html#token=...` preserva o perfil associado ao token recebido. Uma sessão de proprietário no mesmo aparelho não redireciona esse acesso para o painel administrativo; token inválido ou vazio também não causa promoção para proprietário. A entrada sem token mantém o reconhecimento autenticado do titular. O bloqueio de 07:00–12:00 e 14:00–16:20 (America/Recife) e a exceção para links do próprio titular continuam validados pelo servidor.
+
+Validação: testes de entrada com sessão titular, sessão expirada, link individual válido, inválido e vazio; testes de expediente e contrato de atualização. Publicação no GitHub não comprova atualização de aba antiga, instalação na VM ou validação do link real da Menininha. Não há alteração no banco, nas tarefas, nos disparos ou nas sessões salvas. Instalação web: recurso versionado na página inicial. Recuperação: reverter apenas o commit desta correção; preservar as demais melhorias. Validação no aparelho com o link recebido permanece pendente.
+
+
 
 ## Correção do bloqueio visual no celular — 30/10/2026
 
