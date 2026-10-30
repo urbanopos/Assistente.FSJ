@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261030-emergencia-folga-19">
+<meta name="fsj-build" content="20261030-emergencia-tela-folga-20">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -476,6 +476,19 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 #fsjSimpleBar .fsj-simple-label{margin-left:0!important;white-space:nowrap}
 #fsjSimpleBar .fsj-simple-icon{flex:0 0 44px!important}
 @media(max-width:700px){#fsjSimpleBar{padding:6px 8px!important;gap:5px!important}#fsjSimpleBar .fsj-simple-label{font-size:11px!important}#fsjSimpleSelect{min-width:0!important;flex:1!important}}
+
+/* Tela de aviso da emergência, no padrão verde do aviso de expediente. */
+#fsjEmergencyNotice{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:20px;border:0;background:#f2f5ef;color:#213d2c;overflow:auto;padding-bottom:110px}
+#fsjEmergencyNotice::backdrop{background:#f2f5ef}
+.fsj-emergency-notice-wrap{min-height:100%;display:flex;align-items:center;justify-content:center}
+.fsj-emergency-notice-card{box-sizing:border-box;width:100%;max-width:650px;padding:26px;border-radius:16px;background:#175541;color:#fff;border-bottom:5px solid #d6b665;font-family:Arial,sans-serif}
+.fsj-emergency-notice-brand{font-size:12px;letter-spacing:1.3px;margin:0 0 16px;color:#e8edeb}
+#fsjEmergencyNoticeTitle{font-size:24px;margin:0 0 18px;color:#f3d794}
+#fsjEmergencyNoticeMessage{font-size:22px;line-height:1.4;white-space:pre-line;overflow-wrap:anywhere;margin:0 0 24px}
+.fsj-emergency-notice-footer{position:fixed;bottom:0;left:0;right:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:#f2f5ef;border-top:1px solid #cee3eb;display:flex;justify-content:center}
+#fsjEmergencyNotice button{max-width:650px;background:#fff;color:#175541;border:1px solid #d6b665;min-height:44px;width:100%;padding:12px}
+@media(max-width:400px){#fsjEmergencyNotice{padding:15px}.fsj-emergency-notice-card{padding:20px}#fsjEmergencyNoticeMessage{font-size:20px}}
+
 </style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-brisa-menu-02">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
@@ -572,7 +585,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261030-emergencia-folga-19';
+const FSJ_BUILD='20261030-emergencia-tela-folga-20';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1089,6 +1102,19 @@ function fsjIndividualControls(p,showName=false,emergency=false){
 }
 function fsjAbrirDisparoEmergencial(){window.open('https://urbanopos.github.io/Assistente.FSJ/?fsj_acao=disparo-emergencial','_blank','noopener,noreferrer');}
 function fsjAcessoEmergencial(){return new URLSearchParams(location.search).get('fsj_acao')==='disparo-emergencial';}
+function fsjMostrarAvisoEmergencia(message,button){
+ let screen=document.getElementById('fsjEmergencyNotice');
+ if(!screen){
+  screen=document.createElement('dialog');screen.id='fsjEmergencyNotice';
+  screen.setAttribute('aria-labelledby','fsjEmergencyNoticeTitle');screen.setAttribute('aria-describedby','fsjEmergencyNoticeMessage');
+  screen.innerHTML='<div class="fsj-emergency-notice-wrap"><section class="fsj-emergency-notice-card"><p class="fsj-emergency-notice-brand">FAZENDA SÃO JOSÉ</p><h1 id="fsjEmergencyNoticeTitle">Disparo Emergencial</h1><p id="fsjEmergencyNoticeMessage"></p></section></div><footer class="fsj-emergency-notice-footer"><button type="button" aria-label="Voltar à tela de Disparo Emergencial" autofocus>← Voltar ao Disparo Emergencial</button></footer>';
+  screen.querySelector('button').addEventListener('click',()=>screen.close());
+  document.body.appendChild(screen);
+ }
+ document.getElementById('fsjEmergencyNoticeMessage').textContent=message;
+ screen.onclose=()=>{if(button&&button.isConnected)button.focus();};
+ if(!screen.open)screen.showModal();
+}
 async function fsjCondicoesEmergencia(pid,name){
  const day=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()),date=day.split('-').reverse().join('/'),id=encodeURIComponent(pid);
  const [people,weekly,holidays,decisions]=await Promise.all([
@@ -1106,7 +1132,8 @@ async function fsjCondicoesEmergencia(pid,name){
  if(holidays.length&&!decisions.some(d=>d.dia===day&&d.receber===true))reasons.push('Feriado em '+date+': '+holidays.map(h=>h.nome).join(', ')+'. Recebimento não autorizado para esta data.');
  if(p.ativo===false)reasons.push('Cadastro inativo.');
  if(p.receber_tarefas_whatsapp!==true)reasons.push('Recebimento de tarefas desmarcado no cadastro.');
- return (p.identificacao||p.nome||name)+': '+(reasons.length?reasons.join(' '):'O serviço bloqueou o envio, mas a consulta atual não identificou o motivo. Confira Folgas e feriados.')+' Nenhuma mensagem foi preparada ou enviada.';
+ const nome=p.identificacao||p.nome||name,folga=reasons.some(reason=>/folga|feriado|férias/i.test(reason));
+ return (folga?'O destinatário executor ('+nome+') está de folga.\n\n':nome+': ')+(reasons.length?reasons.join(' '):'O serviço bloqueou o envio, mas a consulta atual não identificou o motivo. Confira Folgas e feriados.')+' Nenhuma mensagem foi preparada ou enviada.';
 }
 async function fsjEnviarEmergencialIntegrado(pid,button,status){
  if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid))return;
@@ -1134,7 +1161,7 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
    try{message=await fsjCondicoesEmergencia(pid,control.p.nick||control.p.name);}catch{message='Envio bloqueado para '+(control.p.nick||control.p.name)+'. Não foi possível consultar as condições atuais de folga. Confira Folgas e feriados. Nenhuma mensagem foi preparada ou enviada.';}
    status.textContent=message;
    if(tab&&!opened){try{if(tab.location.href==='about:blank'){tab.close();window.fsjEmergencyWhatsAppTab=null;}}catch{}}
-   alert(message);
+   fsjMostrarAvisoEmergencia(message,button);
   }else status.textContent='Não foi possível preparar: '+message;
  }
  finally{if(tab&&!opened){try{if(tab.location.href==='about:blank'){tab.close();window.fsjEmergencyWhatsAppTab=null;}}catch{}}fsjIndividualBusy.delete(pid);fsjApplyManualState();}
@@ -1549,7 +1576,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./calendar-records.js?v=20261030-emergencia-folga-19"></script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
+</script><script src="./calendar-records.js?v=20261030-emergencia-tela-folga-20"></script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
 <script src="./mobile-pages.js?v=20261020-brisa-menu-02"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261020-brisa-menu-02"></script>
@@ -1741,7 +1768,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('fsjPreviewOverlay').hidden)fsjPreviewClose();});
  if(preview){document.addEventListener('DOMContentLoaded',()=>{const btn=document.getElementById('fsjPreviewButton');if(btn)btn.hidden=true;});}
 })();
-</script><script src="./disparo-emergencial/executor-client.js?v=20261030-emergencia-folga-19"></script></body></html>
+</script><script src="./disparo-emergencial/executor-client.js?v=20261030-emergencia-tela-folga-20"></script></body></html>
 
 
 
