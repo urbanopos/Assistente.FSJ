@@ -1,5 +1,17 @@
 # Assistente FSJ — Manual de operação e manutenção
 
+
+## Correção do bloqueio visual no celular — 30/10/2026
+
+Versão dos recursos: `20261030-expediente-tela-03`. A tela inicial (`inicio-usuario.html`) tinha painéis e navegação fora dos seletores ocultados pelo bloqueio anterior. O aviso agora fica diretamente no `main`, separado dos quadros protegidos; as quatro páginas individuais ocultam todo o conteúdo do `main`, navegação inferior e diálogos ao bloquear. Os controles ficam inertes durante o bloqueio, restaurando seu estado anterior ao liberar; rascunhos não são apagados. A conferência ocorre a cada segundo, ao retomar a tela e ao restaurar o histórico. Uma resposta iniciada antes do fim do expediente não reabre a tela depois do limite; o retorno ao horário permitido depende de uma nova resposta autorizada do servidor.
+
+Mantidas as faixas 07:00–12:00 e 14:00–16:20, America/Recife, e a exceção do Proprietário confirmada pelo servidor. O diagnóstico administrativo não altera essa exceção. A negativa do servidor prevalece mesmo com relógio local dentro do expediente. Não houve alteração de folgas, disparos, perfis, banco ou funções implantadas.
+
+Validações desta entrega: `node tests/expediente-screen.cjs`, `node tests/expediente-banner.cjs`, `node tests/owner-hours-access.cjs`, `node tests/automatic-update-contract.cjs` e `git diff --check`, aprovados. Consulta real confirmou a regra SQL; chamada HTTP sem token real de usuário recebeu 403/fora_expediente no período fechado. Não havia quadros vigentes para validar uma sessão individual real nesta checagem. Teste visual no aparelho do usuário e validação de seu link específico permanecem pendentes.
+
+Instalação: recursos publicados no GitHub Pages das páginas individuais, sem nova instalação de APK ou atualização da VM. Publicação do repositório e resposta dos arquivos servidos devem ser conferidas antes do encerramento; isso não comprova atualização de uma aba antiga ainda aberta. Recuperação: reverter somente o commit desta correção visual, preservando o controle já existente no servidor e as demais melhorias. Histórico anterior permanece no Git.
+
+
 Revisão operacional: 26/10/2026 (complementa histórico de 22–24/10/2026). Responsável pelo sistema: Urbano. Nome de uso: Assistente FSJ — Tarefa.
 Este é o ponto de entrada vigente para operação e manutenção. Os documentos vinculados detalham cada módulo. Decisões antigas permanecem como histórico; não devem ser usadas isoladamente para restaurar funcionalidades substituídas.
 
@@ -480,3 +492,4 @@ Instalação: publicação da interface index.html e calendar-records.js no GitH
 ### Mesma operação no Desktop — 29/10/2026
 
 Versão 20261029-calendario-desktop-17. O painel web do Desktop também oferece Salvar datas e Consultar / Imprimir relatório, com pessoa e período inclusivo, usando os mesmos registros centrais do celular. Clicar normalmente na data abre a escolha de motivo no computador; clique direito e teclado continuam disponíveis. A versão anterior exigia clique direito com mouse. Não altera o layout próprio do Desktop nem cria cópia independente dos dados. Publicação GitHub Pages; cópias isoladas da VM não foram atualizadas nesta sessão. Contrato de atualização e quatro testes do calendário aprovados. Conferência visual e impressão no computador do proprietário pendentes. Recuperação: reverter somente esta alteração de interface, preservando datas centrais.
+

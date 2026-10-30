@@ -1,6 +1,18 @@
 # Banner e horário de consulta
 
 
+## Correção do bloqueio visual no celular — 30/10/2026
+
+Versão dos recursos: `20261030-expediente-tela-03`. A tela inicial (`inicio-usuario.html`) tinha painéis e navegação fora dos seletores ocultados pelo bloqueio anterior. O aviso agora fica diretamente no `main`, separado dos quadros protegidos; as quatro páginas individuais ocultam todo o conteúdo do `main`, navegação inferior e diálogos ao bloquear. Os controles ficam inertes durante o bloqueio, restaurando seu estado anterior ao liberar; rascunhos não são apagados. A conferência ocorre a cada segundo, ao retomar a tela e ao restaurar o histórico. Uma resposta iniciada antes do fim do expediente não reabre a tela depois do limite; o retorno ao horário permitido depende de uma nova resposta autorizada do servidor.
+
+Mantidas as faixas 07:00–12:00 e 14:00–16:20, America/Recife, e a exceção do Proprietário confirmada pelo servidor. O diagnóstico administrativo não altera essa exceção. A negativa do servidor prevalece mesmo com relógio local dentro do expediente. Não houve alteração de folgas, disparos, perfis, banco ou funções implantadas.
+
+Validações desta entrega: `node tests/expediente-screen.cjs`, `node tests/expediente-banner.cjs`, `node tests/owner-hours-access.cjs`, `node tests/automatic-update-contract.cjs` e `git diff --check`, aprovados. Consulta real confirmou a regra SQL; chamada HTTP sem token real de usuário recebeu 403/fora_expediente no período fechado. Não havia quadros vigentes para validar uma sessão individual real nesta checagem. Teste visual no aparelho do usuário e validação de seu link específico permanecem pendentes.
+
+Instalação: recursos publicados no GitHub Pages das páginas individuais, sem nova instalação de APK ou atualização da VM. Publicação do repositório e resposta dos arquivos servidos devem ser conferidas antes do encerramento; isso não comprova atualização de uma aba antiga ainda aberta. Recuperação: reverter somente o commit desta correção visual, preservando o controle já existente no servidor e as demais melhorias. Histórico anterior permanece no Git.
+
+
+
 ## Banner aprovado e controle de acesso por expediente — 29/10/2026
 
 Publicado o modelo aprovado: banner verde com detalhe dourado, título CONSULTA DE TAREFAS e texto contínuo justificado, com tamanho uniforme: **A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.** Rodapé: Horário de Pernambuco. Substitui o aviso de horário em texto vermelho nas páginas inicio-usuario.html, quadro.html, responder.html e supervisor.html.
@@ -19,3 +31,4 @@ Verificações: testes em oito limites de horário para board/detail/start/submi
 O proprietário está dispensado do bloqueio de expediente. O servidor reconhece a identidade pela titularidade oficial e por sessão autenticada válida ou token válido vinculado à pessoa titular ativa; não confia em nome, parâmetro de URL ou sinalizador enviado pelo cliente. Outros perfis continuam sujeitos às faixas de expediente. Validade dos tokens, atribuições e âmbito de supervisão são preservados.
 
 Resposta-tarefa v29 e supervisao v14 implantadas com o indicador de horário livre retornado pelo servidor. O banner respeita esse indicador e não bloqueia o proprietário por relógio local. O banco já possuía exceção do proprietário em fsj_registrar_resposta; nenhuma função SQL ou permissão foi alterada nesta correção. Testes cobrem titular ativo, outro usuário, inativo, link inválido e expirado. O painel autenticado do proprietário continua podendo preparar o disparo antes das 7h.
+

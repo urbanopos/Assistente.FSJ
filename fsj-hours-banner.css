@@ -10,4 +10,7 @@
 .fsj-hours-note{font-size:14px;font-weight:400;margin:9px 0 0;color:#e1eae6}
 body.fsj-afterhours #error,body.fsj-afterhours #status{display:none!important}
 body.fsj-afterhours #content,body.fsj-afterhours #taskScreen,body.fsj-afterhours #form,body.fsj-afterhours #done,body.fsj-afterhours #demandas,body.fsj-afterhours #fsjDuvidasSupervisao{display:none!important}
+/* Abrange início, quadro, resposta e supervisão, inclusive conteúdo já carregado. */
+html.fsj-afterhours main>:not(#fsjHoursBanner),html.fsj-afterhours .footnav,html.fsj-afterhours [role="dialog"],html.fsj-afterhours dialog{display:none!important}
 @media(max-width:400px){.fsj-hours-banner{gap:12px;padding:18px 15px}.fsj-hours-clock{flex-basis:42px;width:42px;height:42px}.fsj-hours-text{font-size:20px}}
+
