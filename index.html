@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261030-emergencia-reenvio-18">
+<meta name="fsj-build" content="20261030-emergencia-folga-19">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -572,7 +572,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261030-emergencia-reenvio-18';
+const FSJ_BUILD='20261030-emergencia-folga-19';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1089,6 +1089,25 @@ function fsjIndividualControls(p,showName=false,emergency=false){
 }
 function fsjAbrirDisparoEmergencial(){window.open('https://urbanopos.github.io/Assistente.FSJ/?fsj_acao=disparo-emergencial','_blank','noopener,noreferrer');}
 function fsjAcessoEmergencial(){return new URLSearchParams(location.search).get('fsj_acao')==='disparo-emergencial';}
+async function fsjCondicoesEmergencia(pid,name){
+ const day=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()),date=day.split('-').reverse().join('/'),id=encodeURIComponent(pid);
+ const [people,weekly,holidays,decisions]=await Promise.all([
+  api('/rest/v1/pessoas?id=eq.'+id+'&select=id,nome,identificacao,ativo,receber_tarefas_whatsapp,folgas_datas,folgas_motivos,ferias_inicio,ferias_fim'),
+  api('/rest/v1/folgas_semana?pessoa_id=eq.'+id+'&dia=eq.'+day+'&select=dia,definido_por'),
+  api('/rest/v1/feriados_fsj?dia=eq.'+day+'&select=dia,nome'),
+  api('/rest/v1/feriados_envio?pessoa_id=eq.'+id+'&or=(dia.eq.'+day+',folga_compensatoria.eq.'+day+')&select=dia,receber,folga_compensatoria')
+ ]);
+ const p=people[0];if(!p)throw Error('Cadastro indisponível para consulta.');
+ const reasons=[];
+ if(weekly.length)reasons.push('Folga semanal em '+date+'.');
+ if((p.folgas_datas||[]).includes(day))reasons.push((p.folgas_motivos?.[day]||'Folga registrada no calendário')+' em '+date+'.');
+ for(const d of decisions)if(d.folga_compensatoria===day)reasons.push('Folga compensatória em '+date+', referente ao feriado de '+d.dia.split('-').reverse().join('/')+'.');
+ if(p.ferias_inicio&&p.ferias_fim&&day>=p.ferias_inicio&&day<=p.ferias_fim)reasons.push('Férias de '+p.ferias_inicio.split('-').reverse().join('/')+' a '+p.ferias_fim.split('-').reverse().join('/')+'.');
+ if(holidays.length&&!decisions.some(d=>d.dia===day&&d.receber===true))reasons.push('Feriado em '+date+': '+holidays.map(h=>h.nome).join(', ')+'. Recebimento não autorizado para esta data.');
+ if(p.ativo===false)reasons.push('Cadastro inativo.');
+ if(p.receber_tarefas_whatsapp!==true)reasons.push('Recebimento de tarefas desmarcado no cadastro.');
+ return (p.identificacao||p.nome||name)+': '+(reasons.length?reasons.join(' '):'O serviço bloqueou o envio, mas a consulta atual não identificou o motivo. Confira Folgas e feriados.')+' Nenhuma mensagem foi preparada ou enviada.';
+}
 async function fsjEnviarEmergencialIntegrado(pid,button,status){
  if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid))return;
  const control=[...fsjManualControls].find(c=>c.p.id===pid&&c.button===button);
@@ -1109,7 +1128,15 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
   control.prepared=true;control.confirm.hidden=fsjManualConfirmed(pid);
   if(tab&&!tab.closed){tab.location.replace(url);opened=true;try{tab.focus();}catch{}}
   status.textContent=(d.confirmado||d.ja_registrado?'Já há envio registrado hoje; confira a conversa para evitar duplicidade. ':'')+(opened?'WhatsApp aberto para o destinatário selecionado. Confira a mensagem e pressione Enviar.':'Toque em Abrir conversa abaixo para abrir o destinatário com a mensagem preenchida.');
- }catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}status.textContent='Não foi possível preparar: '+message;}
+  }catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}
+  control.prepared=false;control.confirm.hidden=true;
+  if(/Envio bloqueado/i.test(message)){
+   try{message=await fsjCondicoesEmergencia(pid,control.p.nick||control.p.name);}catch{message='Envio bloqueado para '+(control.p.nick||control.p.name)+'. Não foi possível consultar as condições atuais de folga. Confira Folgas e feriados. Nenhuma mensagem foi preparada ou enviada.';}
+   status.textContent=message;
+   if(tab&&!opened){try{if(tab.location.href==='about:blank'){tab.close();window.fsjEmergencyWhatsAppTab=null;}}catch{}}
+   alert(message);
+  }else status.textContent='Não foi possível preparar: '+message;
+ }
  finally{if(tab&&!opened){try{if(tab.location.href==='about:blank'){tab.close();window.fsjEmergencyWhatsAppTab=null;}}catch{}}fsjIndividualBusy.delete(pid);fsjApplyManualState();}
 }
 async function fsjEmergenciaProprietario(){
@@ -1522,7 +1549,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./calendar-records.js?v=20261030-emergencia-reenvio-18"></script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
+</script><script src="./calendar-records.js?v=20261030-emergencia-folga-19"></script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
 <script src="./mobile-pages.js?v=20261020-brisa-menu-02"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261020-brisa-menu-02"></script>
@@ -1714,7 +1741,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('fsjPreviewOverlay').hidden)fsjPreviewClose();});
  if(preview){document.addEventListener('DOMContentLoaded',()=>{const btn=document.getElementById('fsjPreviewButton');if(btn)btn.hidden=true;});}
 })();
-</script><script src="./disparo-emergencial/executor-client.js?v=20261030-emergencia-reenvio-18"></script></body></html>
+</script><script src="./disparo-emergencial/executor-client.js?v=20261030-emergencia-folga-19"></script></body></html>
 
 
 
