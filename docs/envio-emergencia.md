@@ -152,3 +152,12 @@ Versão 20261029-emergencia-aba-unica-12. A cada acionamento, reutilizar a refer
 Preservar envio final manual, confirmação posterior, seleção explícita de destinatário, sessão pessoal do WhatsApp, calendário e permissões. O vínculo da conta não é recriado pelo código. O apagamento automático permanece pendente do executor, separado desta correção de navegação. O fluxo fora da seção de emergência não foi alterado.
 
 Validações: contrato de atualização, destinatário/mensagem em Windows/Android/iPhone, dois disparos reutilizando uma aba, abertura após fechamento e destino fixo no link alternativo. Testes simulados; validar no navegador do proprietário. Recuperação: reverter este commit. Cópias isoladas da VM não atualizadas nem promovidas a backup nesta sessão.
+
+
+## Disparo emergencial após envio confirmado — 30/10/2026
+
+Versão `20261030-emergencia-reenvio-18`. Corrigida a aplicação indevida do bloqueio diário dos controles comuns ao Disparo Emergencial. A confirmação de envio de hoje continua visível no histórico e impede repetição pelo botão comum; o botão emergencial permite preparar novamente a mensagem da pessoa selecionada, avisando quando o serviço informa envio anterior. Trocar de destinatário não herda bloqueio de outra pessoa. O link alternativo e a orientação de envio permanecem visíveis após a consulta das confirmações. O botão Confirmar envio aparece após preparar a emergência, apenas se ainda faltar a confirmação do dia.
+
+Operação: Proprietário → Disparo Emergencial → selecionar Carlos ou outra pessoa → Preparar mensagem → conferir conversa e pressionar Enviar no WhatsApp. O servidor continua validando titularidade, cadastro, recebimento, calendário e telefone; o cliente não amplia permissões nem altera destinatários. A confirmação repetida não apaga nem substitui o registro original. Corrigida também referência inexistente a preparedTab ao confirmar envio já confirmado/em andamento.
+
+Validação: regressão com envio confirmado, troca de pessoa, atualização de estado durante preparação, confirmação, cadastros bloqueados e envio comum; testes de abertura/reuso de aba e contrato de atualização. Testes simulados, sem envio ou apagamento de mensagens reais. Entrega destinada ao GitHub Pages; o commit e a implantação devem ser conferidos separadamente. Validação no celular do Proprietário pendente. Nenhuma instalação na VM ou alteração de função/banco/agendamento. Histórico Git preservado; recuperação por reversão apenas deste commit, sem apagar confirmações ou restaurar cartões PDF.

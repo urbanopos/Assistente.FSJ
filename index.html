@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261029-calendario-desktop-17">
+<meta name="fsj-build" content="20261030-emergencia-reenvio-18">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -572,7 +572,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261029-calendario-desktop-17';
+const FSJ_BUILD='20261030-emergencia-reenvio-18';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1057,8 +1057,8 @@ function fsjManualConfirmed(pid){const r=fsjManualStates.get(pid);return r?.dia=
 function fsjApplyManualState(){
  for(const c of fsjManualControls){if(c.row.isConnected)c.mounted=true;else if(c.mounted){fsjManualControls.delete(c);continue;}
   const done=fsjManualConfirmed(c.p.id),blocked=c.p.active===false||c.p.whatsapp7h!==true;
-  c.button.textContent=done?'Envio Confirmado':'Enviar tarefas pelo WhatsApp';c.button.disabled=done||blocked||fsjIndividualBusy.has(c.p.id);c.confirm.hidden=done||blocked;
-  if(done){c.fallback.hidden=true;c.status.textContent=fsjManualStates.get(c.p.id).whatsapp_message_id?'Confirmado por você e identificado pelo executor no WhatsApp.':'Confirmado por você hoje. Identificação técnica da mensagem pendente no executor.';}
+  c.button.textContent=c.emergency?'Enviar mensagem de emergência':done?'Envio Confirmado':'Enviar tarefas pelo WhatsApp';c.button.disabled=(!c.emergency&&done)||blocked||fsjIndividualBusy.has(c.p.id);c.confirm.hidden=done||blocked||(c.emergency&&!c.prepared);
+  if(done&&!c.emergency){c.fallback.hidden=true;c.status.textContent=fsjManualStates.get(c.p.id).whatsapp_message_id?'Confirmado por você e identificado pelo executor no WhatsApp.':'Confirmado por você hoje. Identificação técnica da mensagem pendente no executor.';}
  }
 }
 async function fsjRefreshManualStatus(){
@@ -1068,7 +1068,7 @@ async function fsjRefreshManualStatus(){
  try{await fsjManualRefresh;}finally{fsjManualRefresh=null;}
 }
 async function fsjConfirmarManual(pid,name){
- if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid)||fsjManualConfirmed(pid)){if(preparedTab){try{preparedTab.close();}catch{}}return;}
+ if(!fsjPainelPronto||window.fsjExited||fsjIndividualBusy.has(pid)||fsjManualConfirmed(pid)){return;}
  if(!confirm('Confirma que você já enviou o quadro de hoje para '+name+' pelo WhatsApp? Essa declaração não comprova entrega ou leitura.'))return;
  fsjIndividualBusy.add(pid);fsjApplyManualState();
  try{const d=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'confirmar',pessoa_id:pid,dia:fsjManualDay()})});fsjManualVersion++;fsjManualStates.set(pid,d.envio);}
@@ -1085,7 +1085,7 @@ function fsjIndividualControls(p,showName=false,emergency=false){
  if(button.disabled)status.textContent=p.active===false?'Cadastro inativo.':'Recebimento de tarefas desmarcado no cadastro.';
  const confirmation=document.createElement('button');confirmation.type='button';confirmation.hidden=emergency;confirmation.textContent='Confirmar envio';confirmation.addEventListener('click',()=>fsjConfirmarManual(p.id,p.nick||p.name));
  button.addEventListener('click',()=>emergency?fsjEnviarEmergencialIntegrado(p.id,button,status):fsjEnviarIndividual(p.id,button,status,fallback));row.append(button,status,fallback,confirmation);
- fsjManualControls.add({row,p,button,status,fallback,confirm:confirmation});fsjApplyManualState();return row;
+ fsjManualControls.add({row,p,button,status,fallback,confirm:confirmation,emergency,prepared:false});fsjApplyManualState();return row;
 }
 function fsjAbrirDisparoEmergencial(){window.open('https://urbanopos.github.io/Assistente.FSJ/?fsj_acao=disparo-emergencial','_blank','noopener,noreferrer');}
 function fsjAcessoEmergencial(){return new URLSearchParams(location.search).get('fsj_acao')==='disparo-emergencial';}
@@ -1106,7 +1106,7 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
   const url=mobile?'https://wa.me/'+d.phone+'?text='+encodeURIComponent(d.text):'https://web.whatsapp.com/send?phone='+encodeURIComponent(d.phone)+'&text='+encodeURIComponent(d.text);
   fallback.href=url;fallback.target=tabName;fallback.rel='';fallback.referrerPolicy='no-referrer';fallback.textContent='Abrir conversa de '+(control.p.nick||control.p.name)+' com a mensagem';fallback.hidden=false;
   fallback.onclick=event=>{event.preventDefault();try{let target=window.fsjEmergencyWhatsAppTab;if(target&&!target.closed){target.location.replace(url);}else{target=window.open(url,tabName);if(target){target.opener=null;window.fsjEmergencyWhatsAppTab=target;}}if(target)target.focus();}catch{status.textContent='Permita a abertura do WhatsApp neste navegador e tente o link novamente.';}};
-  control.confirm.hidden=false;
+  control.prepared=true;control.confirm.hidden=fsjManualConfirmed(pid);
   if(tab&&!tab.closed){tab.location.replace(url);opened=true;try{tab.focus();}catch{}}
   status.textContent=(d.confirmado||d.ja_registrado?'Já há envio registrado hoje; confira a conversa para evitar duplicidade. ':'')+(opened?'WhatsApp aberto para o destinatário selecionado. Confira a mensagem e pressione Enviar.':'Toque em Abrir conversa abaixo para abrir o destinatário com a mensagem preenchida.');
  }catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}status.textContent='Não foi possível preparar: '+message;}
@@ -1522,7 +1522,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckUp
 document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
-</script><script src="./calendar-records.js?v=20261029-calendario-desktop-17"></script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
+</script><script src="./calendar-records.js?v=20261030-emergencia-reenvio-18"></script><script src="./weekly-off-manager.js?v=20261018-semana-referencia"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
 <script src="./mobile-pages.js?v=20261020-brisa-menu-02"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261020-brisa-menu-02"></script>
@@ -1714,7 +1714,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('fsjPreviewOverlay').hidden)fsjPreviewClose();});
  if(preview){document.addEventListener('DOMContentLoaded',()=>{const btn=document.getElementById('fsjPreviewButton');if(btn)btn.hidden=true;});}
 })();
-</script><script src="./disparo-emergencial/executor-client.js?v=20261029-calendario-desktop-17"></script></body></html>
+</script><script src="./disparo-emergencial/executor-client.js?v=20261030-emergencia-reenvio-18"></script></body></html>
 
 
 
