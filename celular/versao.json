@@ -1,8 +1,9 @@
 {
   "codigo_identificacao": "FSJ-CELULAR",
   "versao_interface": "0.2.2",
-  "build": "20261030-celular-proprietario-25",
+  "build": "20261030-celular-proprietario-26",
   "canal": "web-operacional",
   "fonte_privado_commit": "00238bc00faa3e3d1083878f02ef1dc2743136c0",
-  "instalador_nativo": false
+  "instalador_nativo": false,
+  "versao": "0.2.3"
 }
