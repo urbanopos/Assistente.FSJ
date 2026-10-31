@@ -1,8 +1,8 @@
 {
   "codigo_identificacao": "FSJ-CELULAR",
-  "versao_interface": "0.3.0",
-  "build": "20261031-supervisao-aceite-29",
+  "versao_interface": "0.3.1",
+  "build": "20261031-supervisor-perfil-30",
   "canal": "web-operacional",
   "instalador_nativo": false,
-  "fonte_privado_commit": "108bec324734c412e80efbca0b23509ad7f8eddb"
+  "fonte_privado_commit": "4cfe0764f2bdc608ca4772a184d6518327cec1df"
 }
