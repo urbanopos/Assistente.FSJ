@@ -1,8 +1,8 @@
 {
   "codigo_identificacao": "FSJ-CELULAR",
-  "versao_interface": "0.2.4",
-  "build": "20261031-celular-supervisao-27",
+  "versao_interface": "0.3.0",
+  "build": "20261031-supervisao-aceite-29",
   "canal": "web-operacional",
-  "fonte_privado_commit": "fa92f6a9a849cc9b8af101e5f3a2a0dd89a58781",
-  "instalador_nativo": false
+  "instalador_nativo": false,
+  "fonte_privado_commit": "108bec324734c412e80efbca0b23509ad7f8eddb"
 }
