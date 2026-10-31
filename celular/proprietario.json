@@ -1,12 +1,12 @@
 {
   "codigo": "FSJ-CELULAR-PROPRIETARIO",
-  "versao": "1.0.3",
-  "build": "20261031-proprietario-sem-tela-acesso-37",
+  "versao": "1.0.4",
+  "build": "20261031-proprietario-telas-internas-38",
   "perfil": "Proprietário",
   "aparelhos": [
     "telefone Android",
     "iPhone"
   ],
   "simulador": false,
-  "fonte_privado_commit": "63a9c9515b3198d55cf800c81b2dd0cbf92bd2a2"
+  "fonte_privado_commit": "89d796554c83ff2096c2cbce9cbe9bacd61cd129"
 }
