@@ -35,3 +35,14 @@ Validação local: contrato obrigatório de atualização nas bases privada e p�
 
 Instalação web: endereço habitual e atualização automática segura, sem exigir APK ou recarga manual. Backup e recuperação: versão anterior preservada no histórico Git; reverter exclusivamente esta entrega de menu/bundle/referências, preservando Desktop, registros, rascunhos, autenticação e rotina das 7h. Não restaurar cartões PDF nem executar automações copiadas.
 
+
+
+## Celular 0.2.4 — SUPERVISÃO no menu inicial — 31/10/2026
+
+Build `20261031-celular-supervisao-27`. O menu inicial do executor recebe exatamente um atalho SUPERVISÃO, somente após resposta `ativo: true` do serviço central para o token do próprio quadro. O atalho abre supervisor.html com esse mesmo token e relaciona as tarefas das pessoas e grupos autorizados. O acesso equivalente antes aninhado no Informativo de tarefas foi movido para a primeira tela, sem duplicação. Perfis comuns, falha de consulta e respostas sem autorização positiva não exibem o botão. As permissões são consultadas novamente ao abrir/retomar; respostas antigas não substituem uma consulta mais recente e uma falha do acesso individual invalida consultas pendentes.
+
+A consulta de tarefas continua protegida no servidor: supervisor e pessoa ativos, quadro válido do dia, prazo e escopos de pessoas/grupos. Nenhuma atribuição de supervisão, autenticação, tabela, política ou função foi modificada por esta entrega. O menu não concede novos poderes sobre tarefas. Desktop/tablets, serviços centrais, chamadas, registros, sessões e rotina das 7h permanecem nos fluxos existentes.
+
+Validação: contrato obrigatório de atualização automática nas entradas privada e pública; testes de DOM do fonte e do minificado, Android/iPhone, exclusão de computadores/tablets, permissões positivas/negativas, falha negando acesso, perfil local sem efeito, token do quadro preservado e revogação ao retomar; regressões do Proprietário, rascunhos, calendário, expediente e atualização segura aprovadas. Conferência somente de leitura das definições operacionais e teste no banco confirmaram rejeição de vínculo/token inválido. Nenhuma tarefa, mensagem ou cadastro real foi alterado. Validação visual na sessão real do usuário permanece pendente.
+
+Instalação web: atualização automática segura no endereço e nos links individuais habituais. Não há novo instalador nativo. Fontes novos somente na pasta privada Assistente FSJ - Celular; distribuição recebe bundle minificado sem mapa e referências de versão. Estado de publicação e commits constam de PUBLICACAO-CELULAR.json. Backup: versão anterior preservada no histórico Git; recuperação por reversão exclusiva desta entrega, sem restaurar cartões PDF nem apagar registros centrais.
