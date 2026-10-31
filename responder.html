@@ -201,7 +201,7 @@ document.getElementById('answerYes').onclick=()=>{if(info?.visitante){fsjVisitor
 
 document.querySelectorAll('input[name=resposta]').forEach(input=>input.addEventListener('change',()=>{document.getElementById('missingBox').hidden=input.value!=='nao';}));
 function fail(s){status.textContent=s;if(!info){document.getElementById('taskScreen').hidden=true;document.getElementById('form').hidden=true;}document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:status}));}
-async function post(body){const r=await fetch(endpoint,{method:'POST',body:JSON.stringify(body),headers:{'Content-Type':'application/json'}});const d=await r.json();if(!r.ok)throw Error(d.erro||'Falha ao carregar');return d}
+async function post(body){const r=await fetch(endpoint,{method:'POST',body:JSON.stringify(body),headers:{'Content-Type':'application/json'}});const d=await r.json();if(d.simulador===true||d.visitante===true){location.replace('./visitante.html');throw Error('Abrindo o simulador do Visitante…');}if(!r.ok)throw Error(d.erro||'Falha ao carregar');return d}
 function fsjExibirRespostasGestor(dados){
  let painel=document.getElementById('fsjRespostasGestor');
  if(!painel){painel=document.createElement('section');painel.id='fsjRespostasGestor';painel.className='card';document.getElementById('taskScreen').append(painel);}

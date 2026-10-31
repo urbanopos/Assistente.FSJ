@@ -1,1 +1,5 @@
-{"versao":"0.3.2","build":"20261031-relatorio-proprietario-31"}
+{
+  "modulo": "supervisao",
+  "versao": "0.3.3",
+  "build": "20261031-visitante-simulador-32"
+}
