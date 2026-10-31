@@ -106,3 +106,14 @@ Validação local aprovada: fonte e bundle em DOM simulado, CSS instalado antes 
 Instalação web: endereço habitual, atualização automática ao abrir/retomar quando seguro, sem comandos ou novo instalador. Backup: versão anterior preservada no histórico Git. Recuperação: reverter exclusivamente a entrega 1.0.2 (adaptador, referência e metadados), sem apagar registros/sessões nem restaurar cartões PDF.
 
 Verificação adicional das suítes legadas `mobile-pages.cjs` e `owner-mobile-access.cjs`: 6 aprovações e 4 falhas reproduzidas também no commit base, sem mudanças (fixture de CSP/paginação e URLSearchParams ausente no mock). Os testes específicos desta correção e o contrato obrigatório passaram; não foram enfraquecidos testes antigos.
+
+
+## Proprietário Celular 1.0.3 — ocultação do acesso durante restauração — 31/10/2026
+
+Build `20261031-proprietario-sem-tela-acesso-37`. Corrige a passagem rápida pelo cartão «Acesso do Proprietário»: o adaptador instalado no head agora oculta também loginBox enquanto restaura dados e verifica titularidade. O carregador sinaliza início e término em finally; na ausência de sessão, erro de restauração ou erro de dados, libera o acesso e Tentar novamente. Eventos são registrados antes do DOMContentLoaded para não deixar sem acesso quem não tem sessão. Sucesso aguarda a titularidade antes de mostrar o menu verde. A autenticação e as autorizações existentes permanecem obrigatórias.
+
+Conferência de navegação em fixture: Casa limpa o histórico; Voltar de Editar retorna ao detalhe, depois à lista; formulários abertos pelo menu retornam ao menu aprovado. Tarefas próprias/grupos, terceiros individuais/grupos e execução real reaproveitada mantêm os eventos anteriores. O desaparecimento do cartão inicial não significa que todos os formulários legados foram reconstruídos: os formulários funcionais existentes continuam adaptados ao celular. Não foi comprovada a ausência de qualquer outra tela antiga em todos os fluxos reais.
+
+Validação local aprovada: fonte e bundle em DOM simulado; ocultação antes da autorização; liberação em falha inclusive antes do DOMContentLoaded; repetição do carregamento; titularidade/revogação; Casa/Voltar; rascunho e Adicionar preservados; exclusão de Desktop/tablets; contrato de atualização automática e três testes de precedência do destinatário. O finally do carregador foi exercitado para sessão ausente, erro de restauração e erro de dados. Sem tarefas gravadas, mensagens enviadas, banco alterado, serviços/horários modificados, VM ou APK instalado. Conferência na sessão e celular reais pendente.
+
+Instalação web pelo endereço habitual, atualização automática ao abrir/retomar quando seguro. Backup: histórico Git e fontes privados. Recuperação: reverter somente os arquivos desta entrega, preservando dados, sessão e decisões anteriores; não restaurar cartões PDF. Publicação web deve ser confirmada separadamente pelo Pages.
