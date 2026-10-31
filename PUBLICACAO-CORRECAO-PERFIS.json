@@ -1,0 +1,10 @@
+{
+  "build": "20261031-relatorio-proprietario-31",
+  "fonte_commit": "d482ceaa02918259d5a2a50cc28d3e773752f01e",
+  "servico": "supervisao",
+  "servico_versao": 17,
+  "servico_estado": "ACTIVE",
+  "regra": "Relatório exclusivo do Proprietário autenticado; Supervisor aceita ou devolve com justificativa",
+  "testes": "DOM fonte/bundles, API simulada, atualização: aprovados",
+  "validacao_sessao_real": false
+}
