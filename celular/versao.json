@@ -1,9 +1,8 @@
 {
   "codigo_identificacao": "FSJ-CELULAR",
   "versao_interface": "0.4.0",
-  "build": "20261101-executor-consulta-45",
+  "build": "20261101-executor-consulta-46",
   "canal": "web-operacional",
   "instalador_nativo": false,
-  "fonte_privado_commit": "02711afd1f23b154e3a6af2165dd8308dd43089a",
   "versao": "0.4.0"
 }

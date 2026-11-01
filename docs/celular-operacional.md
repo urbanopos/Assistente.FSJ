@@ -173,7 +173,7 @@ Instalação web: atualização habitual ao abrir/retomar com as proteções exi
 
 ## 01/11/2026 — Minhas tarefas e consulta de terceiros · Proprietário 1.1.0 / Celular 0.4.0
 
-Build `20261101-executor-consulta-45`. Minhas tarefas separa Atividades de execução (tarefas atribuídas ao titular, individuais ou dos grupos de que participa) de Atividades de supervisão (tarefas em aberto no âmbito autorizado; para o Proprietário, gestão integral). Não usar o perfil salvo para assumir a identidade de outro executor.
+Build `20261101-executor-consulta-46`. Minhas tarefas separa Atividades de execução (tarefas atribuídas ao titular, individuais ou dos grupos de que participa) de Atividades de supervisão (tarefas em aberto no âmbito autorizado; para o Proprietário, gestão integral). Não usar o perfil salvo para assumir a identidade de outro executor.
 
 Tarefas de terceiros abre o campo Usuário executor, sem pessoa presumida. A seleção apresenta somente suas tarefas em aberto, incluindo execução, pendência/aguardando gestor e suspensão; concluídas/arquivadas ficam fora desta consulta. O Proprietário consulta executores ativos da gestão; supervisores recebem somente pessoas e tarefas autorizadas pelo serviço de supervisão. Sem essa característica, o menu individual não oferece consulta de terceiros. Visitantes continuam exclusivamente no simulador.
 
