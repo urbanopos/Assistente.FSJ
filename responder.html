@@ -110,7 +110,7 @@ if(responseParams.get('gestor')==='1'){
  const back=document.getElementById('screenPrevious');back.href='./index.html?fsj_return=1';back.hidden=false;
  document.querySelector('header>div').textContent='Proprietário • registro para o responsável selecionado';
 }
-history.replaceState(null,'',location.pathname);
+/* Preservar parâmetros de retorno da tarefa para o menu inicial. */
 const status=document.getElementById('status'),detail=document.getElementById('detail'),form=document.getElementById('form'),done=document.getElementById('done'),why=document.getElementById('why'),files=document.getElementById('files');
 let info=null,responseStep='detail',responseSending=false;
 document.getElementById('executionControl').after(form);
