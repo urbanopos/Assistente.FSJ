@@ -364,4 +364,35 @@ root.addEventListener('click',async e=>{
 render();
 })();
 </script>
+<meta name="fsj-build" content="20261101-proprietario-atualizacao-acesso-01">
+<script>
+/* Atualiza apenas esta interface do perfil Proprietário; não altera dados locais. */
+(function(){
+  if(!/^https?:$/.test(location.protocol))return;
+  const build=document.querySelector('meta[name="fsj-build"]')?.content;
+  const path=location.pathname;
+  let checking=false;
+  async function check(){
+    if(checking||document.visibilityState==='hidden')return;
+    checking=true;
+    try{
+      const url=new URL(path,location.origin);
+      url.searchParams.set('fsj_verificar',Date.now().toString());
+      const response=await fetch(url.href,{cache:'no-store',credentials:'same-origin'});
+      if(!response.ok)return;
+      const html=await response.text();
+      const found=html.match(/<meta name="fsj-build" content="([^"]+)"/);
+      if(found&&found[1]!==build){
+        const updated=new URL(location.href);
+        updated.searchParams.set('fsj_atualizar',Date.now().toString());
+        location.replace(updated.href);
+      }
+    }catch(e){/* Sem conexão: mantém a interface aberta. */}
+    finally{checking=false;}
+  }
+  window.addEventListener('pageshow',check);
+  window.addEventListener('focus',check);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();});
+})();
+</script>
 </body></html>
