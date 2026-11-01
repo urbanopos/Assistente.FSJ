@@ -1,6 +1,8 @@
 /* A entrada individual reconhece a sessão do titular por consulta protegida por RLS. */
 (()=>{'use strict';
  if(!location.pathname.endsWith('/inicio-usuario.html'))return;
+ // Desenvolvimento do Executor nunca redireciona para a sessão Desktop do Proprietário.
+ if(new URLSearchParams(location.search).get('ambiente')==='desenvolvimento')return;
  // O link individual define o destinatário, mesmo em aparelho com sessão do titular.
  const individualLink=()=>new URLSearchParams(location.hash.slice(1)).has('token')||new URLSearchParams(location.search).has('token');
  if(individualLink())return;
