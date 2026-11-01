@@ -1,0 +1,32 @@
+name: Compilar APK FSJ Proprietario
+on:
+  workflow_dispatch:
+  push:
+    branches: [desenvolvimento/apk-fsj-web-primeira-versao]
+    paths: ['android/**', '.github/workflows/build-android-fsj.yml']
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - uses: android-actions/setup-android@v3
+      - name: Instalar Android SDK 35
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Compilar APK de teste
+        run: |
+          cd android
+          gradle --no-daemon assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FSJ-Proprietario-Android-TESTE
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 14
