@@ -185,7 +185,7 @@ if(manager){
   fsjLoadTaskDetails=async function(id){const details=await load(id);if(String(id).startsWith('sugestao-'))details.sections.unshift({title:'Sugestão de tarefa',entries:[{text:'Analise a sugestão, aprove ou rejeite e justifique a decisão.',actions:[{label:'Analisar sugestão',run:()=>open(id)}]}]});return details;};
  }else{
   // A dúvida abre tela própria; sugestão é exclusiva do menu inicial do executor.
-  window.fsjOpenTaskDoubts=()=>{kind='duvida';selected='';requestId=null;open();const counter=document.getElementById('fsjRequestPageCount');if(counter)counter.textContent='4 / 4';};
+  window.fsjOpenTaskDoubts=()=>{kind='duvida';selected='';requestId=null;open();const counter=document.getElementById('fsjRequestPageCount');if(counter)counter.textContent='3 / 4';};
   const title=el('fsjSuggestionHeading');
   if(title)title.setAttribute('aria-live','polite');
  }
