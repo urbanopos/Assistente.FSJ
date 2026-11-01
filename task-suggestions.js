@@ -62,7 +62,7 @@
   `;document.head.append(css);
   const nav=document.createElement('nav');nav.className='fsj-request-navigation';nav.setAttribute('aria-label','Navegação do formulário');
   const back=el('fsjSuggestionBack');back.setAttribute('aria-label','Retornar à tarefa');
-  const count=document.createElement('span');count.textContent='1 / 1';
+  const count=document.createElement('span');count.id='fsjRequestPageCount';count.textContent='1 / 1';
   const next=document.createElement('button');next.type='button';next.textContent='→';next.disabled=true;next.setAttribute('aria-label','Próximo');
   nav.append(back,count,next);dialog.querySelector('section').append(nav);
  }
@@ -185,7 +185,7 @@ if(manager){
   fsjLoadTaskDetails=async function(id){const details=await load(id);if(String(id).startsWith('sugestao-'))details.sections.unshift({title:'Sugestão de tarefa',entries:[{text:'Analise a sugestão, aprove ou rejeite e justifique a decisão.',actions:[{label:'Analisar sugestão',run:()=>open(id)}]}]});return details;};
  }else{
   // A dúvida abre tela própria; sugestão é exclusiva do menu inicial do executor.
-  window.fsjOpenTaskDoubts=()=>{kind='duvida';selected='';requestId=null;open();};
+  window.fsjOpenTaskDoubts=()=>{kind='duvida';selected='';requestId=null;open();const counter=document.getElementById('fsjRequestPageCount');if(counter)counter.textContent='4 / 4';};
   const title=el('fsjSuggestionHeading');
   if(title)title.setAttribute('aria-live','polite');
  }
