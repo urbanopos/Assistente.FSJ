@@ -10,7 +10,7 @@
 #fsj-app .brand{flex:1;min-width:0;display:grid;gap:4px}
 #fsj-app .brand span,#fsj-app .identity,#fsj-app .caption{font-size:12px}
 #fsj-app strong{font-weight:500}
-#fsj-app .avatar{border-radius:50%;width:34px;height:34px;display:grid;place-items:center;background:var(--fsj-bg);border:1px solid var(--fsj-line)}
+#fsj-app .fsj-logo-link{cursor:pointer;padding:0;color:inherit;font-size:11px;font-weight:700;flex:none}#fsj-app .avatar{border-radius:50%;width:34px;height:34px;display:grid;place-items:center;background:var(--fsj-bg);border:1px solid var(--fsj-line)}
 #fsj-app .identity{display:flex;justify-content:space-between;gap:6px;padding:8px 12px;border-bottom:1px solid var(--fsj-line)}
 #fsj-app button{font:inherit;min-height:44px;border-radius:8px;padding:9px 10px;border:0;touch-action:manipulation}
 #fsj-app .home{min-width:44px;background:var(--fsj-bg);color:var(--fsj-fg);display:grid;place-items:center}
@@ -109,7 +109,7 @@ html,body{margin:0;padding:0;min-height:100%;background:#edf2ed}body{font-family
 @media(prefers-reduced-motion:no-preference){#fsj-app .code[data-priority="true"]{animation:priority 2s ease-in-out 2}@keyframes priority{50%{opacity:.5}}}
 </style></head><body>
 <div id="fsj-app"><section class="phone mobile" aria-label="Simulador FSJ Celular Proprietário">
-<header><button type="button" class="home" data-home aria-label="Voltar ao menu principal">⌂</button><div class="brand"><strong>Fazenda São José</strong><span>Assistente FSJ · Celular</span></div><span class="avatar" aria-label="Marca FSJ">FSJ</span><button type="button" class="settings" data-about aria-label="Versão, salvar cópia e reiniciar">Versão</button></header>
+<header><div class="brand"><strong>Fazenda São José</strong><span>Assistente FSJ · Celular</span></div><button type="button" class="avatar fsj-logo-link" data-home aria-label="Ícone da Fazenda São José — voltar à página inicial" title="Voltar à página inicial">FSJ</button><button type="button" class="settings" data-about aria-label="Versão, salvar cópia e reiniciar">Versão</button></header>
 <div class="identity" role="note"><strong>SIMULADOR · Proprietário</strong><span>Celular · v1.0.0 · Dados fictícios</span></div>
 <main aria-label="Tela atual"></main><div class="notice" role="status" aria-live="polite"></div>
 <footer><button type="button" class="back" aria-label="Página anterior ou voltar">←</button><span class="page-number">1 / 1</span><button type="button" class="next" aria-label="Próxima página">→</button></footer><div class="caption">SIMULADOR · Celular · Proprietário · v1.1.0</div>
