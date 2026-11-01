@@ -107,10 +107,36 @@ html,body{margin:0;padding:0;min-height:100%;background:#edf2ed}body{font-family
 @media(max-width:600px){#fsj-app .counts{grid-template-columns:repeat(2,minmax(0,1fr))}#fsj-app .desktop .identity{display:block}#fsj-app .desktop .execution-actions{grid-template-columns:1fr}}
 @media(max-width:480px){#fsj-app{padding:0}#fsj-app .phone{height:100dvh;border:0;border-radius:0;min-height:430px}}
 @media(prefers-reduced-motion:no-preference){#fsj-app .code[data-priority="true"]{animation:priority 2s ease-in-out 2}@keyframes priority{50%{opacity:.5}}}
+
+/* Padronização das telas subsequentes: somente interface Celular Proprietário. */
+#fsj-app .phone.mobile{width:100%;max-width:430px}
+#fsj-app .mobile main{padding:10px 12px}
+#fsj-app .mobile h2{font-size:17px;line-height:1.2;margin:0 0 8px;font-weight:700}
+#fsj-app .mobile h3{font-size:14px;line-height:1.25;margin:9px 0 5px}
+#fsj-app .mobile p{font-size:13px;line-height:1.35;margin:5px 0}
+#fsj-app .mobile label{font-size:13px;margin:6px 0 3px}
+#fsj-app .mobile .item{padding:6px 0}
+#fsj-app .mobile .action{min-height:44px;margin-top:6px;padding:8px 7px;font-size:14px}
+#fsj-app .mobile .pair{gap:6px}
+#fsj-app .mobile .pair .action{margin-top:0}
+#fsj-app .mobile .execution-actions{gap:6px;margin-top:8px}
+#fsj-app .mobile .execution-actions .action{margin:0}
+#fsj-app .mobile .task-inline-info{border-top:1px solid var(--fsj-line);margin-top:10px;padding-top:6px}
+#fsj-app .mobile .code{min-height:44px;padding:8px 2px}
+#fsj-app .mobile input,#fsj-app .mobile select,#fsj-app .mobile textarea{font-size:16px}
+#fsj-app .mobile .text-voice{align-items:stretch}
+#fsj-app .mobile .text-voice input,#fsj-app .mobile .text-voice textarea{flex:1;width:1px}
+#fsj-app .mobile .text-voice .voice{flex:none;min-width:44px}
+#fsj-app .mobile footer{grid-template-columns:48px minmax(0,1fr) 48px}
+#fsj-app .mobile footer button{min-height:44px}
+#fsj-app .mobile .page-number{font-weight:700;font-variant-numeric:tabular-nums}
+#fsj-app .mobile .fsj-fit-flow{overflow-wrap:anywhere}
+#fsj-app .mobile .fsj-fit-flow .pair,#fsj-app .mobile .fsj-fit-flow .execution-actions{break-inside:avoid}
+@media(max-width:360px){#fsj-app .mobile header{gap:5px;padding:8px}#fsj-app .mobile .brand strong{font-size:14px}#fsj-app .mobile .brand span{font-size:11px}#fsj-app .mobile main{padding:8px}}
 </style></head><body>
 <div id="fsj-app"><section class="phone mobile" aria-label="Simulador FSJ Celular Proprietário">
 <header><div class="brand"><strong>Fazenda São José</strong><span>Assistente FSJ · Celular</span></div><button type="button" class="avatar fsj-logo-link" data-home aria-label="Ícone da Fazenda São José — voltar à página inicial" title="Voltar à página inicial">FSJ</button><button type="button" class="settings" data-about aria-label="Versão, salvar cópia e reiniciar">Versão</button></header>
-<div class="identity" role="note"><strong>SIMULADOR · Proprietário</strong><span>Celular · v1.0.0 · Dados fictícios</span></div>
+<div class="identity" role="note"><strong>SIMULADOR · Proprietário</strong><span>Celular · v1.1.0 · Dados fictícios</span></div>
 <main aria-label="Tela atual"></main><div class="notice" role="status" aria-live="polite"></div>
 <footer><button type="button" class="back" aria-label="Página anterior ou voltar">←</button><span class="page-number">1 / 1</span><button type="button" class="next" aria-label="Próxima página">→</button></footer><div class="caption">SIMULADOR · Celular · Proprietário · v1.1.0</div>
 </section></div>
