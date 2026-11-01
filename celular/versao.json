@@ -4,6 +4,6 @@
   "build": "20261101-executor-consulta-45",
   "canal": "web-operacional",
   "instalador_nativo": false,
-  "fonte_privado_commit": "4cfe0764f2bdc608ca4772a184d6518327cec1df",
+  "fonte_privado_commit": "02711afd1f23b154e3a6af2165dd8308dd43089a",
   "versao": "0.4.0"
 }
