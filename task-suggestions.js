@@ -184,14 +184,11 @@ if(manager){
   const load=fsjLoadTaskDetails;
   fsjLoadTaskDetails=async function(id){const details=await load(id);if(String(id).startsWith('sugestao-'))details.sections.unshift({title:'Sugestão de tarefa',entries:[{text:'Analise a sugestão, aprove ou rejeite e justifique a decisão.',actions:[{label:'Analisar sugestão',run:()=>open(id)}]}]});return details;};
  }else{
-  // Na resposta individual, os dois controles ficam ao lado de Iniciar tarefa.
-  // Nunca transferi-los ao rodapé móvel ou recriá-los em outro contêiner.
+  // A dúvida abre tela própria; sugestão é exclusiva do menu inicial do executor.
   const actions=document.createElement('div');actions.id='fsjTaskQuestions';
   const doubt=document.createElement('button');doubt.type='button';doubt.textContent='Dúvidas sobre a tarefa';
   doubt.onclick=()=>{kind='duvida';selected='';requestId=null;open();};
-  const suggestion=document.createElement('button');suggestion.type='button';suggestion.textContent='Sugestão de tarefas';
-  suggestion.onclick=()=>{kind='sugestao';selected='';requestId=null;open();};
-  actions.append(doubt,suggestion);
+  actions.append(doubt);
   const target=el('taskAnswer')?.closest('.fsj-execution-actions');
   if(target)target.append(actions);
   else el('startTask').after(actions);
