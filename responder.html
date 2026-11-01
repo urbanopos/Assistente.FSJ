@@ -291,7 +291,7 @@ document.addEventListener('click',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('change',fsjCheckReaderVersion,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fsjCheckReaderVersion()});
 window.addEventListener('pageshow',fsjCheckReaderVersion);
-</script><script src="./mobile-pages.js?v=20261029-conclusao-junto-inicio-02"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261101-sugestao-menu-03"></script><script>document.getElementById('fsjTaskHome').addEventListener('click',()=>{const params=new URLSearchParams(location.hash.slice(1));const token=params.get('quadro');if(!token){alert('O acesso ao menu principal não está disponível neste link. Abra o acesso individual do Executor.');return;}location.assign('./inicio-usuario.html#token='+encodeURIComponent(token));});</script></body></html>
+</script><script src="./mobile-pages.js?v=20261029-conclusao-junto-inicio-02"></script><script src="./task-reminders.js?v=20261018-avisos-01"></script><script src="./task-suggestions.js?v=20261101-sugestao-menu-03"></script><script>document.getElementById('fsjTaskHome').addEventListener('click',()=>{const params=new URLSearchParams(location.hash.slice(1));const token=params.get('quadro');if(token){location.assign('./inicio-usuario.html#token='+encodeURIComponent(token));return;}const back=document.getElementById('screenPrevious');if(back&&back.href){location.assign(back.href);return;}alert('Este link de tarefa não contém acesso ao menu principal. Abra o acesso individual do Executor.');});</script></body></html>
 
 
 
