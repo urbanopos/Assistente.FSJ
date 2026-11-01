@@ -186,3 +186,20 @@ O simulador privado `desenvolvimento/simulador-proprietario-20261031.html` refle
 Validações: contrato de atualização automática; Android/iPhone e preservação de Desktop/tablets; fontes e bundles; classificação de tarefas próprias/supervisão; seleção e vínculo do executor; concluídas/arquivadas ausentes; formulário de consulta sem scripts, tokens ou controles ativos; escopos válidos/negados, visitante, expiração, titularidade e ausência de operações de escrita; navegação e simulador. Não foram enviados avisos, mensagens nem respostas reais. Publicação Pages, implantação da função e consulta servida são registradas no comprovante de publicação; teste no telefone real continua pendente até conferência do usuário.
 
 Instalação web: atualização automática ao abrir/retomar, preservando sessão e edições. VM, APK e rotina das 7h permanecem fora desta alteração. Recuperação: reverter somente os bundles, páginas e manifestos desta entrega para a versão validada anterior; a nova consulta pode ser desativada independentemente, sem substituir `supervisao` nem restaurar dados. Fontes novos permanecem exclusivamente na pasta privada Celular.
+
+
+## 01/11/2026 — Detalhes pelo link e telas sem rolagem · Celular 0.4.1 / Proprietário 1.1.1
+
+Build `20261101-navegacao-sem-rolagem-47`. O número/link da tarefa é o ponto de entrada em seus detalhes. As setas paginam exclusivamente o conteúdo da função/tarefa já aberta ou a própria lista; não percorrem funções diferentes, não escolhem outra tarefa e não abrem detalhes sem seleção. Na primeira página, Voltar retorna à origem; Casa permanece no menu principal.
+
+Preservar uma tela completa quando o conteúdo couber. Se exceder a altura disponível, distribuir em páginas horizontais com contador e setas, mantendo campos, rótulos e botões inteiros. Nos exemplos verificados, a lista coube em uma tela e detalhes/consulta em duas. Textos e históricos maiores continuam nas páginas necessárias, sem truncar registros nem voltar à rolagem vertical. A altura é recalculada ao redimensionar, ao mudar o espaço útil e quando chegam registros consultados de forma assíncrona.
+
+A paginação move os mesmos nós do formulário e usa fragmentação CSS: não clona controles, não limpa valores, arquivos selecionados ou eventos e não refaz consultas/envios ao mudar apenas de página. Rótulos ficam junto dos campos e grupos de botões não são cortados. Uma tela sem continuação mantém Próximo desativado.
+
+A consulta passiva de terceiros passa a ser apresentada no painel paginado, substituindo a moldura com rolagem interna da entrega anterior. Os dados continuam vindos da mesma consulta protegida por pessoa/tarefa, com todos os controles de alteração desativados, sem scripts ou ações do executor importados para o painel. Nenhuma mudança de identidade, permissões, função no servidor, banco, VM, APK, rotina das 7h ou envio de mensagens nesta entrega.
+
+O simulador privado `desenvolvimento/simulador-proprietario-20261031.html` usa o mesmo paginador desta entrega; foi removida a antiga sequência global 01/24 que permitia chegar a outras funções pelas setas. Novas melhorias devem continuar refletidas nele na mesma entrega.
+
+Validações: contrato de atualização, fontes e bundles, navegação do proprietário e do usuário autorizado, supervisão, rascunhos/arquivos/eventos e isolamento do simulador. Conferência em navegador na moldura de telefone de 660 px: conteúdo útil com clientHeight=scrollHeight=461 px, scrollTop=0; lista 1/1; detalhes e consulta 1/2–2/2, sem excesso vertical e sem troca de tarefa pelas setas. A conferência no telefone real, com suas fontes e teclado, continua pendente; a prévia não equivale a esse teste.
+
+Instalação web pela atualização automática existente. Publicação Pages e igualdade dos arquivos servidos ficam no comprovante de publicação. Recuperação: retornar às páginas, bundles e manifestos do commit operacional anterior validado (`b99839fab5d3088e0aa0521cff11106876b3b1d7`), preservando registros e sessão. O novo paginador deixa de ser carregado por essas páginas anteriores; não restaurar banco ou automações por uma mudança de apresentação.

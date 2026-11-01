@@ -1,0 +1,22 @@
+{
+  "codigo": "FSJ-CELULAR",
+  "versao": "0.4.1",
+  "proprietario": "1.1.1",
+  "build": "20261101-navegacao-sem-rolagem-47",
+  "fonte_commit": "3ee72d6c22c48f3220938098f4f5dbf1ec7d6223",
+  "simulador_atualizado": true,
+  "detalhes_apenas_pelo_link": true,
+  "navegacao_pagina_tela": true,
+  "validacao_previa_navegador": {
+    "moldura_px": 660,
+    "conteudo_client_height": 461,
+    "conteudo_scroll_height": 461,
+    "lista_paginas": 1,
+    "detalhes_paginas": 2,
+    "consulta_paginas": 2,
+    "vertical_overflow": false
+  },
+  "validacao_aparelho_usuario": false,
+  "backend_alterado": false,
+  "mensagens_enviadas": false
+}

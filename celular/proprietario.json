@@ -1,7 +1,7 @@
 {
   "codigo": "FSJ-CELULAR-PROPRIETARIO",
-  "versao": "1.1.0",
-  "build": "20261101-executor-consulta-46",
+  "versao": "1.1.1",
+  "build": "20261101-navegacao-sem-rolagem-47",
   "perfil": "Proprietário",
   "aparelhos": [
     "telefone Android",
