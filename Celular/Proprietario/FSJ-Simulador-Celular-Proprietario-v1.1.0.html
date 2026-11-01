@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="fsj-simulator-version" content="1.1.0"><meta name="fsj-platform" content="Celular"><meta name="fsj-profile" content="proprietario">
+<title>SIMULADOR FSJ · Celular · Proprietário · v1.1.0</title><style>
+#fsj-app{font-family:system-ui;color-scheme:light dark;padding:12px 0}
+#fsj-app *{box-sizing:border-box}
+#fsj-app .phone{--fsj-bg:light-dark(#fff,#14251b);--fsj-fg:light-dark(#213d2d,#e4eee7);--fsj-line:light-dark(#bed5c2,#4c6956);--fsj-soft:light-dark(#eaf4e9,#243e2c);--fsj-green:light-dark(#235d41,#2e714b);--fsj-white:light-dark(#fff,#fff);--fsj-gold:light-dark(#806100,#ecd689);--fsj-blue:light-dark(#235b91,#285f95);width:100%;max-width:390px;margin:auto;background:var(--fsj-bg);color:var(--fsj-fg);border:1px solid var(--fsj-line);border-radius:20px;overflow:hidden}
+#fsj-app header{display:flex;align-items:center;gap:10px;padding:12px;background:var(--fsj-soft);border-bottom:1px solid var(--fsj-line)}
+#fsj-app .brand{flex:1;min-width:0;display:grid;gap:4px}
+#fsj-app .brand span,#fsj-app .identity,#fsj-app .caption{font-size:12px}
+#fsj-app strong{font-weight:500}
+#fsj-app .avatar{border-radius:50%;width:34px;height:34px;display:grid;place-items:center;background:var(--fsj-bg);border:1px solid var(--fsj-line)}
+#fsj-app .identity{display:flex;justify-content:space-between;gap:6px;padding:8px 12px;border-bottom:1px solid var(--fsj-line)}
+#fsj-app button{font:inherit;min-height:44px;border-radius:8px;padding:9px 10px;border:0;touch-action:manipulation}
+#fsj-app .home{min-width:44px;background:var(--fsj-bg);color:var(--fsj-fg);display:grid;place-items:center}
+#fsj-app main{padding:14px 12px;min-height:350px;overflow-wrap:anywhere}
+#fsj-app h2{font-size:18px;font-weight:500;margin:0 0 12px}
+#fsj-app p{font-size:14px;margin:8px 0;line-height:1.45}
+#fsj-app .main-menu,#fsj-app .pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#fsj-app .action{display:block;width:100%;background:var(--fsj-green);color:var(--fsj-white);margin:8px 0 0;text-align:center}
+#fsj-app .main-menu .action,#fsj-app .pair .action{margin:0;min-width:0;font-size:14px;padding:10px 5px}
+#fsj-app .main-menu .wide{grid-column:1/-1}
+#fsj-app .supervision,#fsj-app .accept{background:var(--fsj-blue)}
+#fsj-app .secondary{background:var(--fsj-soft);color:var(--fsj-fg);border:1px solid var(--fsj-line)}
+#fsj-app .gold{background:light-dark(#f7e7b2,#51451d);color:var(--fsj-gold)}
+#fsj-app .item{padding:9px 0;border-bottom:1px solid var(--fsj-line)}
+#fsj-app .code{text-align:left;background:var(--fsj-bg);color:var(--fsj-fg);width:100%;text-decoration:underline;text-underline-offset:3px}
+#fsj-app .code[data-state="Em execução"]{color:light-dark(#1565c0,#8dbfff)}
+#fsj-app .code[data-state="Concluída"]{color:light-dark(#14532d,#8bdaa3)}
+#fsj-app .code[data-state="Pendente"],#fsj-app .status{color:var(--fsj-gold)}
+#fsj-app .code[data-priority="true"]{color:light-dark(#b91c1c,#ff9b9b)}
+#fsj-app label{display:block;font-size:14px;margin:9px 0 5px}
+#fsj-app input,#fsj-app select,#fsj-app textarea{font:16px system-ui;width:100%;min-width:0;min-height:44px;padding:8px;border:1px solid var(--fsj-line);border-radius:8px;background:var(--fsj-bg);color:var(--fsj-fg)}
+#fsj-app textarea{resize:vertical;min-height:68px}
+#fsj-app .text-voice{display:flex;gap:6px;align-items:center}
+#fsj-app .voice{background:var(--fsj-green);color:var(--fsj-white);min-width:48px;padding:8px;font-size:12px}
+#fsj-app .check{display:flex;gap:8px;align-items:center;min-height:44px}
+#fsj-app .check input{width:20px;min-height:20px}
+#fsj-app .tv{padding:18px 12px;text-align:center;background:var(--fsj-soft);border-radius:10px;margin-bottom:12px}
+#fsj-app .notice{padding:0 12px;font-size:14px;color:var(--fsj-fg)}
+#fsj-app .notice:not(:empty){padding-bottom:12px}
+#fsj-app .notice[data-error="true"]{color:light-dark(#a51c1c,#ffaaaa)}
+#fsj-app footer{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--fsj-line)}
+#fsj-app footer span{text-align:center;font-size:14px}
+#fsj-app footer button{background:var(--fsj-green);color:var(--fsj-white)}
+#fsj-app button:disabled{opacity:.35}
+#fsj-app .caption{text-align:center;padding:6px 8px 10px}
+#fsj-app ol{padding-left:22px;font-size:14px}
+#fsj-app li{margin:7px 0}
+
+
+html,body{margin:0;padding:0;min-height:100%;background:#edf2ed}body{font-family:system-ui,sans-serif}
+#fsj-app{padding:12px;color-scheme:light;font-size:16px;line-height:1.35}
+#fsj-app .phone{height:calc(100dvh - 24px);min-height:430px;display:flex;flex-direction:column;box-shadow:0 8px 28px #173d2812}
+#fsj-app header,#fsj-app .identity,#fsj-app footer,#fsj-app .caption{flex:none}
+#fsj-app header{padding:10px 12px;gap:8px}
+#fsj-app main{flex:1;min-height:0;overflow:hidden;padding:12px}
+#fsj-app .notice{flex:none;max-height:85px;overflow:auto;font-size:13px}
+#fsj-app .identity{display:block;padding:6px 12px;background:#f6e6ab;color:#493c12;font-size:12px;line-height:1.4}
+#fsj-app .identity strong{display:block;font-weight:700;letter-spacing:.2px}
+#fsj-app .identity span{display:block}
+#fsj-app .main-menu{gap:6px}
+#fsj-app .main-menu .action{min-height:40px;padding:7px 5px}
+#fsj-app .main-menu .wide{grid-column:1/-1}
+#fsj-app .home{font-size:22px}
+#fsj-app .settings{min-width:40px;background:var(--fsj-bg);color:var(--fsj-fg);font-size:13px;padding:5px}
+#fsj-app .avatar{font-size:12px;font-weight:700}
+#fsj-app h2{margin:0 0 10px;font-size:18px}
+#fsj-app h3{font-size:15px;font-weight:600;margin:12px 0 7px}
+#fsj-app .execution-actions{display:grid;gap:8px;margin-top:12px;break-inside:avoid}
+#fsj-app .execution-actions .action{margin:0}
+#fsj-app .info-link{display:block;color:#235b91;padding:10px 0;font-size:13px;text-decoration:underline;cursor:pointer}
+#fsj-app .task-status{font-size:12px}
+#fsj-app .code{font-size:14px;line-height:1.4;border-bottom:1px solid var(--fsj-line);border-radius:0}
+#fsj-app .code[data-state="Aberta"]{color:#151b17}
+#fsj-app .code[data-state="Em execução"]{color:#1565c0}
+#fsj-app .code[data-state="Aguardando gestor"],#fsj-app .code[data-state="Suspensa"]{color:#876900}
+#fsj-app .code[data-state="Arquivada"]{color:#59665b}
+#fsj-app .code[data-priority="true"]{color:#b91c1c}
+#fsj-app .gold{background:#f7e7b2;color:#6c5100}
+#fsj-app .caption{padding:5px 8px 7px;font-size:11px}
+#fsj-app .counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:8px;break-inside:avoid}
+#fsj-app .counts .action{margin:0;font-size:14px}
+#fsj-app button,#fsj-app input,#fsj-app select,#fsj-app textarea{box-sizing:border-box}
+#fsj-app .fsj-fit-flow .item{break-inside:avoid}
+#fsj-app .muted{color:#5b6a60;font-size:12px}
+#fsj-app [hidden]{display:none!important}
+#fsj-app button{cursor:pointer}
+#fsj-app button:disabled{cursor:default}
+#fsj-app button:focus-visible,#fsj-app a:focus-visible{outline:3px solid #235b91;outline-offset:2px}
+#fsj-app footer{padding:7px 12px}
+#fsj-app .phone.desktop{max-width:1160px;border-radius:16px}
+#fsj-app .desktop header{padding:14px 20px}
+#fsj-app .desktop .brand strong{font-size:22px}
+#fsj-app .desktop .identity{padding:7px 20px;display:flex;justify-content:space-between;gap:12px}
+#fsj-app .desktop .identity span{display:inline}
+#fsj-app .desktop main{padding:20px 24px}
+#fsj-app .desktop .main-menu{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#fsj-app .desktop .main-menu .action{min-height:42px;font-size:16px}
+#fsj-app .desktop .text-voice{max-width:900px}
+#fsj-app .desktop .execution-actions{grid-template-columns:repeat(3,minmax(0,1fr));max-width:900px}
+#fsj-app .desktop .owner-actions{max-width:900px}
+#fsj-app .desktop .task-status{font-size:14px}
+#fsj-app .desktop .code{font-size:16px}
+#fsj-app .desktop footer{padding:9px 24px}
+@media(max-width:600px){#fsj-app .counts{grid-template-columns:repeat(2,minmax(0,1fr))}#fsj-app .desktop .identity{display:block}#fsj-app .desktop .execution-actions{grid-template-columns:1fr}}
+@media(max-width:480px){#fsj-app{padding:0}#fsj-app .phone{height:100dvh;border:0;border-radius:0;min-height:430px}}
+@media(prefers-reduced-motion:no-preference){#fsj-app .code[data-priority="true"]{animation:priority 2s ease-in-out 2}@keyframes priority{50%{opacity:.5}}}
+</style></head><body>
+<div id="fsj-app"><section class="phone mobile" aria-label="Simulador FSJ Celular Proprietário">
+<header><button type="button" class="home" data-home aria-label="Voltar ao menu principal">⌂</button><div class="brand"><strong>Fazenda São José</strong><span>Assistente FSJ · Celular</span></div><span class="avatar" aria-label="Marca FSJ">FSJ</span><button type="button" class="settings" data-about aria-label="Versão, salvar cópia e reiniciar">Versão</button></header>
+<div class="identity" role="note"><strong>SIMULADOR · Proprietário</strong><span>Celular · v1.0.0 · Dados fictícios</span></div>
+<main aria-label="Tela atual"></main><div class="notice" role="status" aria-live="polite"></div>
+<footer><button type="button" class="back" aria-label="Página anterior ou voltar">←</button><span class="page-number">1 / 1</span><button type="button" class="next" aria-label="Próxima página">→</button></footer><div class="caption">SIMULADOR · Celular · Proprietário · v1.1.0</div>
+</section></div>
+<script id="fsj-config" type="application/json">{"role": "proprietario", "label": "Proprietário", "person": "Proprietário Exemplo", "platform": "Celular", "platformLabel": "Celular", "version": "1.1.0", "filename": "FSJ-Simulador-Celular-Proprietario-v1.1.0.html"}</script>
+<script id="fsj-initial-state" type="application/json"></script>
+<script>
+/* Local screen pagination. Arrows move content; task links alone select tasks. */
+(()=>{
+ 'use strict';
+ const css=document.createElement('style');css.dataset.runtime='pagination';css.textContent=`
+ .fsj-fit-viewport{display:block!important;min-height:0;overflow:hidden!important;overscroll-behavior:none}
+ .fsj-fit-flow{display:block!important;box-sizing:border-box;width:var(--fsj-fit-width);height:var(--fsj-fit-height);column-width:var(--fsj-fit-width);column-count:1;column-gap:24px;column-fill:auto;overflow:visible;min-width:0}
+ .fsj-fit-flow h1,.fsj-fit-flow h2,.fsj-fit-flow h3,.fsj-fit-flow label{break-after:avoid}
+ .fsj-fit-flow button,.fsj-fit-flow a,.fsj-fit-flow input,.fsj-fit-flow textarea,.fsj-fit-flow select,.fsj-fit-flow .fsj-fit-field,.fsj-fit-flow .pair,.fsj-fit-flow .text-voice,.fsj-fit-flow .fsj-owner-actions,.fsj-fit-flow .fsj-execution-actions,.fsj-fit-flow .choices{break-inside:avoid;max-width:100%;box-sizing:border-box}
+ .fsj-fit-flow textarea{max-height:min(120px,calc(var(--fsj-fit-height) - 90px))!important;resize:none}
+ .fsj-fit-flow p{orphans:2;widows:2;overflow-wrap:anywhere}
+ .fsj-fit-flow img,.fsj-fit-flow video{max-width:100%;max-height:var(--fsj-fit-height);object-fit:contain}
+ .fsj-fit-flow .card{break-inside:auto;min-width:0}
+ .fsj-fit-flow [aria-label="Tela do executor — somente consulta"] button{min-height:44px}
+ .fsj-fit-flow [hidden]{display:none!important}
+ `;document.head.append(css);
+ window.fsjFitScreen=({viewport,previous,next,label,onBack,onNext,outerPage=0,outerTotal=1,fillViewport=false})=>{
+  if(!viewport||!previous||!next||!label)return null;
+  viewport.__fsjFit?.destroy();
+  const flow=document.createElement('div');flow.className='fsj-fit-flow';
+  while(viewport.firstChild)flow.append(viewport.firstChild);viewport.append(flow);viewport.classList.add('fsj-fit-viewport');
+  const oldPrevious=previous.onclick,oldNext=next.onclick,oldHeight=viewport.style.height;
+  const back=onBack||oldPrevious,forward=onNext||oldNext,canBack=!!back&&!previous.disabled,canForward=!!forward&&!next.disabled;
+  let index=0,count=1,stride=1,queued=false,dead=false;
+  function pairFields(){
+   for(const item of flow.querySelectorAll('label')){
+    if(item.closest('.fsj-fit-field')||item.querySelector('input,textarea,select'))continue;
+    const field=item.nextElementSibling;
+    if(field?.matches('input:not([type=hidden]),textarea,select,.text-voice,.fsj-owner-text-voice,.fsj-voice-field')){const group=document.createElement('div');group.className='fsj-fit-field';item.before(group);group.append(item,field);}
+   }
+  }
+  function update(){
+   index=Math.max(0,Math.min(count-1,index));previous.disabled=index===0&&!canBack;next.disabled=index===count-1&&!canForward;
+   label.textContent=(index+1)+' / '+count+(outerTotal>1?' · Lista '+(outerPage+1)+' / '+outerTotal:'');
+   label.setAttribute('aria-label','Página '+(index+1)+' de '+count+' da tela atual');
+   viewport.scrollLeft=index*stride;viewport.scrollTop=0;
+  }
+  const prevHandler=()=>{if(index>0){index--;update();}else if(canBack)back();};
+  const nextHandler=()=>{if(index<count-1){index++;update();}else if(canForward)forward();};
+  previous.onclick=prevHandler;next.onclick=nextHandler;
+  function layout(){
+   queued=false;if(dead||!viewport.isConnected)return;
+   for(const node of [...viewport.childNodes])if(node!==flow)flow.append(node);
+   pairFields();
+   if(fillViewport){const visual=window.visualViewport;const top=Math.max(0,viewport.getBoundingClientRect().top-(visual?.offsetTop||0));const footer=next.closest('footer,nav')?.getBoundingClientRect().height||54;viewport.style.height=Math.max(120,(visual?.height||innerHeight)-top-footer-12)+'px';}
+   const style=getComputedStyle(viewport),paddingX=(parseFloat(style.paddingLeft)||0)+(parseFloat(style.paddingRight)||0),paddingY=(parseFloat(style.paddingTop)||0)+(parseFloat(style.paddingBottom)||0);
+   const width=Math.max(1,(viewport.clientWidth||viewport.getBoundingClientRect().width||360)-paddingX),height=Math.max(96,(viewport.clientHeight||parseFloat(viewport.style.height)||420)-paddingY);
+   flow.style.setProperty('--fsj-fit-width',width+'px');flow.style.setProperty('--fsj-fit-height',height+'px');stride=width+24;
+   count=Math.max(1,Math.ceil(((flow.scrollWidth||width)+23)/stride));update();observer.takeRecords();
+  }
+  function schedule(){if(queued||dead)return;queued=true;if(window.requestAnimationFrame)window.requestAnimationFrame(layout);else window.setTimeout(layout,0);}
+  const observer=new MutationObserver(schedule);observer.observe(viewport,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden','class']});
+  const resize=typeof ResizeObserver==='function'?new ResizeObserver(schedule):null;resize?.observe(viewport);
+  const focus=e=>{if(!stride)return;const box=e.target.getBoundingClientRect(),base=viewport.getBoundingClientRect();const target=Math.floor((box.left-base.left+viewport.scrollLeft+1)/stride);if(target>=0&&target<count&&target!==index){index=target;update();}};
+  flow.addEventListener('focusin',focus);window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);document.fonts?.ready?.then(schedule);
+  const controller={layout,destroy(){if(dead)return;dead=true;observer.disconnect();resize?.disconnect();window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule);flow.removeEventListener('focusin',focus);if(previous.onclick===prevHandler)previous.onclick=oldPrevious;if(next.onclick===nextHandler)next.onclick=oldNext;while(flow.firstChild)viewport.insertBefore(flow.firstChild,flow);flow.remove();viewport.classList.remove('fsj-fit-viewport');viewport.style.height=oldHeight;delete viewport.__fsjFit;},get page(){return index;},get count(){return count;}};
+  viewport.__fsjFit=controller;layout();return controller;
+ };
+})();
+
+</script>
+<script>(()=>{
+'use strict';
+const cfg=JSON.parse(document.getElementById('fsj-config').textContent);
+const root=document.getElementById('fsj-app'),main=root.querySelector('main'),notice=root.querySelector('.notice');
+const storageKey='fsj-simulator:'+cfg.platform+':'+cfg.role+':'+cfg.version;
+const manager=['proprietario','gestor'].includes(cfg.role),owner=cfg.role==='proprietario',supervisor=['supervisor','visitante'].includes(cfg.role);
+const canHistory=manager||cfg.role==='visitante';
+const me=cfg.person;
+const nextTaskId=()=> 'SIM-'+String(Math.max(300,...state.tasks.map(t=>Number(t.id.replace('SIM-',''))||0))+1).padStart(6,'0');
+const active=t=>!['Concluída','Arquivada'].includes(t.state);
+const assigned=(t,p)=>(t.people||[t.person]).includes(p);
+function seed(){
+ const tasks=[
+ {id:'SIM-000101',person:me,title:'Conferir os bebedouros do setor norte',state:'Aberta',period:'Diária',priority:false,ri:'—',ec:'—',created:'2026-11-01',requiresAcceptance:false},
+ {id:'SIM-000102',person:me,title:'Conferir a manutenção da bomba',state:'Em execução',period:'Semanal',priority:false,ri:'0h30',ec:'Em curso',created:'2026-11-01',requiresAcceptance:true},
+ {id:'SIM-000103',person:me,title:'Revisar o material de trabalho',state:'Suspensa',period:'Única',priority:false,ri:'0h15',ec:'0h20',created:'2026-11-01',reason:'Aguardando ferramenta'},
+ {id:'SIM-000104',person:me,title:'Aguardar orientação sobre a limpeza',state:'Aguardando gestor',period:'Única',priority:false,ri:'0h10',ec:'—',created:'2026-11-01'},
+ {id:'SIM-000105',person:me,title:'Registrar o resultado da vistoria anterior',state:'Concluída',period:'Semanal',priority:false,ri:'0h15',ec:'0h40',created:'2026-10-31'},
+ {id:'SIM-000106',person:me,title:'Conferência já arquivada',state:'Arquivada',period:'Mensal',priority:false,ri:'0h10',ec:'0h25',created:'2026-10-30'},
+ {id:'SIM-000201',person:'Executor A',title:'Revisar os bebedouros do pasto',state:'Aguardando gestor',period:'Diária',priority:false,ri:'0h15',ec:'0h40',created:'2026-11-01',supervision:true,delivered:true},
+ {id:'SIM-000202',person:'Executor B',title:'Inspecionar a cerca do pomar',state:'Suspensa',period:'Semanal',priority:true,ri:'1h00',ec:'0h30',created:'2026-11-01',supervision:true,reason:'Aguardando material',off:true},
+ {id:'SIM-000203',person:'Executor A',title:'Conferir a iluminação do depósito',state:'Concluída',period:'Diária',priority:false,ri:'0h20',ec:'0h30',created:'2026-10-31',supervision:true},
+ {id:'SIM-000204',person:'Equipe Campo',people:['Executor A','Executor B'],title:'Revisar as cercas da área comum',state:'Aberta',period:'Semanal',priority:false,ri:'—',ec:'—',created:'2026-11-01',supervision:true,group:true}
+ ];
+ return {schema:1,tasks,threads:{'SIM-000101':[{who:'Gestor Exemplo',when:'01/11/2026 07:10',body:'Verifique também o abastecimento dos reservatórios.',replies:[]}],'SIM-000201':[{who:'Executor A',when:'01/11/2026 07:20',body:'Qual orientação seguir na revisão?',replies:[{who:'Gestor Exemplo',when:'01/11/2026 07:25',body:'Verifique a entrada de água e higienize o reservatório.'}]}]},logs:[{task:'SIM-000201',who:'Executor A',when:'01/11/2026 07:00',action:'Iniciou a tarefa'},{task:'SIM-000201',who:'Executor A',when:'01/11/2026 07:40',action:'Entregou para aceite'}],leaves:[{id:1,person:'Executor B',date:'2026-11-02',end:'2026-11-02',type:'Folga semanal',state:'Aguardando aprovação'}],suggestions:[{id:1,person:'Executor A',text:'Verificar a cerca do pomar',state:'Pendente'}],people:[{name:me,role:cfg.label},{name:'Executor A',role:'Executor'},{name:'Executor B',role:'Executor'},{name:'Supervisor Exemplo',role:'Supervisor'}],groups:[{name:'Equipe Campo',members:'Executor A, Executor B'}],stock:[{name:'Mangueira',amount:3}],returns:[],automatic:{enabled:false,people:[],time:'07:00'},drafts:{},videos:['Institucional FSJ','Manejo dos animais','Segurança no trabalho']};
+}
+function valid(s){return s&&s.schema===1&&Array.isArray(s.tasks)&&s.tasks.length&&s.tasks.every(t=>typeof t.id==='string'&&typeof t.title==='string')&&s.threads&&Array.isArray(s.logs)&&s.drafts&&Array.isArray(s.people)&&Array.isArray(s.leaves)&&Array.isArray(s.suggestions)&&s.automatic&&Array.isArray(s.groups)&&Array.isArray(s.stock)&&Array.isArray(s.returns)&&Array.isArray(s.videos);}
+let state;const embedded=document.getElementById('fsj-initial-state');
+try{if(embedded.textContent.trim()){const saved=JSON.parse(embedded.textContent);if(valid(saved))state=saved;}}catch{}
+if(!state){try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(valid(saved))state=saved;}catch{}}
+state=state||seed();
+let drafts=state.drafts,view='home',selected=state.tasks[0].id,context='execution',history=[],message='',playing=false,video='Institucional FSJ',questionIndex=0,editing=false;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const button=(label,attrs='',cls='')=>`<button type="button" class="action ${cls}" ${attrs}>${label}</button>`;
+const go=(label,dest,cls='')=>button(label,`data-go="${dest}"`,cls);
+const act=(label,a,cls='')=>button(label,`data-act="${a}"`,cls);
+const text=(label,key,value='')=>`<label for="f-${key}">${label}</label><div class="text-voice"><textarea id="f-${key}" data-field="${key}" rows="2">${esc(drafts[key]??value)}</textarea><button type="button" class="voice" data-voice="${key}" aria-label="Simular voz: ${label}">Voz</button></div>`;
+const input=(label,key,type='text',value='')=>`<label for="f-${key}">${label}</label><div class="${type==='text'?'text-voice':'field'}"><input id="f-${key}" data-field="${key}" type="${type}" ${type==='file'?(key==='restoreFile'?'accept=".json,application/json"':'multiple accept="image/*,video/*,audio/*"'):`value="${esc(drafts[key]??value)}"`}>${type==='text'?`<button type="button" class="voice" data-voice="${key}" aria-label="Simular voz: ${label}">Voz</button>`:''}</div>`;
+const select=(label,key,options)=>`<label for="f-${key}">${label}</label><select id="f-${key}" data-field="${key}">${options.map(v=>`<option value="${esc(v)}" ${(drafts[key]??options[0])===v?'selected':''}>${esc(v)}</option>`).join('')}</select>`;
+const people=()=>[...new Set(state.people.map(p=>p.name))];
+const mine=()=>state.tasks.filter(t=>assigned(t,me)&&(canHistory||active(t)));
+const under=()=>state.tasks.filter(t=>t.supervision&&(canHistory||active(t)));
+const current=()=>state.tasks.find(t=>t.id===selected)||state.tasks[0];
+const rows=(list,ctx='execution')=>list.length?list.map(t=>`<button type="button" class="code" data-task="${esc(t.id)}" data-context="${ctx}" data-state="${esc(t.state)}" data-priority="${!!t.priority}">${esc(t.id)} <span class="task-status">· ${esc(t.state)}</span></button>`).join(''):'<p>Nenhuma tarefa nesta seleção.</p>';
+function capture(){main.querySelectorAll('[data-field]').forEach(e=>{if(e.type==='file'){drafts[e.dataset.field]=[...e.files].map(f=>f.name).join(', ');}else drafts[e.dataset.field]=e.type==='checkbox'?e.checked:e.value;});persist();}
+function persist(){state.drafts=drafts;try{localStorage.setItem(storageKey,JSON.stringify(state));return true;}catch{return false;}}
+function say(s,error=false){notice.textContent=s;notice.dataset.error=String(error);main.__fsjFit?.layout();}
+function log(action,t=current()){state.logs.push({task:t.id,who:me+' · '+cfg.label,when:new Date().toLocaleString('pt-BR',{timeZone:'America/Recife'}),action});persist();}
+function allowed(dest){if(['maintenance','backup','access'].includes(dest))return owner;if(['register','reports','people','groups','stock','approvals','automatic','emergency','returns','suggestions','edit'].includes(dest))return manager;if(dest==='supervision')return manager||supervisor;if(dest==='thirds')return manager||supervisor;return true;}
+function navigate(dest,ctx){if(!allowed(dest)){say('Função indisponível para este perfil.',true);return;}capture();history.push({view,selected,context});view=dest;if(ctx)context=ctx;message='';render();}
+function back(){capture();const old=history.pop();if(old){view=old.view;selected=old.selected;context=old.context;}else view='home';message='';render();}
+function required(key,label='Preencha este campo.'){capture();if(!String(drafts[key]||'').trim()){say(label,true);main.querySelector(`[data-field="${key}"]`)?.focus();return false;}return true;}
+function discussion(t){const list=state.threads[t.id]||[];return `<h3>Dúvidas e respostas</h3>${list.length?list.map((q,i)=>`<div class="item"><p>${esc(q.who)} · ${esc(q.when)}</p><p>${esc(q.body)}</p>${q.replies.map(r=>`<p><strong>${esc(r.who)}</strong> · ${esc(r.when)}<br>${esc(r.body)}</p>`).join('')}${manager||supervisor?button('Responder esta dúvida',`data-reply="${i}"`,'secondary'):''}</div>`).join(''):'<p>Nenhuma dúvida registrada nesta tarefa.</p>'}${text('Dúvida / pedido sobre esta tarefa','question_'+t.id)}${act('Registrar dúvida / pedido','taskQuestion')}`;}
+function timeline(t){const logs=state.logs.filter(l=>l.task===t.id);return '<h3>Registros da tarefa</h3>'+(logs.length?logs.map(l=>`<div class="item"><p>${esc(l.when)} · ${esc(l.who)}</p><p>${esc(l.action)}</p></div>`).join(''):'<p>Ainda não há registros nesta simulação.</p>');}
+function menu(){
+ let content=go('TV FSJ','tv','wide')+go('Minhas tarefas','mine');
+ if(manager){content+=go('Registrar demanda','register')+go('Tarefas de terceiros','thirds')+go('Folgas e férias','leaves')+go('Relatórios','reports')+go('Pessoas e perfis','people')+go('Disparo emergencial','emergency')+go('Disparo automático','automatic')+(owner?go('Painel de manutenção','maintenance','wide'):'')+go('Grupos','groups')+go('Armazenagem','stock')+go('Avisos de devolução','returns','wide secondary');}
+ else{content+=go('Folgas e férias','leaves');if(supervisor)content+=go('SUPERVISÃO','supervision','wide gold');}
+ let counts='';if(cfg.platform==='Desktop-Laptop'&&manager){counts=`<div class="counts">${button('Em aberto · '+state.tasks.filter(t=>t.state==='Aberta').length,'data-filter="Aberta"','secondary')}${button('Em execução · '+state.tasks.filter(t=>t.state==='Em execução').length,'data-filter="Em execução"','secondary')}${button('Aguardando gestor · '+state.tasks.filter(t=>t.state==='Aguardando gestor').length,'data-filter="Aguardando gestor"','secondary')}${button('Suspensas · '+state.tasks.filter(t=>t.state==='Suspensa').length,'data-filter="Suspensa"','secondary')}</div>`;}
+ return counts+'<div class="main-menu">'+content+'</div>';
+}
+function render(){
+ main.__fsjFit?.destroy();const t=current();let html='',title='';
+ switch(view){
+ case 'home':title='Menu principal';html=menu();break;
+ case 'mine':title='Minhas tarefas';html='<h3>Minhas tarefas de execução</h3><p class="muted">Toque no número da tarefa para abrir descrição, recomendações, dúvidas, histórico e ações.</p>'+rows(mine());break;
+ case 'filtered':title='Tarefas · '+esc(drafts.quickFilter);html=rows(state.tasks.filter(t=>t.state===drafts.quickFilter),'management');break;
+ case 'thirds':title='Tarefas de terceiros';html=select('Tipo','thirdType',['Individual','Grupo'])+select('Usuário executor','executorFilter',['Selecione o usuário executor',...people().filter(p=>p!==me)])+(drafts.executorFilter&&drafts.executorFilter!=='Selecione o usuário executor'?rows(state.tasks.filter(x=>active(x)&&assigned(x,drafts.executorFilter)&&(drafts.thirdType==='Grupo'?x.group:!x.group)),'consultation'):'<p>Escolha um executor para consultar suas tarefas em aberto.</p>');break;
+ case 'task':{
+ title=t.id;const readOnly=context==='consultation',my=assigned(t,me),canExecute=!readOnly&&(my||manager);
+ html=`<p class="status">${esc(t.state)}${readOnly?' · Somente consulta':''}</p><p>${esc(t.title)}</p><p>${esc(t.person)} · ${esc(t.period)}</p>`;
+ if(canExecute&&active(t)&&!t.delivered)html+=`<div class="execution-actions">${act(t.state==='Suspensa'?'Retomar':'Iniciar','start')}${act('Suspender','suspend','secondary')}${act('Concluir','finish')}</div>`;
+ if(readOnly)html+='<div class="execution-actions">'+button('Iniciar','disabled','secondary')+button('Suspender','disabled','secondary')+button('Concluir','disabled','secondary')+'</div>';
+ if(!readOnly&&context==='supervision'&&t.delivered&&(supervisor||manager))html+=go('Recomendações do Gestor','recommendations','gold')+`<div class="pair">${act('Aceitar conclusão','accept','accept')}${go('Devolver','return','secondary')}</div>`;
+ html+=`<section class="task-inline-info"><h3>Informações da tarefa</h3><p>Periodicidade: ${esc(t.period)} · R/I: ${esc(t.ri)} · E/C: ${esc(t.ec)}</p>${t.reason?'<p>Justificativa: '+esc(t.reason)+'</p>':''}${t.attachments?'<p>Anexos: '+esc(t.attachments)+'</p>':''}${go('Recomendações do Gestor','recommendations','gold')}${readOnly?'<p>Consulta de terceiros: sem ações de execução.</p>':discussion(t)}${timeline(t)}</section>`;
+ if(manager&&!readOnly)html+=`<div class="pair owner-actions">${act('Editar','edit','secondary')}${act('Excluir','delete','secondary')}</div>`+(t.state==='Concluída'?act('Arquivar','archive','secondary'):'');
+ break;}
+ case 'info':title=t.id+' · Informações';html=`<p>${esc(t.title)}</p><p>Responsável: ${esc(t.person)} · ${esc(t.state)}</p><p>Periodicidade: <abbr title="Diária, semanal, mensal ou única">${esc(t.period)}</abbr></p><p>Tempo · R/I: ${esc(t.ri)} · E/C: ${esc(t.ec)}</p>${t.reason?'<p>Justificativa: '+esc(t.reason)+'</p>':''}${t.attachments?'<p>Anexos selecionados: '+esc(t.attachments)+'</p>':''}`+go('Recomendações do Gestor','recommendations','gold')+(context==='consultation'?'<h3>Dúvidas e respostas</h3>'+((state.threads[t.id]||[]).map(q=>`<div class="item"><p>${esc(q.body)}</p>${q.replies.map(r=>`<p>Resposta: ${esc(r.body)}</p>`).join('')}</div>`).join('')||'<p>Nenhuma dúvida registrada.</p>'):discussion(t))+timeline(t);break;
+ case 'recommendations':title='Recomendações do Gestor';html=`<p>${t.id}</p><p>${esc(t.title)}</p><ol><li>Conferir as condições do local.</li><li>Executar o serviço e verificar o resultado.</li><li>Registrar a conclusão e os anexos necessários.</li></ol>`+(manager&&context!=='consultation'?text('Orientação aos envolvidos','guidance_'+t.id)+act('Registrar orientação','guidance'):'');break;
+ case 'suspend':title='Suspender tarefa';html=`<p>${t.id}</p>`+text('Justificativa obrigatória','suspend_'+t.id)+act('Confirmar suspensão','confirmSuspend');break;
+ case 'finish':title='Conclusão da tarefa';html=`<p>${t.id}</p><p>CONCLUÍDA?</p><div class="pair">${act('SIM','yes')}${go('NÃO','finishNo','secondary')}</div><p class="muted">SIM conclui diretamente; NÃO abre a justificativa obrigatória.</p>`;break;
+ case 'finishNo':title='Não conclusão · justificativa';html=`<p>${t.id} · Informe o motivo da não conclusão.</p>`+text('Justificativa obrigatória','finish_'+t.id)+input('Anexos: fotos, vídeos ou áudio','attachments_'+t.id,'file')+act('Confirmar NÃO','no');break;
+ case 'return':title='Devolver ao executor';html=`<p>${t.id} · ${esc(t.person)}</p>`+text('Justificativa obrigatória','return_'+t.id)+act('Confirmar devolução','confirmReturn');break;
+ case 'reply':{title='Responder dúvida';const q=(state.threads[t.id]||[])[questionIndex];html=`<p>${t.id}</p><p>${esc(q?.body||'Dúvida não encontrada')}</p>`+text('Resposta','reply_'+t.id+'_'+questionIndex)+act('Registrar resposta','reply');break;}
+ case 'supervision':title='Supervisão';html='<p>Finalizadas · Pendentes de aceitação</p>'+rows(under().filter(x=>x.delivered&&active(x)),'supervision')+'<h3>Tarefas sob supervisão</h3>'+rows(under().filter(x=>!x.delivered),'supervision')+go('Consultar tela do executor','thirds','secondary');break;
+ case 'register':title=editing?'Editar tarefa':'Registrar demanda';html=text('Descrição da tarefa','taskTitle',editing?t.title:'')+select('Responsável','taskPerson',people())+select('Periodicidade','taskPeriod',['Única','Diária','Semanal','Mensal'])+input('Prazo','taskDeadline','date')+select('Prioridade','taskPriority',['Normal','Prioritária','Urgente'])+act(editing?'Salvar alterações':'Adicionar','saveTask');break;
+ case 'suggest':title='Sugestão de tarefas';html=text('Sua sugestão','suggestion')+act('Enviar sugestão','suggest')+'<h3>Sugestões registradas</h3>'+state.suggestions.filter(s=>manager||s.person===me).map(s=>`<div class="item"><p>${esc(s.text)}</p><p>${esc(s.state)}${s.reason?' · '+esc(s.reason):''}</p></div>`).join('')+(manager?go('Analisar sugestões','suggestions','secondary'):'');break;
+ case 'suggestions':title='Analisar sugestões';html=state.suggestions.map(s=>`<div class="item"><p>${esc(s.person)} · ${esc(s.text)}</p><p>${esc(s.state)}</p>${text('Justificativa / retorno','suggestReason_'+s.id)}<div class="pair">${button('Aprovar',`data-suggestion="${s.id}" data-decision="Aprovada"`)}${button('Rejeitar',`data-suggestion="${s.id}" data-decision="Rejeitada"`,'secondary')}</div></div>`).join('')||'<p>Nenhuma sugestão.</p>';break;
+ case 'leaves':title='Folgas e férias';html=go('Marcar datas','leaveForm')+(manager?go('Solicitações para aprovação','approvals','secondary'):'')+state.leaves.filter(l=>manager||l.person===me).map(l=>`<div class="item"><p>${esc(l.person)} · ${esc(l.type)}</p><p>${esc(l.date)} a ${esc(l.end)} · ${esc(l.state)}</p></div>`).join('');break;
+ case 'leaveForm':title='Calendário · marcar datas';html=select('Pessoa','leavePerson',manager?people():[me])+select('Tipo','leaveType',['Folga semanal','Férias','Feriado','Compensação'])+input('Data inicial','leaveStart','date')+input('Data final','leaveEnd','date')+text('Observação','leaveNote')+act('Salvar datas','saveLeave');break;
+ case 'approvals':title='Aprovar solicitações';html=state.leaves.map(l=>`<div class="item"><p>${esc(l.person)} · ${esc(l.date)} · ${esc(l.type)}</p><p>${esc(l.state)}</p>${text('Motivo da decisão','leaveReason_'+l.id)}<div class="pair">${button('Aprovar',`data-leave="${l.id}" data-decision="Aprovada"`)}${button('Rejeitar',`data-leave="${l.id}" data-decision="Rejeitada"`,'secondary')}</div></div>`).join('');break;
+ case 'reports':title='Relatórios';html=select('Pessoa','reportPerson',['Todas',...people()])+`<div class="pair"><div>${input('Data inicial','reportStart','date','2026-10-01')}</div><div>${input('Data final','reportEnd','date','2026-11-30')}</div></div>`+select('Situação','reportState',['Todas','Aberta','Em execução','Aguardando gestor','Suspensa','Concluída','Arquivada'])+select('Periodicidade','reportPeriod',['Todas','Única','Diária','Semanal','Mensal'])+`<div class="pair">${act('Filtrar por seleção','report')}${act('Limpar seleção','clearReport','secondary')}</div>`+(drafts.reportReady?reportResult():'');break;
+ case 'people':title='Pessoas e perfis';html=state.people.map(p=>`<p>${esc(p.name)} · ${esc(p.role)}</p>`).join('')+input('Nome','personName')+input('Telefone','personPhone')+select('Perfil','personRole',owner?['Executor','Supervisor','Gestor','Visitante']:['Executor','Supervisor','Visitante'])+act('Salvar pessoa','savePerson')+go('Grupos','groups','secondary')+(owner?go('Delegações e acessos','access','secondary'):'<p>Delegação de Gestor e administração técnica são exclusivas do Proprietário.</p>');break;
+ case 'access':title='Delegações e acessos';html=select('Pessoa','accessPerson',people().filter(p=>p!==me))+select('Perfil autorizado','accessRole',['Executor','Supervisor','Gestor','Visitante'])+act('Registrar autorização simulada','saveAccess');break;
+ case 'groups':title='Grupos';html=state.groups.map(g=>`<p>${esc(g.name)} · ${esc(g.members)}</p>`).join('')+input('Nome do grupo','groupName')+text('Participantes','groupMembers')+act('Salvar grupo','saveGroup');break;
+ case 'stock':title='Armazenagem';html=state.stock.map(s=>`<p>${esc(s.name)} · Quantidade: ${esc(s.amount)}</p>`).join('')+input('Item','stockName')+input('Quantidade','stockAmount','number')+act('Registrar item','saveStock');break;
+ case 'communication':title='Comunicação';html=text('Mensagem / pedido à gestão','communication')+act('Registrar comunicação','communicate')+go('Sugestão de tarefas','suggest','secondary')+(manager?go('Disparo emergencial','emergency','secondary'):'');break;
+ case 'emergency':title='Disparo emergencial';html=select('Destinatário','emergencyPerson',['Selecione',...people().filter(p=>p!==me)])+'<p><strong>ESTA MENSAGEM CANCELA AS ANTERIORES</strong></p>'+text('Mensagem','emergencyMessage','Suas tarefas estão disponíveis.')+act('Preparar envio simulado','send')+'<div id="emergency-result"></div>';break;
+ case 'automatic':title='Disparo automático';html=people().filter(p=>p!==me).map(p=>`<label class="check"><input type="checkbox" data-field="auto_${esc(p)}" ${drafts['auto_'+p]?'checked':''}>${esc(p)}</label>`).join('')+input('Horário · Recife','autoTime','time',state.automatic.time)+`<p>Rotina: ${state.automatic.enabled?'Ativada nesta simulação':'Desativada nesta simulação'}</p>`+act(state.automatic.enabled?'Desativar rotina':'Ativar rotina','auto');break;
+ case 'returns':title='Avisos de devolução';html=state.returns.length?state.returns.map(r=>`<div class="item"><p>${esc(r.task)} · ${esc(r.person)}</p><p>${esc(r.reason)}</p><p>${esc(r.when)}</p></div>`).join(''):'<p>Nenhuma devolução registrada nesta simulação.</p>';break;
+ case 'tv':title='TV FSJ';html=`<div class="tv"><strong>${esc(video)}</strong><p>${playing?'▶ Reprodução ilustrativa':'Vídeo institucional · Demonstração'}</p>${act(playing?'Encerrar':'Iniciar vídeo','video')}</div>`+select('Tema','theme',['Todos','Manejo','Orientações'])+select('Vídeo da videoteca','video',state.videos)+act('Reproduzir selecionado','play')+(manager?input('Título do vídeo','videoTitle')+input('Arquivo de vídeo','videoFile','file')+act('Cadastrar na videoteca simulada','saveVideo','secondary'):'');break;
+ case 'maintenance':title='Painel de manutenção';html='<p>Exclusivo do Proprietário · Ambiente de simulação</p>'+act('Verificar sistema','diagnostic')+go('Backup e recuperação da simulação','backup','secondary')+go('Armazenagem','stock','secondary')+go('Versão e arquivos','about','secondary');break;
+ case 'backup':title='Backup e recuperação';html=act('Baixar cópia da simulação','saveCopy')+input('Arquivo de dados da simulação','restoreFile','file')+act('Restaurar dados do simulador','restore','secondary');break;
+ case 'about':title='Versão e arquivos';html=`<p><strong>SIMULADOR · ${esc(cfg.platformLabel)} · ${esc(cfg.label)} · v${esc(cfg.version)}</strong></p><p>Base visual: modelo FSJ aprovado. Revisão local: 01/11/2026.</p><p>Dados fictícios. Não acessa GitHub, WhatsApp, banco ou serviços da fazenda.</p>`+act('Salvar cópia com os testes','saveCopy')+act('Exportar dados fictícios','exportState','secondary')+act('Reiniciar dados de teste','resetPrompt','secondary');break;
+ case 'reset':title='Reiniciar simulação';html='<p>Descartar somente os testes salvos neste perfil e nesta plataforma?</p>'+act('Confirmar reinício','reset')+act('Cancelar','cancel','secondary');break;
+ case 'delete':title='Excluir tarefa';html=`<p>Excluir ${t.id} da lista simulada? O registro ficará no histórico.</p>`+act('Confirmar exclusão','confirmDelete')+act('Cancelar','cancel','secondary');break;
+ }
+ main.innerHTML=`<h2>${title}</h2>${html}`;say(message);
+ const previous=root.querySelector('.back'),next=root.querySelector('.next');previous.disabled=view==='home';next.disabled=true;previous.onclick=back;next.onclick=null;
+ window.fsjFitScreen({viewport:main,previous,next,label:root.querySelector('.page-number')});persist();
+}
+function reportResult(){const list=state.tasks.filter(t=>(!drafts.reportPerson||drafts.reportPerson==='Todas'||t.person===drafts.reportPerson)&&(!drafts.reportState||drafts.reportState==='Todas'||t.state===drafts.reportState)&&(!drafts.reportPeriod||drafts.reportPeriod==='Todas'||t.period===drafts.reportPeriod)&&(!drafts.reportStart||t.created>=drafts.reportStart)&&(!drafts.reportEnd||t.created<=drafts.reportEnd));return '<h3>Fazenda São José · Relatório simulado</h3>'+(list.map(t=>`<div class="item"><p><strong>${esc(t.id)}</strong> · ${esc(t.person)}</p><p>${esc(t.state)} · ${esc(t.period)} · ${esc(t.created)}</p><p>Tempo · R/I: ${esc(t.ri)} · E/C: ${esc(t.ec)}</p>${timeline(t)}</div>`).join('')||'<p>Nenhum registro na seleção.</p>');}
+function download(blob,filename){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.style.display='none';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+function saveCopy(){capture();const doc=document.documentElement.cloneNode(true);doc.querySelector('#fsj-initial-state').textContent=JSON.stringify(state).replace(/</g,'\\u003c');doc.querySelector('main').innerHTML='';doc.querySelector('.notice').textContent='';doc.querySelectorAll('style[data-runtime]').forEach(n=>n.remove());download(new Blob(['<!doctype html>\n'+doc.outerHTML],{type:'text/html;charset=utf-8'}),cfg.filename);say('Cópia preparada com os dados fictícios e configurações desta simulação.');}
+root.addEventListener('input',capture);
+root.addEventListener('change',e=>{capture();if(['executorFilter','thirdType'].includes(e.target.dataset.field))render();});
+root.addEventListener('click',async e=>{
+ const b=e.target.closest('button,a[data-go]');if(!b||b.disabled)return;
+ if(b.hasAttribute('data-home')){capture();history=[];view='home';message='';render();return;}
+ if(b.hasAttribute('data-about')){navigate('about');return;}
+ if(b.classList.contains('back')||b.classList.contains('next'))return;
+ if(b.dataset.go){e.preventDefault();if(b.dataset.go==='register'){editing=false;delete drafts.taskTitle;}navigate(b.dataset.go);return;}
+ if(b.dataset.filter){drafts.quickFilter=b.dataset.filter;navigate('filtered');return;}
+ if(b.dataset.task){const found=state.tasks.find(t=>t.id===b.dataset.task);if(!found)return;if(!canHistory&&!active(found)){say('Tarefa fora da lista deste perfil.',true);return;}history.push({view,selected,context});capture();selected=found.id;context=b.dataset.context||'execution';view='task';message='';render();return;}
+ if(b.dataset.voice){const f=main.querySelector(`[data-field="${b.dataset.voice}"]`);if(f){f.value=(f.value+' Texto ilustrativo por voz.').trim();capture();say('Simulação de voz: revise o texto antes de confirmar.');}return;}
+ if(b.dataset.reply){questionIndex=Number(b.dataset.reply);navigate('reply');return;}
+ capture();const t=current(),a=b.dataset.act;
+ if(b.dataset.suggestion&&manager){const s=state.suggestions.find(s=>s.id===Number(b.dataset.suggestion));if(!s)return;const reason=drafts['suggestReason_'+s.id]||'';if(b.dataset.decision==='Rejeitada'&&!reason.trim()){say('Informe o motivo da rejeição.',true);return;}s.state=b.dataset.decision;s.reason=reason;if(s.state==='Aprovada'){state.tasks.push({id:nextTaskId(),person:me,title:s.text,state:'Aberta',period:'Única',ri:'—',ec:'—',created:'2026-11-01',priority:true});}message='Simulação: decisão registrada e retorno ao solicitante preparado.';render();return;}
+ if(b.dataset.leave&&manager){const l=state.leaves.find(l=>l.id===Number(b.dataset.leave));if(!l)return;const reason=drafts['leaveReason_'+l.id]||'';if(b.dataset.decision==='Rejeitada'&&!reason.trim()){say('Informe o motivo da rejeição.',true);return;}l.state=b.dataset.decision;l.reason=reason;message='Simulação: decisão registrada.';render();return;}
+ if(['start','confirmSuspend','yes','no'].includes(a)){
+ if(context==='consultation'||(!assigned(t,me)&&!manager)){say('Esta consulta não permite executar tarefas de terceiros.',true);return;}
+ if(!active(t)||t.delivered){say('A tarefa já foi finalizada ou aguarda aceite.',true);return;}
+ }
+ if(a==='start'){
+ if(t.state==='Em execução'){say('Esta tarefa já está em execução.');return;}
+ state.tasks.filter(x=>x.id!==t.id&&assigned(x,me)&&x.state==='Em execução').forEach(x=>{x.state='Suspensa';x.reason='Início de outra tarefa';log('Suspensão automática pelo início de outra tarefa',x);});
+ t.state='Em execução';t.ri=t.ri==='—'?'0h00':t.ri;t.ec='Em curso';log('Iniciou / retomou a tarefa');message='Simulação: início registrado com data, hora e agente.'+(t.off?' Atenção: o executor está de folga.':'');render();return;
+ }
+ if(a==='suspend'){navigate('suspend');return;}
+ if(a==='confirmSuspend'){if(!required('suspend_'+t.id,'Informe a justificativa da suspensão.'))return;t.reason=drafts['suspend_'+t.id];t.state='Suspensa';t.ec='Pausado';log('Suspendeu: '+t.reason);view='task';message='Simulação: suspensão registrada com justificativa.';render();return;}
+ if(a==='finish'){navigate('finish');return;}
+ if(a==='yes'||a==='no'){
+ if(a==='no'&&!required('finish_'+t.id,'Informe o motivo da não conclusão.'))return;
+ t.reason=a==='no'?(drafts['finish_'+t.id]||''):'';t.attachments=a==='no'?(drafts['attachments_'+t.id]||''):'';
+ t.delivered=a==='yes'&&!!t.requiresAcceptance;t.state=a==='no'?'Aguardando gestor':t.delivered?'Aguardando gestor':'Concluída';t.ec='0h40';
+ log(a==='yes'?(t.delivered?'Entregou para aceite':'Concluiu a tarefa'):'Registrou não conclusão: '+t.reason);
+ view=!canHistory&&t.state==='Concluída'?'mine':'task';history=[];message='Simulação: '+(t.state==='Concluída'?'conclusão registrada; tarefa retirada da lista do executor.':t.delivered?'entrega encaminhada ao supervisor para aceite.':'não conclusão registrada e encaminhada à gestão.');if(t.off)message+=' Atenção: executor em folga.';render();return;
+ }
+ if(a==='accept'&&(manager||supervisor)&&context==='supervision'){if(!t.delivered){say('Esta tarefa não aguarda aceite.',true);return;}t.state='Concluída';t.delivered=false;log('Aceitou a conclusão');view='supervision';message='Simulação: aceite registrado; tarefa concluída.';render();return;}
+ if(a==='confirmReturn'&&(manager||supervisor)){if(!required('return_'+t.id,'Informe a justificativa da devolução.'))return;t.state='Suspensa';t.delivered=false;t.reason=drafts['return_'+t.id];const rec={task:t.id,person:t.person,reason:t.reason,when:new Date().toLocaleString('pt-BR')};state.returns.push(rec);log('Devolveu ao executor: '+t.reason);view='supervision';message='Simulação: devolução registrada e aviso incluído para o Proprietário.';render();return;}
+ if(a==='edit'&&manager){editing=true;drafts.taskTitle=t.title;drafts.taskPerson=t.person;drafts.taskPeriod=t.period;navigate('register');return;}
+ if(a==='delete'&&manager){navigate('delete');return;}
+ if(a==='confirmDelete'&&manager){log('Excluiu da lista simulada, preservando este registro');state.tasks=state.tasks.filter(x=>x.id!==t.id);view='mine';history=[];message='Simulação: tarefa retirada da lista.';render();return;}
+ if(a==='archive'&&manager){if(t.state!=='Concluída')return;t.state='Arquivada';log('Arquivou a tarefa');message='Simulação: tarefa arquivada, com histórico preservado.';render();return;}
+ if(a==='saveTask'&&manager){if(!required('taskTitle','Preencha a descrição.'))return;if(editing){Object.assign(t,{title:drafts.taskTitle,person:drafts.taskPerson||people()[0],period:drafts.taskPeriod||'Única',priority:(drafts.taskPriority||'Normal')!=='Normal'});log('Editou a tarefa');}else{const created={id:nextTaskId(),title:drafts.taskTitle,person:drafts.taskPerson||people()[0],state:'Aberta',period:drafts.taskPeriod||'Única',priority:(drafts.taskPriority||'Normal')!=='Normal',ri:'—',ec:'—',created:'2026-11-01',deadline:drafts.taskDeadline||''};state.tasks.push(created);log('Criou a tarefa simulada',created);}message='Simulação: tarefa salva. Consulte a relação de tarefas.';render();return;}
+ if(a==='taskQuestion'||a==='reply'||a==='guidance'){
+ if(context==='consultation')return;const key=a==='taskQuestion'?'question_'+t.id:a==='reply'?'reply_'+t.id+'_'+questionIndex:'guidance_'+t.id;
+ if(!required(key,'Preencha a mensagem por texto ou voz.'))return;const record={who:me,when:new Date().toLocaleString('pt-BR'),body:drafts[key]};
+ if(a==='reply'){if(!manager&&!supervisor)return;const q=state.threads[t.id]?.[questionIndex];if(!q)return;q.replies.push(record);}else(state.threads[t.id]??=[]).push({...record,replies:[]});log('Registrou '+(a==='reply'?'resposta':'mensagem')+': '+drafts[key]);delete drafts[key];view='info';message='Simulação: mensagem registrada apenas nesta tarefa.';render();return;
+ }
+ if(a==='suggest'){if(!required('suggestion','Digite sua sugestão.'))return;state.suggestions.push({id:Date.now(),person:me,text:drafts.suggestion,state:'Pendente'});delete drafts.suggestion;message='Simulação: sugestão encaminhada para análise do Proprietário.';render();return;}
+ if(a==='communicate'){if(!required('communication'))return;log('Comunicação à gestão: '+drafts.communication);say('Simulação: comunicação registrada, sem envio externo.');return;}
+ if(a==='saveLeave'){
+ if(!required('leaveStart','Escolha a data inicial.'))return;const end=drafts.leaveEnd||drafts.leaveStart;if(end<drafts.leaveStart){say('A data final deve ser igual ou posterior à inicial.',true);return;}
+ state.leaves.push({id:Date.now(),person:manager?(drafts.leavePerson||people()[0]):me,date:drafts.leaveStart,end,type:drafts.leaveType||'Folga semanal',state:manager?'Registrada':'Aguardando aprovação'});view='leaves';message='Simulação: datas salvas no calendário deste perfil.';render();return;
+ }
+ if(a==='report'&&manager){if(drafts.reportStart&&drafts.reportEnd&&drafts.reportStart>drafts.reportEnd){say('Corrija o período do relatório.',true);return;}drafts.reportReady=true;message='Relatório de dados fictícios gerado.';render();return;}
+ if(a==='clearReport'){for(const k of Object.keys(drafts))if(k.startsWith('report'))delete drafts[k];render();return;}
+ if(a==='savePerson'&&manager){if(!required('personName','Informe o nome.'))return;const role=drafts.personRole||'Executor';if(!owner&&['Gestor','Proprietário'].includes(role))return;state.people.push({name:drafts.personName,role});message='Simulação: pessoa e perfil registrados.';render();return;}
+ if(a==='saveAccess'&&owner){const p=state.people.find(p=>p.name===drafts.accessPerson);if(p)p.role=drafts.accessRole||'Executor';say('Simulação: delegação registrada. Não concede acesso ao sistema real.');return;}
+ if(a==='saveGroup'&&manager){if(!required('groupName'))return;state.groups.push({name:drafts.groupName,members:drafts.groupMembers||''});message='Simulação: grupo salvo.';render();return;}
+ if(a==='saveStock'&&manager){if(!required('stockName'))return;const amount=Number(drafts.stockAmount);if(!Number.isFinite(amount)||amount<0){say('Informe uma quantidade válida.',true);return;}state.stock.push({name:drafts.stockName,amount});message='Simulação: item registrado.';render();return;}
+ if(a==='send'&&manager){if(!drafts.emergencyPerson||drafts.emergencyPerson==='Selecione'){say('Selecione o destinatário.',true);return;}if(!required('emergencyMessage'))return;const off=drafts.emergencyPerson==='Executor B';root.querySelector('#emergency-result').innerHTML=(off?'<p class="status">O destinatário executor (Executor B) está de folga (compensação, feriado, folga semanal, etc).</p>':'')+'<p><strong>Prévia simulada</strong></p><p>'+esc(drafts.emergencyPerson)+'</p><p>'+esc(drafts.emergencyMessage)+'</p>';say('Simulação: o sistema prepararia a conversa do destinatário. Nenhuma mensagem foi enviada.');return;}
+ if(a==='auto'&&manager){if(!state.automatic.enabled){const recipients=people().filter(p=>drafts['auto_'+p]);if(!recipients.length){say('Escolha pelo menos um destinatário.',true);return;}if(!drafts.autoTime){say('Escolha o horário.',true);return;}state.automatic={enabled:true,people:recipients,time:drafts.autoTime};}else state.automatic.enabled=false;message='Simulação: rotina '+(state.automatic.enabled?'ativada':'desativada')+'. Nenhum agendamento real foi criado.';render();return;}
+ if(a==='video'||a==='play'){if(a==='play'){video=drafts.video||state.videos[0];playing=true;}else playing=!playing;if(!playing)video='Institucional FSJ';message=playing?'Demonstração visual de reprodução; nenhum vídeo real é acessado.':'Retorno ao institucional simulado.';render();return;}
+ if(a==='saveVideo'&&manager){if(!required('videoTitle','Informe o título.'))return;state.videos.push(drafts.videoTitle);message='Simulação: vídeo incluído na lista demonstrativa.';render();return;}
+ if(a==='diagnostic'&&owner){say('Simulação: verificaria serviços, versões, conexões e logs.');return;}
+ if(a==='saveCopy'){saveCopy();return;}
+ if(a==='exportState'){download(new Blob([JSON.stringify({config:cfg,state},null,2)],{type:'application/json'}),'FSJ-Simulador-'+cfg.platform+'-'+cfg.role+'-dados.json');return;}
+ if(a==='restore'&&owner){const f=main.querySelector('[data-field="restoreFile"]')?.files[0];if(!f){say('Selecione o JSON exportado pelo simulador.',true);return;}try{const d=JSON.parse(await f.text());if(d.config?.role!==cfg.role||d.config?.platform!==cfg.platform||!valid(d.state))throw Error();state=d.state;drafts=state.drafts;view='home';history=[];message='Dados fictícios restaurados neste simulador.';render();}catch{say('Arquivo incompatível. Use os dados deste perfil e plataforma.',true);}return;}
+ if(a==='resetPrompt'){navigate('reset');return;}
+ if(a==='reset'){state=seed();drafts=state.drafts;view='home';history=[];message='Dados fictícios reiniciados.';render();return;}
+ if(a==='cancel'){back();return;}
+});
+render();
+})();
+</script>
+</body></html>
