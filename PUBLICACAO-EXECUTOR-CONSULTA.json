@@ -1,0 +1,14 @@
+{
+  "codigo": "FSJ-CELULAR",
+  "versao": "0.4.0",
+  "proprietario": "1.1.0",
+  "build": "20261101-executor-consulta-45",
+  "fonte_commit": "02711afd1f23b154e3a6af2165dd8308dd43089a",
+  "funcao_consulta": "executor-consulta",
+  "consulta_versao": 1,
+  "escopo": "Minhas tarefas separa execução e supervisão; terceiros seleciona executor e consulta tela real sem assumir identidade.",
+  "simulador_atualizado": true,
+  "validacao_local": true,
+  "validacao_aparelho_usuario": false,
+  "mensagens_enviadas": false
+}
