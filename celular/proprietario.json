@@ -1,7 +1,7 @@
 {
   "codigo": "FSJ-CELULAR-PROPRIETARIO",
-  "versao": "1.0.8",
-  "build": "20261031-tarefas-comunicacao-43",
+  "versao": "1.0.9",
+  "build": "20261101-tarefa-informacoes-44",
   "perfil": "Proprietário",
   "aparelhos": [
     "telefone Android",
@@ -9,3 +9,4 @@
   ],
   "simulador": false
 }
+

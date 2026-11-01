@@ -1,0 +1,12 @@
+{
+  "codigo": "FSJ-CELULAR-PROPRIETARIO",
+  "versao": "1.0.9",
+  "build": "20261101-tarefa-informacoes-44",
+  "fonte_commit": "94582392ce4ac446773472a2054647a14f503488",
+  "simulador_privado": "Assistente FSJ - Celular/desenvolvimento/simulador-proprietario-20261031.html",
+  "escopo": "Informações completas e dúvidas dentro da tarefa; respostas vinculadas à dúvida e tarefa; sem botões externos.",
+  "validacao_local": true,
+  "validacao_aparelho_usuario": false,
+  "backend_alterado": false,
+  "mensagens_enviadas": false
+}
