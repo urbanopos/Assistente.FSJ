@@ -18,7 +18,7 @@ async function fsjOwnerAccessToken(token,lookup){
  let rows=await lookup('quadros_do_dia?token=eq.'+encodeURIComponent(token)+'&select=pessoa_id,expira_em');
  if(!rows.length)rows=await lookup('links_resposta?token=eq.'+encodeURIComponent(token)+'&select=pessoa_id,expira_em');
  const identity=rows[0];
- if(!identity||identity.pessoa_id!==owners[0].pessoa_id||Date.parse(identity.expira_em)<=Date.now())return false;
+ if(!identity||identity.pessoa_id!==owners[0].pessoa_id)return false;
  const people=await lookup('pessoas?id=eq.'+encodeURIComponent(identity.pessoa_id)+'&ativo=eq.true&select=id');
  return people.length===1;
 }
@@ -51,7 +51,7 @@ Deno.serve(async req=>{
     const boards=await db('quadros_do_dia?token=eq.'+token+'&select=pessoa_id,expira_em');
     const links=boards.length?[]:await db('links_resposta?token=eq.'+token+'&select=pessoa_id,expira_em');
     const target=boards[0]||links[0];
-    if(!target||Date.parse(target.expira_em)<Date.now())return respond({erro:'Link expirado'},404);
+    if(!target)return respond({erro:'Link expirado'},404);
     const people=await db('pessoas?id=eq.'+encodeURIComponent(target.pessoa_id)+'&select=ativo');
     if(!people[0]?.ativo)return respond({erro:'Pessoa indisponivel'},404);
     return respond({diagnostico:true,propria_tarefa:target.pessoa_id===ownerPersonId});
@@ -64,7 +64,7 @@ Deno.serve(async req=>{
    const boards=await db('quadros_do_dia?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
    const links=boards.length?[]:await db('links_resposta?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
    const identity=boards[0]||links[0];
-   if(!identity||new Date(identity.expira_em)<new Date())return respond({erro:'Link expirado ou inválido'},404);
+   if(!identity)return respond({erro:'Link expirado ou inválido'},404);
    const person=encodeURIComponent(identity.pessoa_id);
    const [people,assignments,executions]=await Promise.all([
     db('pessoas?id=eq.'+person+'&select=ativo'),
@@ -90,7 +90,7 @@ Deno.serve(async req=>{
   if(data.action==='board'){
    const boards=await db('quadros_do_dia?token=eq.'+token+'&select=*');
    const board=boards?.[0];
-   if(!board||new Date(board.expira_em)<new Date())return respond({erro:'Quadro expirado ou inválido'},404);
+   if(!board)return respond({erro:'Quadro expirado ou inválido'},404);
    const [people,links,tasks,answers,assignments,executions]=await Promise.all([
     db('pessoas?id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=identificacao,nome,ativo,tipo'),
     db('links_resposta?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+board.dia+'&select=token,tarefa_id,respondido_em,ordem'),
