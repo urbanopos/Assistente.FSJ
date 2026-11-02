@@ -270,7 +270,17 @@ function render(){
  case 'home':title='Menu principal';html=menu();break;
  case 'mine':title='Minhas tarefas';html='<h3>Minhas tarefas de execução</h3><p class="muted">Toque no número da tarefa para abrir descrição, recomendações, dúvidas, histórico e ações.</p>'+rows(mine());break;
  case 'filtered':title='Tarefas · '+esc(drafts.quickFilter);html=rows(state.tasks.filter(t=>t.state===drafts.quickFilter),'management');break;
- case 'thirds':title='Tarefas de terceiros';html=select('Tipo','thirdType',['Individual','Grupo'])+select('Usuário executor','executorFilter',['Selecione o usuário executor',...people().filter(p=>p!==me)])+(drafts.executorFilter&&drafts.executorFilter!=='Selecione o usuário executor'?rows(state.tasks.filter(x=>active(x)&&assigned(x,drafts.executorFilter)&&(drafts.thirdType==='Grupo'?x.group:!x.group)),'consultation'):'<p>Escolha um executor para consultar suas tarefas em aberto.</p>');break;
+ case 'thirds':{
+ title='Tarefas de terceiros';
+ const byGroup=drafts.thirdType==='Grupo';
+ const choices=byGroup?['Selecione o grupo',...state.groups.map(g=>g.name)]:['Selecione o usuário executor',...people().filter(p=>p!==me)];
+ const selected=byGroup?drafts.groupFilter:drafts.executorFilter;
+ const valid=choices.slice(1).includes(selected);
+ html=select('Tipo','thirdType',['Individual','Grupo'])+
+ (byGroup?select('Grupo de executores','groupFilter',choices):select('Usuário executor','executorFilter',choices))+
+ (valid?rows(state.tasks.filter(x=>active(x)&&(byGroup?(x.group&&x.person===selected):(!x.group&&assigned(x,selected)))),'consultation'):
+ '<p>Escolha '+(byGroup?'um grupo':'um executor')+' para consultar as tarefas em aberto.</p>');
+ break;}
  case 'task':{
  title=t.id;const readOnly=context==='consultation',my=assigned(t,me),canExecute=!readOnly&&(my||manager);
  html=`<p class="status">${esc(t.state)}${readOnly?' · Somente consulta':''}</p><p>${esc(t.title)}</p><p>${esc(t.person)} · ${esc(t.period)}</p>`;
@@ -318,7 +328,7 @@ function reportResult(){const list=state.tasks.filter(t=>(!drafts.reportPerson||
 function download(blob,filename){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.style.display='none';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 function saveCopy(){capture();const doc=document.documentElement.cloneNode(true);doc.querySelector('#fsj-initial-state').textContent=JSON.stringify(state).replace(/</g,'\\u003c');doc.querySelector('main').innerHTML='';doc.querySelector('.notice').textContent='';doc.querySelectorAll('style[data-runtime]').forEach(n=>n.remove());download(new Blob(['<!doctype html>\n'+doc.outerHTML],{type:'text/html;charset=utf-8'}),cfg.filename);say('Cópia preparada com os dados fictícios e configurações desta simulação.');}
 root.addEventListener('input',capture);
-root.addEventListener('change',e=>{capture();if(['executorFilter','thirdType'].includes(e.target.dataset.field))render();});
+root.addEventListener('change',e=>{capture();if(['executorFilter','groupFilter','thirdType'].includes(e.target.dataset.field))render();});
 root.addEventListener('click',async e=>{
  const b=e.target.closest('button,a[data-go]');if(!b||b.disabled)return;
  if(b.hasAttribute('data-home')){capture();history=[];view='home';message='';render();return;}
