@@ -1150,9 +1150,8 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
  const control=[...fsjManualControls].find(c=>c.p.id===pid&&c.button===button);
  if(!control)return;
  const fallback=control.fallback;
- const tabName='fsjWhatsAppEmergencial';
- let tab=window.fsjEmergencyWhatsAppTab&&!window.fsjEmergencyWhatsAppTab.closed?window.fsjEmergencyWhatsAppTab:null,opened=false;
- if(!tab){try{tab=window.open('',tabName);if(tab){tab.opener=null;window.fsjEmergencyWhatsAppTab=tab;}}catch{}}
+ // O link permanece na tela; não abrir aba vazia nem tentar controlar sessão do WhatsApp.
+ let tab=null,opened=false;
  fsjIndividualBusy.add(pid);button.disabled=true;fallback.hidden=true;
  status.textContent='Preparando mensagem para o destinatário selecionado...';
  try{
@@ -1160,11 +1159,16 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
   if(!/^55[0-9]{10,11}$/.test(String(d.phone||''))||typeof d.text!=='string'||!d.text.trim())throw Error('Telefone ou mensagem indisponível no cadastro.');
   const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const url=mobile?'https://wa.me/'+d.phone+'?text='+encodeURIComponent(d.text):'https://web.whatsapp.com/send?phone='+encodeURIComponent(d.phone)+'&text='+encodeURIComponent(d.text);
-  fallback.href=url;fallback.target=tabName;fallback.rel='';fallback.referrerPolicy='no-referrer';fallback.textContent='Abrir conversa de '+(control.p.nick||control.p.name)+' com a mensagem';fallback.hidden=false;
-  fallback.onclick=event=>{event.preventDefault();try{let target=window.fsjEmergencyWhatsAppTab;if(target&&!target.closed){target.location.replace(url);}else{target=window.open(url,tabName);if(target){target.opener=null;window.fsjEmergencyWhatsAppTab=target;}}if(target)target.focus();}catch{status.textContent='Permita a abertura do WhatsApp neste navegador e tente o link novamente.';}};
+  fallback.href=url;
+  fallback.target='_blank';
+  fallback.rel='noopener noreferrer';
+  fallback.referrerPolicy='no-referrer';
+  fallback.textContent='Abrir conversa de '+(control.p.nick||control.p.name)+' com a mensagem';
+  fallback.hidden=false;
+  // Navegação ocorre pelo clique direto no link, sem redirecionamento assíncrono.
   control.prepared=true;control.confirm.hidden=fsjManualConfirmed(pid);
-  if(tab&&!tab.closed){tab.location.replace(url);opened=true;try{tab.focus();}catch{}}
-  status.textContent=(d.confirmado||d.ja_registrado?'Já há envio registrado hoje; confira a conversa para evitar duplicidade. ':'')+(opened?'WhatsApp aberto para o destinatário selecionado. Confira a mensagem e pressione Enviar.':'Toque em Abrir conversa abaixo para abrir o destinatário com a mensagem preenchida.');
+
+  status.textContent=(d.confirmado||d.ja_registrado?'Já há envio registrado hoje; confira a conversa para evitar duplicidade. ':'')+'Clique em Abrir conversa abaixo para direcionar o WhatsApp ao destinatário com a mensagem preenchida.';
   }catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}
   control.prepared=false;control.confirm.hidden=true;
   if(/Envio bloqueado/i.test(message)){
