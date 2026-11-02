@@ -1793,7 +1793,14 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('fsjPreviewOverlay').hidden)fsjPreviewClose();});
  if(preview){document.addEventListener('DOMContentLoaded',()=>{const btn=document.getElementById('fsjPreviewButton');if(btn)btn.hidden=true;});}
 })();
-</script><script src="./disparo-emergencial/executor-client.js?v=20261030-emergencia-aviso-dourado-21"></script><script src="./desktop/layout.min.js?v=20261030-desktop-inicio-22"></script></body></html>
+</script><script src="./disparo-emergencial/executor-client.js?v=20261030-emergencia-aviso-dourado-21"></script><script src="./desktop/layout.min.js?v=20261030-desktop-inicio-22"></script>
+<script>
+(function(){
+ function sync(){const host=document.getElementById('dashboard');if(!host)return;let btn=document.getElementById('fsjOwnerDiagnosticHome');if(!btn){btn=document.createElement('button');btn.id='fsjOwnerDiagnosticHome';btn.type='button';btn.textContent='Diagnóstico';btn.style.cssText='display:none;width:100%;padding:14px;border:0;border-radius:10px;background:#185b43;color:white;font:700 16px system-ui;margin:8px 0';btn.onclick=()=>window.fsjSimpleSelectGo?.('__diagnostico');const grid=host.querySelector('[id*="Home"],[class*="home-grid"],[class*="grid"]');(grid||host).append(btn);}const allowed=window.fsjOwnerVerified===true;btn.hidden=!allowed;btn.style.display=allowed?'block':'none';}
+ document.addEventListener('fsj:ownership-updated',sync);document.addEventListener('DOMContentLoaded',sync);setInterval(sync,2500);
+})();
+</script>
+</body></html>
 
 
 
