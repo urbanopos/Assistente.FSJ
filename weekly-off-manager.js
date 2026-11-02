@@ -112,7 +112,6 @@ async function fsjAbrirMesOperacionalDesktop(day, personId){
  await fsjRenderMesOperacionalDesktop(link,personId);
 }
 async function fsjRenderMesOperacionalDesktop(link,personId){
- const link=ev.target.closest('a[data-fsj-calendario-dia]');
  if(!link)return;
  const day=link.dataset.fsjCalendarioDia;
  if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return;
@@ -165,4 +164,5 @@ document.addEventListener('click',ev=>{const link=ev.target.closest('a[data-fsj-
   }
   content.innerHTML='<p><strong>'+esc(month.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}))+'</strong>'+(name?' — '+esc(name):' — Selecione uma pessoa para visualizar as folgas individuais')+'</p><div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font-size:12px">'+['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>'<strong style="text-align:center">'+d+'</strong>').join('')+cells.join('')+'</div><p style="font-size:12px">Marcações consultadas nos registros operacionais do Assistente FSJ.</p>';
  }catch(err){content.textContent='Não foi possível carregar o calendário: '+err.message}
-});
+}
+document.addEventListener('click',ev=>{const link=ev.target.closest('a[data-fsj-calendario-dia]');if(!link)return;ev.preventDefault();fsjRenderMesOperacionalDesktop(link);});
