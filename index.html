@@ -1190,13 +1190,22 @@ async function fsjEmergenciaProprietario(){
  const control=[...fsjManualControls].find(c=>c.p.id===p.id&&box.contains(c.row));
  if(control&&!control.button.disabled)await fsjEnviarEmergencialIntegrado(p.id,control.button,control.status);
 }
-function fsjRenderEmergenciaPessoas(){
+async function fsjRenderEmergenciaPessoas(){
  const select=document.getElementById('fsjEmergenciaPessoa'),box=document.getElementById('fsjEmergenciaControles');if(!select||!box)return;
  const previous=select.value;
- select.replaceChildren(new Option('Selecione uma pessoa',''),...[...S.people].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>new Option(p.nick||p.name,p.id)));
- select.value=S.people.some(p=>p.id===previous)?previous:'';
+ let people=[...S.people];
+ if(!people.length){
+  select.replaceChildren(new Option('Carregando pessoas...',''));
+  try{
+   const rows=await api('/rest/v1/pessoas?select=*&order=nome.asc');
+   people=(rows||[]).map(p=>({id:p.id,name:p.nome||p.identificacao||p.id,nick:p.identificacao||p.nome,active:p.ativo,whatsapp:p.whatsapp,phone:p.telefone}));
+   if(people.length)S.people=people;
+  }catch(e){select.replaceChildren(new Option('Não foi possível carregar pessoas',''));box.textContent='Falha ao consultar usuários: '+e.message;return;}
+ }
+ select.replaceChildren(new Option('Selecione uma pessoa',''),...people.sort((a,b)=>(a.name||'').localeCompare(b.name||'','pt-BR')).map(p=>new Option(p.nick||p.name,p.id)));
+ select.value=people.some(p=>p.id===previous)?previous:'';
  box.replaceChildren();
- const p=S.people.find(p=>p.id===select.value);if(!p)return;
+ const p=people.find(p=>p.id===select.value);if(!p)return;
  box.append(fsjIndividualControls(p,true,true));fsjRefreshManualStatus();
 }
 function fsjRenderIndividualList(){
