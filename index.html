@@ -1100,7 +1100,17 @@ function fsjIndividualControls(p,showName=false,emergency=false){
  button.addEventListener('click',()=>emergency?fsjEnviarEmergencialIntegrado(p.id,button,status):fsjEnviarIndividual(p.id,button,status,fallback));row.append(button,status,fallback,confirmation);
  fsjManualControls.add({row,p,button,status,fallback,confirm:confirmation,emergency,prepared:false});fsjApplyManualState();return row;
 }
-function fsjAbrirDisparoEmergencial(){window.open('https://urbanopos.github.io/Assistente.FSJ/?fsj_acao=disparo-emergencial','_blank','noopener,noreferrer');}
+function fsjAbrirDisparoEmergencial(){
+ // Abrir no painel atual: evita bloqueio de pop-up e mantém a sessão autenticada.
+ if(typeof navTo==='function' && fsjPainelPronto){
+  navTo('disparoEmergencia');
+  return;
+ }
+ // Se a sessão ainda não estiver pronta, não abrir uma aba silenciosamente.
+ const aviso=document.getElementById('loginMsg');
+ if(aviso)aviso.textContent='Entre no Assistente FSJ para acessar o Disparo Emergencial.';
+ else window.alert('Entre no Assistente FSJ para acessar o Disparo Emergencial.');
+}
 function fsjAcessoEmergencial(){return new URLSearchParams(location.search).get('fsj_acao')==='disparo-emergencial';}
 function fsjMostrarAvisoEmergencia(message,button){
  let screen=document.getElementById('fsjEmergencyNotice');
