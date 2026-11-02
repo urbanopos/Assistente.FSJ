@@ -2,7 +2,7 @@
 (()=>{
  const endpoint=/^https:\/\/awrxnzbfrsaurzpunuko\.supabase\.co\/functions\/v1\/(resposta-tarefa|supervisao)(?:\?|$)/;
  const nativeFetch=window.fetch.bind(window);
- let lastOpen=null,ownerExempt=false,diagnosticEnabled=false,diagnosticChecking=false;
+ let lastOpen=null,ownerExempt=false,diagnosticEnabled=false,diagnosticChecking=false,diagnosticLastCheck=0;
  function isOpen(now=new Date()){
   const p=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Recife',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(now);
   const value=k=>Number(p.find(x=>x.type===k).value),t=value('hour')*3600+value('minute')*60+value('second');
@@ -17,8 +17,8 @@
   let banner=document.getElementById('fsjHoursBanner');
   if(!banner&&show){
    banner=document.createElement('aside');banner.id='fsjHoursBanner';banner.className='fsj-hours-banner';banner.setAttribute('role','status');
-   banner.innerHTML='<div class="fsj-hours-clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v6l4 2"></path></svg></div><div class="fsj-hours-copy"><p class="fsj-hours-eyebrow">CONSULTA DE TAREFAS</p><p class="fsj-hours-text">A partir das <span class="fsj-hours-time">7:00h</span>, disponível para consulta, exceto nos horários de descanso e após o expediente.</p><p class="fsj-hours-note">Horário de Pernambuco</p></div>';
-   const diag=document.createElement('button');diag.type='button';diag.id='fsjHoursDiagnostic';diag.textContent='Acesso Diagnóstico';diag.hidden=true;diag.style.cssText='display:block;margin:14px auto 0;padding:12px 20px;border:0;border-radius:10px;background:#195d42;color:white;font:600 16px system-ui;cursor:pointer';diag.onclick=()=>{const url=new URL(location.href);url.searchParams.set('diagnostico','1');location.assign(url.href);};banner.append(diag);
+   banner.innerHTML='<div class="fsj-hours-clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v6l4 2"></path></svg></div><div class="fsj-hours-copy"><p class="fsj-hours-eyebrow">CONSULTA DE TAREFAS</p><p class="fsj-hours-text">Consulta disponível das 7h às 12h e das 14h às 16h20, horário de Pernambuco.</p><p class="fsj-hours-note">Horário de Pernambuco</p></div>';
+   const diag=document.createElement('button');diag.type='button';diag.id='fsjHoursDiagnostic';diag.textContent='Acesso Diagnóstico';diag.hidden=true;diag.style.cssText='margin:14px auto 0;padding:12px 20px;border:0;border-radius:10px;background:#195d42;color:white;font:600 16px system-ui;cursor:pointer';diag.onclick=()=>{const url=new URL(location.href);url.searchParams.set('diagnostico','1');location.assign(url.href);};banner.querySelector('.fsj-hours-copy').append(diag);
    // Fora dos quadros protegidos: o aviso continua visível ao ocultar toda a tela.
    (document.querySelector('main')||document.body).prepend(banner);
   }
@@ -31,12 +31,12 @@
   if(show)for(const id of ['openCount','runningCount','pendingCount','questionCount']){const el=document.getElementById(id);if(el)el.textContent='—';}
  }
  async function verifyOwnerDiagnostic(){
-  if(diagnosticChecking||diagnosticEnabled)return;
+  if(diagnosticChecking||diagnosticEnabled||Date.now()-diagnosticLastCheck<60000)return;
   const btn=document.getElementById('fsjHoursDiagnostic');if(!btn)return;
   const token=new URLSearchParams(location.hash.slice(1)).get('token');
   const jwt=localStorage.getItem('fsj_access_token');
   if(!token||!jwt){btn.hidden=true;return;}
-  diagnosticChecking=true;
+  diagnosticChecking=true;diagnosticLastCheck=Date.now();
   try{const response=await nativeFetch('https://awrxnzbfrsaurzpunuko.supabase.co/functions/v1/resposta-tarefa',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+jwt},body:JSON.stringify({action:'diagnostic',token}),cache:'no-store'});const data=await response.json();btn.hidden=!(response.ok&&data.diagnostico===true);}catch{btn.hidden=true;}finally{diagnosticChecking=false;}
  }
  window.fetch=async function(input,init){
