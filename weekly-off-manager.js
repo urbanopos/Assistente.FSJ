@@ -107,10 +107,13 @@ folgasAgendarVirada();
 
 /* Calendário operacional do Desktop: o link de cada feriado abre o mês,
    sem redirecionar para a fonte legal. Consulta os registros vigentes. */
-document.addEventListener('click',async function(ev){
+async function fsjAbrirMesOperacionalDesktop(day, personId){
+ const link={dataset:{fsjCalendarioDia:day}};
+ await fsjRenderMesOperacionalDesktop(link,personId);
+}
+async function fsjRenderMesOperacionalDesktop(link,personId){
  const link=ev.target.closest('a[data-fsj-calendario-dia]');
  if(!link)return;
- ev.preventDefault();
  const day=link.dataset.fsjCalendarioDia;
  if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return;
  let dialog=document.getElementById('fsjCalendarioFeriadosDesktop');
@@ -118,14 +121,21 @@ document.addEventListener('click',async function(ev){
   dialog=document.createElement('dialog');
   dialog.id='fsjCalendarioFeriadosDesktop';
   dialog.style.cssText='width:min(96vw,780px);max-height:90vh;overflow:auto;border:1px solid #a9c4d0;border-radius:12px;padding:16px;background:#fff;color:#172b35';
-  dialog.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2 style="margin:0">Calendário mensal de folgas e feriados</h2><button type="button" data-fechar-calendario>Fechar</button></div><div id="fsjCalendarioFeriadosConteudo" role="status"></div>';
+  dialog.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2 style="margin:0">Calendário mensal de folgas e feriados</h2><button type="button" data-fechar-calendario>Fechar</button></div><div class="row" style="align-items:center;gap:10px;margin:12px 0"><button type="button" data-mes-anterior aria-label="Mês anterior">←</button><strong id="fsjMesDesktopTitulo"></strong><button type="button" data-mes-proximo aria-label="Próximo mês">→</button></div><label>Funcionário <select id="fsjCalendarioDesktopPessoa"></select></label><div id="fsjCalendarioFeriadosConteudo" role="status"></div>';
   dialog.querySelector('[data-fechar-calendario]').onclick=()=>dialog.close();
   document.body.appendChild(dialog);
  }
+ const selector=dialog.querySelector('#fsjCalendarioDesktopPessoa');
+ const current=personId===undefined?(document.getElementById('folgasPessoaSelect')?.value||''):personId;
+ selector.innerHTML='<option value="">Selecione uma pessoa</option>'+[...S.people].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nick||p.name)+'</option>').join('');
+ selector.value=current;
+ selector.onchange=()=>fsjAbrirMesOperacionalDesktop(day,selector.value);
+ dialog.querySelector('[data-mes-anterior]').onclick=()=>fsjAbrirMesOperacionalDesktop(folgaSomar(day.slice(0,7)+'-01',-1),selector.value);
+ dialog.querySelector('[data-mes-proximo]').onclick=()=>{const d=new Date(day.slice(0,7)+'-01T12:00:00Z');d.setUTCMonth(d.getUTCMonth()+1);fsjAbrirMesOperacionalDesktop(d.toISOString().slice(0,10),selector.value)};
  if(!dialog.open)dialog.showModal();
  const content=dialog.querySelector('#fsjCalendarioFeriadosConteudo');
  content.textContent='Consultando marcações do mês...';
- const selected=document.getElementById('folgasPessoaSelect')?.value||'';
+ const selected=dialog.querySelector('#fsjCalendarioDesktopPessoa')?.value||'';
  const start=day.slice(0,7)+'-01',last=new Date(Number(day.slice(0,4)),Number(day.slice(5,7)),0).getDate();
  const end=day.slice(0,7)+'-'+String(last).padStart(2,'0');
  try{
@@ -142,14 +152,16 @@ document.addEventListener('click',async function(ev){
   holidays.forEach(h=>add(h.dia,'Feriado: '+h.nome));
   weekly.forEach(f=>add(f.dia,'Folga semanal'));
   manual.forEach(d=>add(d,reasons[d]||'Folga cadastrada'));
-  decisions.forEach(d=>{if(d.folga_compensatoria)add(d.folga_compensatoria,'Compensatória do feriado '+fsjData(d.dia));if(d.dia>=start&&d.dia<=end&&d.receber)add(d.dia,'Trabalho autorizado no feriado')});
+  decisions.forEach(d=>{if(d.folga_compensatoria)add(d.folga_compensatoria,'Compensatória do feriado '+fsjData(d.dia));if(d.dia>=start&&d.dia<=end&&d.receber)add(d.dia,'Trabalho autorizado no feriado')}
+document.addEventListener('click',ev=>{const link=ev.target.closest('a[data-fsj-calendario-dia]');if(!link)return;ev.preventDefault();fsjRenderMesOperacionalDesktop(link);});
   if(p.ferias_inicio&&p.ferias_fim){for(let i=1;i<=last;i++){const d=start.slice(0,7)+'-'+String(i).padStart(2,'0');if(d>=p.ferias_inicio&&d<=p.ferias_fim)add(d,'Férias')}}
   const month=new Date(Number(day.slice(0,4)),Number(day.slice(5,7))-1,1);
+  dialog.querySelector('#fsjMesDesktopTitulo').textContent=month.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   const offset=month.getDay();
   const cells=Array.from({length:offset},()=>'<div></div>');
   for(let i=1;i<=last;i++){
    const d=start.slice(0,7)+'-'+String(i).padStart(2,'0'),notes=marks[d]||[];
-   cells.push('<div style="min-height:76px;padding:6px;border:1px solid #c5d5dd;border-radius:6px;background:'+(notes.length?'#eef7ef':'#fff')+'"><strong>'+i+'</strong>'+notes.map(n=>'<div style="font-size:11px;line-height:1.25;margin-top:4px">'+esc(n)+'</div>').join('')+'</div>');
+   cells.push('<div style="min-height:76px;padding:6px;border:1px solid #c5d5dd;border-radius:6px;background:'+(notes.some(n=>n.includes('Compensatória'))?'#fff0d5':notes.some(n=>n.includes('Férias'))?'#e8f1ff':notes.some(n=>n.includes('Trabalho autorizado'))?'#d9f4df':notes.length?'#eef2f5':'#fff')+'"><strong>'+i+'</strong>'+notes.map(n=>'<div style="font-size:11px;line-height:1.25;margin-top:4px">'+esc(n)+'</div>').join('')+'</div>');
   }
   content.innerHTML='<p><strong>'+esc(month.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}))+'</strong>'+(name?' — '+esc(name):' — Selecione uma pessoa para visualizar as folgas individuais')+'</p><div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font-size:12px">'+['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>'<strong style="text-align:center">'+d+'</strong>').join('')+cells.join('')+'</div><p style="font-size:12px">Marcações consultadas nos registros operacionais do Assistente FSJ.</p>';
  }catch(err){content.textContent='Não foi possível carregar o calendário: '+err.message}
