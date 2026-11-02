@@ -22,7 +22,32 @@ function folgasVirarSemana(){
  return true;
 }
 
+async function fsjCarregarPessoasFolgas(){
+ const select=document.getElementById('folgasPessoaSelect');if(!select)return;
+ const previous=select.value;
+ if(!S.people.length){select.replaceChildren(new Option('Carregando pessoas...',''));}
+ try{
+  const rows=await api('/rest/v1/pessoas?select=*&order=nome.asc');
+  if(Array.isArray(rows)&&rows.length){
+   const known=new Map(S.people.map(p=>[String(p.id),p]));
+   for(const row of rows){
+    const id=String(row.id),old=known.get(id)||{};
+    known.set(id,{...old,id,name:row.nome||old.name||row.identificacao||id,nick:row.identificacao||old.nick||row.nome,active:row.ativo!==false,whatsapp7h:row.receber_tarefas_whatsapp===true});
+   }
+   S.people=[...known.values()];
+  }
+  fsjRenderFolgas();
+  if(previous&&S.people.some(p=>p.id===previous)){select.value=previous;fsjRenderFolgas();}
+  if(!S.people.length)select.replaceChildren(new Option('Nenhuma pessoa cadastrada',''));
+ }catch(e){
+  if(S.people.length)fsjRenderFolgas();
+  else select.replaceChildren(new Option('Falha ao consultar pessoas — clique em Atualizar calendário',''));
+  const status=document.getElementById('folgasStatus');if(status)status.textContent='Não foi possível consultar a lista de pessoas: '+e.message;
+ }
+}
+
 async function carregarFolgas(){
+ fsjCarregarPessoasFolgas();
  folgasVirarSemana();
  const request=++folgasConsulta;
  const status=document.getElementById('folgasStatus');status.textContent='Consultando calendário...';
@@ -40,7 +65,8 @@ async function carregarFolgas(){
 }
 
 function fsjRenderFolgas(){
- const select=document.getElementById('folgasPessoaSelect'),chosen=select.value;
+ const select=document.getElementById('folgasPessoaSelect');if(!select)return;
+ const chosen=select.value;
  select.innerHTML='<option value="">Selecione uma pessoa</option>'+[...S.people].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+(p.active===false?' (inativo)':'')+'</option>').join('');
  select.value=S.people.some(p=>p.id===chosen)?chosen:'';
  document.getElementById('folgasPessoaDados').hidden=!select.value||!folgasAgenda;
