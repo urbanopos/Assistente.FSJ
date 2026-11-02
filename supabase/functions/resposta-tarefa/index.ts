@@ -97,12 +97,12 @@ Deno.serve(async req=>{
     db('tarefas?select=id,descricao,criada_em,diaria,situacao,exige_supervisao,reaberta_dia,reaberta_em,reabertura_motivo,prioridade,codigo_tarefa,periodicidade,grupo_id'),
     db('retornos?cancelado_por_revisao=is.null&select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc'),
     db('tarefa_responsaveis?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&select=tarefa_id'),
-    db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+board.dia+'&select=tarefa_id,estado')
+    db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(board.pessoa_id)+'&dia=eq.'+new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date())+'&select=tarefa_id,estado')
    ]);
    if(!people?.length||!people[0].ativo)return respond({erro:'Quadro indisponível'},404);
    const [groups,groupMembers,allPeople]=await Promise.all([db('grupos?select=id,nome'),db('grupo_membros?select=grupo_id,pessoa_id'),db('pessoas?select=id,identificacao,nome')]);
    const groupInfo=(task:any)=>{const g=groups.find((x:any)=>x.id===task?.grupo_id);return {grupo_id:task?.grupo_id||null,grupo_nome:g?.nome||'',participantes:g?groupMembers.filter((m:any)=>m.grupo_id===g.id).map((m:any)=>{const p=allPeople.find((x:any)=>x.id===m.pessoa_id);return p?.identificacao||p?.nome||''}).filter(Boolean):[]};};
-   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:assignments.map((a:any)=>a.tarefa_id),p_mes:board.dia.slice(0,7)+'-01',p_pessoa:board.pessoa_id})});
+   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:assignments.map((a:any)=>a.tarefa_id),p_mes:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()).slice(0,7)+'-01',p_pessoa:board.pessoa_id})});
    if(data.situacao==='Arquivado'){
     const history=tasks.filter((t:any)=>t.situacao==='Arquivado'&&assignments.some((a:any)=>a.tarefa_id===t.id)).map((t:any)=>({tarefa_id:t.id,tarefa:t.descricao,codigo_tarefa:t.codigo_tarefa,periodicidade:t.periodicidade,prioridade:'normal',situacao:'Arquivado',somente_leitura:true,...groupInfo(t),progresso_mensal:progress[t.id]||null}));
     return respond({responsavel:people[0].identificacao||people[0].nome,visitante:!ownerTokenAccess&&String(people[0].tipo||'').toLowerCase()==='visitante',dia:board.dia,tarefas:history});
@@ -113,7 +113,7 @@ Deno.serve(async req=>{
    const missing=tasks.filter((t:any)=>available(t)&&!links.some((l:any)=>l.tarefa_id===t.id)&&new Date(t.criada_em).getTime()<=Date.now());
    for(const t of missing){const created=await db('links_resposta?select=token,tarefa_id,respondido_em,ordem',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({token:crypto.randomUUID(),tarefa_id:t.id,pessoa_id:board.pessoa_id,dia:board.dia,expira_em:new Date(Math.max(Date.now()+365*86400000,new Date(board.expira_em).getTime())).toISOString(),ordem:links.length+1})});links.push(created[0])}
    const items=links.map((l:any)=>({token:l.token,...groupInfo(tasks.find((t:any)=>t.id===l.tarefa_id)),tarefa_id:l.tarefa_id,progresso_mensal:progress[l.tarefa_id]||null,tarefa:tasks.find((t:any)=>t.id===l.tarefa_id)?.descricao||'',codigo_tarefa:tasks.find((t:any)=>t.id===l.tarefa_id)?.codigo_tarefa||'',periodicidade:tasks.find((t:any)=>t.id===l.tarefa_id)?.periodicidade||'pontual',prioridade:tasks.find((t:any)=>t.id===l.tarefa_id)?.prioridade||'normal',situacao:taskSituation(tasks.find((t:any)=>t.id===l.tarefa_id)||{},answers,currentDay),execucao:executions.find((e:any)=>e.tarefa_id===l.tarefa_id)||null,ordem:l.ordem||999,respondido:!!l.respondido_em,concluida:!available(tasks.find((t:any)=>t.id===l.tarefa_id))})).filter((x:any)=>x.tarefa&&!x.concluida).sort((a:any,b:any)=>a.ordem-b.ordem||a.tarefa.localeCompare(b.tarefa));
-   return respond({responsavel:people[0].identificacao||people[0].nome,visitante:String(people[0].tipo||'').toLowerCase()==='visitante',dia:board.dia,criado_em:board.criado_em,tarefas:items});
+   return respond({responsavel:people[0].identificacao||people[0].nome,visitante:String(people[0].tipo||'').toLowerCase()==='visitante',dia:currentDay,criado_em:board.criado_em,tarefas:items});
   }
   const links=await db('links_resposta?token=eq.'+token+'&select=*');
   const link=links?.[0];
