@@ -768,3 +768,9 @@ O simulador privado `desenvolvimento/simulador-proprietario-20261031.html` usa o
 Validações: contrato de atualização, fontes e bundles, navegação do proprietário e do usuário autorizado, supervisão, rascunhos/arquivos/eventos e isolamento do simulador. Conferência em navegador na moldura de telefone de 660 px: conteúdo útil com clientHeight=scrollHeight=461 px, scrollTop=0; lista 1/1; detalhes e consulta 1/2–2/2, sem excesso vertical e sem troca de tarefa pelas setas. A conferência no telefone real, com suas fontes e teclado, continua pendente; a prévia não equivale a esse teste.
 
 Instalação web pela atualização automática existente. Publicação Pages e igualdade dos arquivos servidos ficam no comprovante de publicação. Recuperação: retornar às páginas, bundles e manifestos do commit operacional anterior validado (`b99839fab5d3088e0aa0521cff11106876b3b1d7`), preservando registros e sessão. O novo paginador deixa de ser carregado por essas páginas anteriores; não restaurar banco ou automações por uma mudança de apresentação.
+
+## Correção de seleção de terceiros — 02/11/2026
+
+Solicitado: seleção independente de executor individual e grupo para Proprietário, Gestor e Supervisor na tela Tarefas de Terceiros. O filtro de grupo deve consultar tarefas coletivas pelo grupo, sem exigir executor individual. Consulta respeita permissões e não autoriza execução por Supervisor.
+
+Publicado parcialmente: simulador Celular/Proprietario/FSJ-Simulador-Celular-Proprietario-v1.1.0.html, commit 55d3f7b7db3104dcafe29e2891b143fafa7cd3d7. Não equivale à implantação operacional em index.html ou à validação em aparelho. Não houve alteração dos dados, serviços, APK, backup ou mecanismos de recuperação.
