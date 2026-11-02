@@ -1,6 +1,7 @@
 /* FSJ: consulta protegida para Proprietario em links de resposta. Funcionarios sem sessao de gestor nao sao alterados. */
 (()=>{'use strict';
 const access=localStorage.getItem('fsj_access_token'),refresh=localStorage.getItem('fsj_refresh_token');
+if(new URLSearchParams(location.search).get('diagnostico')!=='1')return;
 if(!access&&!refresh)return;
 const token=new URLSearchParams(location.hash.slice(1)).get('token');
 if(!token||!location.pathname.endsWith('/responder.html'))return;
