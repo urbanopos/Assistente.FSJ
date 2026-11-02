@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta name="copyright" content="© 2026 Urbano Possidônio de Carvalho Junior — direitos reservados sobre o material próprio do Assistente FSJ"><meta charset="utf-8"><meta name="fsj-reader-version" content="20261102-fluxo-sim2-nao3-31"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+<html lang="pt-BR"><head><meta name="copyright" content="© 2026 Urbano Possidônio de Carvalho Junior — direitos reservados sobre o material próprio do Assistente FSJ"><meta charset="utf-8"><meta name="fsj-reader-version" content="20261102-layout-unico-32"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://awrxnzbfrsaurzpunuko.supabase.co; img-src 'self' data:; form-action 'none'">
 <title>Responder tarefa • Fazenda São José</title><link rel="icon" href="./icon-512.png">
 <style>
@@ -88,8 +88,20 @@
 #taskScreen #form .buttons{gap:6px!important}
 #executionControl #fsjTaskQuestions{margin-top:8px!important}
 }
-</style><link rel="stylesheet" href="./fsj-hours-banner.css?v=20261030-expediente-tela-03"><script src="./fsj-hours-banner.js?v=20261030-expediente-tela-03"></script><meta name="fsj-phone-version" content="20261101-navegacao-sem-rolagem-47"><script src="./celular/interface.min.js?v=20261102-sem-casa-49"></script><script src="./compartilhado/supervisao.min.js?v=20261031-supervisor-perfil-30" defer></script><style id="fsj-executor-biblioteca-v1">/* Apresentação móvel do modelo Biblioteca; ações e autenticação originais preservadas. */
+</style><link rel="stylesheet" href="./fsj-hours-banner.css?v=20261030-expediente-tela-03"><script src="./fsj-hours-banner.js?v=20261030-expediente-tela-03"></script><meta name="fsj-phone-version" content="20261102-layout-unico-32"><script src="./celular/interface.min.js?v=20261102-layout-unico-50"></script><script src="./compartilhado/supervisao.min.js?v=20261031-supervisor-perfil-30" defer></script><style id="fsj-executor-biblioteca-v1">/* Apresentação móvel do modelo Biblioteca; ações e autenticação originais preservadas. */
 @media(max-width:700px){body{background:#f6f8f5!important}main{max-width:470px!important;margin:0 auto!important;padding:8px!important}.board,.card{border-radius:12px!important;box-shadow:none!important}.task,.action,button[type=submit]{border-radius:10px!important}a.task{border-left:5px solid #235d41!important}header{padding:12px!important}h1{font-size:21px!important} .footnav{background:#fff!important}}
+</style><style id="fsj-unified-task-mobile">
+@media(max-width:700px){
+ html,body{width:100%;max-width:100%;overflow-x:hidden}
+ body{padding-bottom:75px}
+ header{max-width:100%;width:100%;box-sizing:border-box}
+ main{max-width:470px!important;width:100%!important;margin:0 auto!important;padding:8px 12px 80px!important;box-sizing:border-box}
+ main>.card{max-width:100%;width:100%;box-sizing:border-box}
+ #fsjTaskFlowFooter{max-width:470px!important;box-sizing:border-box}
+ #fsjTaskFlowFooter button{min-width:52px;min-height:48px}
+ .fsj-phone-home,#fsjTaskFlowNav,#fsjInactivePageNotice{display:none!important}
+ #fsjQuestionPage[hidden]{display:none!important}
+}
 </style></head><body><header style="display:flex;align-items:center;gap:10px;min-height:70px;padding:10px 12px;background:#e3f5fa;color:#174b3b"><button type="button" id="fsjTaskHome" aria-label="Voltar ao menu principal" title="Menu principal" style="border:0;background:transparent;padding:0;cursor:pointer;flex-shrink:0"><img src="./icon-512.png" width="48" height="48" alt="Fazenda São José"></button><b class="response-brand" style="display:flex;flex-direction:column;gap:2px;font-size:17px">Fazenda São José<small style="font-size:11px;color:#886300">GESTÃO DE TAREFAS</small></b><a id="screenPrevious" data-fsj-screen-back hidden>Anterior</a></header><main>
 <div id="status" role="status">Carregando tarefa...</div><div class="card" id="taskScreen"><h1>Tarefa do dia</h1><div id="detail"></div><div id="executionControl"><p id="executionStatus" role="status" aria-live="polite"></p><div class="fsj-execution-actions"><button id="startTask" type="button" hidden>Iniciar tarefa</button><button id="suspendTask" type="button" hidden>Suspender tarefa</button><div id="taskAnswer" class="fsj-task-answer" hidden><strong>Finalizada a tarefa?</strong><div class="fsj-answer-buttons"><button type="button" id="answerYes">SIM</button><button type="button" id="answerNo">NÃO</button></div></div></div><p class="muted">Ao iniciar outra tarefa, a anterior será suspensa automaticamente.</p></div></div>
 <div id="form" class="card"><button type="button" id="reasonBack" class="fsj-nav-arrow fsj-response-back" aria-label="Anterior">←</button><h2>Justificativa — não concluída</h2><div class="choices" hidden><label><input type="radio" name="resposta" value="sim"> SIM</label><label><input type="radio" name="resposta" value="nao"> NÃO</label></div><label for="why"><b>Justificativa ou observação</b></label><textarea id="why" maxlength="2000" placeholder="Digite o motivo ou use o botão Ditar justificativa"></textarea><div id="missingBox" hidden><label for="missing"><b>Pedidos à administração / Itens faltantes</b></label><textarea id="missing" maxlength="2000" placeholder="Informe materiais, ferramentas ou outras providências necessárias à administração"></textarea><small>Quando preenchido, será criada uma tarefa para o Proprietário e o supervisor poderá consultar o aviso.</small></div><div class="buttons"><button type="button" class="secondary" id="listen">🔊 Ouvir tarefa</button><button type="button" class="secondary" id="dictate">🎙 Ditar justificativa</button></div><label for="files"><b>Fotos, vídeos ou áudios (opcional)</b></label><div class="buttons"><button type="button" class="secondary" id="openGallery">🖼 Escolher foto do Android</button></div><input id="galleryFiles" type="file" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" tabindex="-1" aria-label="Selecionar fotos da galeria"><input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,audio/mpeg,audio/mp4,audio/ogg,audio/webm" multiple><small>Até 3 arquivos, no máximo 10 MB cada.</small><div class="buttons"><button id="reasonNext" type="button" hidden>Próxima página →</button><button id="send">Enviar justificativa</button></div><p class="muted">Respostas permitidas das 7h às 12h e das 14h às 16h20, no horário de Pernambuco.</p></div>
@@ -141,13 +153,13 @@ form.after(fsjQuestionPage);
 const fsjTaskFlowFooter=document.createElement('nav');
 fsjTaskFlowFooter.id='fsjTaskFlowFooter';
 fsjTaskFlowFooter.setAttribute('aria-label','Navegação da execução da tarefa');
-fsjTaskFlowFooter.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-top:1px solid #d8e4da;background:#fff';
+fsjTaskFlowFooter.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 16px;min-height:60px;border-top:1px solid #d8e4da;background:#fff;max-width:650px;margin:0 auto';
 fsjTaskFlowFooter.innerHTML='<button type="button" id="fsjTaskFlowBack" aria-label="Página anterior">←</button><strong id="fsjTaskFlowCount"></strong><button type="button" id="fsjTaskFlowNext" aria-label="Próxima página">→</button>';
 (document.querySelector('main')||form).after(fsjTaskFlowFooter);
 const fsjTaskFlowBack=document.getElementById('fsjTaskFlowBack'),fsjTaskFlowNext=document.getElementById('fsjTaskFlowNext'),fsjTaskFlowCount=document.getElementById('fsjTaskFlowCount');
 function fsjUpdateTaskFlow(){
  const step=responseStep;
- fsjTaskFlowCount.textContent=step==='evidence'?'2/2':step==='reason'?'2/3':step==='questions'?'3/3':'';
+ fsjTaskFlowCount.textContent=step==='evidence'?'2/2':step==='reason'?'2/3':step==='questions'?'3/3':'1/1';
  fsjTaskFlowBack.disabled=step==='detail';
  fsjTaskFlowNext.disabled=step!=='reason';
 }
