@@ -58,7 +58,7 @@ function fsjRenderFolgas(){
    return '<div class="card"><h3>'+esc(p.nick||p.name)+'</h3><p>'+(f?.dia?'Folga semanal: <b>'+esc(fsjData(f.dia))+'</b> • '+(f.bloqueada_gestor?'Definida pelo gestor; empregado bloqueado.':'Informada pelo empregado.'):'Folga semanal pendente: empregado ainda não escolheu.')+'</p>'+(f?.dia?'<details class="folga-alterar"><summary>Alterar folga</summary>'+controls+'</details>':controls)+'</div>';
   }).join(''):'<p>Nenhum destinatário ativo selecionado para o WhatsApp.</p>';
   const holidaySection=document.getElementById('feriadosSection');if(holidaySection)holidaySection.hidden=folgasAgenda.feriados.length===0;
-  document.getElementById('feriadosLista').innerHTML=folgasAgenda.feriados.map(h=>'<details class="card" open><summary><b>'+esc(fsjData(h.dia))+' • '+esc(h.nome)+'</b> — '+esc(h.ambito)+'</summary><p><a href="'+esc(h.fonte)+'" target="_blank" rel="noopener noreferrer">Fonte do calendário</a></p>'+people.map(p=>{
+  document.getElementById('feriadosLista').innerHTML=folgasAgenda.feriados.map(h=>'<details class="card" open><summary><b>'+esc(fsjData(h.dia))+' • '+esc(h.nome)+'</b> — '+esc(h.ambito)+'</summary><p><a href="#" data-fsj-calendario-dia="'+esc(h.dia)+'" aria-label="Abrir calendário mensal operacional">Fonte do calendário</a></p>'+people.map(p=>{
    const v=folgasAgenda.decisoes.find(x=>x.pessoa_id===p.id&&x.dia===h.dia);
    const label='Folga compensatória do Feriado '+h.dia.slice(8,10)+'/'+h.dia.slice(5,7)+'/'+h.dia.slice(2,4);
    const compensation='<details><summary>'+(v?.folga_compensatoria?'Alterar folga compensatória':'Registrar folga compensatória')+'</summary><label>'+esc(label)+'<input type="date" data-compensacao-input="'+esc(p.id)+'|'+h.dia+'" min="'+folgaSomar(h.dia,-30)+'" max="'+folgaSomar(h.dia,30)+'" value="'+(v?.folga_compensatoria||'')+'"></label><button type="button" data-compensacao-pessoa="'+esc(p.id)+'" data-compensacao-feriado="'+h.dia+'">Salvar compensação</button><p class="muted">A folga pode ser antes, no próprio feriado ou depois. No dia marcado não há mensagem. Se a folga ocorrer em outra data, o feriado permite tarefas. A folga semanal continua separada.</p></details>';
@@ -104,3 +104,53 @@ function folgasRetomar(){if(document.hidden)return;if(folgasVirarSemana())carreg
 document.addEventListener('visibilitychange',folgasRetomar);
 window.addEventListener('pageshow',folgasRetomar);
 folgasAgendarVirada();
+
+/* Calendário operacional do Desktop: o link de cada feriado abre o mês,
+   sem redirecionar para a fonte legal. Consulta os registros vigentes. */
+document.addEventListener('click',async function(ev){
+ const link=ev.target.closest('a[data-fsj-calendario-dia]');
+ if(!link)return;
+ ev.preventDefault();
+ const day=link.dataset.fsjCalendarioDia;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return;
+ let dialog=document.getElementById('fsjCalendarioFeriadosDesktop');
+ if(!dialog){
+  dialog=document.createElement('dialog');
+  dialog.id='fsjCalendarioFeriadosDesktop';
+  dialog.style.cssText='width:min(96vw,780px);max-height:90vh;overflow:auto;border:1px solid #a9c4d0;border-radius:12px;padding:16px;background:#fff;color:#172b35';
+  dialog.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2 style="margin:0">Calendário mensal de folgas e feriados</h2><button type="button" data-fechar-calendario>Fechar</button></div><div id="fsjCalendarioFeriadosConteudo" role="status"></div>';
+  dialog.querySelector('[data-fechar-calendario]').onclick=()=>dialog.close();
+  document.body.appendChild(dialog);
+ }
+ if(!dialog.open)dialog.showModal();
+ const content=dialog.querySelector('#fsjCalendarioFeriadosConteudo');
+ content.textContent='Consultando marcações do mês...';
+ const selected=document.getElementById('folgasPessoaSelect')?.value||'';
+ const start=day.slice(0,7)+'-01',last=new Date(Number(day.slice(0,4)),Number(day.slice(5,7)),0).getDate();
+ const end=day.slice(0,7)+'-'+String(last).padStart(2,'0');
+ try{
+  const [holidays,weekly,decisions,people]=await Promise.all([
+   api('/rest/v1/feriados_fsj?dia=gte.'+start+'&dia=lte.'+end+'&select=dia,nome'),
+   selected?api('/rest/v1/folgas_semana?pessoa_id=eq.'+encodeURIComponent(selected)+'&dia=gte.'+start+'&dia=lte.'+end+'&select=dia'):Promise.resolve([]),
+   selected?api('/rest/v1/feriados_envio?pessoa_id=eq.'+encodeURIComponent(selected)+'&select=dia,receber,folga_compensatoria'):Promise.resolve([]),
+   selected?api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(selected)+'&select=nome,identificacao,folgas_datas,folgas_motivos,ferias_inicio,ferias_fim'):Promise.resolve([])
+  ]);
+  const p=people[0]||{},reasons=p.folgas_motivos||{},manual=p.folgas_datas||[];
+  const name=p.identificacao||p.nome||'';
+  const marks={};
+  const add=(d,label)=>{if(d>=start&&d<=end)(marks[d]??=[]).push(label)};
+  holidays.forEach(h=>add(h.dia,'Feriado: '+h.nome));
+  weekly.forEach(f=>add(f.dia,'Folga semanal'));
+  manual.forEach(d=>add(d,reasons[d]||'Folga cadastrada'));
+  decisions.forEach(d=>{if(d.folga_compensatoria)add(d.folga_compensatoria,'Compensatória do feriado '+fsjData(d.dia));if(d.dia>=start&&d.dia<=end&&d.receber)add(d.dia,'Trabalho autorizado no feriado')});
+  if(p.ferias_inicio&&p.ferias_fim){for(let i=1;i<=last;i++){const d=start.slice(0,7)+'-'+String(i).padStart(2,'0');if(d>=p.ferias_inicio&&d<=p.ferias_fim)add(d,'Férias')}}
+  const month=new Date(Number(day.slice(0,4)),Number(day.slice(5,7))-1,1);
+  const offset=month.getDay();
+  const cells=Array.from({length:offset},()=>'<div></div>');
+  for(let i=1;i<=last;i++){
+   const d=start.slice(0,7)+'-'+String(i).padStart(2,'0'),notes=marks[d]||[];
+   cells.push('<div style="min-height:76px;padding:6px;border:1px solid #c5d5dd;border-radius:6px;background:'+(notes.length?'#eef7ef':'#fff')+'"><strong>'+i+'</strong>'+notes.map(n=>'<div style="font-size:11px;line-height:1.25;margin-top:4px">'+esc(n)+'</div>').join('')+'</div>');
+  }
+  content.innerHTML='<p><strong>'+esc(month.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}))+'</strong>'+(name?' — '+esc(name):' — Selecione uma pessoa para visualizar as folgas individuais')+'</p><div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font-size:12px">'+['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>'<strong style="text-align:center">'+d+'</strong>').join('')+cells.join('')+'</div><p style="font-size:12px">Marcações consultadas nos registros operacionais do Assistente FSJ.</p>';
+ }catch(err){content.textContent='Não foi possível carregar o calendário: '+err.message}
+});
