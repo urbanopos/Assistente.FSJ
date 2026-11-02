@@ -41,6 +41,7 @@ async function fsjCarregarPessoaCalendario(id){
 async function fsjSalvarDatasCalendario(){
  if(fsjCalendarBusy)return;if(!fsjCalendarContext?.id)return fsjCalendarStatus('Selecione uma pessoa.');
  const id=fsjCalendarContext.id,dates=[...personDatesOff],reasons={...personDayReasons};
+ if(dates.some(d=>reasons[d]==='Folga compensatória'))return fsjCalendarStatus('Folga compensatória exige vínculo com a data do feriado. Registre-a exclusivamente em Folgas e feriados > Registrar folga compensatória. Nenhuma alteração foi gravada.');
  fsjCalendarSetBusy(true);fsjCalendarStatus('Salvando datas...');
  try{
   const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,folgas_datas,folgas_motivos',{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({folgas_datas:dates,folgas_motivos:reasons})});
