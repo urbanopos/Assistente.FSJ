@@ -103,7 +103,7 @@ Deno.serve(async req=>{
    const [groups,groupMembers,allPeople]=await Promise.all([db('grupos?select=id,nome'),db('grupo_membros?select=grupo_id,pessoa_id'),db('pessoas?select=id,identificacao,nome')]);
    const groupInfo=(task:any)=>{const g=groups.find((x:any)=>x.id===task?.grupo_id);return {grupo_id:task?.grupo_id||null,grupo_nome:g?.nome||'',participantes:g?groupMembers.filter((m:any)=>m.grupo_id===g.id).map((m:any)=>{const p=allPeople.find((x:any)=>x.id===m.pessoa_id);return p?.identificacao||p?.nome||''}).filter(Boolean):[]};};
    const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:assignments.map((a:any)=>a.tarefa_id),p_mes:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()).slice(0,7)+'-01',p_pessoa:board.pessoa_id})});
-   if(data.situacao==='Arquivado'){
+   if(data.situacao==='Arquivado'&&ownerTokenAccess){
     const history=tasks.filter((t:any)=>t.situacao==='Arquivado'&&assignments.some((a:any)=>a.tarefa_id===t.id)).map((t:any)=>({tarefa_id:t.id,tarefa:t.descricao,codigo_tarefa:t.codigo_tarefa,periodicidade:t.periodicidade,prioridade:'normal',situacao:'Arquivado',somente_leitura:true,...groupInfo(t),progresso_mensal:progress[t.id]||null}));
     return respond({responsavel:people[0].identificacao||people[0].nome,visitante:!ownerTokenAccess&&String(people[0].tipo||'').toLowerCase()==='visitante',dia:board.dia,tarefas:history});
    }
@@ -120,6 +120,7 @@ Deno.serve(async req=>{
   if(!link||!(await db('rpc/fsj_link_resposta_vigente',{method:'POST',body:JSON.stringify({p_token:token})})))return respond({erro:'Link expirado ou inválido'},404);
   const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,exige_supervisao,reaberta_dia,reaberta_em,reabertura_motivo,prioridade,diaria,codigo_tarefa,periodicidade'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo,tipo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return respond({erro:'Tarefa indisponível'},404);
+  if(!ownerTokenAccess&&(tasks[0].situacao==='Arquivado'||(tasks[0].situacao==='Concluída'&&!tasks[0].diaria)))return respond({erro:'Tarefa não disponível para este perfil'},403);
   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:link.dia.slice(0,7)+'-01',p_pessoa:link.pessoa_id})});
   const visitante=!ownerTokenAccess&&String(people[0].tipo||'').trim().toLowerCase()==='visitante';
   const detail={visitante,revisao:tasks[0].reaberta_em?{dia:tasks[0].reaberta_dia,em:tasks[0].reaberta_em,motivo:tasks[0].reabertura_motivo}:null,progresso_mensal:progress[link.tarefa_id]||null,tarefa:tasks[0].descricao,codigo_tarefa:tasks[0].codigo_tarefa,periodicidade:tasks[0].periodicidade||'pontual',prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:link.dia,respondido:!!link.respondido_em||tasks[0].situacao==='Arquivado'};
