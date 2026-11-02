@@ -138,6 +138,22 @@ fsjQuestionPage.className='card';
 fsjQuestionPage.hidden=true;
 fsjQuestionPage.innerHTML='<h2>Dúvidas sobre a tarefa</h2><p class="muted">Se necessário, registre dúvidas ou pedidos de esclarecimento relacionados a esta tarefa.</p><label for="fsjQuestionText"><b>Dúvidas e observações</b></label><textarea id="fsjQuestionText" maxlength="2000" placeholder="Opcional: descreva sua dúvida"></textarea><div class="buttons"><button type="button" id="fsjQuestionBack">← Anterior</button><button type="button" id="fsjQuestionFinish">Registrar resposta NÃO</button></div><p class="muted">3/3</p>';
 form.after(fsjQuestionPage);
+const fsjTaskFlowFooter=document.createElement('nav');
+fsjTaskFlowFooter.id='fsjTaskFlowFooter';
+fsjTaskFlowFooter.setAttribute('aria-label','Navegação da execução da tarefa');
+fsjTaskFlowFooter.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-top:1px solid #d8e4da;background:#fff';
+fsjTaskFlowFooter.innerHTML='<button type="button" id="fsjTaskFlowBack" aria-label="Página anterior">←</button><strong id="fsjTaskFlowCount"></strong><button type="button" id="fsjTaskFlowNext" aria-label="Próxima página">→</button>';
+document.querySelector('main').after(fsjTaskFlowFooter);
+const fsjTaskFlowBack=document.getElementById('fsjTaskFlowBack'),fsjTaskFlowNext=document.getElementById('fsjTaskFlowNext'),fsjTaskFlowCount=document.getElementById('fsjTaskFlowCount');
+function fsjUpdateTaskFlow(){
+ const step=responseStep;
+ fsjTaskFlowCount.textContent=step==='evidence'?'2/2':step==='reason'?'2/3':step==='questions'?'3/3':'';
+ fsjTaskFlowBack.disabled=step==='detail';
+ fsjTaskFlowNext.disabled=step!=='reason';
+}
+fsjTaskFlowBack.onclick=()=>showResponseStep(responseStep==='questions'?'reason':'detail');
+fsjTaskFlowNext.onclick=()=>{if(responseStep==='reason')document.getElementById('reasonNext').click();};
+
 document.getElementById('fsjQuestionBack').onclick=()=>showResponseStep('reason');
 document.getElementById('fsjQuestionFinish').onclick=()=>submitTaskResponse();
 document.getElementById('reasonNext').onclick=()=>{
@@ -145,7 +161,7 @@ document.getElementById('reasonNext').onclick=()=>{
  showResponseStep('questions');
 };
 function fsjExecutionStarted(){return ['em_andamento','suspensa'].includes(info?.execucao?.estado);}
-function showResponseStep(step){if(info?.visitante){fsjVisitorDemo();return;}responseStep=step;fsjEvidenceScreen();taskScreen.hidden=step==='reason'||step==='evidence'||step==='questions';form.style.display=(step==='reason'||step==='evidence')?'block':'none';fsjQuestionPage.hidden=step!=='questions';document.getElementById('reasonNext').hidden=step!=='reason';document.getElementById('send').hidden=step==='reason';taskAnswer.hidden=step!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido));fsjSyncAnswerFields();document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:step==='questions'?fsjQuestionPage:(step==='reason'||step==='evidence')?form:taskScreen}));}
+function showResponseStep(step){if(info?.visitante){fsjVisitorDemo();return;}responseStep=step;fsjEvidenceScreen();taskScreen.hidden=step==='reason'||step==='evidence'||step==='questions';form.style.display=(step==='reason'||step==='evidence')?'block':'none';fsjQuestionPage.hidden=step!=='questions';document.getElementById('reasonNext').hidden=step!=='reason';document.getElementById('send').hidden=step==='reason';taskAnswer.hidden=step!=='detail'||(!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode)&&(!!info?.respondido));fsjSyncAnswerFields();fsjUpdateTaskFlow();document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:step==='questions'?fsjQuestionPage:(step==='reason'||step==='evidence')?form:taskScreen}));}
 function fsjSyncAnswerFields(){
  const mode=document.documentElement.dataset.fsjOwnerMode;
  const diagnostic=mode==='readonly'||mode==='checking'||responseSending;
