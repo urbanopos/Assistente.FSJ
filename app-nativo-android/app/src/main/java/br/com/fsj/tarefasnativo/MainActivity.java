@@ -29,7 +29,11 @@ public class MainActivity extends Activity {
   @Override public void onCreate(Bundle state) {
     super.onCreate(state);
     prefs=getSharedPreferences("fsj_access",MODE_PRIVATE);
-    String incoming=getIntent().getDataString();\n    if(incoming!=null && incoming.startsWith("fsj://vincular")){\n      String t=Uri.parse(incoming).getQueryParameter("token");\n      if(t!=null && t.matches("[a-fA-F0-9-]{36}"))incoming=PREFIX+"inicio-usuario.html#token="+t;\n    }
+    String incoming=getIntent().getDataString();
+    if(incoming!=null && incoming.startsWith("fsj://vincular")){
+      String t=Uri.parse(incoming).getQueryParameter("token");
+      if(t!=null && t.matches("[a-fA-F0-9-]{36}"))incoming=PREFIX+"inicio-usuario.html#token="+t;
+    }
     if(incoming!=null && allowed(incoming)){prefs.edit().putString("link",incoming).apply();}
     String link=prefs.getString("link",null);
     if(link==null){setup();} else {open(link);}
