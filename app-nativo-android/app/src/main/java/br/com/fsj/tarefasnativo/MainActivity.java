@@ -29,28 +29,17 @@ public class MainActivity extends Activity {
   @Override public void onCreate(Bundle state) {
     super.onCreate(state);
     prefs=getSharedPreferences("fsj_access",MODE_PRIVATE);
-    String incoming=getIntent().getDataString();
+    String incoming=getIntent().getDataString();\n    if(incoming!=null && incoming.startsWith("fsj://vincular")){\n      String t=Uri.parse(incoming).getQueryParameter("token");\n      if(t!=null && t.matches("[a-fA-F0-9-]{36}"))incoming=PREFIX+"inicio-usuario.html#token="+t;\n    }
     if(incoming!=null && allowed(incoming)){prefs.edit().putString("link",incoming).apply();}
     String link=prefs.getString("link",null);
     if(link==null){setup();} else {open(link);}
   }
   private void setup(){
-    LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);
-    l.setPadding(28,45,28,24);l.setBackgroundColor(Color.WHITE);
-    TextView title=new TextView(this);title.setText("Fazenda São José\nAssistente FSJ – Tarefas");
-    title.setTextSize(23);title.setTextColor(Color.rgb(24,83,54));l.addView(title);
-    TextView info=new TextView(this);
-    info.setText("Na primeira abertura, cole seu link individual recebido pelo WhatsApp. O aplicativo o guardará neste aparelho para os próximos acessos.");
-    info.setPadding(0,24,0,16);l.addView(info);
-    EditText input=new EditText(this);input.setHint("Cole seu link individual https://...");
-    input.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_URI);
-    input.setSingleLine(false);l.addView(input);
-    Button save=new Button(this);save.setText("Vincular e abrir");l.addView(save);
-    save.setOnClickListener(v->{String url=input.getText().toString().trim();
-      if(!allowed(url)){input.setError("Use o link individual do Assistente FSJ com token.");return;}
-      prefs.edit().putString("link",url).apply();open(url);
-    });
-    setContentView(l);
+    // Sem formulario de instalacao ou configuracao. O link individual abre
+    // o aplicativo via intent Android e fornece o token somente no aparelho.
+    Intent browser=new Intent(Intent.ACTION_VIEW,Uri.parse(PREFIX+"inicio-usuario.html"));
+    startActivity(browser);
+    finish();
   }
   private void open(String link){
     web=new WebView(this);
