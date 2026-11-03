@@ -601,7 +601,7 @@ let currentPage='dashboard',pageHistory=[],pageHistoryState=[];
 // Navegação leve: os dados gerais são carregados na entrada do sistema.
 // A troca de página não deve recarregar todas as tabelas da Armazenagem.
 let fsjNavSequence=0;
-function fsjAbrirNaoCumpridas(){navTo('fsjNaoCumpridas');fsjRenderNaoCumpridas();}
+function fsjAbrirNaoCumpridas(){navTo('fsjNaoCumpridas');const painel=document.getElementById('fsjNaoCumpridas');if(painel){painel.classList.remove('hidden');painel.hidden=false;}fsjRenderNaoCumpridas();}
 function fsjRenderNaoCumpridas(){
  const box=document.getElementById('fsjNaoCumpridasLista');if(!box)return;
  box.replaceChildren();
@@ -613,7 +613,7 @@ function fsjRenderNaoCumpridas(){
   if(['Concluída','Arquivado','Cancelada'].includes(t.status))continue;
   // Somente prazos explícitos e válidos. A data de criação não é vencimento.
   const due=t.prazo_final||t.data_limite||t.vencimento||t.prazo_execucao_fim||t.deadline||t.dueDate;
-  if(!due||!/^(\\d{4})-(\\d{2})-(\\d{2})/.test(String(due)))continue;
+  if(!due||!/^(\d{4})-(\d{2})-(\d{2})/.test(String(due)))continue;
   const end=String(due).slice(0,10),limit=new Date(end+'T12:00:00-03:00');
   if(!Number.isFinite(limit.getTime()))continue;
   const transfer=new Date(limit.getTime()+2*86400000).toISOString().slice(0,10);
