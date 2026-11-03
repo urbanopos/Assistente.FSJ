@@ -24,14 +24,30 @@ function folgasVirarSemana(){
 
 function fsjPreencherSeletorFolgas(){
  const select=document.getElementById('folgasPessoaSelect');if(!select)return;
+ const source=document.getElementById('personSelect');
  const previous=select.value;
+ // A página Pessoas é a referência operacional já funcional.
+ // Reutilizar exatamente seus identificadores, sem uma segunda lista paralela.
+ const sourceOptions=source?[...source.options].filter(o=>o.value):[];
  const people=Array.isArray(S.people)?S.people.filter(p=>p&&p.id):[];
- select.replaceChildren(new Option(people.length?'Selecione uma pessoa':'Nenhuma pessoa disponível',''));
- for(const person of [...people].sort((a,b)=>String(a.name||a.nick||'').localeCompare(String(b.name||b.nick||''),'pt-BR'))){
-  select.add(new Option(String(person.name||person.nick||person.id)+(person.active===false?' (inativo)':''),String(person.id)));
- }
- if(previous&&people.some(p=>String(p.id)===previous))select.value=previous;
+ const options=sourceOptions.length
+  ?sourceOptions.map(o=>({id:String(o.value),label:o.textContent||o.value}))
+  :[...people].sort((a,b)=>String(a.name||a.nick||'').localeCompare(String(b.name||b.nick||''),'pt-BR')).map(p=>({id:String(p.id),label:String(p.name||p.nick||p.id)+(p.active===false?' (inativo)':'')}));
+ const current=[...select.options].slice(1);
+ if(current.length===options.length&&current.every((o,i)=>o.value===options[i].id&&o.textContent===options[i].label))return;
+ if(document.activeElement===select&&select.options.length>1)return;
+ select.replaceChildren(new Option(options.length?'Selecione uma pessoa':'Cadastro de pessoas não carregado',''));
+ for(const item of options)select.add(new Option(item.label,item.id));
+ if(previous&&options.some(o=>o.id===previous))select.value=previous;
 }
+(function fsjVincularCadastroPessoas(){
+ const source=document.getElementById('personSelect');
+ if(!source)return;
+ const observer=new MutationObserver(()=>fsjPreencherSeletorFolgas());
+ observer.observe(source,{childList:true,subtree:true,characterData:true});
+ document.getElementById('folgasPessoaSelect')?.addEventListener('blur',()=>fsjPreencherSeletorFolgas());
+ fsjPreencherSeletorFolgas();
+})();
 let fsjFolgasPessoasPendente=null;
 async function fsjCarregarPessoasFolgas(){
  const select=document.getElementById('folgasPessoaSelect');if(!select)return;
