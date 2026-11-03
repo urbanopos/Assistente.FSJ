@@ -39,8 +39,9 @@ async function fsjCarregarPessoasFolgas(){
  if(fsjFolgasPessoasPendente)return fsjFolgasPessoasPendente;
  fsjFolgasPessoasPendente=(async()=>{
   try{
-   const rows=await api('/rest/v1/pessoas?select=id,nome,identificacao,ativo,receber_tarefas_whatsapp&order=nome.asc');
+   const rows=await api('/rest/v1/pessoas?select=*&order=nome.asc');
    if(!Array.isArray(rows))throw Error('Resposta inválida do cadastro de pessoas');
+   if(!rows.length){const status=document.getElementById('folgasStatus');if(status)status.textContent='A consulta de pessoas retornou vazia. Verifique o cadastro em Pessoas e Grupos.';}
    if(rows.length){
     const known=new Map((Array.isArray(S.people)?S.people:[]).map(p=>[String(p.id),p]));
     for(const row of rows){
