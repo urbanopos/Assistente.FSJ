@@ -1183,7 +1183,7 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
  }
  finally{if(tab&&!opened){try{if(tab.location.href==='about:blank'){tab.close();window.fsjEmergencyWhatsAppTab=null;}}catch{}}fsjIndividualBusy.delete(pid);fsjApplyManualState();}
 }
-async function fsjEmergenciaProprietario(){
+async async function fsjEmergenciaProprietario(){
  if(!fsjPainelPronto||window.fsjExited)return;
  const p=S.people.find(p=>p.id===document.getElementById('fsjEmergenciaPessoa').value);
  if(!p){alert('Selecione o destinatário da mensagem de emergência.');return;}
