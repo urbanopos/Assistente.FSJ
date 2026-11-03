@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="theme-color" content="#185c40">
+<title>Instalar aplicativo de tarefas | Fazenda São José</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#edf4ee;color:#173f2e;font:17px system-ui,Arial,sans-serif;padding:20px}
+main{width:min(100%,480px);background:#fff;border-radius:22px;box-shadow:0 12px 40px #163f3020;padding:28px 22px;text-align:center}
+img{width:92px;height:92px;object-fit:contain}h1{font-size:24px;margin:12px 0 4px}p{line-height:1.5}small{color:#5b7166}button,a.action{display:block;width:100%;border:0;border-radius:12px;background:#185c40;color:white;padding:16px 12px;text-decoration:none;font:700 18px system-ui;cursor:pointer;margin:20px 0 10px}
+#status{font-size:15px;min-height:3em;color:#355f48}ol{text-align:left;font-size:15px;line-height:1.6;padding-left:24px}li{margin:7px 0}a{color:#185c40}
+</style></head><body><main>
+<img src="./reserva/icon-ramo-r-v3-192.png" alt="Ramo da Fazenda São José">
+<h1>Fazenda São José</h1><p><strong>Assistente FSJ – Tarefas</strong></p>
+<p>Estamos preparando a instalação do aplicativo de tarefas da Fazenda São José.</p>
+<button id="install" type="button">Instalar aplicativo</button>
+<p id="status" role="status">Toque no botão para baixar o aplicativo Android.</p>
+<ol><li>Quando o download terminar, toque em <strong>Abrir</strong> na notificação do navegador.</li><li>Confirme <strong>Instalar</strong> quando o Android solicitar.</li><li>Abra o aplicativo pelo ícone da Fazenda São José.</li></ol>
+<small>O Android pode solicitar autorização para instalar aplicativos desta origem. Esta página não altera as permissões do seu perfil.</small>
+</main><script>
+(function(){
+const btn=document.getElementById('install'),status=document.getElementById('status');
+if(!/Android/i.test(navigator.userAgent)){btn.disabled=true;btn.textContent='Disponível para Android';status.textContent='Este instalador é destinado a celulares Android.';return;}
+btn.addEventListener('click',function(){
+status.textContent='Download iniciado. Quando terminar, toque em Abrir na notificação do celular para confirmar a instalação.';
+const a=document.createElement('a');a.href='./downloads/Assistente-FSJ-Android.apk';a.download='Assistente-FSJ-Android.apk';document.body.append(a);a.click();a.remove();
+});
+})();
+</script></body></html>
