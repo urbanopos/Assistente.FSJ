@@ -94,9 +94,13 @@ async function carregarFolgas(){
 
 function fsjRenderFolgas(){
  const select=document.getElementById('folgasPessoaSelect');if(!select)return;
+ // Não reconstruir o elemento select a cada atualização de tela: isso interrompe
+ // o menu nativo do navegador enquanto o Proprietário escolhe a pessoa.
  const chosen=select.value;
- select.innerHTML='<option value="">Selecione uma pessoa</option>'+[...S.people].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+(p.active===false?' (inativo)':'')+'</option>').join('');
- select.value=S.people.some(p=>p.id===chosen)?chosen:'';
+ const expected=(Array.isArray(S.people)?S.people:[]).filter(p=>p&&p.id);
+ const existing=[...select.options].slice(1).map(o=>o.value).join('|');
+ const wanted=expected.map(p=>String(p.id)).join('|');
+ if(existing!==wanted)fsjPreencherSeletorFolgas();
  document.getElementById('folgasPessoaDados').hidden=!select.value||!folgasAgenda;
  if(!folgasAgenda)return;
   const holidayToday=folgaHoje(),holidayStart=folgaSomar(holidayToday,-30),holidayEnd=folgaSomar(holidayToday,30);
