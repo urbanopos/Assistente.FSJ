@@ -61,6 +61,15 @@ async function fsjCarregarPessoasFolgas(){
  })();
  return fsjFolgasPessoasPendente;
 }
+// Evita que atualizações assíncronas fechem a lista nativa durante a escolha.
+document.getElementById('folgasPessoaSelect')?.addEventListener('pointerdown',()=>{
+ const select=document.getElementById('folgasPessoaSelect');
+ const status=document.getElementById('folgasStatus');
+ if(select.options.length<=1){
+  if(status)status.textContent='Consultando pessoas cadastradas para a folga semanal…';
+  void fsjCarregarPessoasFolgas();
+ }
+});
 document.getElementById('folgasPessoaSelect')?.addEventListener('focus',()=>{
  if(!document.getElementById('folgasPessoaSelect').options.length||document.getElementById('folgasPessoaSelect').options.length===1)void fsjCarregarPessoasFolgas();
 });
@@ -100,7 +109,7 @@ function fsjRenderFolgas(){
  const expected=(Array.isArray(S.people)?S.people:[]).filter(p=>p&&p.id);
  const existing=[...select.options].slice(1).map(o=>o.value).join('|');
  const wanted=expected.map(p=>String(p.id)).join('|');
- if(existing!==wanted)fsjPreencherSeletorFolgas();
+ if(existing!==wanted&&document.activeElement!==select)fsjPreencherSeletorFolgas();
  document.getElementById('folgasPessoaDados').hidden=!select.value||!folgasAgenda;
  if(!folgasAgenda)return;
   const holidayToday=folgaHoje(),holidayStart=folgaSomar(holidayToday,-30),holidayEnd=folgaSomar(holidayToday,30);
