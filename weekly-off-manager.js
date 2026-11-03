@@ -74,7 +74,17 @@ async function carregarFolgas(){
   const agenda=await folgasPost({action:'manager-calendar',semana:input.value});
   if(request!==folgasConsulta)return;
   if(folgasVirarSemana()){carregarFolgas();return;}
-  folgasAgenda=agenda;input.value=folgasAgenda.semana;
+  folgasAgenda=agenda;
+  if(Array.isArray(agenda.pessoas)){
+   const known=new Map((Array.isArray(S.people)?S.people:[]).map(p=>[String(p.id),p]));
+   for(const row of agenda.pessoas){
+    const id=String(row.id),old=known.get(id)||{};
+    known.set(id,{...old,id,name:row.nome||old.name||row.identificacao||id,nick:row.identificacao||old.nick||row.nome,active:row.ativo!==false,whatsapp7h:row.receber_tarefas_whatsapp===true});
+   }
+   S.people=[...known.values()];
+   fsjPreencherSeletorFolgas();
+  }
+  input.value=folgasAgenda.semana;
   try{localStorage.setItem(folgasReferenciaKey,JSON.stringify({ciclo:folgasCiclo,semana:folgasAgenda.semana}));}catch{}
 
   fsjRenderFolgas();
