@@ -1536,14 +1536,21 @@ async function carregarArmazenagem(){document.dispatchEvent(new CustomEvent('fsj
 const fsjAbaValida=fsjAbaSalva&&document.querySelector('#gestor>div#'+CSS.escape(fsjAbaSalva));
 const fsjDestino=fsjAcessoEmergencial()?'disparoEmergencia':fsjAbaValida?fsjAbaSalva:'dashboard';
 const fsjPessoaSalva=(()=>{try{return sessionStorage.getItem('fsj_ultima_pessoa_v1')}catch(e){return null}})();
-if(fsjDestino==='fichaPessoa'&&fsjPessoaSalva&&S.people.some(p=>p.id===fsjPessoaSalva)){
- editPerson(fsjPessoaSalva);
- navTo('fichaPessoa',undefined,false);
-}else{
- navTo(fsjDestino,undefined,false);
- if(fsjDestino==='cadPessoas'&&fsjPessoaSalva&&S.people.some(p=>p.id===fsjPessoaSalva))selectPerson(fsjPessoaSalva);
+try{
+ if(fsjDestino==='fichaPessoa'&&fsjPessoaSalva&&S.people.some(p=>p.id===fsjPessoaSalva)){
+  editPerson(fsjPessoaSalva);
+  navTo('fichaPessoa',undefined,false);
+ }else{
+  navTo(fsjDestino,undefined,false);
+  if(fsjDestino==='cadPessoas'&&fsjPessoaSalva&&S.people.some(p=>p.id===fsjPessoaSalva))selectPerson(fsjPessoaSalva);
+ }
+ if(!fsjAcessoEmergencial())fsjRestoreAppReturn();
+}catch(navigationError){
+ console.error('FSJ: falha na restauração da navegação; preservando acesso autenticado',navigationError);
+ try{sessionStorage.removeItem('fsj_ultima_aba_v1');}catch(e){}
+ try{navTo('dashboard',undefined,false);}catch(e){console.error('FSJ: falha no retorno à tela inicial',e);}
+ loginStatus.textContent='Acesso autenticado. A última tela apresentou erro; utilize os botões verdes para navegar.';
 }
-if(!fsjAcessoEmergencial())fsjRestoreAppReturn();
 try{
  const scroll=JSON.parse(sessionStorage.getItem('fsj_ultima_rolagem_v1')||'null');
  if(scroll&&scroll.page===fsjDestino&&Number.isFinite(scroll.y)){
