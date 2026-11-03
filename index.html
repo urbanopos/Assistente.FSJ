@@ -1203,8 +1203,8 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
   fallback.rel='noopener noreferrer';
   fallback.referrerPolicy='no-referrer';
   fallback.textContent='Abrir conversa de '+(control.p.nick||control.p.name)+' com a mensagem';
-  fallback.hidden=false;
-  // Navegação ocorre pelo clique direto no link, sem redirecionamento assíncrono.
+  fallback.hidden=true;
+  window.location.assign(url);
   control.prepared=true;control.confirm.hidden=fsjManualConfirmed(pid);
 
   status.textContent=(d.confirmado||d.ja_registrado?'Já há envio registrado hoje; confira a conversa para evitar duplicidade. ':'')+'Clique em Abrir conversa abaixo para direcionar o WhatsApp ao destinatário com a mensagem preenchida.';
