@@ -22,30 +22,48 @@ function folgasVirarSemana(){
  return true;
 }
 
-async function fsjCarregarPessoasFolgas(){
+function fsjPreencherSeletorFolgas(){
  const select=document.getElementById('folgasPessoaSelect');if(!select)return;
  const previous=select.value;
- if(!S.people.length){select.replaceChildren(new Option('Carregando pessoas...',''));}
- try{
-  const rows=await api('/rest/v1/pessoas?select=*&order=nome.asc');
-  if(Array.isArray(rows)&&rows.length){
-   const known=new Map(S.people.map(p=>[String(p.id),p]));
-   for(const row of rows){
-    const id=String(row.id),old=known.get(id)||{};
-    known.set(id,{...old,id,name:row.nome||old.name||row.identificacao||id,nick:row.identificacao||old.nick||row.nome,active:row.ativo!==false,whatsapp7h:row.receber_tarefas_whatsapp===true});
-   }
-   S.people=[...known.values()];
-  }
-  fsjRenderFolgas();
-  if(previous&&S.people.some(p=>p.id===previous)){select.value=previous;fsjRenderFolgas();}
-  if(!S.people.length)select.replaceChildren(new Option('Nenhuma pessoa cadastrada',''));
- }catch(e){
-  if(S.people.length)fsjRenderFolgas();
-  else select.replaceChildren(new Option('Falha ao consultar pessoas — clique em Atualizar calendário',''));
-  const status=document.getElementById('folgasStatus');if(status)status.textContent='Não foi possível consultar a lista de pessoas: '+e.message;
+ const people=Array.isArray(S.people)?S.people.filter(p=>p&&p.id):[];
+ select.replaceChildren(new Option(people.length?'Selecione uma pessoa':'Nenhuma pessoa disponível',''));
+ for(const person of [...people].sort((a,b)=>String(a.name||a.nick||'').localeCompare(String(b.name||b.nick||''),'pt-BR'))){
+  select.add(new Option(String(person.name||person.nick||person.id)+(person.active===false?' (inativo)':''),String(person.id)));
  }
+ if(previous&&people.some(p=>String(p.id)===previous))select.value=previous;
 }
-
+let fsjFolgasPessoasPendente=null;
+async function fsjCarregarPessoasFolgas(){
+ const select=document.getElementById('folgasPessoaSelect');if(!select)return;
+ fsjPreencherSeletorFolgas();
+ if(fsjFolgasPessoasPendente)return fsjFolgasPessoasPendente;
+ fsjFolgasPessoasPendente=(async()=>{
+  try{
+   const rows=await api('/rest/v1/pessoas?select=id,nome,identificacao,ativo,receber_tarefas_whatsapp&order=nome.asc');
+   if(!Array.isArray(rows))throw Error('Resposta inválida do cadastro de pessoas');
+   if(rows.length){
+    const known=new Map((Array.isArray(S.people)?S.people:[]).map(p=>[String(p.id),p]));
+    for(const row of rows){
+     const id=String(row.id),old=known.get(id)||{};
+     known.set(id,{...old,id,name:row.nome||old.name||row.identificacao||id,nick:row.identificacao||old.nick||row.nome,active:row.ativo!==false,whatsapp7h:row.receber_tarefas_whatsapp===true});
+    }
+    S.people=[...known.values()];
+   }
+   fsjPreencherSeletorFolgas();
+   if(folgasAgenda)fsjRenderFolgas();
+   const status=document.getElementById('folgasStatus');
+   if(!rows.length&&status)status.textContent='Nenhuma pessoa cadastrada foi retornada pela Armazenagem.';
+  }catch(e){
+   fsjPreencherSeletorFolgas();
+   const status=document.getElementById('folgasStatus');
+   if(status)status.textContent='Não foi possível consultar as pessoas cadastradas: '+e.message;
+  }finally{fsjFolgasPessoasPendente=null}
+ })();
+ return fsjFolgasPessoasPendente;
+}
+document.getElementById('folgasPessoaSelect')?.addEventListener('focus',()=>{
+ if(!document.getElementById('folgasPessoaSelect').options.length||document.getElementById('folgasPessoaSelect').options.length===1)void fsjCarregarPessoasFolgas();
+});
 async function carregarFolgas(){
  fsjCarregarPessoasFolgas();
  folgasVirarSemana();
