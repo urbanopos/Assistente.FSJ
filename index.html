@@ -1207,7 +1207,7 @@ async function fsjEnviarEmergencialIntegrado(pid,button,status){
   window.location.assign(url);
   control.prepared=true;control.confirm.hidden=fsjManualConfirmed(pid);
 
-  status.textContent=(d.confirmado||d.ja_registrado?'Já há envio registrado hoje; confira a conversa para evitar duplicidade. ':'')+'Clique em Abrir conversa abaixo para direcionar o WhatsApp ao destinatário com a mensagem preenchida.';
+  status.textContent=(d.confirmado||d.ja_registrado?'Já há envio registrado hoje; confira a conversa para evitar duplicidade. ':'')+'WhatsApp aberto com a mensagem preenchida. Confira o destinatário e pressione Enviar no WhatsApp.';
   }catch(e){let message=e.message;try{message=JSON.parse(message).erro||message}catch{}
   control.prepared=false;control.confirm.hidden=true;
   if(/Envio bloqueado/i.test(message)){
