@@ -927,6 +927,7 @@ function fsjSelecionarDiaFolga(d){
  if(s){s.replaceChildren(...motivos.map(([valor,rotulo])=>new Option(rotulo,valor)));}
  const motivoSalvo=personDayReasons[d]||'';
  s.value=motivoSalvo.startsWith('Folga compensatória')?'Folga compensatória':motivoSalvo;
+ const antigoTipo=document.getElementById('fsjCalendarTypeBar');if(antigoTipo)antigoTipo.remove();
  const origem=document.getElementById('fsjFolgaFeriadoOrigemLabel');
  const origemSalva=motivoSalvo.match(/feriado compensado: (\d{4}-\d{2}-\d{2})/i);
  document.getElementById('fsjFolgaFeriadoOrigem').value=origemSalva?.[1]||'';
@@ -976,7 +977,7 @@ function renderPersonDatesOff(){
  document.getElementById('fsjMesFolgasTitulo').textContent=primeiro.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
  let html=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(x=>'<span class="fsj-cal-head">'+x+'</span>').join('');
  for(let i=0;i<inicio;i++)html+='<span></span>';
- for(let dia=1;dia<=dias;dia++){const d=fsjMesFolgas+'-'+String(dia).padStart(2,'0'),motivo=personDayReasons[d]||'';html+='<button type="button" class="fsj-dia-folga'+(personDatesOff.includes(d)?' marcado':'')+'" data-dia="'+d+'" title="'+esc(motivo||'Escolher motivo')+'" aria-label="'+dia+' '+esc(motivo)+'">'+dia+(motivo?'<small>'+esc(motivo)+'</small>':'')+'</button>';}
+ for(let dia=1;dia<=dias;dia++){const d=fsjMesFolgas+'-'+String(dia).padStart(2,'0'),motivo=personDayReasons[d]||'',compensatoria=motivo.startsWith('Folga compensatória'),feriado=compensatoria?motivo.match(/feriado compensado: (\d{4}-\d{2}-\d{2})/i)?.[1]:null,rotulo=compensatoria?'Folga Compensatória':motivo,descricao=compensatoria?(feriado?'Folga Compensatória — feriado compensado em '+feriado.split('-').reverse().join('/'):'Folga Compensatória'):motivo;html+='<button type="button" class="fsj-dia-folga'+(personDatesOff.includes(d)?' marcado':'')+'" data-dia="'+d+'" title="'+esc(descricao||'Escolher motivo')+'" aria-label="'+dia+' '+esc(descricao)+'">'+dia+(rotulo?'<small>'+esc(rotulo)+'</small>':'')+'</button>';}
  cal.innerHTML=html;
  cal.querySelectorAll('button[data-dia]').forEach(btn=>{btn.addEventListener('click',e=>{fsjSelecionarDiaFolga(btn.dataset.dia);});btn.addEventListener('contextmenu',e=>{e.preventDefault();fsjSelecionarDiaFolga(btn.dataset.dia);});});
 }
