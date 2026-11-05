@@ -923,6 +923,8 @@ function fsjSelecionarDiaFolga(d){
  fsjDataFolgaAtual=d;
  document.getElementById('fsjFolgaDataEscolhida').textContent=d.split('-').reverse().join('/');
  const s=document.getElementById('fsjFolgaMotivo');
+ const motivos=[['','Selecione o motivo'],['Folga semanal','Folga Semanal'],['Feriado','Feriado'],['Folga compensatória','Folga Compensatória'],['Férias','Férias'],['__remover','Remover marcação']];
+ if(s){s.replaceChildren(...motivos.map(([valor,rotulo])=>new Option(rotulo,valor)));}
  s.value=personDayReasons[d]||'';
  const origem=document.getElementById('fsjFolgaFeriadoOrigemLabel');
  origem.hidden=s.value!=='Folga compensatória';
