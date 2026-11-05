@@ -41,7 +41,7 @@ function fsjRenderOpenTasks(tasks){
  }
 }
 
-const params=new URLSearchParams(location.hash.slice(1));
+const params=new URLSearchParams(location.hash.slice(1));const queryParams=new URLSearchParams(location.search);if(!params.get('token')&&queryParams.get('token'))params.set('token',queryParams.get('token'));
 const token=params.get('token')||'';
 /* Links antigos do WhatsApp entram primeiro no extrato individual; retorno do extrato ou de resposta permanece no quadro. */
 if(token && params.get('origem')!=='inicio' && !params.has('filtro') && !params.has('pagina') && !params.has('gestor')){location.replace('./inicio-usuario.html#token='+encodeURIComponent(token));}
