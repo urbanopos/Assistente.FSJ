@@ -1,7 +1,7 @@
 // Calendário mensal: grava somente datas/motivos da pessoa, sob RLS existente.
 let fsjCalendarContext=null,fsjCalendarBusy=false,fsjCalendarDirty=false;
 async function fsjPrepararCalendario(){
- const modal=document.getElementById('fsjCalendarioModal');
+ const modal=document.getElementById('fsjFolgasCalendarioLateral');
  let box=document.getElementById('fsjCalendarControls');
  if(!box){
   box=document.createElement('div');box.id='fsjCalendarControls';
@@ -9,29 +9,27 @@ async function fsjPrepararCalendario(){
   modal.prepend(box);
   const actions=document.createElement('div');actions.className='row';actions.style.cssText='gap:8px;margin:12px 0;flex-wrap:wrap';
   actions.innerHTML='<button type="button" class="primary" id="fsjCalendarSave">Salvar datas</button><button type="button" id="fsjCalendarReport">Consultar relatório</button>';
-  modal.insertBefore(actions,document.getElementById('fsjFecharCalendario'));
+  modal.appendChild(actions);
   document.getElementById('fsjCalendarSave').onclick=fsjSalvarDatasCalendario;
-  document.getElementById('fsjCalendarReport').onclick=()=>{if(fsjCalendarDirty){fsjCalendarStatus('Salve as datas antes de consultar o relatório.');return;}modal.close();fsjAbrirRelatorioFolgas();};
+  document.getElementById('fsjCalendarReport').onclick=()=>{if(fsjCalendarDirty){fsjCalendarStatus('Salve as datas antes de consultar o relatório.');return;}fsjAbrirRelatorioFolgas();};
   document.getElementById('fsjCalendarPerson').onchange=async e=>{
    if(fsjCalendarDirty){e.target.value=fsjCalendarContext?.id||'';fsjCalendarStatus('Salve as datas antes de trocar a pessoa.');return;}
    await fsjCarregarPessoaCalendario(e.target.value);
   };
-  modal.addEventListener('cancel',e=>{if(fsjCalendarBusy||fsjCalendarDirty){e.preventDefault();fsjCalendarStatus('Salve as datas antes de fechar o calendário.');}});
-  modal.addEventListener('close',()=>{if(fsjCalendarContext?.backup){personDatesOff=fsjCalendarContext.backup.dates;personDayReasons=fsjCalendarContext.backup.reasons;renderPersonDatesOff();}fsjCalendarContext=null;});
-  document.getElementById('fsjFecharCalendario').onclick=()=>{if(fsjCalendarBusy||fsjCalendarDirty){fsjCalendarStatus('Salve as datas antes de fechar o calendário.');return;}modal.close();};
+
  }
- if(fsjCalendarContext)return;
- const agenda=currentPage==='folgasGestor';
+ if(fsjCalendarContext){const selected=document.getElementById('folgasPessoaSelect')?.value||'';if(selected!==fsjCalendarContext.id && !fsjCalendarDirty)await fsjCarregarPessoaCalendario(selected);return;}
+ const agenda=true;
  fsjCalendarContext={id:'',backup:agenda?{dates:[...personDatesOff],reasons:{...personDayReasons}}:null};
  const select=document.getElementById('fsjCalendarPerson');
  select.innerHTML='<option value="">Selecione uma pessoa</option>'+[...S.people].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('');
- select.disabled=!agenda;
- select.value=agenda?document.getElementById('folgasPessoaSelect').value:document.getElementById('pid').value;
+ select.disabled=true;box.hidden=true;
+ select.value=document.getElementById('folgasPessoaSelect').value;
  if(agenda)await fsjCarregarPessoaCalendario(select.value);
  else{fsjCalendarContext.id=select.value;fsjCalendarDirty=true;fsjCalendarStatus('Confira as datas e clique em Salvar datas.');}
 }
 function fsjCalendarStatus(text){document.getElementById('fsjCalendarStatus').textContent=text;}
-function fsjCalendarSetBusy(busy){fsjCalendarBusy=busy;document.getElementById('fsjCalendarSave').disabled=busy||!fsjCalendarContext?.id;document.getElementById('fsjCalendarPerson').disabled=busy||!fsjCalendarContext?.backup;document.getElementById('fsjCalendarioFolgas').inert=busy;}
+function fsjCalendarSetBusy(busy){fsjCalendarBusy=busy;document.getElementById('fsjCalendarSave').disabled=busy||!fsjCalendarContext?.id;document.getElementById('fsjCalendarPerson').disabled=true;document.getElementById('fsjCalendarioFolgas').inert=busy;}
 async function fsjCarregarPessoaCalendario(id){
  fsjCalendarContext.id=id;personDatesOff=[];personDayReasons={};fsjCalendarDirty=false;renderPersonDatesOff();
  fsjCalendarSetBusy(true);fsjCalendarStatus(id?'Consultando datas salvas...':'Selecione a pessoa para marcar as datas.');
