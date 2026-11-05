@@ -1,5 +1,5 @@
 // Calendário mensal: grava somente datas/motivos da pessoa, sob RLS existente.
-let fsjCalendarContext=null,fsjCalendarBusy=false,fsjCalendarDirty=false;
+let fsjCalendarContext=null,fsjCalendarBusy=false,fsjCalendarDirty=false,fsjCalendarPendingCompensation=null;
 async function fsjPrepararCalendario(){
  const modal=document.getElementById('fsjFolgasCalendarioLateral');
  let box=document.getElementById('fsjCalendarControls');
@@ -48,6 +48,7 @@ async function fsjSalvarDatasCalendario(){
   const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,folgas_datas,folgas_motivos',{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({folgas_datas:dates,folgas_motivos:reasons})});
   if(rows?.length!==1||rows[0].id!==id)throw Error('Gravação não confirmada. Confira sua sessão.');
   const p=S.people.find(p=>p.id===id);if(p){p.datesOff=[...(rows[0].folgas_datas||[])];p.dayOffReasons={...(rows[0].folgas_motivos||{})};}save();
+  if(fsjCalendarPendingCompensation){const c=fsjCalendarPendingCompensation;await folgasPost({action:'compensation-set',pessoa_id:id,feriado:c.feriado,folga:c.folga});fsjCalendarPendingCompensation=null;}
   fsjCalendarDirty=false;fsjCalendarStatus('Datas salvas na armazenagem central para '+(p?.name||'a pessoa selecionada')+'.');
  }catch(e){fsjCalendarStatus('Não foi possível salvar. As marcações foram preservadas: '+e.message);}finally{fsjCalendarSetBusy(false);}
 }
