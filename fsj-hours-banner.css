@@ -20,11 +20,3 @@ html.fsj-afterhours main>:not(#fsjHoursBanner):not(#fsjHoursTv),html.fsj-afterho
 #fsjHoursTv[hidden]{display:none!important}
 html.fsj-afterhours main>#fsjHoursTv{display:block!important}
 
-/* Correção de geometria móvel: nenhum conteúdo pode ampliar o aviso horizontalmente. */
-html.fsj-afterhours,body.fsj-afterhours{max-width:100%;overflow-x:hidden!important}
-html.fsj-afterhours main{box-sizing:border-box!important;min-width:0!important;max-width:100%!important;overflow-x:hidden!important}
-html.fsj-afterhours #fsjHoursBanner{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;margin:12px 0!important;padding:18px!important;overflow-wrap:anywhere!important;white-space:normal!important}
-html.fsj-afterhours #fsjHoursBanner .fsj-hours-clock{flex:0 0 auto!important}
-html.fsj-afterhours #fsjHoursBanner .fsj-hours-copy{display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-wrap:anywhere!important}
-html.fsj-afterhours #fsjHoursBanner .fsj-hours-text{font-size:clamp(17px,4.5vw,22px)!important;line-height:1.4!important;text-align:left!important;overflow-wrap:anywhere!important;white-space:normal!important}
-html.fsj-afterhours #fsjHoursTv{display:block!important;position:relative!important;box-sizing:border-box!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;margin:12px 0 0!important;padding:14px!important}
