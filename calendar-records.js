@@ -49,7 +49,7 @@ async function fsjSalvarDatasCalendario(){
   if(rows?.length!==1||rows[0].id!==id)throw Error('Gravação não confirmada. Confira sua sessão.');
   const p=S.people.find(p=>p.id===id);if(p){p.datesOff=[...(rows[0].folgas_datas||[])];p.dayOffReasons={...(rows[0].folgas_motivos||{})};}save();
   if(fsjCalendarPendingCompensation){const c=fsjCalendarPendingCompensation;await folgasPost({action:'compensation-set',pessoa_id:id,feriado:c.feriado,folga:c.folga});fsjCalendarPendingCompensation=null;}
-  fsjCalendarDirty=false;fsjCalendarStatus('Datas salvas na armazenagem central para '+(p?.name||'a pessoa selecionada')+'.');
+  fsjCalendarDirty=false;const nome=p?.name||document.getElementById('folgasPessoaSelect')?.selectedOptions?.[0]?.textContent||'funcionário';const mensagem='Folga registrada com sucesso para '+nome+'. Registro confirmado na armazenagem central.';fsjCalendarStatus(mensagem);window.alert(mensagem);
  }catch(e){fsjCalendarStatus('Não foi possível salvar. As marcações foram preservadas: '+e.message);}finally{fsjCalendarSetBusy(false);}
 }
 function fsjAbrirRelatorioFolgas(){
