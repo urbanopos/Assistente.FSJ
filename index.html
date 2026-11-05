@@ -928,7 +928,7 @@ function fsjSelecionarDiaFolga(d){
  const motivoSalvo=personDayReasons[d]||'';
  s.value=motivoSalvo.startsWith('Folga compensatória')?'Folga compensatória':motivoSalvo;
  const origem=document.getElementById('fsjFolgaFeriadoOrigemLabel');
- const origemSalva=motivoSalvo.match(/feriado compensado: (\\d{4}-\\d{2}-\\d{2})/i);
+ const origemSalva=motivoSalvo.match(/feriado compensado: (\d{4}-\d{2}-\d{2})/i);
  document.getElementById('fsjFolgaFeriadoOrigem').value=origemSalva?.[1]||'';
  origem.hidden=s.value!=='Folga compensatória';
  s.onchange=()=>{origem.hidden=s.value!=='Folga compensatória';};
