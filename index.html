@@ -910,6 +910,7 @@ function fsjAbrirCalendarioFolgas(){
  if(!panel.contains(title.parentElement))panel.appendChild(title.parentElement);
  if(!panel.contains(cal))panel.appendChild(cal);
  if(editor&&!panel.contains(editor))panel.appendChild(editor);
+ if(editor)editor.hidden=true; // Exibir somente após clique em um dia do calendário.
  const dates=document.getElementById('pdayoffdates');
  if(dates&&!panel.contains(dates))panel.appendChild(dates);
  panel.hidden=false;
@@ -923,6 +924,7 @@ function renderPersonDatesOff(){
  const root=document.getElementById('pdayoffdates');if(!root)return;
  root.replaceChildren(); // Datas e motivos já aparecem nos próprios dias do calendário.
  const cal=document.getElementById('fsjCalendarioFolgas');if(!cal)return;
+ const editor=document.getElementById('fsjFolgaMotivoEditor');if(editor)editor.hidden=true;
  const [ano,mes]=fsjMesFolgas.split('-').map(Number);const primeiro=new Date(ano,mes-1,1);const dias=new Date(ano,mes,0).getDate();const inicio=primeiro.getDay();
  document.getElementById('fsjMesFolgasTitulo').textContent=primeiro.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
  let html=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(x=>'<span class="fsj-cal-head">'+x+'</span>').join('');
