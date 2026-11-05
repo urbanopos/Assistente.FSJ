@@ -20,6 +20,6 @@
   let r=await ownership(jwt);if(r.status===401){jwt=await restore();if(!jwt)return;r=await ownership(jwt);}
   if(!r.ok)return;const rows=await r.json();
   // A política do banco exige auth.uid() = auth_user_id; nome e token de tarefa não promovem ninguém.
-  if(!individualLink()&&rows.length===1&&rows[0].pessoa_id)location.replace('./index.html?fsj_perfil=proprietario');
+  if(!individualLink()&&rows.length===1&&rows[0].pessoa_id){/* A tela individual nunca promove automaticamente para Proprietário. A entrada administrativa deve ser explícita e autenticada na página própria. */return;}
  }catch{/* Sem validação, preservar o acesso individual e sua mensagem de estado. */}})();
 })();
