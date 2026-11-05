@@ -21,6 +21,7 @@
   }else{open=!open;frame.parentElement.hidden=!open;}
  };
 
+ window.fsjOpenTv=()=>{if(!button.hidden)button.click();else if(notice)notice.textContent='Verificando autorização para a TV FSJ...';else window.alert('Aguarde a validação do acesso à TV FSJ.');};
  window.addEventListener('message',e=>{
   if(!frame||e.source!==frame.contentWindow||e.origin!==origin)return;
   if(e.data?.type==='fsj-tv-tasks'){open=false;frame.parentElement.hidden=true;document.dispatchEvent(new CustomEvent('fsj:page-target',{detail:document.getElementById('tasks')}));return;}
