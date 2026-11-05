@@ -1871,11 +1871,31 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('fsj:ownership-updated',sync);document.addEventListener('DOMContentLoaded',sync);setInterval(sync,2500);
 })();
 </script>
-<script id="fsjDesktopTaskPaginationDefault">
+<style id="fsjResponsiveViewportDefault">
+/* DEFAULT: densidade adaptativa por plataforma; não interfere na versão Celular. */
+@media (min-width:701px){
+ #gestor{max-width:100%;box-sizing:border-box}
+ #gestor .card{box-sizing:border-box;max-width:100%;padding:clamp(10px,1.2vw,20px);margin-block:clamp(6px,1vh,12px)}
+ #gestor .card h2{margin-top:0;margin-bottom:clamp(7px,1vh,14px)}
+ #gestor .card h3{margin-block:clamp(6px,1vh,12px)}
+ #gestor .row{row-gap:8px}
+ #gestor .table{max-width:100%;overflow-x:auto}
+ #gestor table{width:100%;border-collapse:collapse}
+ #gestor th,#gestor td{padding:clamp(5px,.7vh,10px) clamp(5px,.65vw,12px);vertical-align:middle}
+ #gestor .fsj-task-pagination{position:sticky;bottom:4px;z-index:5;background:var(--bg,#fff);border:1px solid #d3e1da;border-radius:12px}
+}
+@media (min-width:701px) and (max-height:800px){
+ #gestor .card{padding:9px 12px;margin-block:5px}
+ #gestor .card h2{font-size:1.25rem}
+ #gestor .card h3{font-size:1.05rem}
+ #gestor p{margin-block:6px}
+ #gestor th,#gestor td{padding:4px 7px}
+}
+</style><script id="fsjDesktopTaskPaginationDefault">
 /* REGRA DEFAULT FSJ DESKTOP: toda relação de tarefas com mais de cinco itens deve oferecer navegação. */
 (function(){
- const PAGE_SIZE=5;
  const states=new WeakMap();
+ function pageSize(){if(window.innerWidth<=700)return 5;const available=Math.max(200,window.innerHeight-340);return Math.max(2,Math.min(12,Math.floor(available/62)));}
  function apply(host){
   if(!host||!host.isConnected)return;
   const rows=[...host.children].filter(el=>el.matches('tr,article'));
@@ -1885,6 +1905,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
   if(!target)return;
   let state=states.get(host);
   if(!state){state={page:0,bar:document.createElement('nav')};states.set(host,state);state.bar.className='fsj-task-pagination';state.bar.setAttribute('aria-label','Navegação das tarefas');state.bar.style.cssText='display:flex;justify-content:center;align-items:center;gap:18px;margin:12px 0;padding:8px;';}
+  const PAGE_SIZE=pageSize();
   const total=Math.ceil(rows.length/PAGE_SIZE);
   state.page=Math.min(state.page,Math.max(0,total-1));
   rows.forEach((el,i)=>{el.hidden=total>1&&(i<state.page*PAGE_SIZE||i>=(state.page+1)*PAGE_SIZE);if(el.hidden)el.style.display='none';else el.style.removeProperty('display');});
@@ -1903,6 +1924,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh();});};
  const observer=new MutationObserver(records=>{if(records.some(r=>!r.target.closest?.('.fsj-task-pagination')&&[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.classList?.contains('fsj-task-pagination'))))schedule();});
  function start(){observer.observe(document.getElementById('gestor')||document.body,{subtree:true,childList:true});schedule();}
+ window.addEventListener('resize',schedule,{passive:true});
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 </script></body></html>
