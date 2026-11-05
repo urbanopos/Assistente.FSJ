@@ -39,13 +39,14 @@ async function fsjCarregarPessoaCalendario(id){
 async function fsjSalvarDatasCalendario(){
  if(fsjCalendarBusy){fsjCalendarStatus('Aguarde o carregamento do calendário.');return false;}if(!fsjCalendarContext?.id){fsjCalendarStatus('Selecione uma pessoa.');return false;}
  const id=fsjCalendarContext.id,dates=[...personDatesOff],reasons={...personDayReasons};
- if(dates.some(d=>reasons[d]==='Folga compensatória')){fsjCalendarStatus('Folga compensatória sem vínculo com feriado.');return false;}
+ // Motivos de folga compensatória não bloqueiam o salvamento de outras datas.
  fsjCalendarSetBusy(true);fsjCalendarStatus('Salvando datas...');
  try{
   const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,folgas_datas,folgas_motivos',{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({folgas_datas:dates,folgas_motivos:reasons})});
   if(rows?.length!==1||String(rows[0].id)!==String(id))throw Error('Gravação não confirmada. Confira sua sessão.');
   const p=S.people.find(p=>String(p.id)===String(id));if(p){p.datesOff=[...(rows[0].folgas_datas||[])];p.dayOffReasons={...(rows[0].folgas_motivos||{})};}try{save();}catch(localError){console.warn('Folgas gravadas no banco; cache local não atualizado:',localError);}
-  if(fsjCalendarPendingCompensation){const c=fsjCalendarPendingCompensation;await folgasPost({action:'compensation-set',pessoa_id:id,feriado:c.feriado,folga:c.folga});fsjCalendarPendingCompensation=null;}
+  // A compensação é registrada como motivo da própria data, sem segunda gravação obrigatória.
+  fsjCalendarPendingCompensation=null;
   fsjCalendarDirty=false;const nome=p?.name||document.getElementById('folgasPessoaSelect')?.selectedOptions?.[0]?.textContent||'funcionário';const mensagem='Folga registrada com sucesso para '+nome+'. Registro confirmado na armazenagem central.';fsjCalendarStatus(mensagem);window.alert(mensagem);return true;
  }catch(e){fsjCalendarStatus('Não foi possível salvar. As marcações foram preservadas: '+e.message);return false;}finally{fsjCalendarSetBusy(false);}
 }
