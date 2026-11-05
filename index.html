@@ -887,6 +887,18 @@ let personDatesOff=[];
 let personDayReasons={};
 let fsjMesFolgas=(function(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})(),fsjDataFolgaAtual='';
 const fsjMotivosFolga=['Folga semanal','Folga compensatória','Feriado'];
+/* fsj-folgas-home-calendar-20261105: o botão principal abre o calendário mensal existente, sem alterar registros. */
+document.addEventListener('click',function fsjAbrirFolgasPeloMenu(ev){
+ const btn=ev.target.closest?.('#fsjHomeLeavesButton');
+ if(!btn)return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ if(typeof fsjOwnerVerified!=='undefined' && fsjOwnerVerified!==true)return;
+ if(typeof fsjSimpleGo==='function')fsjSimpleGo('folgasGestor');
+ else if(typeof navTo==='function')navTo('folgasGestor');
+ const pessoa=document.getElementById('folgasPessoaSelect');
+ if(pessoa&&typeof fsjCarregarPessoasFolgas==='function')void fsjCarregarPessoasFolgas();
+ if(typeof fsjAbrirCalendarioFolgas==='function')fsjAbrirCalendarioFolgas();
+},true);
 function fsjAbrirCalendarioFolgas(){
  const agora=new Date();fsjMesFolgas=agora.getFullYear()+'-'+String(agora.getMonth()+1).padStart(2,'0');
  const editor=document.getElementById('fsjFolgaMotivoEditor');
