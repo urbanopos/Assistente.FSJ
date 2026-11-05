@@ -26,7 +26,7 @@ async function fsjPrepararCalendario(){
  fsjCalendarContext={id:'',backup:agenda?{dates:[...personDatesOff],reasons:{...personDayReasons}}:null};
  const select=document.getElementById('fsjCalendarPerson');
  select.innerHTML='<option value="">Selecione uma pessoa</option>'+[...S.people].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('');
- select.disabled=true;box.hidden=true;
+ select.disabled=true;box.hidden=false; // O status deve permanecer visível; somente o seletor duplicado fica oculto.
  select.value=document.getElementById('folgasPessoaSelect').value;
  if(agenda)await fsjCarregarPessoaCalendario(select.value);
  else{fsjCalendarContext.id=select.value;fsjCalendarDirty=true;fsjCalendarStatus('Confira as datas e clique em Salvar datas.');}
