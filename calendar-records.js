@@ -8,7 +8,7 @@ async function fsjPrepararCalendario(){
   box.innerHTML='<select id="fsjCalendarPerson" hidden aria-hidden="true"></select><p id="fsjCalendarStatus" role="status"></p>';
   modal.prepend(box);
   const actions=document.createElement('div');actions.className='row';actions.style.cssText='gap:8px;margin:12px 0;flex-wrap:wrap';
-  actions.innerHTML='<button type="button" class="primary" id="fsjCalendarSave">Salvar datas</button><button type="button" id="fsjCalendarReport">Consultar relatório</button>';
+  actions.innerHTML='<button type="button" class="primary" id="fsjCalendarSave" hidden aria-hidden="true">Salvar datas</button><button type="button" id="fsjCalendarReport">Consultar relatório</button>';
   const typeBar=document.createElement('div');typeBar.id='fsjCalendarTypeBar';typeBar.style.cssText='display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0';typeBar.innerHTML='<label for="fsjCalendarType">Tipo de folga</label><select id="fsjCalendarType"><option value="Folga semanal">Folga Semanal</option><option value="Feriado">Feriado</option><option value="Folga compensatória">Folga Compensatória</option><option value="Férias">Férias</option></select><label for="fsjCalendarHolidayDate" id="fsjCalendarHolidayLabel" hidden>Feriado compensado <input id="fsjCalendarHolidayDate" type="date"></label>';
   const calendar=document.getElementById('fsjCalendarioFolgas');calendar.insertAdjacentElement('afterend',typeBar);
   document.getElementById('fsjCalendarType').onchange=()=>{document.getElementById('fsjCalendarHolidayLabel').hidden=document.getElementById('fsjCalendarType').value!=='Folga compensatória';};
