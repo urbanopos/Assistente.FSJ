@@ -67,6 +67,7 @@ async function fsjCarregarPessoasFolgas(){
     S.people=[...known.values()];
    }
    fsjPreencherSeletorFolgas();
+   // A seleção de pessoas deve funcionar mesmo se a agenda semanal estiver indisponível.
    if(folgasAgenda)fsjRenderFolgas();
    const status=document.getElementById('folgasStatus');
    if(!rows.length&&status)status.textContent='Nenhuma pessoa cadastrada foi retornada pela Armazenagem.';
@@ -155,6 +156,11 @@ function fsjRenderFolgas(){
 
 }
 function selecionarPessoaFolgas(){
+ // O calendário operacional pertence a Folgas e Férias, não ao cadastro Pessoas.
+ // Ao escolher o funcionário, abrir diretamente a marcação mensal existente.
+ if(document.getElementById('folgasPessoaSelect')?.value && typeof fsjAbrirCalendarioFolgas==='function'){
+  fsjAbrirCalendarioFolgas();
+ }
  fsjRenderFolgas();
  if(typeof fsjPersonLayout==='function')fsjPersonLayout(true);
  const target=document.getElementById('folgasPessoaSelect').value&&folgasAgenda?document.getElementById('folgasPessoaNome'):document.getElementById('folgasPessoaSelect');
@@ -237,8 +243,7 @@ async function fsjRenderMesOperacionalDesktop(link,personId){
   holidays.forEach(h=>add(h.dia,'Feriado: '+h.nome));
   weekly.forEach(f=>add(f.dia,'Folga semanal'));
   manual.forEach(d=>add(d,reasons[d]||'Folga cadastrada'));
-  decisions.forEach(d=>{if(d.folga_compensatoria)add(d.folga_compensatoria,'Compensatória do feriado '+fsjData(d.dia));if(d.dia>=start&&d.dia<=end&&d.receber)add(d.dia,'Trabalho autorizado no feriado')}
-document.addEventListener('click',ev=>{const link=ev.target.closest('a[data-fsj-calendario-dia]');if(!link)return;ev.preventDefault();fsjRenderMesOperacionalDesktop(link);});
+  decisions.forEach(d=>{if(d.folga_compensatoria)add(d.folga_compensatoria,'Compensatória do feriado '+fsjData(d.dia));if(d.dia>=start&&d.dia<=end&&d.receber)add(d.dia,'Trabalho autorizado no feriado');});
   if(p.ferias_inicio&&p.ferias_fim){for(let i=1;i<=last;i++){const d=start.slice(0,7)+'-'+String(i).padStart(2,'0');if(d>=p.ferias_inicio&&d<=p.ferias_fim)add(d,'Férias')}}
   const month=new Date(Number(day.slice(0,4)),Number(day.slice(5,7))-1,1);
   dialog.querySelector('#fsjMesDesktopTitulo').textContent=month.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
