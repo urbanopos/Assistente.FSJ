@@ -23,7 +23,7 @@ function fsjRenderOpenTasks(tasks){
  const target=document.getElementById('tasks');target.replaceChildren();
  const visible=(Array.isArray(tasks)?tasks:[]).filter(t=>document.getElementById('boardSituation').value==='Arquivado'?t.situacao==='Arquivado':fsjFiltro==='perguntas'?false:fsjEstado(t)===fsjFiltro&&!t.respondido&&!t.respondido_em&&!t.concluida&&!t.concluida_em).sort(fsjCompareTaskPriority);
  if(!visible.length){const empty=document.createElement('p');empty.className='empty';empty.textContent=fsjFiltro==='perguntas'?'Os registros de perguntas ainda não estão disponíveis neste quadro.':'Nenhuma tarefa nesta situação.';target.append(empty);return;}
- const sections=[{title:'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},{title:'Tarefas de grupo',items:visible.filter(t=>!!t.grupo_id)}];
+ const groupMap=new Map();for(const task of visible.filter(t=>!!t.grupo_id)){const id=String(task.grupo_id);if(!groupMap.has(id))groupMap.set(id,{title:'Grupo: '+(task.grupo_nome||'Não identificado'),items:[]});groupMap.get(id).items.push(task);}const sections=[{title:'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},...groupMap.values()];
  for(const section of sections){
   if(!section.items.length)continue;
   const heading=document.createElement('h2');heading.textContent=section.title;heading.style.cssText='font-size:17px;margin:18px 0 10px';target.append(heading);
@@ -34,7 +34,7 @@ function fsjRenderOpenTasks(tasks){
    if(t.somente_leitura){a.href='#';a.onclick=event=>{event.preventDefault();fsjOpenTaskDetails(t.codigo_tarefa,t.tarefa,'Arquivado • somente consulta',null,t.periodicidade);};}
    name.append(code);fsjApplyTaskColor(name,t.prioridade,t.situacao,t.execucao?.estado==='em_andamento');
    a.setAttribute('aria-label',code.textContent+' — abrir detalhes');a.append(name);
-   if(t.grupo_id){const participants=document.createElement('small');participants.style.cssText='display:block;font-size:12px;margin-top:5px;line-height:1.4';participants.textContent='Grupo: '+(t.grupo_nome||'Não identificado')+' • Participantes: '+((t.participantes||[]).join(', ')||'Não informados');name.append(participants);}
+   if(t.grupo_id){const participants=document.createElement('small');participants.style.cssText='display:block;font-size:12px;margin-top:5px;line-height:1.4';participants.textContent='Participantes: '+((t.participantes||[]).join(', ')||'Não informados');name.append(participants);}
    if(t.progresso_mensal){const progress=document.createElement('span');progress.className='status';progress.style.whiteSpace='nowrap';progress.textContent=t.progresso_mensal.rotulo;progress.title=FSJDaily.hint(t.progresso_mensal);a.append(progress);}
    target.append(a);
   }
