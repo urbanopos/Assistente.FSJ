@@ -29,26 +29,81 @@ async function fsjPrepararCalendario(){
  else{fsjCalendarContext.id=select.value;fsjCalendarDirty=true;fsjCalendarStatus('Confira as datas e clique em Salvar datas.');}
 }
 function fsjCalendarStatus(text){document.getElementById('fsjCalendarStatus').textContent=text;}
-function fsjCalendarSetBusy(busy){fsjCalendarBusy=busy;document.getElementById('fsjCalendarSave').disabled=busy||!fsjCalendarContext?.id;document.getElementById('fsjCalendarPerson').disabled=true;document.getElementById('fsjCalendarioFolgas').inert=busy;}
+function fsjCalendarSetBusy(busy){
+ fsjCalendarBusy=busy;
+ const saveButton=document.getElementById('fsjCalendarSave');
+ if(saveButton)saveButton.disabled=busy||!fsjCalendarContext?.id;
+ const person=document.getElementById('fsjCalendarPerson');
+ if(person)person.disabled=true;
+ const calendar=document.getElementById('fsjCalendarioFolgas');
+ if(calendar)calendar.inert=busy||!fsjCalendarContext?.id;
+ const editorButton=document.getElementById('fsjConfirmarDiaMotivo');
+ if(editorButton)editorButton.disabled=busy||!fsjCalendarContext?.id;
+}
 async function fsjCarregarPessoaCalendario(id){
- fsjCalendarContext.id=id;personDatesOff=[];personDayReasons={};fsjCalendarDirty=false;renderPersonDatesOff();
- fsjCalendarSetBusy(true);fsjCalendarStatus(id?'Consultando datas salvas...':'Selecione a pessoa para marcar as datas.');
- try{if(!id)return;const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,folgas_datas,folgas_motivos');if(rows.length!==1)throw Error('Pessoa indisponível para esta sessão.');personDatesOff=[...(rows[0].folgas_datas||[])];personDayReasons={...(rows[0].folgas_motivos||{})};renderPersonDatesOff();fsjCalendarStatus('Datas carregadas da armazenagem central.');}
- catch(e){fsjCalendarContext.id='';fsjCalendarStatus('Não foi possível consultar: '+e.message);}finally{fsjCalendarSetBusy(false);}
+ if(!fsjCalendarContext)fsjCalendarContext={id:'',backup:null};
+ fsjCalendarContext.id='';
+ fsjCalendarDirty=false;
+ const editor=document.getElementById('fsjFolgaMotivoEditor');
+ if(editor)editor.hidden=true;
+ fsjCalendarSetBusy(true);
+ fsjCalendarStatus(id?'Consultando datas salvas...':'Selecione uma pessoa para marcar as datas.');
+ try{
+  if(!id){personDatesOff=[];personDayReasons={};renderPersonDatesOff();return;}
+  const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,folgas_datas,folgas_motivos');
+  if(!Array.isArray(rows)||rows.length!==1||String(rows[0].id)!==String(id))throw Error('Pessoa indisponível para esta sessão.');
+  personDatesOff=[...(rows[0].folgas_datas||[])];
+  personDayReasons={...(rows[0].folgas_motivos||{})};
+  fsjCalendarContext.id=id;
+  fsjCalendarContext.loadedDates=[...personDatesOff];
+  fsjCalendarContext.loadedReasons={...personDayReasons};
+  renderPersonDatesOff();
+  fsjCalendarStatus('Datas carregadas da armazenagem central.');
+ }catch(e){
+  fsjCalendarContext.id='';
+  fsjCalendarStatus('Falha na consulta. Edição bloqueada; nenhuma marcação existente foi apagada: '+e.message);
+ }finally{fsjCalendarSetBusy(false);}
 }
 async function fsjSalvarDatasCalendario(){
- if(fsjCalendarBusy){fsjCalendarStatus('Aguarde o carregamento do calendário.');return false;}if(!fsjCalendarContext?.id){fsjCalendarStatus('Selecione uma pessoa.');return false;}
- const id=fsjCalendarContext.id,dates=[...personDatesOff],reasons={...personDayReasons};
- // Motivos de folga compensatória não bloqueiam o salvamento de outras datas.
- fsjCalendarSetBusy(true);fsjCalendarStatus('Salvando datas...');
+ if(fsjCalendarBusy){fsjCalendarStatus('Aguarde o carregamento do calendário.');return false;}
+ if(!fsjCalendarContext?.id){fsjCalendarStatus('Selecione uma pessoa e aguarde a consulta dos registros reais.');return false;}
+ const id=fsjCalendarContext.id;
+ const selected=typeof fsjDataFolgaAtual!=='undefined'?fsjDataFolgaAtual:null;
+ if(!selected){fsjCalendarStatus('Selecione a data a incluir, alterar ou remover.');return false;}
+ const oldDates=fsjCalendarContext.loadedDates||[];
+ const oldReasons=fsjCalendarContext.loadedReasons||{};
+ const newHas=personDatesOff.includes(selected),newReason=personDayReasons[selected]||'';
+ fsjCalendarSetBusy(true);fsjCalendarStatus('Conferindo registros atuais antes de salvar...');
  try{
+  const current=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,folgas_datas,folgas_motivos');
+  if(!Array.isArray(current)||current.length!==1||String(current[0].id)!==String(id))throw Error('Não foi possível confirmar os registros atuais.');
+  const actualDates=[...(current[0].folgas_datas||[])];
+  const actualReasons={...(current[0].folgas_motivos||{})};
+  const oldHas=oldDates.includes(selected),actualHas=actualDates.includes(selected);
+  if(oldHas!==actualHas||(oldReasons[selected]||'')!==(actualReasons[selected]||''))throw Error('Esta data foi modificada por outra sessão. Atualize o calendário antes de editar.');
+  const dates=actualDates.filter(d=>d!==selected);
+  if(newHas)dates.push(selected);
+  dates.sort();
+  const reasons={...actualReasons};
+  if(newHas)reasons[selected]=newReason;
+  else delete reasons[selected];
   const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,folgas_datas,folgas_motivos',{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({folgas_datas:dates,folgas_motivos:reasons})});
-  if(rows?.length!==1||String(rows[0].id)!==String(id))throw Error('Gravação não confirmada. Confira sua sessão.');
-  const p=S.people.find(p=>String(p.id)===String(id));if(p){p.datesOff=[...(rows[0].folgas_datas||[])];p.dayOffReasons={...(rows[0].folgas_motivos||{})};}try{save();}catch(localError){console.warn('Folgas gravadas no banco; cache local não atualizado:',localError);}
-  // A compensação é registrada como motivo da própria data, sem segunda gravação obrigatória.
-  fsjCalendarPendingCompensation=null;
-  fsjCalendarDirty=false;const nome=p?.name||document.getElementById('folgasPessoaSelect')?.selectedOptions?.[0]?.textContent||'funcionário';const mensagem='Folga registrada com sucesso para '+nome+'. Registro confirmado na armazenagem central.';fsjCalendarStatus(mensagem);window.alert(mensagem);return true;
- }catch(e){fsjCalendarStatus('Não foi possível salvar. As marcações foram preservadas: '+e.message);return false;}finally{fsjCalendarSetBusy(false);}
+  if(!Array.isArray(rows)||rows.length!==1||String(rows[0].id)!==String(id))throw Error('Gravação não confirmada.');
+  personDatesOff=[...(rows[0].folgas_datas||[])];
+  personDayReasons={...(rows[0].folgas_motivos||{})};
+  fsjCalendarContext.loadedDates=[...personDatesOff];
+  fsjCalendarContext.loadedReasons={...personDayReasons};
+  const p=S.people.find(p=>String(p.id)===String(id));
+  if(p){p.datesOff=[...personDatesOff];p.dayOffReasons={...personDayReasons};}
+  try{save();}catch(localError){console.warn('Registro central salvo; cache local não atualizado:',localError);}
+  fsjCalendarPendingCompensation=null;fsjCalendarDirty=false;
+  renderPersonDatesOff();
+  fsjCalendarStatus('Data salva e calendário atualizado na armazenagem central.');
+  return true;
+ }catch(e){
+  fsjCalendarStatus('Não foi possível salvar. Nenhum registro foi substituído nesta tentativa: '+e.message);
+  return false;
+ }finally{fsjCalendarSetBusy(false);}
 }
 function fsjAbrirRelatorioFolgas(){
  let modal=document.getElementById('fsjFolgasReport');
