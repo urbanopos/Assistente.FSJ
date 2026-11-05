@@ -21,7 +21,7 @@ async function fsjPrepararCalendario(){
   };
 
  }
- if(fsjCalendarContext){const selected=document.getElementById('folgasPessoaSelect')?.value||'';if(selected!==fsjCalendarContext.id && !fsjCalendarDirty)await fsjCarregarPessoaCalendario(selected);return;}
+ if(fsjCalendarContext){const selected=document.getElementById('folgasPessoaSelect')?.value||'';if(fsjCalendarDirty){fsjCalendarStatus('Existem alterações não salvas. Salve antes de trocar de pessoa.');return;}await fsjCarregarPessoaCalendario(selected);return;}
  const agenda=true;
  fsjCalendarContext={id:'',backup:agenda?{dates:[...personDatesOff],reasons:{...personDayReasons}}:null};
  const select=document.getElementById('fsjCalendarPerson');
