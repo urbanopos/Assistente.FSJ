@@ -1871,7 +1871,41 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('fsj:ownership-updated',sync);document.addEventListener('DOMContentLoaded',sync);setInterval(sync,2500);
 })();
 </script>
-</body></html>
+<script id="fsjDesktopTaskPaginationDefault">
+/* REGRA DEFAULT FSJ DESKTOP: toda relação de tarefas com mais de cinco itens deve oferecer navegação. */
+(function(){
+ const PAGE_SIZE=5;
+ const states=new WeakMap();
+ function apply(host){
+  if(!host||!host.isConnected)return;
+  const rows=[...host.children].filter(el=>el.matches('tr,article'));
+  if(!rows.length)return;
+  const table=host.closest('table');
+  const target=table?.parentElement||host.parentElement;
+  if(!target)return;
+  let state=states.get(host);
+  if(!state){state={page:0,bar:document.createElement('nav')};states.set(host,state);state.bar.className='fsj-task-pagination';state.bar.setAttribute('aria-label','Navegação das tarefas');state.bar.style.cssText='display:flex;justify-content:center;align-items:center;gap:18px;margin:12px 0;padding:8px;';}
+  const total=Math.ceil(rows.length/PAGE_SIZE);
+  state.page=Math.min(state.page,Math.max(0,total-1));
+  rows.forEach((el,i)=>{el.hidden=total>1&&(i<state.page*PAGE_SIZE||i>=(state.page+1)*PAGE_SIZE);if(el.hidden)el.style.display='none';else el.style.removeProperty('display');});
+  if(total<=1){state.bar.remove();return;}
+  const mk=(label,disabled,delta)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.disabled=disabled;b.style.cssText='min-width:52px;min-height:44px;border-radius:10px;background:#175b40;color:white;font-size:22px;border:0;cursor:pointer';if(disabled)b.style.opacity='.4';b.addEventListener('click',()=>{state.page+=delta;apply(host);target.scrollIntoView({block:'start',behavior:'smooth'});});return b;};
+  const counter=document.createElement('strong');counter.textContent=(state.page+1)+' / '+total;
+  state.bar.replaceChildren(mk('←',state.page===0,-1),counter,mk('→',state.page>=total-1,1));
+  target.insertAdjacentElement('afterend',state.bar);
+ }
+ function refresh(){
+  if(!document.getElementById('gestor')||document.getElementById('gestor').classList.contains('hidden'))return;
+  document.querySelectorAll('#gestor #taskRows,#gestor #fsjPessoaGruposRows,#gestor #demandaGrupoRows,#gestor #listaSupervisaoConteudo tbody,#gestor #report tbody,#gestor #employeeTasks tbody').forEach(apply);
+  document.querySelectorAll('#gestor #fsjExecucaoLista section').forEach(section=>{const items=[...section.children].filter(x=>x.tagName==='ARTICLE');if(items.length)apply(section);});
+ }
+ let scheduled=false;
+ const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh();});};
+ const observer=new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.classList?.contains('fsj-task-pagination'))))schedule();});
+ function start(){observer.observe(document.getElementById('gestor')||document.body,{subtree:true,childList:true});schedule();}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+</script></body></html>
 
 
 
