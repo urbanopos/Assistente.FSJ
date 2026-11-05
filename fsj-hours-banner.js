@@ -15,11 +15,11 @@
   if(!document.body)return;
   document.body.classList.toggle('fsj-afterhours',show);
   let banner=document.getElementById('fsjHoursBanner');
-  const obsoleteTv=document.getElementById('fsjHoursTv');
-  if(obsoleteTv)obsoleteTv.remove();
   if(!banner&&show){
    banner=document.createElement('aside');banner.id='fsjHoursBanner';banner.className='fsj-hours-banner';banner.setAttribute('role','status');
    banner.innerHTML='<div class="fsj-hours-clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v6l4 2"></path></svg></div><div class="fsj-hours-copy"><p class="fsj-hours-eyebrow">CONSULTA DE TAREFAS</p><p class="fsj-hours-text">Consulta disponível das 7h às 12h e das 14h às 16h20, horário de Pernambuco.</p><p class="fsj-hours-note">Horário de Pernambuco</p></div>';
+
+   // Fora dos quadros protegidos: o aviso continua visível ao ocultar toda a tela.
    (document.querySelector('main')||document.body).prepend(banner);
   }
   if(banner)banner.hidden=!show;
