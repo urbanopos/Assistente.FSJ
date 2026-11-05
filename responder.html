@@ -61,6 +61,14 @@
 #executionControl .fsj-answer-buttons button{min-height:36px;padding:6px 12px}
 #executionControl #taskAnswer[hidden]{display:none!important}
 @media(max-width:420px){#executionControl .fsj-execution-actions{gap:6px}#executionControl .fsj-task-answer{gap:5px}#executionControl .fsj-answer-buttons button{padding:6px 9px}}
+
+/* Correção 20261105: um único par SIM/NÃO; sem botões auxiliares. */
+#executionControl #taskAnswer{display:flex!important;flex-direction:column!important;align-items:stretch!important;width:100%!important;min-width:0!important}
+#executionControl #taskAnswer[hidden]{display:none!important}
+#executionControl #taskAnswer strong{order:0!important;text-align:left!important;font-size:16px!important;white-space:normal!important}
+#executionControl #taskAnswer .fsj-answer-buttons{order:1!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:10px!important;width:100%!important;min-width:0!important}
+#executionControl #taskAnswer .fsj-answer-buttons button{width:100%!important;min-width:0!important;max-width:100%!important;min-height:48px!important;height:auto!important;background:#176447!important;color:#fff!important;border-radius:10px!important;font-size:17px!important;font-weight:700!important}
+#executionControl #taskAnswer .fsj-answer-buttons button:disabled{opacity:.5!important}
 </style><script src="./daily-progress.js?v=20261021-1"></script><style id="fsj-reader-layout-20261027">
 /* Barra horizontal, finalização e comandos ao final, preservando handlers existentes. */
 #executionControl .fsj-execution-actions{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important}
@@ -221,28 +229,7 @@ function fsjEvidenceScreen(){const yes=responseStep==='evidence',h=form.querySel
 document.getElementById('reasonBack').onclick=()=>showResponseStep('detail');
 document.getElementById('screenPrevious').addEventListener('click',event=>{if(responseStep==='reason'||responseStep==='evidence'||responseStep==='questions'){event.preventDefault();showResponseStep(responseStep==='questions'?'reason':'detail');}});
 document.getElementById('answerNo').onclick=()=>{if(info?.visitante){fsjVisitorDemo();return;}document.querySelector('input[name=resposta][value=nao]').checked=true;document.getElementById('missingBox').hidden=false;showResponseStep('reason');};
-// Atalhos de conclusão junto ao comando Iniciar/Retomar, sem duplicar o envio.
-(function fsjAtalhosConclusao(){
- const start=document.getElementById('startTask'),actions=start?.parentElement;
- if(!start||!actions||document.getElementById('fsjQuickAnswer'))return;
- const quick=document.createElement('div');quick.id='fsjQuickAnswer';
- quick.style.cssText='display:none;gap:10px;width:100%;margin:8px 0;flex-wrap:wrap';
- for(const [id,label] of [['answerYes','SIM'],['answerNo','NÃO']]){
-  const button=document.createElement('button');button.type='button';button.textContent=label;
-  button.style.cssText='flex:1 1 110px;min-height:44px;font-weight:700;font-size:17px';
-  button.addEventListener('click',()=>document.getElementById(id)?.click());quick.append(button);
- }
- start.after(quick);
- const sync=()=>{
-  const eligible=!!info&&!info.visitante&&!info.respondido&&fsjExecutionStarted()&&!['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode);
-  quick.style.display=eligible?'flex':'none';
-  [...quick.children].forEach((b,i)=>b.disabled=!eligible||!!document.getElementById(i?'answerNo':'answerYes')?.disabled);
- };
- document.addEventListener('fsj:execution-updated',sync);
- document.addEventListener('fsj:owner-mode',sync);
- document.addEventListener('fsj:page-target',sync);
- sync();
-})();
+// A conclusão usa exclusivamente os botões originais #answerYes e #answerNo.
 document.getElementById('answerYes').onclick=()=>{if(info?.visitante){fsjVisitorDemo();return;}if(document.getElementById('answerYes').disabled)return;document.querySelector('input[name=resposta][value=sim]').checked=true;document.getElementById('missingBox').hidden=true;showResponseStep('evidence');};
 
 document.querySelectorAll('input[name=resposta]').forEach(input=>input.addEventListener('change',()=>{document.getElementById('missingBox').hidden=input.value!=='nao';}));
