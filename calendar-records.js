@@ -107,46 +107,50 @@ async function fsjSalvarDatasCalendario(){
 }
 function fsjAbrirRelatorioFolgas(){
  let modal=document.getElementById('fsjFolgasReport');
- if(!modal){modal=document.createElement('dialog');modal.id='fsjFolgasReport';modal.style.cssText='width:min(96vw,900px);max-height:92vh;overflow:auto;border:1px solid #9bb6c3;border-radius:12px;padding:16px';
-  modal.innerHTML='<h2>Relatório de folgas, feriados e compensações</h2><label>Pessoa<select id="fsjReportPerson"></select></label><div class="row"><label>Data inicial<input id="fsjReportFrom" type="date"></label><label>Data final<input id="fsjReportTo" type="date"></label></div><div class="row" style="gap:8px;flex-wrap:wrap;margin:12px 0"><button type="button" id="fsjReportQuery">Consultar relatório</button><button type="button" id="fsjReportPrint" disabled>Imprimir / Salvar PDF</button><button type="button" id="fsjReportClose">Fechar</button></div><p id="fsjReportStatus" role="status"></p><div id="fsjReportResult"></div>';
-  document.body.append(modal);document.getElementById('fsjReportClose').onclick=()=>modal.close();document.getElementById('fsjReportQuery').onclick=fsjConsultarRelatorioFolgas;document.getElementById('fsjReportPrint').onclick=fsjImprimirRelatorioFolgas;
+ if(!modal){
+  modal=document.createElement('dialog');modal.id='fsjFolgasReport';modal.style.cssText='width:min(96vw,760px);max-height:92vh;overflow:auto;border:1px solid #9bb6c3;border-radius:12px;padding:16px';
+  modal.innerHTML='<h2>Relatório mensal de folgas e férias</h2><div class="row"><label>Usuário<select id="fsjReportPerson"></select></label><label>Mês<input id="fsjReportMonth" type="month"></label></div><div class="row" style="gap:8px;flex-wrap:wrap;margin:12px 0"><button type="button" id="fsjReportQuery">Consultar relatório</button><button type="button" id="fsjReportPrint" disabled>Imprimir / Salvar PDF</button><button type="button" id="fsjReportClose">Fechar</button></div><p id="fsjReportStatus" role="status"></p><div id="fsjReportResult"></div>';
+  document.body.append(modal);
+  document.getElementById('fsjReportClose').onclick=()=>modal.close();
+  document.getElementById('fsjReportQuery').onclick=fsjConsultarRelatorioFolgas;
+  document.getElementById('fsjReportPrint').onclick=fsjImprimirRelatorioFolgas;
   modal.addEventListener('change',()=>{document.getElementById('fsjReportPrint').disabled=true;document.getElementById('fsjReportResult').replaceChildren();});
  }
- document.getElementById('fsjReportPerson').innerHTML='<option value="">Todas as pessoas</option>'+[...S.people].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('');
- document.getElementById('fsjReportPerson').value=document.getElementById('folgasPessoaSelect').value||document.getElementById('fsjCalendarPerson')?.value||'';
- const today=folgaHoje();document.getElementById('fsjReportFrom').value=today.slice(0,7)+'-01';const d=new Date(today+'T12:00:00Z');d.setUTCMonth(d.getUTCMonth()+1,0);document.getElementById('fsjReportTo').value=d.toISOString().slice(0,10);
- document.getElementById('fsjReportResult').replaceChildren();document.getElementById('fsjReportPrint').disabled=true;document.getElementById('fsjReportStatus').textContent='Selecione a pessoa e o período, depois consulte.';if(!modal.open)modal.showModal();
-}
-async function fsjReportRead(path){const rows=[];for(let offset=0;;){const page=await api(path+'&limit=500&offset='+offset);if(!Array.isArray(page))throw Error('Consulta inválida.');rows.push(...page);if(!page.length)return rows;offset+=page.length;}}
-function fsjReportRows(people,weekly,holidays,decisions,from,to){
- const rows=[],inside=d=>d&&d>=from&&d<=to;const add=(p,day,type,detail,source)=>{if(inside(day))rows.push({person:p.nome,day,type,detail,source});};
- for(const p of people){
-  for(const day of p.folgas_datas||[])add(p,day,p.folgas_motivos?.[day]||'Folga semanal','Marcação no calendário mensal','Calendário mensal');
-  for(const f of weekly.filter(x=>x.pessoa_id===p.id))add(p,f.dia,'Folga semanal','Semana de '+fsjData(f.semana),'Agenda semanal');
-  for(const h of holidays){const v=decisions.find(x=>x.pessoa_id===p.id&&x.dia===h.dia);add(p,h.dia,'Feriado',h.nome+' — '+(v?v.receber?'Recebe tarefas':'Não recebe tarefas':'Decisão pendente'),'Calendário oficial');}
-  for(const v of decisions.filter(x=>x.pessoa_id===p.id&&x.folga_compensatoria))add(p,v.folga_compensatoria,'Folga compensatória','Referente ao feriado de '+fsjData(v.dia),'Compensação registrada');
- }
- return rows.sort((a,b)=>a.person.localeCompare(b.person,'pt-BR')||a.day.localeCompare(b.day)||a.type.localeCompare(b.type));
+ document.getElementById('fsjReportPerson').innerHTML='<option value="">Todos os usuários</option>'+[...S.people].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('');
+ document.getElementById('fsjReportPerson').value=document.getElementById('folgasPessoaSelect')?.value||document.getElementById('fsjCalendarPerson')?.value||'';
+ document.getElementById('fsjReportMonth').value=folgaHoje().slice(0,7);
+ document.getElementById('fsjReportResult').replaceChildren();
+ document.getElementById('fsjReportPrint').disabled=true;
+ document.getElementById('fsjReportStatus').textContent='Selecione o usuário e o mês para consultar as folgas registradas.';
+ if(!modal.open)modal.showModal();
 }
 async function fsjConsultarRelatorioFolgas(){
  const button=document.getElementById('fsjReportQuery'),status=document.getElementById('fsjReportStatus'),result=document.getElementById('fsjReportResult');
- const from=document.getElementById('fsjReportFrom').value,to=document.getElementById('fsjReportTo').value,id=document.getElementById('fsjReportPerson').value;
- document.getElementById('fsjReportPrint').disabled=true;result.replaceChildren();if(!from||!to||from>to){status.textContent='Informe um período válido, com data inicial anterior ou igual à final.';return;}
- button.disabled=true;status.textContent='Consultando registros centrais...';
+ const month=document.getElementById('fsjReportMonth').value,id=document.getElementById('fsjReportPerson').value;
+ document.getElementById('fsjReportPrint').disabled=true;result.replaceChildren();
+ if(!/^\\d{4}-\\d{2}$/.test(month)){status.textContent='Selecione um mês válido.';return;}
+ button.disabled=true;status.textContent='Consultando registros salvos...';
  const controls=[...document.querySelectorAll('#fsjFolgasReport input,#fsjFolgasReport select')];controls.forEach(x=>x.disabled=true);
  try{
-  const pf=id?'&pessoa_id=eq.'+encodeURIComponent(id):'';
-  const [people,weekly,holidays,decisions]=await Promise.all([
-   fsjReportRead('/rest/v1/pessoas?select=id,nome,folgas_datas,folgas_motivos&order=id'+(id?'&id=eq.'+encodeURIComponent(id):'')),
-   fsjReportRead('/rest/v1/folgas_semana?select=*&dia=gte.'+from+'&dia=lte.'+to+'&order=pessoa_id,semana'+pf),
-   fsjReportRead('/rest/v1/feriados_fsj?select=*&dia=gte.'+from+'&dia=lte.'+to+'&order=dia'),
-   fsjReportRead('/rest/v1/feriados_envio?select=*&or=(and(dia.gte.'+from+',dia.lte.'+to+'),and(folga_compensatoria.gte.'+from+',folga_compensatoria.lte.'+to+'))&order=pessoa_id,dia'+pf)
-  ]);
-  if(!people.length)throw Error('Nenhuma pessoa disponível. Confira a sessão.');
-  const rows=fsjReportRows(people,weekly,holidays,decisions,from,to);
-  result.innerHTML='<div class="fsj-report-header" style="display:flex;align-items:center;gap:14px;border-bottom:2px solid #176341;padding:8px 0 12px;margin-bottom:12px"><img src="https://urbanopos.github.io/Assistente.FSJ/icons/assistente-fsj-casa-180.png" alt="Ícone da Fazenda São José" style="width:58px;height:58px;object-fit:contain"><div><h2 style="margin:0;color:#176341">FAZENDA SÃO JOSÉ</h2><div style="font-size:14px;font-weight:700">RELATÓRIO DE FOLGAS, FERIADOS E COMPENSAÇÕES</div></div></div><p>Folgas, feriados e compensações — '+esc(id?people[0].nome:'Todas as pessoas')+'</p><p>Período: '+esc(fsjData(from))+' a '+esc(fsjData(to))+' (datas incluídas). Emissão: '+esc(new Date().toLocaleString('pt-BR',{timeZone:'America/Recife'}))+'</p><p>'+rows.length+' registro(s). Fontes distintas são identificadas; não representa total de dias únicos.</p><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th>Pessoa</th><th>Data</th><th>Tipo</th><th>Descrição</th><th>Origem</th></tr></thead><tbody>'+rows.map(r=>'<tr>'+[r.person,fsjData(r.day),r.type,r.detail,r.source].map(v=>'<td style="border:1px solid #bbb;padding:6px">'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'+(rows.length?'':'<p>Nenhum registro no período.</p>');
-  status.textContent='Consulta concluída. O relatório pode ser impresso ou salvo em PDF.';document.getElementById('fsjReportPrint').disabled=false;
- }catch(e){status.textContent='Não foi possível consultar: '+e.message;}finally{button.disabled=false;controls.forEach(x=>x.disabled=false);}
+  const people=await api('/rest/v1/pessoas?select=id,nome,folgas_datas,folgas_motivos&order=nome'+(id?'&id=eq.'+encodeURIComponent(id):''));
+  if(!Array.isArray(people)||(!people.length&&id))throw Error('Usuário não encontrado na base central.');
+  const rows=[];
+  for(const p of people){
+   for(const day of p.folgas_datas||[]){
+    if(typeof day!=='string'||!day.startsWith(month+'-'))continue;
+    const raw=String(p.folgas_motivos?.[day]||'Folga semanal');
+    const compensatoria=raw.toLowerCase().startsWith('folga compensatória');
+    const feriado=compensatoria?raw.match(/feriado compensado: (\\d{4}-\\d{2}-\\d{2})/i)?.[1]:null;
+    rows.push({person:p.nome,day,type:compensatoria?'Folga Compensatória':raw,holiday:feriado});
+   }
+  }
+  rows.sort((a,b)=>a.person.localeCompare(b.person,'pt-BR')||a.day.localeCompare(b.day));
+  const period=new Date(month+'-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  result.innerHTML='<div class="fsj-report-header" style="border-bottom:2px solid #176341;padding:8px 0 12px;margin-bottom:12px"><h2 style="margin:0;color:#176341">FAZENDA SÃO JOSÉ</h2><strong>RELATÓRIO MENSAL DE FOLGAS E FÉRIAS</strong></div><p>Usuário: '+esc(id?people[0].nome:'Todos os usuários')+' · Mês: '+esc(period)+'</p><p>'+rows.length+' folga(s) registrada(s).</p><table style="width:100%;border-collapse:collapse"><thead><tr><th>Usuário</th><th>Data</th><th>Tipo da folga</th></tr></thead><tbody>'+rows.map(r=>'<tr>'+[r.person,fsjData(r.day),r.type].map(v=>'<td style="border:1px solid #bbb;padding:6px">'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>'+(rows.length?'':'<p>Nenhuma folga registrada neste mês.</p>');
+  status.textContent='Consulta concluída com os registros do calendário mensal.';
+  document.getElementById('fsjReportPrint').disabled=false;
+ }catch(e){status.textContent='Não foi possível consultar: '+e.message;}
+ finally{button.disabled=false;controls.forEach(x=>x.disabled=false);}
 }
 function fsjImprimirRelatorioFolgas(){
  const win=window.open('','fsjRelatorioFolgas');if(!win){document.getElementById('fsjReportStatus').textContent='Permita a abertura da janela de impressão neste navegador.';return;}
