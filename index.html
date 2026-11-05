@@ -939,15 +939,27 @@ async function fsjSalvarFolgaDoDia(){
  if(motivo==='Folga compensatória'){
   const feriado=document.getElementById('fsjFolgaFeriadoOrigem')?.value;
   if(!feriado){fsjCalendarStatus('Informe a data do feriado compensado.');document.getElementById('fsjFolgaFeriadoOrigem')?.focus();return;}
-  fsjCalendarPendingCompensation={feriado,folga:fsjDataFolgaAtual};
- }else{
-  fsjConfirmarMotivoFolga();
+  const id=fsjCalendarContext?.id;
+  if(!id){fsjCalendarStatus('Selecione uma pessoa antes de salvar.');return;}
+  botao.disabled=true;
+  fsjCalendarStatus('Registrando folga compensatória...');
+  try{
+   await folgasPost({action:'compensation-set',pessoa_id:id,feriado,folga:fsjDataFolgaAtual});
+   fsjCalendarPendingCompensation=null;
+   fsjCalendarDirty=false;
+   const nome=document.getElementById('folgasPessoaSelect')?.selectedOptions?.[0]?.textContent||'funcionário';
+   const mensagem='Folga compensatória registrada com sucesso para '+nome+'.';
+   fsjCalendarStatus(mensagem);window.alert(mensagem);editor.hidden=true;
+   if(typeof carregarFolgas==='function')void carregarFolgas();
+  }catch(e){fsjCalendarStatus('Não foi possível registrar a compensação: '+e.message);editor.hidden=false;}
+  finally{botao.disabled=false;}
+  return;
  }
+ fsjConfirmarMotivoFolga();
  botao.disabled=true;
  try{
   const ok=await fsjSalvarDatasCalendario();
-  if(ok===true)editor.hidden=true;
-  else editor.hidden=false;
+  editor.hidden=ok===true;
  }catch(e){fsjCalendarStatus('Falha ao salvar a data: '+e.message);editor.hidden=false;}
  finally{botao.disabled=false;}
 }
