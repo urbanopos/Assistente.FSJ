@@ -58,8 +58,18 @@ Deno.serve(async req=>{
   }
   const ownerTokenAccess=await fsjOwnerAccessToken(token,path=>db(path));
   ownerScheduleAccess=owner||ownerTokenAccess;
-  if(data.action!=='board'&&!ownerScheduleAccess&&await db('rpc/fsj_horario_resposta',{method:'POST',body:JSON.stringify({p_instante:new Date().toISOString()})})!==true)return respond({erro:'A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.',codigo:'fora_expediente'},403);
+  if(data.action!=='board'&&data.action!=='folgas-consulta'&&!ownerScheduleAccess&&await db('rpc/fsj_horario_resposta',{method:'POST',body:JSON.stringify({p_instante:new Date().toISOString()})})!==true)return respond({erro:'A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.',codigo:'fora_expediente'},403);
   if(owner&&(data.action==='start'||data.action==='suspend'||data.action==='submit'))return respond({erro:'Modo Diagnostico: registro bloqueado'},403);
+  if(data.action==='folgas-consulta'){
+   const boards=await db('quadros_do_dia?token=eq.'+token+'&select=pessoa_id,expira_em');
+   const links=boards.length?[]:await db('links_resposta?token=eq.'+token+'&select=pessoa_id,expira_em');
+   const identity=boards[0]||links[0];
+   if(!identity)return respond({erro:'Acesso individual inválido.'},404);
+   if(identity.expira_em&&new Date(identity.expira_em).getTime()<Date.now())return respond({erro:'Acesso expirado.'},403);
+   const people=await db('pessoas?id=eq.'+encodeURIComponent(identity.pessoa_id)+'&ativo=eq.true&select=id,nome,folgas_datas,folgas_motivos');
+   if(people.length!==1)return respond({erro:'Usuário não encontrado ou inativo.'},404);
+   return respond({pessoa:people[0].nome,folgas_datas:people[0].folgas_datas||[],folgas_motivos:people[0].folgas_motivos||{}});
+  }
   if(data.action==='reminders'){
    const boards=await db('quadros_do_dia?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
    const links=boards.length?[]:await db('links_resposta?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
