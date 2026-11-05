@@ -15,19 +15,22 @@
   if(!document.body)return;
   document.body.classList.toggle('fsj-afterhours',show);
   let banner=document.getElementById('fsjHoursBanner');
+  let tv=document.getElementById('fsjHoursTv');
   if(!banner&&show){
    banner=document.createElement('aside');banner.id='fsjHoursBanner';banner.className='fsj-hours-banner';banner.setAttribute('role','status');
    banner.innerHTML='<div class="fsj-hours-clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v6l4 2"></path></svg></div><div class="fsj-hours-copy"><p class="fsj-hours-eyebrow">CONSULTA DE TAREFAS</p><p class="fsj-hours-text">Consulta disponível das 7h às 12h e das 14h às 16h20, horário de Pernambuco.</p><p class="fsj-hours-note">Horário de Pernambuco</p></div>';
 
-   const tv=document.createElement('button');tv.type='button';tv.id='fsjHoursTv';tv.textContent='TV FSJ';tv.style.cssText='display:block;width:100%;margin:0 0 12px;padding:14px;border:0;border-radius:9px;background:#176341;color:#fff;font-weight:700;font-size:17px;cursor:pointer';
+   tv=document.createElement('button');tv.type='button';tv.id='fsjHoursTv';tv.textContent='TV FSJ';tv.style.cssText='display:block;width:100%;margin:0 0 12px;padding:14px;border:0;border-radius:9px;background:#176341;color:#fff;font-weight:700;font-size:17px;cursor:pointer';
    tv.onclick=()=>{const token=new URLSearchParams(location.hash.slice(1)).get('token');if(!token){window.alert('A TV FSJ exige acesso individual autenticado. Abra o link recebido.');return;}if(typeof window.fsjOpenTv==='function'){window.fsjOpenTv();return;}location.assign('./quadro.html#token='+encodeURIComponent(token)+'&origem=inicio&secao=videos');};
-   banner.prepend(tv);
-   // Fora dos quadros protegidos: o aviso continua visível ao ocultar toda a tela.
-   (document.querySelector('main')||document.body).prepend(banner);
+   // TV independente do aviso, ambos filhos diretos do mesmo contêiner.
+   const host=document.querySelector('main')||document.body;
+   host.prepend(banner);
+   host.insertBefore(tv,banner);
   }
   if(banner)banner.hidden=!show;
+  if(tv)tv.hidden=!show;
 
-  document.querySelectorAll('main > :not(#fsjHoursBanner),.footnav,[role="dialog"],dialog').forEach(el=>{
+  document.querySelectorAll('main > :not(#fsjHoursBanner):not(#fsjHoursTv),.footnav,[role="dialog"],dialog').forEach(el=>{
    if(show){if(!el.hasAttribute('data-fsj-hours-inert'))el.setAttribute('data-fsj-hours-inert',el.inert?'1':'0');el.inert=true;}
    else if(el.hasAttribute('data-fsj-hours-inert')){el.inert=el.getAttribute('data-fsj-hours-inert')==='1';el.removeAttribute('data-fsj-hours-inert');}
   });
