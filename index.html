@@ -1901,7 +1901,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  }
  let scheduled=false;
  const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh();});};
- const observer=new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.classList?.contains('fsj-task-pagination'))))schedule();});
+ const observer=new MutationObserver(records=>{if(records.some(r=>!r.target.closest?.('.fsj-task-pagination')&&[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.classList?.contains('fsj-task-pagination'))))schedule();});
  function start(){observer.observe(document.getElementById('gestor')||document.body,{subtree:true,childList:true});schedule();}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
