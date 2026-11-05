@@ -58,7 +58,7 @@ Deno.serve(async req=>{
   }
   const ownerTokenAccess=await fsjOwnerAccessToken(token,path=>db(path));
   ownerScheduleAccess=owner||ownerTokenAccess;
-  if(!ownerScheduleAccess&&await db('rpc/fsj_horario_resposta',{method:'POST',body:JSON.stringify({p_instante:new Date().toISOString()})})!==true)return respond({erro:'A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.',codigo:'fora_expediente'},403);
+  if(data.action!=='board'&&!ownerScheduleAccess&&await db('rpc/fsj_horario_resposta',{method:'POST',body:JSON.stringify({p_instante:new Date().toISOString()})})!==true)return respond({erro:'A partir das 7:00h, disponível para consulta, exceto nos horários de descanso e após o expediente.',codigo:'fora_expediente'},403);
   if(owner&&(data.action==='start'||data.action==='suspend'||data.action==='submit'))return respond({erro:'Modo Diagnostico: registro bloqueado'},403);
   if(data.action==='reminders'){
    const boards=await db('quadros_do_dia?token=eq.'+token+'&select=pessoa_id,dia,expira_em');
