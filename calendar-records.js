@@ -9,9 +9,6 @@ async function fsjPrepararCalendario(){
   modal.prepend(box);
   const actions=document.createElement('div');actions.className='row';actions.style.cssText='gap:8px;margin:12px 0;flex-wrap:wrap';
   actions.innerHTML='<button type="button" class="primary" id="fsjCalendarSave" hidden aria-hidden="true">Salvar datas</button><button type="button" id="fsjCalendarReport">Consultar relatório</button>';
-  const typeBar=document.createElement('div');typeBar.id='fsjCalendarTypeBar';typeBar.style.cssText='display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0';typeBar.innerHTML='<label for="fsjCalendarType">Tipo de folga</label><select id="fsjCalendarType"><option value="Folga semanal">Folga Semanal</option><option value="Feriado">Feriado</option><option value="Folga compensatória">Folga Compensatória</option><option value="Férias">Férias</option></select><label for="fsjCalendarHolidayDate" id="fsjCalendarHolidayLabel" hidden>Feriado compensado <input id="fsjCalendarHolidayDate" type="date"></label>';
-  const calendar=document.getElementById('fsjCalendarioFolgas');calendar.insertAdjacentElement('afterend',typeBar);
-  document.getElementById('fsjCalendarType').onchange=()=>{document.getElementById('fsjCalendarHolidayLabel').hidden=document.getElementById('fsjCalendarType').value!=='Folga compensatória';};
   modal.appendChild(actions);
   document.getElementById('fsjCalendarSave').onclick=fsjSalvarDatasCalendario;
   document.getElementById('fsjCalendarReport').onclick=()=>{if(fsjCalendarDirty){fsjCalendarStatus('Salve as datas antes de consultar o relatório.');return;}fsjAbrirRelatorioFolgas();};
@@ -40,14 +37,14 @@ async function fsjCarregarPessoaCalendario(id){
  catch(e){fsjCalendarContext.id='';fsjCalendarStatus('Não foi possível consultar: '+e.message);}finally{fsjCalendarSetBusy(false);}
 }
 async function fsjSalvarDatasCalendario(){
- if(fsjCalendarBusy)return false;if(!fsjCalendarContext?.id){fsjCalendarStatus('Selecione uma pessoa.');return false;}
+ if(fsjCalendarBusy){fsjCalendarStatus('Aguarde o carregamento do calendário.');return false;}if(!fsjCalendarContext?.id){fsjCalendarStatus('Selecione uma pessoa.');return false;}
  const id=fsjCalendarContext.id,dates=[...personDatesOff],reasons={...personDayReasons};
  if(dates.some(d=>reasons[d]==='Folga compensatória')){fsjCalendarStatus('Folga compensatória sem vínculo com feriado.');return false;}
  fsjCalendarSetBusy(true);fsjCalendarStatus('Salvando datas...');
  try{
   const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,folgas_datas,folgas_motivos',{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({folgas_datas:dates,folgas_motivos:reasons})});
-  if(rows?.length!==1||rows[0].id!==id)throw Error('Gravação não confirmada. Confira sua sessão.');
-  const p=S.people.find(p=>p.id===id);if(p){p.datesOff=[...(rows[0].folgas_datas||[])];p.dayOffReasons={...(rows[0].folgas_motivos||{})};}save();
+  if(rows?.length!==1||String(rows[0].id)!==String(id))throw Error('Gravação não confirmada. Confira sua sessão.');
+  const p=S.people.find(p=>String(p.id)===String(id));if(p){p.datesOff=[...(rows[0].folgas_datas||[])];p.dayOffReasons={...(rows[0].folgas_motivos||{})};}try{save();}catch(localError){console.warn('Folgas gravadas no banco; cache local não atualizado:',localError);}
   if(fsjCalendarPendingCompensation){const c=fsjCalendarPendingCompensation;await folgasPost({action:'compensation-set',pessoa_id:id,feriado:c.feriado,folga:c.folga});fsjCalendarPendingCompensation=null;}
   fsjCalendarDirty=false;const nome=p?.name||document.getElementById('folgasPessoaSelect')?.selectedOptions?.[0]?.textContent||'funcionário';const mensagem='Folga registrada com sucesso para '+nome+'. Registro confirmado na armazenagem central.';fsjCalendarStatus(mensagem);window.alert(mensagem);return true;
  }catch(e){fsjCalendarStatus('Não foi possível salvar. As marcações foram preservadas: '+e.message);return false;}finally{fsjCalendarSetBusy(false);}
