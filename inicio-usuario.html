@@ -42,10 +42,13 @@ body.fsj-executor-v1 #page0 .executor-banner{background:#f8e8af;margin:-12px -12
  const url='https://awrxnzbfrsaurzpunuko.supabase.co/functions/v1/resposta-tarefa';
  fetch(url,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'board',token})})
  .then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.erro||'Acesso não validado');return d})
- .then(d=>{
+ .then(async d=>{
   if(d.visitante||d.simulador)return;
   const role=String(d.perfil||d.categoria||d.tipo_perfil||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  const route=/proprietari|titular/.test(role)?'proprietario':/supervisor/.test(role)?'supervisor':/executor|funcionari|participante/.test(role)?'executor':'';
+  let route=/proprietari|titular/.test(role)?'proprietario':/supervisor/.test(role)?'supervisor':/executor|funcionari|participante/.test(role)?'executor':'';
+  if(route==='executor'){
+   try{const response=await fetch('https://awrxnzbfrsaurzpunuko.supabase.co/functions/v1/supervisao',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'available',token})});if(response.ok&&(await response.json()).ativo===true)route='supervisor'}catch{}
+  }
   if(!route)return;
   const target=new URL('./celular/'+route+'/index.html',location.href);
   target.hash='token='+encodeURIComponent(token);
