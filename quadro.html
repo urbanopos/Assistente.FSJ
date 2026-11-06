@@ -21,13 +21,13 @@ function fsjTaskClass(priority,status,running=false){if(status==='Concluída')re
 function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.classList.remove('fsj-task-completed','fsj-task-open','fsj-task-running','fsj-task-pending','fsj-priority','fsj-urgent');el.classList.add(...fsjTaskClass(priority,status,running).split(' '));}
 
 function fsjRenderOpenTasks(tasks){
- const target=document.getElementById('tasks');target.replaceChildren();
+ const target=document.getElementById('tasks');target.replaceChildren();if(document.body.classList.contains('fsj-index-execucao')){const heading=document.createElement('h2');heading.textContent='TAREFAS INDIVIDUAIS';heading.style.cssText='font-size:18px;margin:14px 0 10px;font-weight:800';target.append(heading);}
  const visible=(Array.isArray(tasks)?tasks:[]).filter(t=>document.getElementById('boardSituation').value==='Arquivado'?t.situacao==='Arquivado':fsjFiltro==='perguntas'?false:fsjEstado(t)===fsjFiltro&&!t.respondido&&!t.respondido_em&&!t.concluida&&!t.concluida_em).sort(fsjCompareTaskPriority);
  if(!visible.length){const empty=document.createElement('p');empty.className='empty';empty.textContent=fsjFiltro==='perguntas'?'Os registros de perguntas ainda não estão disponíveis neste quadro.':'Nenhuma tarefa nesta situação.';target.append(empty);return;}
- const groupMap=new Map();for(const task of visible.filter(t=>!!t.grupo_id)){const id=String(task.grupo_id);if(!groupMap.has(id))groupMap.set(id,{title:'Grupo: '+(task.grupo_nome||'Não identificado'),items:[]});groupMap.get(id).items.push(task);}const sections=[{title:'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},...groupMap.values()];
+ const groupMap=new Map();for(const task of visible.filter(t=>!!t.grupo_id)){const id=String(task.grupo_id);if(!groupMap.has(id))groupMap.set(id,{title:'Grupo: '+(task.grupo_nome||'Não identificado'),items:[]});groupMap.get(id).items.push(task);}const sections=[{title:document.body.classList.contains('fsj-index-execucao')?'':'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},...groupMap.values()];
  for(const section of sections){
   if(!section.items.length)continue;
-  const heading=document.createElement('h2');heading.textContent=section.title;heading.style.cssText='font-size:17px;margin:18px 0 10px';target.append(heading);
+  if(section.title){const heading=document.createElement('h2');heading.textContent=section.title;heading.style.cssText='font-size:17px;margin:18px 0 10px';target.append(heading);}
   for(const t of section.items){
    const a=document.createElement('a');a.className='task'+(t.grupo_id?' fsj-group-task':'');a.href='./responder.html#token='+encodeURIComponent(t.token)+'&quadro='+encodeURIComponent(token);
    const name=document.createElement('span');name.className='name';
