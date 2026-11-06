@@ -1483,7 +1483,7 @@ function fsjCompareTaskPriority(a,b){const rank=t=>({urgente:0,prioritaria:1}[t.
 function fsjTaskClass(priority,status,running=false){if(status==='Concluída')return 'fsj-task-completed';if(priority==='urgente')return 'fsj-priority fsj-urgent';if(priority==='prioritaria')return 'fsj-priority';if(status!=='Concluída'&&(running||status==='Em andamento'))return 'fsj-task-running';if(status==='Pendente')return 'fsj-task-pending';return 'fsj-task-open';}
 function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.classList.remove('fsj-task-completed','fsj-task-open','fsj-task-running','fsj-task-pending','fsj-priority','fsj-urgent');el.classList.add(...fsjTaskClass(priority,status,running).split(' '));}
 function fsjTaskName(t,employee=false){const running=fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento');return '<button type="button" class="fsj-task-number '+fsjTaskClass(t.priority,t.status,running)+'" data-fsj-task-id="'+esc(t.id)+'"><strong>'+esc(fsjTaskListLabel(t.code,t.text,t.frequency))+'</strong></button>';}
-document.addEventListener('click',event=>{const button=event.target.closest('[data-fsj-task-id]');if(!button)return;const t=S.tasks.find(t=>t.id===button.dataset.fsjTaskId);if(t){if(t.status!=='Arquivado'&&button.closest('#taskRows'))fsjOpenEmployeeTask(t,button);else fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);}});
+document.addEventListener('click',event=>{const button=event.target.closest('[data-fsj-task-id]');if(!button)return;const t=S.tasks.find(t=>t.id===button.dataset.fsjTaskId);if(t){if(fsjTarefaPeriodica(t)&&button.closest('#taskRows')){const pid=document.getElementById('demandaFuncionario').value;const d=new Date();fsjCalendarioSomenteLeitura(t,pid,d.getFullYear(),d.getMonth());}else if(t.status!=='Arquivado'&&button.closest('#taskRows'))fsjOpenEmployeeTask(t,button);else fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);}});
 function mostrarDemandasSituacao(situacao){document.getElementById('demandaSituacao').value=situacao;renderDemandas()}
 async function fsjOpenEmployeeTask(t,button){
  const pid=document.getElementById('demandaFuncionario').value;
@@ -1511,6 +1511,42 @@ function fsjPosicionarAcoesMobile(rows){
 }
 
 // O filtro de ocorrências não pode bloquear os demais filtros nem alterar a situação original.
+function fsjTarefaPeriodica(t){return fsjFrequency(t)!=='pontual';}
+function fsjSituacaoDemanda(t,responsavel){
+ if(!fsjTarefaPeriodica(t))return esc(FSJDaily.ownerText(t,null,responsavel));
+ return '<span style="color:#165c8a;font-weight:700">Ver Calendário</span> <small class="muted">'+esc(FSJDaily.ownerText(t,null,responsavel))+'</small>';
+}
+function fsjCalendarioSomenteLeitura(t,pid,ano,mes){
+ const old=document.getElementById('fsjCalendarioTarefaModal');if(old)old.remove();
+ const overlay=document.createElement('div');overlay.id='fsjCalendarioTarefaModal';
+ overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+ const panel=document.createElement('section');panel.style.cssText='background:white;border-radius:12px;max-width:670px;width:100%;max-height:90vh;overflow:auto;padding:18px;color:#17382c';
+ overlay.append(panel);
+ const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;gap:12px;align-items:center';
+ const heading=document.createElement('strong');heading.textContent=(t.code||'Tarefa')+' — '+(t.text||'');
+ const close=document.createElement('button');close.type='button';close.textContent='Fechar';close.onclick=()=>overlay.remove();header.append(heading,close);panel.append(header);
+ const subtitle=document.createElement('p');subtitle.textContent='Calendário da tarefa • Somente consulta do Proprietário';panel.append(subtitle);
+ const nav=document.createElement('div');nav.style.cssText='display:flex;align-items:center;gap:16px;margin:12px 0';
+ const prev=document.createElement('button');prev.textContent='←';prev.onclick=()=>fsjCalendarioSomenteLeitura(t,pid,...fsjMesAdjacente(ano,mes,-1));
+ const month=document.createElement('strong');month.textContent=new Date(ano,mes,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ const next=document.createElement('button');next.textContent='→';next.onclick=()=>fsjCalendarioSomenteLeitura(t,pid,...fsjMesAdjacente(ano,mes,1));nav.append(prev,month,next);panel.append(nav);
+ const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px';
+ for(const d of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']){const el=document.createElement('strong');el.textContent=d;el.style.textAlign='center';grid.append(el);}
+ const first=new Date(ano,mes,1).getDay();for(let n=0;n<first;n++)grid.append(document.createElement('span'));
+ const total=new Date(ano,mes+1,0).getDate();const pessoa=S.people.find(p=>String(p.id)===String(pid));
+ for(let dia=1;dia<=total;dia++){
+  const date=ano+'-'+String(mes+1).padStart(2,'0')+'-'+String(dia).padStart(2,'0');
+  const e=fsjTemposExecucoes.find(e=>String(e.tarefa_id)===String(t.id)&&String(e.pessoa_id)===String(pid)&&e.dia===date&&e.estado==='concluida');
+  const folga=Array.isArray(pessoa?.folgas_datas)&&pessoa.folgas_datas.includes(date);
+  const cell=document.createElement('div');cell.style.cssText='min-height:54px;border:1px solid #aecdc0;border-radius:6px;padding:5px;text-align:center;font-size:14px;background:'+(e?'#b9dcfa':folga?'#b9dcc6':'#e0f2df')+';color:#17382c';
+  cell.textContent=String(dia);
+  const label=document.createElement('small');label.style.cssText='display:block;font-size:10px';label.textContent=e?'Concluída':folga?'Folga':'';cell.append(label);grid.append(cell);
+ }
+ panel.append(grid);
+ const legend=document.createElement('p');legend.style.cssText='font-size:12px;margin-top:12px';legend.textContent='Azul: conclusão registrada • Verde-escuro: folga cadastrada • Verde-claro: sem conclusão registrada. Dias sem marcação não são automaticamente classificados como descumpridos.';panel.append(legend);
+ overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};document.body.append(overlay);
+}
+function fsjMesAdjacente(ano,mes,delta){const d=new Date(ano,mes+delta,1);return [d.getFullYear(),d.getMonth()];}
 function fsjFiltroSituacaoDemanda(t,valor){
  if(!valor)return true;
  if(valor==='Não cumprida')return t.status==='Não cumprida';
@@ -1529,7 +1565,7 @@ function fsjRenderSequenciaDiaria(responsavel,todas){
   p.append(nome,progresso);list.append(p);
  }
 }
-function renderDemandas(){let responsavel=document.getElementById('demandaFuncionario').value;document.getElementById('demandaTabela').hidden=!responsavel;document.getElementById('demandaEscolha').hidden=!!responsavel;if(!responsavel){fsjRenderSequenciaDiaria('',[]);document.getElementById('fsjPessoaGruposBloco').hidden=true;taskRows.innerHTML='';document.getElementById('demandaContagem').textContent='';return;}FSJDaily.ensure(null,responsavel,renderDemandas);const todas=filtrarDemandas(S.tasks,responsavel);fsjRenderSequenciaDiaria(responsavel,todas);let tarefas=todas.filter(t=>!t.groupId&&fsjFiltroSituacaoDemanda(t,document.getElementById('demandaSituacao').value)).sort(fsjCompareTaskPriority);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+fsjFrequencyLabel(t)+(t.groupId?' / Grupo':'')+'</td><td>'+esc(FSJDaily.ownerText(t,null,responsavel))+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions">'+(t.status==='Concluída'?'<button type="button" data-fsj-archive="'+esc(t.id)+'">Aprovar e arquivar</button>':'')+(t.status==='Arquivado'?'Somente consulta':'<button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button><label class="fsj-supervision-toggle" title="Marcar esta tarefa para acompanhamento e fiscalização pelo supervisor"><input type="checkbox" data-fsj-supervision="'+esc(t.id)+'" '+(t.supervision?'checked':'')+'><span>Supervisão</span></label>')+'</div></td></tr>').join('');fsjPosicionarAcoesMobile(taskRows);document.getElementById('demandaContagem').textContent=tarefas.length+' tarefa(s) individual(is) de '+todas.filter(t=>!t.groupId).length+' · '+todas.filter(t=>t.groupId).length+' tarefa(s) de grupo';if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="9" class="muted">Nenhuma tarefa individual encontrada com estes filtros.</td></tr>';
+function renderDemandas(){let responsavel=document.getElementById('demandaFuncionario').value;document.getElementById('demandaTabela').hidden=!responsavel;document.getElementById('demandaEscolha').hidden=!!responsavel;if(!responsavel){fsjRenderSequenciaDiaria('',[]);document.getElementById('fsjPessoaGruposBloco').hidden=true;taskRows.innerHTML='';document.getElementById('demandaContagem').textContent='';return;}FSJDaily.ensure(null,responsavel,renderDemandas);const todas=filtrarDemandas(S.tasks,responsavel);fsjRenderSequenciaDiaria(responsavel,todas);let tarefas=todas.filter(t=>!t.groupId&&fsjFiltroSituacaoDemanda(t,document.getElementById('demandaSituacao').value)).sort(fsjCompareTaskPriority);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+fsjFrequencyLabel(t)+(t.groupId?' / Grupo':'')+'</td><td>'+esc(fsjSituacaoDemanda(t,responsavel))+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions">'+(t.status==='Concluída'?'<button type="button" data-fsj-archive="'+esc(t.id)+'">Aprovar e arquivar</button>':'')+(t.status==='Arquivado'?'Somente consulta':'<button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button><label class="fsj-supervision-toggle" title="Marcar esta tarefa para acompanhamento e fiscalização pelo supervisor"><input type="checkbox" data-fsj-supervision="'+esc(t.id)+'" '+(t.supervision?'checked':'')+'><span>Supervisão</span></label>')+'</div></td></tr>').join('');fsjPosicionarAcoesMobile(taskRows);document.getElementById('demandaContagem').textContent=tarefas.length+' tarefa(s) individual(is) de '+todas.filter(t=>!t.groupId).length+' · '+todas.filter(t=>t.groupId).length+' tarefa(s) de grupo';if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="9" class="muted">Nenhuma tarefa individual encontrada com estes filtros.</td></tr>';
 
 // As tarefas coletivas aparecem em quadro independente, sem duplicação na lista individual.
 const grupoRows=document.getElementById('fsjPessoaGruposRows');
