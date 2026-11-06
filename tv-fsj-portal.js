@@ -20,7 +20,7 @@ function init(){
   if(frame.dataset.ssoReady==='1')frame.hidden=false;
  }
  wrap.addEventListener('click',e=>{const b=e.target.closest('[data-tv]');if(!b)return;const kind=b.dataset.tv;if(kind==='voltar'){window.navTo?.('dashboard');return;}showVM(kind)});
- window.abrirTVFSJPortal=function(){if(!window.fsjPainelPronto)return;window.abrirVideosReserva?.();showLanding();};
+ window.abrirTVFSJPortal=function(){if(typeof window.abrirVideosReserva!=='function')return;window.abrirVideosReserva();showLanding();};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
