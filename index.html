@@ -445,6 +445,16 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 #fsjPreviewNote{color:white;font-size:12px;text-align:center;max-width:520px}
 @media(max-width:700px){#fsjPreviewButton{display:none!important}}
 
+
+/* FSJ Proprietário — indicadores na mesma linha, imediatamente antes da TV FSJ. */
+@media (max-width:700px){
+ #dashboard.grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ #dashboard>.kpi{grid-column:auto!important;grid-row:auto!important;min-width:0!important;width:auto!important;max-width:none!important;padding:8px 2px!important;text-align:center!important;font-size:clamp(9px,2.4vw,12px)!important;overflow-wrap:normal!important}
+ #dashboard>.kpi b{font-size:clamp(18px,5.5vw,25px)!important}
+ #dashboard>.kpi:nth-of-type(n){min-width:0!important}
+ #dashboard>#fsjHomeTvButton{grid-column:1/-1!important}
+}
+
 /* FSJ tela 1: quatro indicadores em uma única linha no celular. */
 @media(max-width:700px){
  #dashboard.grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
