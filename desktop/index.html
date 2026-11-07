@@ -1728,9 +1728,10 @@ async function fsjAtualizarRetornos(updateView=true){
     S.tasks=fresh; // Incluir novas, refletir edições e retirar excluídas.
     retornosDia=answers;
     save();
-    // A quantidade e os links do Início não dependem de carregar o calendário.
+    // Os contadores mudam imediatamente, mesmo nas chamadas após edição/arquivamento.
+    fsjAtualizarIndicadoresIniciais();
+    // Os links do Início não dependem de carregar o calendário.
     if(updateView){
-      fsjAtualizarIndicadoresIniciais();
       if(currentPage==='tarefasPorSituacao')fsjRenderTarefasPorSituacao();
       if(currentPage==='fsjNaoCumpridas')fsjRenderNaoCumpridas();
     }
