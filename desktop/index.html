@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261105-folgas-confirmacao-04">
+<meta name="fsj-build" content="20261107-admin-contadores-sincronizados-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -602,7 +602,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261102-seletor-grupo-executor-02';
+const FSJ_BUILD='20261107-admin-contadores-sincronizados-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1665,33 +1665,86 @@ async function fsjLerRetornos(){
     rows.push(...page);if(page.length<1000)return rows;
   }
 }
+// FSJ: reconciliacao completa; a lista central prevalece sobre o snapshot local.
+async function fsjLerRegistrosPaginados(path){
+ const all=[];
+ for(let offset=0;;offset+=1000){
+  const page=await api(path+'&limit=1000&offset='+offset);
+  if(!Array.isArray(page))throw new Error('Consulta central de tarefas retornou dados inválidos.');
+  all.push(...page);
+  if(page.length<1000)return all;
+ }
+}
+function fsjReconciliarTarefas(anteriores,rows,vinculos,answers,day){
+ const prev=new Map(anteriores.map(t=>[String(t.id),t]));
+ const byTask=new Map();
+ for(const v of vinculos){
+  const id=String(v.tarefa_id);
+  if(!byTask.has(id))byTask.set(id,[]);
+  if(v.pessoa_id!=null&&!byTask.get(id).includes(v.pessoa_id))byTask.get(id).push(v.pessoa_id);
+ }
+ return rows.map(row=>{
+  const old=prev.get(String(row.id)),daily=!!row.diaria;
+  let status=row.situacao;
+  if(daily&&row.reaberta_em&&row.reaberta_dia!==day&&status==='Pendente')status='Em aberto';
+  if(daily&&status==='Concluída'&&row.concluida_em&&fsjDia(row.concluida_em)!==day)status='Em aberto';
+  return fsjAplicarRetornos({
+   id:row.id,code:row.codigo_tarefa,text:row.descricao,
+   personIds:byTask.get(String(row.id))||[],groupId:row.grupo_id||'',
+   daily,frequency:row.periodicidade||(daily?'diaria':'pontual'),
+   priority:row.prioridade||'normal',supervision:!!row.exige_supervisao,
+   timedMinutes:row.duracao_execucao_minutos??null,
+   status,centralStatus:row.situacao,created:row.criada_em,
+   completedBy:status==='Concluída'?(row.concluida_por||''):'',
+   reopenedAt:row.reaberta_em,reopenedDay:row.reaberta_dia,
+   reopenReason:row.reabertura_motivo,
+   attachments:Array.isArray(old?.attachments)?old.attachments:[]
+  },answers,day);
+ });
+}
+function fsjAtualizarIndicadoresIniciais(){
+ for(const [id,situacao] of [['ko','Em aberto'],['kc','Concluída'],['kp','Pendente'],['kq','Aguardando gestão']]){
+  const el=document.getElementById(id);
+  if(el)el.textContent=S.tasks.filter(t=>t.status===situacao).length;
+ }
+}
 let fsjAtualizacaoEmCurso=null;
 async function fsjAtualizarRetornos(updateView=true){
   if(window.fsjExited||!localStorage.getItem('fsj_access_token'))return;
   if(fsjAtualizacaoEmCurso)return fsjAtualizacaoEmCurso;
   fsjAtualizacaoEmCurso=(async()=>{
     const executionDay=fsjDia(new Date());
-    const [tasks,answers,executions]=await Promise.all([api('/rest/v1/tarefas?select=id,situacao,duracao_execucao_minutos,exige_supervisao,concluida_por,concluida_em,prioridade,codigo_tarefa,reaberta_em,reaberta_dia,reabertura_motivo'),fsjLerRetornos(),fsjLerExecucoesTempos()]);
+    const [tasks,vinculos,answers,executions]=await Promise.all([
+      fsjLerRegistrosPaginados('/rest/v1/tarefas?select=*&order=id.asc'),
+      fsjLerRegistrosPaginados('/rest/v1/tarefa_responsaveis?select=tarefa_id,pessoa_id&order=tarefa_id.asc,pessoa_id.asc'),
+      fsjLerRetornos(),fsjLerExecucoesTempos()
+    ]);
+    if(window.fsjExited)return;
+    if(!tasks.length&&S.tasks.length)throw new Error('Consulta central vazia; preservada a lista anterior até confirmar o acesso.');
+    const day=fsjDia(new Date());
+    const fresh=fsjReconciliarTarefas(S.tasks,tasks,vinculos,answers,day);
     fsjTemposExecucoes=executions;
     fsjExecucoes=executions.filter(e=>e.dia===executionDay||e.estado==='em_andamento');
-    if(window.fsjExited)return;
-    const central=new Map(tasks.map(t=>[t.id,t]));
-    const day=fsjDia(new Date());
-    S.tasks=S.tasks.map(t=>{
-      const row=central.get(t.id);if(!row)return t;
-      let status=row.situacao;if(t.daily&&row.reaberta_em&&row.reaberta_dia!==day&&status==='Pendente')status='Em aberto';
-      if(t.daily&&status==='Concluída'&&row.concluida_em&&fsjDia(row.concluida_em)!==day)status='Em aberto';
-      return fsjAplicarRetornos({...t,status,supervision:!!row.exige_supervisao,timedMinutes:row.duracao_execucao_minutos??null,reopenedAt:row.reaberta_em,reopenedDay:row.reaberta_dia,reopenReason:row.reabertura_motivo,code:row.codigo_tarefa,priority:row.prioridade||'normal',centralStatus:row.situacao,completedBy:status==='Concluída'?(row.concluida_por||''):''},answers,day);
-    });
+    S.tasks=fresh; // Incluir novas, refletir edições e retirar excluídas.
     retornosDia=answers;
-    await FSJDaily.load(null,document.getElementById('demandaFuncionario').value||'',true);
-    if(currentPage==='relatorios')await FSJDaily.load(month.value||FSJDaily.month(),'',true);
+    save();
+    // A quantidade e os links do Início não dependem de carregar o calendário.
     if(updateView){
-      ko.textContent=S.tasks.filter(t=>t.status==='Em aberto').length;
-      kc.textContent=S.tasks.filter(t=>t.status==='Concluída').length;
-      kp.textContent=S.tasks.filter(t=>t.status==='Pendente').length;
-      kq.textContent=S.tasks.filter(t=>t.status==='Aguardando gestão').length;
-      renderDemandas();renderListaSupervisao();renderDemandasGrupos();if(currentPage==='tarefasEmExecucao')fsjRenderTarefasEmExecucao();if(currentPage==='tarefasPorSituacao')fsjRenderTarefasPorSituacao();if(currentPage==='perguntasGestor')fsjRenderPerguntas();if(currentPage==='relatorios')monthly();
+      fsjAtualizarIndicadoresIniciais();
+      if(currentPage==='tarefasPorSituacao')fsjRenderTarefasPorSituacao();
+      if(currentPage==='fsjNaoCumpridas')fsjRenderNaoCumpridas();
+    }
+    let progressoIndisponivel=false;
+    try{
+      await FSJDaily.load(null,document.getElementById('demandaFuncionario').value||'',true);
+      if(currentPage==='relatorios')await FSJDaily.load(month.value||FSJDaily.month(),'',true);
+    }catch(e){progressoIndisponivel=true;console.warn('FSJ: calendário de execução indisponível; contadores atualizados.',e);}
+    if(updateView){
+      renderDemandas();renderListaSupervisao();renderDemandasGrupos();
+      if(currentPage==='tarefasEmExecucao')fsjRenderTarefasEmExecucao();
+      if(currentPage==='tarefasPorSituacao')fsjRenderTarefasPorSituacao();
+      if(currentPage==='perguntasGestor')fsjRenderPerguntas();
+      if(currentPage==='relatorios'&&!progressoIndisponivel)monthly();
     }
     document.getElementById('retornosSyncStatus').textContent='Respostas atualizadas em '+fsjDataHora(new Date())+'.';
     ultimaAtualizacao.textContent='Dados: '+fsjDataHora(new Date());
