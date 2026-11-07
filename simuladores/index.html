@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ — Simuladores Celular | Executor e Proprietário</title>
-<meta name="fsj-simulador-versao" content="1.0.0">
+<meta name="fsj-simulador-versao" content="1.0.1">
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#203b2c;background:#eef2ef}*{box-sizing:border-box}body{margin:0;padding:14px}.intro{max-width:980px;margin:0 auto 12px;color:#395548;font-size:13px}.shell{max-width:980px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.phone{min-width:0;border:2px solid #1e503d;border-radius:20px;background:#f6f9f6;overflow:hidden;display:flex;flex-direction:column;height:min(790px,calc(100dvh - 84px));min-height:550px}.phone.owner{border-color:#335d88;background:#f4f8fc}.phone header{background:#194b3c;color:white;padding:13px 15px}.phone.owner header{background:#234e73}.phone header strong{font-size:18px}.phone header small{display:block;font-size:11px;color:#dceab7;margin-top:3px}.phone.owner header small{color:#e0edf9}.screen{padding:10px;overflow:hidden;flex:1;min-height:0}.screen h2{font-size:17px;color:#194b3c;margin:3px 0 8px}.owner .screen h2{color:#234e73}.screen h3{font-size:15px;margin:13px 0 7px}.muted{font-size:12px;color:#63786b;line-height:1.5}.item{padding:8px;background:#fff;border:1px solid #d4e3d7;border-radius:10px;margin:8px 0;cursor:pointer}.item:focus-visible{outline:3px solid #84b99c}.item b{color:#20533d}.owner .item b{color:#254f75}.item p{margin:5px 0;font-size:13px}.item small{font-size:11px;color:#63786b}.item.overdue{background:#fff7ec;border-color:#eab578}.item.overdue b{color:#a6570f}.button{display:block;width:100%;padding:8px 9px;margin:5px 0;border:0;border-radius:9px;background:#22784e;color:white;font-weight:600;cursor:pointer;min-height:40px;font-size:14px}.button:hover{filter:brightness(.96)}.button.secondary{background:white;color:#20593e;border:1px solid #adcdb9}.button.small{font-size:12px;padding:7px;width:auto;min-height:32px;margin:0}.button.blue{background:#2d648d}.button.warn{background:#9b542b}button:disabled{opacity:.45;cursor:not-allowed}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}.tabs button{margin:0}.tabs .inactive{background:#e4ede6;color:#32533f}.owner .tabs .inactive{background:#e0e9f3;color:#2e5775}label{display:block;font-size:12px;font-weight:650;margin:5px 0 3px}select,input,textarea{font:inherit;font-size:12px;width:100%;padding:7px;border:1px solid #b5cdbb;border-radius:8px;background:white;color:#203b2c}textarea{min-height:70px;max-height:130px;resize:none}.calendar-head{display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.calendar .weekday{text-align:center;font-size:10px;color:#63786b;padding:5px 0}.calendar button{min-width:0;height:31px;font-size:12px;border:1px solid #d9e4dc;background:#fff;border-radius:5px;cursor:pointer;color:#213e2c;padding:0}.calendar button.done{background:#206b49;color:white;font-weight:bold}.calendar button.selected{outline:2px solid #2e7194;outline-offset:-2px}.calendar button.weekly{background:#d5e9f8}.calendar button.holiday{background:#f8e3b7}.calendar button.comp{background:#dcead0}.calendar button.vacation{background:#eadcf6}.calendar button:disabled{cursor:default}.calendar-hint{font-weight:700;color:#24563f;margin:12px 0 5px;font-size:13px}.calendar-note{background:white;border:1px solid #d9e4dc;border-radius:8px;padding:10px;margin-top:10px;font-size:12px}.legend{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:11px;margin-top:10px}.swatch{display:inline-block;width:12px;height:12px;border:1px solid #bbb;vertical-align:middle;margin-right:5px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.kpi{border:1px solid #dae7ec;background:white;color:#234e73;padding:10px 3px;border-radius:9px;cursor:pointer;text-align:center}.kpi b{display:block;font-size:21px}.kpi small{font-size:10px}.panel{padding:12px;background:white;border:1px solid #d6e4dd;border-radius:9px;margin:9px 0}.owner .panel{border-color:#d8e3ee}.tag{font-weight:bold;color:#276d45}.owner .tag{color:#234e73}.foot{background:#e3eee6;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:5px}.owner .foot{background:#e4edf5}.foot .button{width:auto;padding:8px 10px;font-size:12px;margin:0;min-height:34px}.foot span{font-size:11px;color:#456150}.link{color:#a6570f;text-decoration:underline;cursor:pointer}.hint-blue{background:#e7f0f7;border-left:3px solid #356f9d;padding:10px;margin:10px 0;font-size:12px;color:#33566e}.hint-green{background:#e4f0e8;border-left:3px solid #397b58;padding:10px;margin:10px 0;font-size:12px}.footer-note{max-width:980px;margin:13px auto 0;color:#5e7668;font-size:12px}@media(max-width:680px){body{padding:6px;overflow-x:auto}.shell{grid-template-columns:repeat(2,minmax(325px,1fr));gap:10px;min-width:660px}.phone{height:calc(100dvh - 62px);min-height:430px}.intro,.footer-note{padding:0 6px}}
 .people-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.people-actions .button{margin:4px 0}.people-actions .button:first-child{flex:1}.form-section{padding:9px;background:#fff;border:1px solid #cadbe5;border-radius:10px;margin-top:10px}.form-section label:first-child{margin-top:0}.form-section input[readonly],.form-section select:disabled{background:#f0f4f6;color:#546875}.form-section .check-row{display:flex;align-items:flex-start;gap:9px;padding:12px 9px;background:#f1f6fa;border:1px solid #dce7ed;border-radius:8px;margin:12px 0}.form-section .check-row input{width:19px;height:19px;flex:0 0 19px;margin:1px 0 0;accent-color:#22784e}.form-section .check-row label{margin:0;font-weight:600;line-height:1.4}.form-section .check-row small{display:block;margin-top:3px;font-weight:400;color:#5c7080}.people-feedback{background:#e6f3e8;color:#205a3d;border:1px solid #b5dcc0;padding:10px;border-radius:8px;font-size:12px;margin:10px 0}.people-feedback.bad{background:#fff3e9;color:#924313;border-color:#efc59e}.people-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}.people-list .panel{margin:0;font-size:12px;padding:9px}.form-section .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.form-section .form-actions .button{margin:4px 0}.owner .form-section{background:#fff}
@@ -606,7 +606,7 @@ function printOwnerReport(){if(state.owner.screen!=='reportResult')return;window
 
 function renderOwner(){const s=state.owner,t=taskById(s.task);let h='';
 const menu=[['Minhas Tarefas','tasks'],['Tarefas Não Cumpridas','overdue'],['Pessoas e Grupos','people'],['Folgas e Férias','leaves'],['Relatórios','reports'],['Supervisão','supervision'],['TV FSJ','tv'],['Ver Sugestões','suggestions']];
-if(s.screen==='home'){const counts=['Em aberto','Concluída','Pendente','Aguardando gestão'];h='<h2>Painel do Proprietário</h2><div class="kpis">'+counts.map((status,i)=>`<button class="kpi" onclick="openOwnerBySituation('${status}')"><b>${jobs.filter(j=>j.status===status).length}</b><small>${['Abertas','Concluídas','Pendentes','Perguntas'][i]}</small></button>`).join('')+'</div><div class="twocol owner-primary-actions" style="margin-top:9px"><button class="button" onclick="newTaskForm()">Registro de Tarefas</button><button class="button" onclick="navigate(\'owner\',\'whatsapp\')">Disparo WhatsApp</button></div><div class="twocol" style="margin-top:6px">'+menu.map(([label,target])=>`<button class="button" onclick="${target==='tasks'?"openOwnerAll('Em aberto')":"navigate('owner','"+target+"')"}">${label}</button>`).join('')+'</div>'}
+if(s.screen==='home'){const counts=['Em aberto','Concluída','Pendente','Aguardando gestão'];h='<h2>Painel do Proprietário</h2><div class="kpis">'+counts.map((status,i)=>`<button class="kpi" onclick="openOwnerBySituation('${status}')"><b>${jobs.filter(j=>j.status===status).length}</b><small>${['Abertas','Concluídas','Pendentes','Perguntas'][i]}</small></button>`).join('')+'</div><div class="twocol owner-primary-actions" style="margin-top:9px"><button class="button" onclick="newTaskForm()">Registro de Tarefas</button><button class="button" onclick="navigate(\'owner\',\'whatsapp\')">Disparo WhatsApp</button></div><div class="twocol" style="margin-top:6px">'+menu.map(([label,target])=>`<button class="button" onclick="${target==='tasks'?"openOwnerAll('Em aberto')":"navigate('owner','"+target+"')"}">${label}</button>`).join('')+'</div><button class="button secondary" onclick="navigate(\'owner\',\'recovery\')">Recuperar cadastros e fazer backup</button>'}
 else if(s.screen==='tasks'||s.screen==='supervision'){
   h='<h2>Demandas e retornos</h2><button class="button blue" onclick="newTaskForm()">+ Registrar nova tarefa</button><p class="muted">Tarefas compartilhadas com o Executor no painel à esquerda.</p>';
   h+=`<label for="ownerExecutor">Selecionar usuário Executor</label><select id="ownerExecutor" onchange="setExecutor(this.value)"><option value="">Selecione o executor</option><option value="Proprietário" ${s.mode==='executor'&&s.executor==='Proprietário'?'selected':''}>Urbano (Proprietário — minhas tarefas)</option>${people.filter(p=>p.perfil!=='Visitante').map(p=>`<option value="${esc(personKey(p))}" ${s.mode==='executor'&&s.executor===personKey(p)?'selected':''}>${esc(personLabel(p))}${p.protegido?' (minhas tarefas)':''}</option>`).join('')}</select>`;
@@ -647,6 +647,7 @@ else if(s.screen==='overdueCalendar'){
  const ack=acknowledgements.find(a=>a.task===t?.id);if(ack)h+='<div class="acknowledged">✓ Ciência recebida de '+esc(ack.person)+' em '+esc(ack.date)+'</div>';
 }
 
+else if(s.screen==='recovery'){h=fsjRenderRecoveryScreen()}
 else if(s.screen==='people'){h=renderPeopleScreen()}
 else if(s.screen==='groupForm'){h=renderGroupFormation()}
 else if(s.screen==='newTask'){h=renderNewTaskForm()}
@@ -702,12 +703,89 @@ function paginate(which){const holder=$(which==='ex'?'executor':'proprietario'),
 
 let fsjApplyingRemoteData=false;
 const FSJ_DEMO_STORAGE_KEY='fsj_sim_executor_proprietario_limpo_v1_20261107';
+const FSJ_SIM_SNAPSHOTS_KEY='fsj_sim_backup_historico_v1_20261107';
+let fsjAllowEmptyReset=false,fsjRecoveryFeedback='';
+function fsjValidPayload(data){return !!data&&Array.isArray(data.people)&&Array.isArray(data.jobs)&&Array.isArray(data.groups)}
+function fsjLocalSnapshots(){
+ try{const entries=JSON.parse(localStorage.getItem(FSJ_SIM_SNAPSHOTS_KEY)||'[]');return Array.isArray(entries)?entries:[]}catch(e){return []}
+}
+function fsjArchiveRaw(raw){
+ if(!raw)return;
+ try{
+  const entries=fsjLocalSnapshots();
+  if(entries[0]&&entries[0].raw===raw)return;
+  entries.unshift({date:new Date().toLocaleString('pt-BR'),raw});
+  // No mínimo 30 versões anteriores por origem, sem envio para o GitHub.
+  localStorage.setItem(FSJ_SIM_SNAPSHOTS_KEY,JSON.stringify(entries.slice(0,30)));
+ }catch(e){/* Bloqueio ou limite de armazenamento local: exportação manual continua disponível. */}
+}
+function fsjCurrentData(){
+ return {people,jobs,groups,marks,absences,personAbsences,acknowledgements,suggestions,
+  demoPersonSequence,demoTaskSequence,executorPreview:state.ex.personId};
+}
+function fsjExportData(){
+ const raw=localStorage.getItem(FSJ_DEMO_STORAGE_KEY)||JSON.stringify(fsjCurrentData());
+ const b=new Blob([raw],{type:'application/json;charset=utf-8'});
+ const url=URL.createObjectURL(b),a=document.createElement('a');
+ a.href=url;a.download='FSJ-simuladores-backup-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+ fsjRecoveryFeedback='Cópia JSON preparada para salvar no Chrome.';if(state.owner.screen==='recovery')render();
+}
+function fsjApplyRecoveredData(raw){
+ let parsed;
+ try{parsed=JSON.parse(raw)}catch(e){fsjRecoveryFeedback='Arquivo ou texto inválido: não é JSON.';render();return}
+ if(!fsjValidPayload(parsed)){fsjRecoveryFeedback='Cópia inválida: faltam pessoas, tarefas ou grupos.';render();return}
+ if(!confirm('Restaurar '+parsed.people.length+' pessoa(s), '+parsed.jobs.length+' tarefa(s) e '+parsed.groups.length+' grupo(s)? Os registros atuais serão preservados no histórico.'))return;
+ try{
+  fsjArchiveRaw(localStorage.getItem(FSJ_DEMO_STORAGE_KEY));
+  localStorage.setItem(FSJ_DEMO_STORAGE_KEY,JSON.stringify(parsed));
+  restoreSimulatorSession();fsjRecoveryFeedback='Registros restaurados: '+people.length+' pessoa(s).';
+  state.owner.screen='recovery';render();
+ }catch(e){fsjRecoveryFeedback='O Chrome bloqueou a gravação. Tente exportar primeiro a cópia de segurança.';render()}
+}
+function fsjRestoreSnapshot(index){
+ const item=fsjLocalSnapshots()[index];
+ if(item&&item.raw)fsjApplyRecoveredData(item.raw);
+}
+async function fsjImportBackupFile(input){
+ const f=input?.files?.[0];if(!f)return;
+ try{fsjApplyRecoveredData(await f.text())}
+ catch(e){fsjRecoveryFeedback='Falha na leitura do arquivo.';render()}
+}
+function fsjImportBackupText(){
+ const raw=document.getElementById('fsjRecoveryJson')?.value?.trim();
+ if(!raw){fsjRecoveryFeedback='Cole o JSON obtido na versão original ou escolha o arquivo de backup.';render();return}
+ fsjApplyRecoveredData(raw);
+}
+function fsjRenderRecoveryScreen(){
+ const snapshots=fsjLocalSnapshots();
+ let h='<h2>Recuperar cadastros e backups</h2>';
+ h+='<p class="muted">Registros atuais: <b>'+people.length+' pessoa(s)</b>, '+jobs.length+' tarefa(s), '+groups.length+' grupo(s). Esta ferramenta não acessa o sistema operacional nem envia dados ao GitHub.</p>';
+ h+='<button class="button" onclick="fsjExportData()">Salvar cópia dos registros atuais (.json)</button>';
+ h+='<h3>Histórico local ('+snapshots.length+')</h3>';
+ if(!snapshots.length)h+='<div class="panel">Nenhuma versão anterior encontrada <b>neste endereço</b>. Os registros podem continuar no Chrome no endereço original onde foram cadastrados.</div>';
+ else h+=snapshots.map((item,i)=>{let p={people:[],jobs:[],groups:[]};try{p=JSON.parse(item.raw)}catch(e){}return '<button class="button secondary" onclick="fsjRestoreSnapshot('+i+')">Restaurar '+esc(item.date)+' — '+(p.people?.length||0)+' pessoa(s), '+(p.jobs?.length||0)+' tarefas</button>'}).join('');
+ h+='<h3>Importar registros da versão anterior</h3><label for="fsjRecoveryFile">Selecionar cópia JSON</label><input type="file" id="fsjRecoveryFile" accept=".json,application/json" onchange="fsjImportBackupFile(this)">';
+ h+='<label for="fsjRecoveryJson">Ou colar dados JSON extraídos do Chrome anterior</label><textarea id="fsjRecoveryJson" rows="2" placeholder="Cole o conteúdo JSON, sem enviar dados pessoais pelo chat"></textarea><button class="button blue" onclick="fsjImportBackupText()">Restaurar JSON colado</button>';
+ h+='<p class="muted">Importante: o Chrome mantém os dados separados por endereço/origem. Se você cadastrou as quatro pessoas em um arquivo HTML ou link anterior, abra <b>aquele mesmo endereço</b> no mesmo Chrome para recuperá-las. Não limpe os dados do site.</p>';
+ if(fsjRecoveryFeedback)h+='<div class="people-feedback" role="status">'+esc(fsjRecoveryFeedback)+'</div>';
+ return h;
+}
 function saveSimulatorSession(){
  if(fsjApplyingRemoteData)return;
- try{localStorage.setItem(FSJ_DEMO_STORAGE_KEY,JSON.stringify({
-  people,jobs,groups,marks,absences,personAbsences,acknowledgements,suggestions,
-  demoPersonSequence,demoTaskSequence,executorPreview:state.ex.personId
- }))}catch(err){/* Alguns navegadores bloqueiam armazenamento de arquivos locais; sincronização na mesma página continua. */}
+ try{
+  const current=JSON.stringify(fsjCurrentData());
+  const previous=localStorage.getItem(FSJ_DEMO_STORAGE_KEY);
+  if(previous===current)return;
+  if(previous){
+   fsjArchiveRaw(previous);
+   let old=null;try{old=JSON.parse(previous)}catch(e){return} // não destruir dados ilegíveis
+   if(!fsjAllowEmptyReset&&fsjValidPayload(old)&&old.people.length>0&&people.length===0){
+    restoreSimulatorSession();return; // protege cadastros no carregamento
+   }
+  }
+  localStorage.setItem(FSJ_DEMO_STORAGE_KEY,current);
+ }catch(err){/* Falha ao salvar não deve apagar o histórico local. */}
 }
 function restoreSimulatorSession(){
  let saved=null;try{saved=JSON.parse(localStorage.getItem(FSJ_DEMO_STORAGE_KEY)||'null')}catch(err){}
@@ -726,14 +804,16 @@ function restoreSimulatorSession(){
  if(people.length)state.owner.leavePerson=personKey(people[0]);
 }
 function resetSimulatorData(){
- if(!confirm('Zerar todos os usuários, grupos, tarefas, folgas e registros dos dois simuladores? Esta ação não pode ser desfeita.'))return;
+ if(prompt('ATENÇÃO: os registros serão apagados. Digite ZERAR para confirmar (uma cópia será preservada):')!=='ZERAR')return;
+ fsjArchiveRaw(localStorage.getItem(FSJ_DEMO_STORAGE_KEY));
+ fsjAllowEmptyReset=true;
  people.length=0;jobs.length=0;groups.length=0;acknowledgements.length=0;suggestions.length=0;
  for(const data of [marks,absences,personAbsences])for(const k of Object.keys(data))delete data[k];
  demoPersonSequence=0;demoTaskSequence=0;
  state.ex.personId='';state.ex.task=null;state.ex.screen='home';state.ex.page=0;
  Object.assign(state.owner,{executor:'',supervisor:'',personId:'',leavePerson:'',mode:'all',status:'Todas',section:'all',task:null,groupEditIndex:-1,groupDraftName:'',groupDraftMembers:[],groupPick:'',groupFeedback:'',screen:'home',page:0});
  try{localStorage.removeItem(FSJ_DEMO_STORAGE_KEY)}catch(err){}
- render();
+ render();fsjAllowEmptyReset=false;
 }
 function fsjClearRemoteData(){
  people.length=0;jobs.length=0;groups.length=0;acknowledgements.length=0;suggestions.length=0;
