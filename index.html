@@ -2129,6 +2129,15 @@ window.fsjAbrirRelatorioMensalAcoes=function(modoGrupo=false){
   });
 })();
 </script>
+
+<script id="fsj-calendario-grupo-proprietario-20261107">
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-fsj-group-calendar]');if(!button)return;
+ const task=S.tasks.find(t=>String(t.id)===String(button.dataset.fsjGroupCalendar));
+ if(!task||!task.groupId||!fsjTarefaPeriodica(task))return;
+ const now=new Date();fsjCalendarioSomenteLeitura(task,null,now.getFullYear(),now.getMonth());
+});
+</script>
 </body></html>';
  // Exibir sempre no próprio Assistente Desktop, sem depender de pop-ups.
 let dlg=document.getElementById('fsjRelatorioAcoesFallback');
