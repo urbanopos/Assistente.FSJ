@@ -247,7 +247,42 @@ function fsjExibirRespostasGestor(dados){
  const heading=document.createElement('h2');heading.textContent='Respostas do gestor';painel.append(heading);
  for(const r of rows){const card=document.createElement('div');card.className='msg';const when=document.createElement('p');when.className='muted';when.textContent='Respondida em '+new Date(r.respondida_em).toLocaleString('pt-BR',{timeZone:'America/Recife'});const body=document.createElement('p');body.textContent=r.resposta;card.append(when,body);painel.append(card);}
 }
-async function load(){if(!token){fail('Link inválido. Peça um novo link ao gestor.');return}try{info=await post({action:'detail',token});if(responseParams.get('gestor')==='1'&&responseParams.get('concluida')==='1')info.respondido=true;status.textContent='';const title=document.createElement('div');title.className='task';const taskText=String(info.tarefa||'').trim();const taskCode=String(info.codigo_tarefa||'').trim();const normalized=taskCode?taskText.startsWith(taskCode)?taskText.slice(taskCode.length).replace(/^\s*[-—:]?\s*/,''):taskText:taskText;title.textContent=normalized;if(taskCode){const code=document.createElement('strong');code.textContent=fsjResponseTaskNumber(taskCode,info.periodicidade);title.prepend(code);}detail.replaceChildren();const meta=document.createElement('p');meta.className='muted';const [y,m,d]=info.dia.split('-');meta.textContent='Responsável: '+info.responsavel+' • Data: '+d+'/'+m+'/'+y;detail.append(meta,title);fsjExibirRespostasGestor(info);if(info.progresso_mensal){const progress=document.createElement('p');progress.id='dailyProgress';progress.className='muted';progress.textContent=info.progresso_mensal.rotulo+' • '+info.progresso_mensal.mes;progress.title=FSJDaily.hint(info.progresso_mensal);detail.append(progress);}renderExecution(info.execucao);if(info.respondido){done.style.display='block';taskScreen.hidden=true;form.style.display='none';fsjTaskFlowFooter.hidden=true;}else{done.style.display='none';fsjTaskFlowFooter.hidden=false;showResponseStep('detail')}}catch(e){fail(e.message)}}
+
+// FSJ calendário periódico — consulta dos dias; conclusão permanece no fluxo SIM existente.
+function fsjCalendarioExecutor(info){
+ const frequency=String(info?.periodicidade||'').toLowerCase();
+ if(!['diaria','semanal','quinzenal','mensal','trimestral','semestral','anual'].includes(frequency))return;
+ let old=document.getElementById('fsjCalendarioExecutor');if(old)old.remove();
+ const host=document.createElement('section');host.id='fsjCalendarioExecutor';host.className='card';
+ host.style.cssText='margin:12px 0;padding:12px;max-width:100%;box-sizing:border-box';
+ const heading=document.createElement('h3');heading.textContent='Calendário de conclusão — tarefa periódica';host.append(heading);
+ const help=document.createElement('p');help.className='muted';help.textContent='Selecione o dia de hoje para registrar a conclusão pelo botão SIM. Dias anteriores são apresentados para consulta; folgas e conclusões dependem da validação do servidor.';host.append(help);
+ const now=new Date(),recife=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(now);
+ let [year,month]=recife.split('-').map(Number);month--;
+ const bar=document.createElement('div');bar.style.cssText='display:flex;align-items:center;gap:12px;margin:8px 0';
+ const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px';
+ function draw(){
+  bar.replaceChildren();grid.replaceChildren();
+  const prev=document.createElement('button');prev.type='button';prev.textContent='←';prev.onclick=()=>{const d=new Date(year,month-1,1);year=d.getFullYear();month=d.getMonth();draw();};
+  const title=document.createElement('strong');title.textContent=new Date(year,month,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const next=document.createElement('button');next.type='button';next.textContent='→';next.onclick=()=>{const d=new Date(year,month+1,1);year=d.getFullYear();month=d.getMonth();draw();};
+  bar.append(prev,title,next);
+  for(const label of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']){const h=document.createElement('strong');h.textContent=label;h.style.cssText='text-align:center;font-size:12px';grid.append(h);}
+  for(let n=0;n<new Date(year,month,1).getDay();n++)grid.append(document.createElement('span'));
+  for(let day=1;day<=new Date(year,month+1,0).getDate();day++){
+   const date=year+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+   const today=date===recife;
+   const button=document.createElement('button');button.type='button';button.textContent=String(day);
+   button.style.cssText='min-width:0;min-height:45px;padding:4px;border:1px solid #aecdc0;border-radius:6px;background:'+(today?'#c7e7fa':'#e0f2df')+';color:#17382c';
+   button.disabled=!today||!!info.respondido||!!info.visitante||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode);
+   button.title=today?'Registrar a conclusão de hoje pelo fluxo SIM':'Somente consulta — registros de outros dias não são alterados';
+   button.onclick=()=>{const yes=document.querySelector('input[name=resposta][value=sim]');if(yes)yes.checked=true;const answer=document.getElementById('taskAnswer');if(answer)answer.hidden=false;const go=document.getElementById('startTask');if(go&&!go.hidden&&!go.disabled){go.scrollIntoView({block:'center'});go.focus();}else{const send=document.getElementById('send');if(send)send.scrollIntoView({block:'center'});}status.textContent='Dia '+day+': utilize o fluxo SIM para confirmar a conclusão da tarefa.';};
+   grid.append(button);
+  }
+ }
+ host.append(bar,grid);draw();detail.after(host);
+}
+async function load(){if(!token){fail('Link inválido. Peça um novo link ao gestor.');return}try{info=await post({action:'detail',token});if(responseParams.get('gestor')==='1'&&responseParams.get('concluida')==='1')info.respondido=true;status.textContent='';const title=document.createElement('div');title.className='task';const taskText=String(info.tarefa||'').trim();const taskCode=String(info.codigo_tarefa||'').trim();const normalized=taskCode?taskText.startsWith(taskCode)?taskText.slice(taskCode.length).replace(/^\s*[-—:]?\s*/,''):taskText:taskText;title.textContent=normalized;if(taskCode){const code=document.createElement('strong');code.textContent=fsjResponseTaskNumber(taskCode,info.periodicidade);title.prepend(code);}detail.replaceChildren();const meta=document.createElement('p');meta.className='muted';const [y,m,d]=info.dia.split('-');meta.textContent='Responsável: '+info.responsavel+' • Data: '+d+'/'+m+'/'+y;detail.append(meta,title);fsjExibirRespostasGestor(info);if(info.progresso_mensal){const progress=document.createElement('p');progress.id='dailyProgress';progress.className='muted';progress.textContent=info.progresso_mensal.rotulo+' • '+info.progresso_mensal.mes;progress.title=FSJDaily.hint(info.progresso_mensal);detail.append(progress);}renderExecution(info.execucao);fsjCalendarioExecutor(info);if(info.respondido){done.style.display='block';taskScreen.hidden=true;form.style.display='none';fsjTaskFlowFooter.hidden=true;}else{done.style.display='none';fsjTaskFlowFooter.hidden=false;showResponseStep('detail')}}catch(e){fail(e.message)}}
 function executionTime(value){return value?new Date(value).toLocaleString('pt-BR',{timeZone:'America/Recife'}):''}
 function fsjShowCompletionReview(){
  let label=document.getElementById('completionReviewReason');
