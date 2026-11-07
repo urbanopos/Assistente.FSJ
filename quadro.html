@@ -41,10 +41,9 @@ function fsjCalendarioConsulta(t){
 function fsjRenderOpenTasks(tasks){
  const target=document.getElementById('tasks');target.replaceChildren();if(fsjFiltro==='nao_cumpridas'){const filters=document.createElement('div');filters.style.cssText='display:flex;gap:8px;align-items:center;margin:10px 0';const label=document.createElement('label');label.textContent='Mês/Ano: ';const month=document.createElement('input');month.type='month';month.value=fsjMesFiltro;month.onchange=()=>{fsjMesFiltro=month.value;load()};label.append(month);filters.append(label);target.append(filters)}if(document.body.classList.contains('fsj-index-execucao')){const heading=document.createElement('h2');heading.textContent='TAREFAS INDIVIDUAIS';heading.style.cssText='font-size:18px;margin:14px 0 10px;font-weight:800';target.append(heading);}
  const visible=(Array.isArray(tasks)?tasks:[]).filter(t=>{
-  const individual=fsjFiltro==='nao_cumpridas'||!document.body.classList.contains('fsj-index-execucao')||!t.grupo_id;
+  // Tarefas coletivas pertencentes ao executor também aparecem após as individuais.
   const archive=document.getElementById('boardSituation').value==='Arquivado';
   const periodic=['diaria','semanal','quinzenal','mensal','trimestral','semestral','anual'].includes(String(t.periodicidade||'').toLowerCase());
-  if(!individual)return false;
   if(archive)return t.situacao==='Arquivado';
   if(fsjFiltro==='perguntas'||t.situacao==='Arquivado')return false;
   if(fsjFiltro==='nao_cumpridas')return t.fsj_nao_cumprida===true && (!fsjMesFiltro || String(t.periodo_inicio||'').startsWith(fsjMesFiltro));
@@ -53,7 +52,7 @@ function fsjRenderOpenTasks(tasks){
   return (document.body.classList.contains('fsj-index-execucao')?fsjEstado(t)!=='concluida':fsjEstado(t)===fsjFiltro)&&!t.respondido&&!t.respondido_em&&!t.concluida&&!t.concluida_em;
  }).sort(fsjCompareTaskPriority);
  if(!visible.length){const empty=document.createElement('p');empty.className='empty';empty.textContent=fsjFiltro==='perguntas'?'Os registros de perguntas ainda não estão disponíveis neste quadro.':'Nenhuma tarefa nesta situação.';target.append(empty);return;}
- const groupMap=new Map();for(const task of visible.filter(t=>!!t.grupo_id)){const id=String(task.grupo_id);if(!groupMap.has(id))groupMap.set(id,{title:'Grupo: '+(task.grupo_nome||'Não identificado'),items:[]});groupMap.get(id).items.push(task);}const sections=[{title:document.body.classList.contains('fsj-index-execucao')?'':'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},...groupMap.values()];
+ const groupMap=new Map();for(const task of visible.filter(t=>!!t.grupo_id)){const id=String(task.grupo_id);if(!groupMap.has(id))groupMap.set(id,{title:'Grupo: '+(task.grupo_nome||'Não identificado'),items:[]});groupMap.get(id).items.push(task);}const sections=[{title:document.body.classList.contains('fsj-index-execucao')?'':'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},...groupMap.values().map(g=>({...g,title:'TAREFAS DE GRUPO — '+g.title}))];
  for(const section of sections){
   if(!section.items.length)continue;
   if(section.title){const heading=document.createElement('h2');heading.textContent=section.title;heading.style.cssText='font-size:17px;margin:18px 0 10px';target.append(heading);}
