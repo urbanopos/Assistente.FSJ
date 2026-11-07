@@ -774,3 +774,18 @@ Instalação web pela atualização automática existente. Publicação Pages e 
 Solicitado: seleção independente de executor individual e grupo para Proprietário, Gestor e Supervisor na tela Tarefas de Terceiros. O filtro de grupo deve consultar tarefas coletivas pelo grupo, sem exigir executor individual. Consulta respeita permissões e não autoriza execução por Supervisor.
 
 Publicado parcialmente: simulador Celular/Proprietario/FSJ-Simulador-Celular-Proprietario-v1.1.0.html, commit 55d3f7b7db3104dcafe29e2891b143fafa7cd3d7. Não equivale à implantação operacional em index.html ou à validação em aparelho. Não houve alteração dos dados, serviços, APK, backup ou mecanismos de recuperação.
+
+
+## Indicadores e links de tarefas do Administrador — proposta de correção em teste (07/11/2026)
+
+**Solicitação:** os números e links de tarefas na tela inicial permaneciam mostrando registros antigos mesmo após inclusão, exclusão ou edição de tarefas.
+
+**Causa no código:** a rotina `fsjAtualizarRetornos` consultava apenas um subconjunto das colunas da tabela `tarefas` e executava `S.tasks.map(...)` sobre a lista já armazenada no navegador. Isso atualizava algumas situações, mas não incluía novas tarefas, não retirava tarefas eliminadas e não revisava descrição, periodicidade, grupo ou executores. Além disso, a versão HTML (`meta fsj-build`) estava diferente de `FSJ_BUILD`, comprometendo o contrato de atualização automática.
+
+**Correção preparada na branch de teste `fix/admin-home-kpi-sync-20261107`:** em `index.html` e `desktop/index.html`, consulta integral e paginada das tabelas `tarefas` e `tarefa_responsaveis`, reconstrução da lista pela identidade central, eliminação dos registros não mais presentes, atualização dos quatro indicadores da página inicial e das listas de links para os estados selecionados, inclusive não cumpridas. Mantém distinção individual/grupo e reaplica os retornos das ocorrências. Uma falha isolada na consulta de calendário não deve congelar os indicadores. Estado de versão alinhado em `20261107-admin-contadores-sincronizados-01`.
+
+**Segurança e escopo:** apenas leitura dos registros centrais nesta sincronização; não modifica tarefas no banco, autenticação, envios ou permissões. Preserva anexos mantidos localmente em tarefas existentes e a sessão do titular. A atualização automática de dados usa a rotina já prevista de 30 segundos, ao focar a janela e ao retornar à página. Uma consulta central vazia inesperada preserva a lista anterior e sinaliza falha, evitando perda aparente de dados no painel.
+
+**Validação planejada/automatizada:** `tests/owner-dashboard-sync.cjs` simula inclusão, atualização, remoção, mudança de grupo, vínculos e contagem; `tests/automatic-update-contract.cjs` roda para as duas versões no workflow GitHub. Esses testes não substituem validar a tela real autenticada em Celular e Desktop. Não declarar publicado em produção ou instalado na VM antes de aprovação/integração.
+
+**Recuperação:** caso a proposta apresente regressão, não integrar a branch de teste; se integrada, reverter os commits específicos preservando todos os dados da Armazenagem e as demais correções, sem restaurar versões antigas de cartões PDF.
