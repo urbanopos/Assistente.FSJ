@@ -22,7 +22,16 @@ function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.cl
 
 function fsjRenderOpenTasks(tasks){
  const target=document.getElementById('tasks');target.replaceChildren();if(document.body.classList.contains('fsj-index-execucao')){const heading=document.createElement('h2');heading.textContent='TAREFAS INDIVIDUAIS';heading.style.cssText='font-size:18px;margin:14px 0 10px;font-weight:800';target.append(heading);}
- const visible=(Array.isArray(tasks)?tasks:[]).filter(t=>(!document.body.classList.contains('fsj-index-execucao')||!t.grupo_id)&&document.getElementById('boardSituation').value==='Arquivado'?t.situacao==='Arquivado':fsjFiltro==='perguntas'?false:(document.body.classList.contains('fsj-index-execucao')?fsjEstado(t)!=='concluida':fsjEstado(t)===fsjFiltro)&&!t.respondido&&!t.respondido_em&&!t.concluida&&!t.concluida_em).sort(fsjCompareTaskPriority);
+ const visible=(Array.isArray(tasks)?tasks:[]).filter(t=>{
+  const individual=!document.body.classList.contains('fsj-index-execucao')||!t.grupo_id;
+  const archive=document.getElementById('boardSituation').value==='Arquivado';
+  const periodic=['diaria','semanal','quinzenal','mensal','trimestral','semestral','anual'].includes(String(t.periodicidade||'').toLowerCase());
+  if(!individual)return false;
+  if(archive)return t.situacao==='Arquivado';
+  if(fsjFiltro==='perguntas'||t.situacao==='Arquivado')return false;
+  if(periodic)return true;
+  return (document.body.classList.contains('fsj-index-execucao')?fsjEstado(t)!=='concluida':fsjEstado(t)===fsjFiltro)&&!t.respondido&&!t.respondido_em&&!t.concluida&&!t.concluida_em;
+ }).sort(fsjCompareTaskPriority);
  if(!visible.length){const empty=document.createElement('p');empty.className='empty';empty.textContent=fsjFiltro==='perguntas'?'Os registros de perguntas ainda não estão disponíveis neste quadro.':'Nenhuma tarefa nesta situação.';target.append(empty);return;}
  const groupMap=new Map();for(const task of visible.filter(t=>!!t.grupo_id)){const id=String(task.grupo_id);if(!groupMap.has(id))groupMap.set(id,{title:'Grupo: '+(task.grupo_nome||'Não identificado'),items:[]});groupMap.get(id).items.push(task);}const sections=[{title:document.body.classList.contains('fsj-index-execucao')?'':'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},...groupMap.values()];
  for(const section of sections){
