@@ -1497,7 +1497,20 @@ function fsjCompareTaskPriority(a,b){const rank=t=>({urgente:0,prioritaria:1}[t.
 function fsjTaskClass(priority,status,running=false){if(status==='Concluída')return 'fsj-task-completed';if(priority==='urgente')return 'fsj-priority fsj-urgent';if(priority==='prioritaria')return 'fsj-priority';if(status!=='Concluída'&&(running||status==='Em andamento'))return 'fsj-task-running';if(status==='Pendente')return 'fsj-task-pending';return 'fsj-task-open';}
 function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.classList.remove('fsj-task-completed','fsj-task-open','fsj-task-running','fsj-task-pending','fsj-priority','fsj-urgent');el.classList.add(...fsjTaskClass(priority,status,running).split(' '));}
 function fsjTaskName(t,employee=false){const running=fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento');return '<button type="button" class="fsj-task-number '+fsjTaskClass(t.priority,t.status,running)+'" data-fsj-task-id="'+esc(t.id)+'"><strong>'+esc(fsjTaskListLabel(t.code,t.text,t.frequency))+'</strong></button>';}
-document.addEventListener('click',event=>{const button=event.target.closest('[data-fsj-task-id]');if(!button)return;const t=S.tasks.find(t=>t.id===button.dataset.fsjTaskId);if(t){if(fsjTarefaPeriodica(t)&&(button.closest('#demandaGrupoRows')||button.closest('#fsjPessoaGruposRows'))){const d=new Date();fsjCalendarioSomenteLeitura(t,null,d.getFullYear(),d.getMonth());}else if(fsjTarefaPeriodica(t)&&button.closest('#taskRows')){const pid=document.getElementById('demandaFuncionario').value;const d=new Date();fsjCalendarioSomenteLeitura(t,pid,d.getFullYear(),d.getMonth());}else fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);}});
+document.addEventListener('click',event=>{
+ const button=event.target.closest('[data-fsj-task-id]');if(!button)return;
+ const t=S.tasks.find(t=>String(t.id)===String(button.dataset.fsjTaskId));if(!t)return;
+ const periodic=fsjTarefaPeriodica(t)||/\\b[DS]\\b/i.test(String(t.code||''))||['Tar-000142','Tar-000150'].includes(String(t.code||'').replace(/\\s+[DS]$/i,''));
+ if(periodic){
+  event.preventDefault();event.stopImmediatePropagation();
+  const isGroup=!!t.groupId||!!button.closest('#demandaGrupoRows,#fsjPessoaGruposRows');
+  const pid=isGroup?null:(document.getElementById('demandaFuncionario')?.value||null);
+  const d=new Date();fsjCalendarioSomenteLeitura(t,pid,d.getFullYear(),d.getMonth());
+ }else{
+  event.preventDefault();event.stopImmediatePropagation();
+  fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);
+ }
+},true);
 function mostrarDemandasSituacao(situacao){document.getElementById('demandaSituacao').value=situacao;renderDemandas()}
 function fsjOpenEmployeeTask(t,button){
  // Proprietário: tarefas periódicas abrem calendário; nenhuma consulta emite token de gestor.
