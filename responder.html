@@ -258,6 +258,8 @@ function fsjCalendarioExecutor(info){
  const heading=document.createElement('h3');heading.textContent='Calendário de conclusão — tarefa periódica';host.append(heading);
  const help=document.createElement('p');help.className='muted';help.textContent='Selecione o dia de hoje para registrar a conclusão pelo botão SIM. Dias anteriores são apresentados para consulta; folgas e conclusões dependem da validação do servidor.';host.append(help);
  const now=new Date(),recife=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(now);
+ const history=info.calendario_mensal||{},byDay=new Map((history.dias||[]).map(x=>[x.dia,x.situacao])),unavailable=new Set(history.indisponiveis||[]);
+ const summary=document.createElement('p');summary.className='muted';const available=(history.dias||[]).filter(x=>!unavailable.has(x.dia)&&x.situacao!=='dispensada');const completed=available.filter(x=>x.situacao==='cumprida').length;summary.textContent='Realizados / disponíveis: '+completed+' / '+available.length+' ('+(available.length?(100*completed/available.length).toFixed(1):'0')+'%)';host.append(summary);
  let [year,month]=recife.split('-').map(Number);month--;
  const bar=document.createElement('div');bar.style.cssText='display:flex;align-items:center;gap:12px;margin:8px 0';
  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px';
@@ -273,9 +275,11 @@ function fsjCalendarioExecutor(info){
    const date=year+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
    const today=date===recife;
    const button=document.createElement('button');button.type='button';button.textContent=String(day);
-   button.style.cssText='min-width:0;min-height:45px;padding:4px;border:1px solid #aecdc0;border-radius:6px;background:'+(today?'#c7e7fa':'#e0f2df')+';color:#17382c';
-   button.disabled=!today||!!info.respondido||!!info.visitante||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode);
-   button.title=today?'Registrar a conclusão de hoje pelo fluxo SIM':'Somente consulta — registros de outros dias não são alterados';
+   const state=unavailable.has(date)?'dispensada':(byDay.get(date)||'sem_registro');
+   const colors={cumprida:'#bde8c5',nao_cumprida:'#ffd2c8',dispensada:'#e2e2e2',em_execucao:'#cde3ff',prevista:'#fff1c4',sem_registro:'#f4f6f5'};
+   button.style.cssText='min-width:0;min-height:45px;padding:4px;border:1px solid #aecdc0;border-radius:6px;background:'+(colors[state]||colors.sem_registro)+';color:#17382c';button.title=date+' — '+state.replaceAll('_',' ');
+   button.disabled=!today||unavailable.has(date)||state==='cumprida'||!!info.respondido||!!info.visitante||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode);
+   if(today&&!button.disabled)button.title='Registrar a conclusão de hoje pelo fluxo SIM';
    button.onclick=()=>{const yes=document.querySelector('input[name=resposta][value=sim]');if(yes)yes.checked=true;const answer=document.getElementById('taskAnswer');if(answer)answer.hidden=false;const go=document.getElementById('startTask');if(go&&!go.hidden&&!go.disabled){go.scrollIntoView({block:'center'});go.focus();}else{const send=document.getElementById('send');if(send)send.scrollIntoView({block:'center'});}status.textContent='Dia '+day+': utilize o fluxo SIM para confirmar a conclusão da tarefa.';};
    grid.append(button);
   }
