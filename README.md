@@ -21,3 +21,11 @@ Manual vigente: [Manual de operação e manutenção](./docs/MANUAL-OPERACAO-MAN
 - Supervisores: [docs/supervisores-demandas.md](./docs/supervisores-demandas.md).
 
 O Proprietário permanece com o acesso administrativo existente. A identificação de titularidade fica vinculada ao cadastro de Urbano e à sua conta autenticada, em um registro único protegido no banco. Este registro administrativo não equivale a certificado do INPI ou prova conclusiva de direitos sobre componentes de terceiros.
+
+## Regras permanentes e prevenção de regressões
+
+**Referência obrigatória:** [REGRAS_PERMANENTES_FSJ.md](./REGRAS_PERMANENTES_FSJ.md), especialmente a norma **FSJ-ACESSO-001**. Identificação do link, perfil e autorizações atuais precedem a escolha independente do layout Celular/Desktop. Links individuais não são bloqueados pela data de envio; restrições operacionais continuam valendo.
+
+**Verificação automática:** [tests/fsj-acesso.test.mjs](./tests/fsj-acesso.test.mjs) é executado pelo [workflow FSJ — Regras permanentes de acesso](./.github/workflows/fsj-acesso-regressao.yml) em alterações na branch principal e solicitações de integração. Para executar localmente: `node --test tests/fsj-acesso.test.mjs`.
+
+Os testes estáticos não substituem a validação de autorização no Supabase, os testes reais de links antigos, a verificação do APK e os testes com usuários reais. A publicação na branch principal só fica impedida por falhas quando a proteção de branch exigir o status do workflow.
