@@ -1499,19 +1499,11 @@ function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.cl
 function fsjTaskName(t,employee=false){const running=fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento');return '<button type="button" class="fsj-task-number '+fsjTaskClass(t.priority,t.status,running)+'" data-fsj-task-id="'+esc(t.id)+'"><strong>'+esc(fsjTaskListLabel(t.code,t.text,t.frequency))+'</strong></button>';}
 document.addEventListener('click',event=>{const button=event.target.closest('[data-fsj-task-id]');if(!button)return;const t=S.tasks.find(t=>t.id===button.dataset.fsjTaskId);if(t){if(fsjTarefaPeriodica(t)&&button.closest('#demandaGrupoRows')){const d=new Date();fsjCalendarioSomenteLeitura(t,null,d.getFullYear(),d.getMonth());}else if(fsjTarefaPeriodica(t)&&button.closest('#taskRows')){const pid=document.getElementById('demandaFuncionario').value;const d=new Date();fsjCalendarioSomenteLeitura(t,pid,d.getFullYear(),d.getMonth());}else fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);}});
 function mostrarDemandasSituacao(situacao){document.getElementById('demandaSituacao').value=situacao;renderDemandas()}
-async function fsjOpenEmployeeTask(t,button){
- const pid=document.getElementById('demandaFuncionario').value;
- if(!ids(t).includes(pid)){alert('Selecione o responsável desta tarefa.');return;}
- button.disabled=true;
- try{
-  const result=await api('/functions/v1/envio-manual',{method:'POST',body:JSON.stringify({action:'abrir-tarefa',pessoa_id:pid,tarefa_id:t.id})});
-  if(!/^[0-9a-f-]{36}$/i.test(result.token||''))throw Error('Link de tarefa inválido.');
-  const params=new URLSearchParams({token:result.token,gestor:'1'});
-  if(result.concluida)params.set('concluida','1');
-  try{sessionStorage.setItem('fsj_app_return',JSON.stringify({page:'demandas',employee:pid,situation:document.getElementById('demandaSituacao').value}));}catch{}
-  location.assign('./responder.html#'+params.toString());
- }catch{alert('Não foi possível abrir a tarefa. Confira sua conexão e o acesso de proprietário.');button.disabled=false;}
+function fsjOpenEmployeeTask(t,button){
+ // Consulta do Proprietário: nunca emitir token de executor/gestor nem redirecionar para responder.html.
+ fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);
 }
+
 function fsjPosicionarAcoesMobile(rows){
  for(const row of rows?.querySelectorAll('tr')||[]){
   const first=row.querySelector('td:first-child'),last=row.querySelector('td:last-child .actions');
