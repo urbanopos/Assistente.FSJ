@@ -5,6 +5,9 @@
 ## Regra de isolamento permanente
 Todo desenvolvimento e teste de novas funcionalidades ocorre **exclusivamente em `simuladores/`**. Nenhum código, cadastro, banco, disparo, APK, versão de produção ou serviço da operação real será alterado durante o desenvolvimento. Qualquer intervenção no aplicativo operacional deverá ser identificada como **Manutenção** e dependerá de autorização expressa do Proprietário.
 
+## Pasta única dos simuladores — regra permanente
+Todo material relacionado a planejamento, desenvolvimento, testes, demonstrações, arquivos HTML/JS/CSS, relatórios de validação, manuais, versões e registros **de simulação** deve permanecer em `simuladores/` ou em subpastas **internas à própria pasta**. Não criar arquivos dos simuladores na raiz, em `Celular/`, `celular/`, `desktop/`, `raw/` ou em outros diretórios operacionais. Os backups ficam exclusivamente em `simuladores/backups/` e devem ser produzidos **antes de cada alteração**, sem apagar versões anteriores. O código real e o banco operacional ficam separados e intocados durante o desenvolvimento. Links para favoritar no Chrome apontam sempre para os acessos estáveis abaixo e não para backups ou arquivos de versões antigas.
+
 ## Arquitetura e sincronização
 O arquivo `index.html` contém o motor **único**, os modelos de tela e os registros demonstrativos dos dois perfis. `celular-proprietario.html` e `celular-executor.html` são os dois links permanentes que abrem a respectiva interface, ocultando a outra visualmente. Os dados de teste são guardados no armazenamento local do Chrome (`localStorage`, chave exclusiva `fsj_sim_executor_proprietario_limpo_v1_20261107`) e são sincronizados entre abas do **mesmo navegador e domínio** pelo evento `storage`. Não há consulta ou alteração de dados reais. Se o navegador estiver em outro computador, perfil ou origem, não haverá compartilhamento automático de dados; limpar armazenamento apaga os registros de teste.
 
