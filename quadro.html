@@ -20,16 +20,34 @@ function fsjCompareTaskPriority(a,b){const rank=t=>({urgente:0,prioritaria:1}[t.
 function fsjTaskClass(priority,status,running=false){if(status==='Concluída')return 'fsj-task-completed';if(priority==='urgente')return 'fsj-priority fsj-urgent';if(priority==='prioritaria')return 'fsj-priority';if(status!=='Concluída'&&(running||status==='Em andamento'))return 'fsj-task-running';if(status==='Pendente')return 'fsj-task-pending';return 'fsj-task-open';}
 function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.classList.remove('fsj-task-completed','fsj-task-open','fsj-task-running','fsj-task-pending','fsj-priority','fsj-urgent');el.classList.add(...fsjTaskClass(priority,status,running).split(' '));}
 
+let fsjMesFiltro=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife',year:'numeric',month:'2-digit'}).format(new Date());
+function fsjCalendarioConsulta(t){
+ const wrap=document.createElement('div');wrap.style.cssText='padding:10px;border:1px solid #b4d6bf;border-radius:10px;background:#fff;margin:10px 0';
+ const title=document.createElement('strong');title.textContent='Calendário de ocorrências — '+(t.codigo_tarefa||'');wrap.append(title);
+ const controls=document.createElement('div');controls.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0';
+ const calendar=document.createElement('div');calendar.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px';
+ let d=new Date((t.periodo_inicio||new Date().toISOString().slice(0,10))+'T12:00:00');
+ function draw(){controls.replaceChildren();calendar.replaceChildren();const y=d.getFullYear(),m=d.getMonth();
+  const prev=document.createElement('button');prev.type='button';prev.textContent='‹';prev.onclick=()=>{d=new Date(y,m-1,1);draw()};
+  const heading=document.createElement('b');heading.textContent=d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const next=document.createElement('button');next.type='button';next.textContent='›';next.onclick=()=>{d=new Date(y,m+1,1);draw()};
+  controls.append(prev,heading,next);
+  for(const x of ['D','S','T','Q','Q','S','S']){const el=document.createElement('small');el.textContent=x;el.style.textAlign='center';calendar.append(el)}
+  for(let i=0;i<new Date(y,m,1).getDay();i++)calendar.append(document.createElement('span'));
+  for(let day=1;day<=new Date(y,m+1,0).getDate();day++){const date=y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');const b=document.createElement('button');b.type='button';b.textContent=day;b.disabled=true;b.title=date===t.periodo_inicio?'Ocorrência não cumprida — somente consulta':'Consulta; nenhum lançamento permitido';b.style.cssText='padding:7px 0;min-width:0;border-radius:6px;border:1px solid #b8d4c2;background:'+(date===t.periodo_inicio?'#fce1b9':'#f0f7f2');calendar.append(b)}
+ }
+ wrap.append(controls,calendar);draw();return wrap;
+}
 function fsjRenderOpenTasks(tasks){
- const target=document.getElementById('tasks');target.replaceChildren();if(document.body.classList.contains('fsj-index-execucao')){const heading=document.createElement('h2');heading.textContent='TAREFAS INDIVIDUAIS';heading.style.cssText='font-size:18px;margin:14px 0 10px;font-weight:800';target.append(heading);}
+ const target=document.getElementById('tasks');target.replaceChildren();if(fsjFiltro==='nao_cumpridas'){const filters=document.createElement('div');filters.style.cssText='display:flex;gap:8px;align-items:center;margin:10px 0';const label=document.createElement('label');label.textContent='Mês/Ano: ';const month=document.createElement('input');month.type='month';month.value=fsjMesFiltro;month.onchange=()=>{fsjMesFiltro=month.value;load()};label.append(month);filters.append(label);target.append(filters)}if(document.body.classList.contains('fsj-index-execucao')){const heading=document.createElement('h2');heading.textContent='TAREFAS INDIVIDUAIS';heading.style.cssText='font-size:18px;margin:14px 0 10px;font-weight:800';target.append(heading);}
  const visible=(Array.isArray(tasks)?tasks:[]).filter(t=>{
-  const individual=!document.body.classList.contains('fsj-index-execucao')||!t.grupo_id;
+  const individual=fsjFiltro==='nao_cumpridas'||!document.body.classList.contains('fsj-index-execucao')||!t.grupo_id;
   const archive=document.getElementById('boardSituation').value==='Arquivado';
   const periodic=['diaria','semanal','quinzenal','mensal','trimestral','semestral','anual'].includes(String(t.periodicidade||'').toLowerCase());
   if(!individual)return false;
   if(archive)return t.situacao==='Arquivado';
   if(fsjFiltro==='perguntas'||t.situacao==='Arquivado')return false;
-  if(fsjFiltro==='nao_cumpridas')return t.fsj_nao_cumprida===true;
+  if(fsjFiltro==='nao_cumpridas')return t.fsj_nao_cumprida===true && (!fsjMesFiltro || String(t.periodo_inicio||'').startsWith(fsjMesFiltro));
   if(t.fsj_nao_cumprida===true)return false;
   if(periodic)return true;
   return (document.body.classList.contains('fsj-index-execucao')?fsjEstado(t)!=='concluida':fsjEstado(t)===fsjFiltro)&&!t.respondido&&!t.respondido_em&&!t.concluida&&!t.concluida_em;
@@ -43,7 +61,7 @@ function fsjRenderOpenTasks(tasks){
    const a=document.createElement('a');a.className='task'+(t.grupo_id?' fsj-group-task':'');a.href='./responder.html#token='+encodeURIComponent(t.token)+'&quadro='+encodeURIComponent(token);
    const name=document.createElement('span');name.className='name';
    const code=document.createElement('strong');code.textContent=fsjTaskListLabel(t.codigo_tarefa,t.tarefa,t.periodicidade);
-   if(t.somente_leitura){a.href='#';a.onclick=event=>{event.preventDefault();fsjOpenTaskDetails(t.codigo_tarefa,t.tarefa,'Arquivado • somente consulta',null,t.periodicidade);};}
+   if(t.somente_leitura){a.href='#';a.onclick=event=>{event.preventDefault();const previous=a.nextElementSibling;if(previous?.dataset.fsjCalendar==='1'){previous.remove();return}const calendar=fsjCalendarioConsulta(t);calendar.dataset.fsjCalendar='1';a.after(calendar);};}
    name.append(code);fsjApplyTaskColor(name,t.prioridade,t.situacao,t.execucao?.estado==='em_andamento');
    a.setAttribute('aria-label',code.textContent+' — abrir detalhes');a.append(name);
    if(t.grupo_id){const participants=document.createElement('small');participants.style.cssText='display:block;font-size:12px;margin-top:5px;line-height:1.4';participants.textContent='Participantes: '+((t.participantes||[]).join(', ')||'Não informados');name.append(participants);}
