@@ -14,4 +14,4 @@ jobs:
         with:
           node-version: '22'
       - name: Verificar atualizacao automatica e impedir ciclo de recarga
-        run: node tests/automatic-update-contract.cjs
+        run: |\n          node tests/automatic-update-contract.cjs\n          node tests/automatic-update-contract.cjs desktop/index.html\n          node tests/owner-dashboard-sync.cjs
