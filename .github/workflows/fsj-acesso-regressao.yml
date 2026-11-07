@@ -1,0 +1,18 @@
+name: FSJ - Regras permanentes de acesso
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regressao-acesso:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validar regras de identidade, plataforma e supervisao
+        run: node --test tests/fsj-acesso.test.mjs
