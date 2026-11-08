@@ -128,7 +128,7 @@ async function fsjConsultarRelatorioFolgas(){
  const button=document.getElementById('fsjReportQuery'),status=document.getElementById('fsjReportStatus'),result=document.getElementById('fsjReportResult');
  const month=document.getElementById('fsjReportMonth').value,id=document.getElementById('fsjReportPerson').value;
  document.getElementById('fsjReportPrint').disabled=true;result.replaceChildren();
- if(!/^\\d{4}-\\d{2}$/.test(month)){status.textContent='Selecione um mês válido.';return;}
+ if(!/^\d{4}-\d{2}$/.test(month)){status.textContent='Selecione um mês válido.';return;}
  button.disabled=true;status.textContent='Consultando registros salvos...';
  const controls=[...document.querySelectorAll('#fsjFolgasReport input,#fsjFolgasReport select')];controls.forEach(x=>x.disabled=true);
  try{
@@ -140,7 +140,7 @@ async function fsjConsultarRelatorioFolgas(){
     if(typeof day!=='string'||!day.startsWith(month+'-'))continue;
     const raw=String(p.folgas_motivos?.[day]||'Folga semanal');
     const compensatoria=raw.toLowerCase().startsWith('folga compensatória');
-    const feriado=compensatoria?raw.match(/feriado compensado: (\\d{4}-\\d{2}-\\d{2})/i)?.[1]:null;
+    const feriado=compensatoria?raw.match(/feriado compensado: (\d{4}-\d{2}-\d{2})/i)?.[1]:null;
     rows.push({person:p.nome,day,type:compensatoria?'Folga Compensatória':raw,holiday:feriado});
    }
   }
