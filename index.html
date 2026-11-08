@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261108-indicadores-supabase-05">
+<meta name="fsj-build" content="20261108-fonte-unica-supabase-06">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -596,6 +596,11 @@ async function fsjCompartilharWeb(modo){
 <script src="./task-list-ui.js?v=20261020-label-archive-02"></script><script src="./task-detail-manager.js?v=20261021-revisao-1"></script>
 <script>
 let fsjPainelPronto=false;
+// REGRA DEFAULT FSJ 08/11/2026: dados operacionais somente confirmados pelo Supabase.
+// Cache do navegador e S (memória) NÃO são fontes de verdade; são projeções transitórias.
+// Qualquer leitura sem confirmação central ou falha de sincronização exige tarja vermelha.
+let fsjFonteOperacionalConfirmada=false;
+function fsjMarcarFonteOperacional(confirmada){fsjFonteOperacionalConfirmada=confirmada===true;document.dispatchEvent(new CustomEvent('fsj:fonte-operacional'));}
 const FSJ_VIDEO_VM_URL='https://192.168.77.2:8443/';
 let fsjVideoTentativa=0;
 function fsjVideoMostrarForaRede(){
@@ -682,6 +687,8 @@ function fsjRenderNaoCumpridas(){
 }
 function navTo(id,b,record=true){
  if(!fsjPainelPronto)return;
+ // Exibir alerta quando a tela estiver sustentada por dados não confirmados na base.
+ if(!fsjFonteOperacionalConfirmada)document.dispatchEvent(new CustomEvent('fsj:fonte-operacional'));
  const seq=++fsjNavSequence;
  const notice=document.getElementById('fsjPageFreshness');
  if(notice){notice.hidden=true;notice.classList.add('hidden');}
@@ -1847,10 +1854,10 @@ async function fsjAtualizarRetornos(updateView=true){
       kq.textContent=S.tasks.filter(t=>t.status==='Aguardando gestão').length;
       renderDemandas();renderListaSupervisao();renderDemandasGrupos();if(currentPage==='tarefasEmExecucao')fsjRenderTarefasEmExecucao();if(currentPage==='tarefasPorSituacao')fsjRenderTarefasPorSituacao();if(currentPage==='perguntasGestor')fsjRenderPerguntas();if(currentPage==='relatorios')monthly();
     }
-    document.getElementById('retornosSyncStatus').textContent='Tarefas e respostas consultadas no Supabase em '+fsjDataHora(new Date())+'.';
+    fsjMarcarFonteOperacional(true);document.getElementById('retornosSyncStatus').textContent='Tarefas e respostas consultadas no Supabase em '+fsjDataHora(new Date())+'.';
     ultimaAtualizacao.textContent='Dados: '+fsjDataHora(new Date());
   })();
-  try{await fsjAtualizacaoEmCurso;}catch(e){document.getElementById('retornosSyncStatus').textContent='FALHA NA CONSULTA AO SUPABASE — Indicadores indisponíveis. Não utilize números anteriores.';for(const id of ['ko','kc','kp','kq']){const el=document.getElementById(id);if(el)el.textContent='—';}throw e;}
+  try{await fsjAtualizacaoEmCurso;}catch(e){fsjMarcarFonteOperacional(false);document.getElementById('retornosSyncStatus').textContent='FALHA NA CONSULTA AO SUPABASE — Indicadores indisponíveis. Não utilize números anteriores.';for(const id of ['ko','kc','kp','kq']){const el=document.getElementById(id);if(el)el.textContent='—';}throw e;}
   finally{fsjAtualizacaoEmCurso=null;}
 }
 function fsjAtualizacaoAutomatica(){
@@ -1895,7 +1902,7 @@ async function fsjVerificarVersao(){
   return true;
 }
 
-async function carregarArmazenagem(){document.dispatchEvent(new CustomEvent('fsj:entry-loading'));try{fsjPainelPronto=false;gestor.classList.add('hidden');document.querySelectorAll('.topnav button').forEach(b=>b.disabled=true);capturarSessao();loginBox.classList.remove('hidden');let tok;try{tok=await recuperarAcessoGestor()}catch(e){ultimaAtualizacao.textContent='Acesso não recuperado';loginStatus.textContent='Não foi possível recuperar sua sessão. Tente novamente ou abra um novo link de acesso.';return}if(!tok){ultimaAtualizacao.textContent='Aguardando autenticação do Proprietário';loginStatus.textContent='Esta é a área do Proprietário. Supervisores usam o acesso individual e o botão SUPERVISÃO; visitantes usam exclusivamente o simulador.';gestor.classList.add('hidden');return}let etapa='verificação da versão';try{if(!(await fsjVerificarVersao()))return;etapa='consulta dos cadastros e tarefas';loginStatus.textContent='Carregando dados atuais...';let [ps,gs,gms,ts,trs]=await Promise.all([api('/rest/v1/pessoas?select=*'),api('/rest/v1/grupos?select=*'),api('/rest/v1/grupo_membros?select=*'),api('/rest/v1/tarefas?select=*'),api('/rest/v1/tarefa_responsaveis?select=*')]);if((!ps.length&&S.people.length)||(!ts.length&&S.tasks.length))throw new Error('A Armazenagem retornou uma lista vazia. A cópia local foi preservada.');S.people=ps.map(x=>({id:x.id,name:x.nome,nick:x.identificacao,phone:x.whatsapp,email:x.email||null,type:x.tipo,active:x.ativo===true,videosChamadas:x.videos_chamadas===true,whatsapp7h:x.receber_tarefas_whatsapp===true,requireWeeklyOff:x.exigir_folga_semanal!==false,daysOff:x.folgas_semanais||[],datesOff:x.folgas_datas||[],dayOffReasons:x.folgas_motivos||{},vacationStart:x.ferias_inicio||null,vacationEnd:x.ferias_fim||null,workStart:(x.jornada_inicio||'07:00').slice(0,5),lunchStart:x.almoco_inicio?x.almoco_inicio.slice(0,5):'12:00'}));S.groups=gs.map(g=>({id:g.id,name:g.nome,members:gms.filter(m=>m.grupo_id===g.id).map(m=>m.pessoa_id)}));S.tasks=ts.map(t=>({id:t.id,code:t.codigo_tarefa,text:t.descricao,personIds:trs.filter(r=>r.tarefa_id===t.id).map(r=>r.pessoa_id),groupId:t.grupo_id||'',daily:!!t.diaria,frequency:t.periodicidade||(t.diaria?'diaria':'pontual'),priority:t.prioridade||'normal',supervision:!!t.exige_supervisao,timedMinutes:t.duracao_execucao_minutos??null,status:t.situacao,created:t.criada_em,response:'',question:'',completedBy:t.concluida_por||'',attachments:[]}));rollover();etapa='consulta das respostas e execuções';await fsjAtualizarRetornos(false);save();loginStatus.textContent='Proprietário autenticado • Armazenagem conectada: '+S.people.length+' pessoas, '+S.groups.length+' grupos, '+S.tasks.length+' tarefas.';brisaDadosCarregados=true;loginBox.classList.add('hidden');fsjPainelPronto=true;document.dispatchEvent(new CustomEvent('fsj:entry-validated'));document.querySelectorAll('.topnav button').forEach(b=>b.disabled=false);gestor.classList.remove('hidden');etapa='organização das telas';try{render();}catch(uiError){console.error('FSJ: falha não bloqueante ao montar telas',uiError);loginStatus.textContent='Proprietário autenticado. Algumas informações precisam ser atualizadas: '+uiError.message;}try{syncInfo();}catch(uiError){console.warn('FSJ: sincronização visual',uiError);}if(typeof carregarFolgas==='function')Promise.resolve().then(()=>carregarFolgas()).catch(e=>console.warn('FSJ: agenda de folgas',e));if(typeof fsjLoadSupervisors==='function')Promise.resolve().then(()=>fsjLoadSupervisors()).catch(e=>console.warn('FSJ: supervisores',e));if(typeof fsjLoadOwnership==='function')Promise.resolve().then(()=>fsjLoadOwnership()).catch(e=>console.warn('FSJ: propriedade',e));const fsjAbaSalva=(()=>{try{return sessionStorage.getItem('fsj_ultima_aba_v1')}catch(e){return null}})();
+async function carregarArmazenagem(){fsjMarcarFonteOperacional(false);document.dispatchEvent(new CustomEvent('fsj:entry-loading'));try{fsjPainelPronto=false;gestor.classList.add('hidden');document.querySelectorAll('.topnav button').forEach(b=>b.disabled=true);capturarSessao();loginBox.classList.remove('hidden');let tok;try{tok=await recuperarAcessoGestor()}catch(e){ultimaAtualizacao.textContent='Acesso não recuperado';loginStatus.textContent='Não foi possível recuperar sua sessão. Tente novamente ou abra um novo link de acesso.';return}if(!tok){ultimaAtualizacao.textContent='Aguardando autenticação do Proprietário';loginStatus.textContent='Esta é a área do Proprietário. Supervisores usam o acesso individual e o botão SUPERVISÃO; visitantes usam exclusivamente o simulador.';gestor.classList.add('hidden');return}let etapa='verificação da versão';try{if(!(await fsjVerificarVersao()))return;etapa='consulta dos cadastros e tarefas';loginStatus.textContent='Carregando dados atuais...';let [ps,gs,gms,ts,trs]=await Promise.all([api('/rest/v1/pessoas?select=*'),api('/rest/v1/grupos?select=*'),api('/rest/v1/grupo_membros?select=*'),api('/rest/v1/tarefas?select=*'),api('/rest/v1/tarefa_responsaveis?select=*')]);if((!ps.length&&S.people.length)||(!ts.length&&S.tasks.length))throw new Error('A Armazenagem retornou uma lista vazia. A cópia local foi preservada.');S.people=ps.map(x=>({id:x.id,name:x.nome,nick:x.identificacao,phone:x.whatsapp,email:x.email||null,type:x.tipo,active:x.ativo===true,videosChamadas:x.videos_chamadas===true,whatsapp7h:x.receber_tarefas_whatsapp===true,requireWeeklyOff:x.exigir_folga_semanal!==false,daysOff:x.folgas_semanais||[],datesOff:x.folgas_datas||[],dayOffReasons:x.folgas_motivos||{},vacationStart:x.ferias_inicio||null,vacationEnd:x.ferias_fim||null,workStart:(x.jornada_inicio||'07:00').slice(0,5),lunchStart:x.almoco_inicio?x.almoco_inicio.slice(0,5):'12:00'}));S.groups=gs.map(g=>({id:g.id,name:g.nome,members:gms.filter(m=>m.grupo_id===g.id).map(m=>m.pessoa_id)}));S.tasks=ts.map(t=>({id:t.id,code:t.codigo_tarefa,text:t.descricao,personIds:trs.filter(r=>r.tarefa_id===t.id).map(r=>r.pessoa_id),groupId:t.grupo_id||'',daily:!!t.diaria,frequency:t.periodicidade||(t.diaria?'diaria':'pontual'),priority:t.prioridade||'normal',supervision:!!t.exige_supervisao,timedMinutes:t.duracao_execucao_minutos??null,status:t.situacao,created:t.criada_em,response:'',question:'',completedBy:t.concluida_por||'',attachments:[]}));rollover();etapa='consulta das respostas e execuções';await fsjAtualizarRetornos(false);save();loginStatus.textContent='Proprietário autenticado • Armazenagem conectada: '+S.people.length+' pessoas, '+S.groups.length+' grupos, '+S.tasks.length+' tarefas.';brisaDadosCarregados=true;loginBox.classList.add('hidden');fsjPainelPronto=true;fsjMarcarFonteOperacional(true);document.dispatchEvent(new CustomEvent('fsj:entry-validated'));document.querySelectorAll('.topnav button').forEach(b=>b.disabled=false);gestor.classList.remove('hidden');etapa='organização das telas';try{render();}catch(uiError){console.error('FSJ: falha não bloqueante ao montar telas',uiError);loginStatus.textContent='Proprietário autenticado. Algumas informações precisam ser atualizadas: '+uiError.message;}try{syncInfo();}catch(uiError){console.warn('FSJ: sincronização visual',uiError);}if(typeof carregarFolgas==='function')Promise.resolve().then(()=>carregarFolgas()).catch(e=>console.warn('FSJ: agenda de folgas',e));if(typeof fsjLoadSupervisors==='function')Promise.resolve().then(()=>fsjLoadSupervisors()).catch(e=>console.warn('FSJ: supervisores',e));if(typeof fsjLoadOwnership==='function')Promise.resolve().then(()=>fsjLoadOwnership()).catch(e=>console.warn('FSJ: propriedade',e));const fsjAbaSalva=(()=>{try{return sessionStorage.getItem('fsj_ultima_aba_v1')}catch(e){return null}})();
 const fsjAbaValida=fsjAbaSalva&&document.querySelector('#gestor>div#'+CSS.escape(fsjAbaSalva));
 const fsjDestino=fsjAcessoEmergencial()?'disparoEmergencia':'dashboard'; // Entrada padrão pela tela inicial dos botões verdes; menus internos são navegação secundária.
 const fsjPessoaSalva=(()=>{try{return sessionStorage.getItem('fsj_ultima_pessoa_v1')}catch(e){return null}})();
@@ -2263,13 +2270,14 @@ dlg.querySelector('iframe').srcdoc=html;dlg.showModal();
 (function(){
  const faixa=document.getElementById('fsjFaixaNaoOperacional');
  function atualizar(){
-  const real=typeof fsjPainelPronto!=='undefined' && fsjPainelPronto===true && typeof brisaDadosCarregados!=='undefined' && brisaDadosCarregados===true;
+  const real=typeof fsjPainelPronto!=='undefined' && fsjPainelPronto===true && typeof brisaDadosCarregados!=='undefined' && brisaDadosCarregados===true && typeof fsjFonteOperacionalConfirmada!=='undefined' && fsjFonteOperacionalConfirmada===true;
   const simulado=/simulad|demo|preview|visitante/i.test(location.pathname) || new URLSearchParams(location.search).has('simulador');
   if(simulado){faixa.hidden=false;faixa.textContent='AMBIENTE DE SIMULAÇÃO — NÃO OPERACIONAL. Dados não representam os registros reais da Fazenda São José.';return;}
   faixa.hidden=real;
   if(!real)faixa.textContent='AMBIENTE NÃO VALIDADO — Dados operacionais ainda não confirmados no Supabase. Não efetue alterações.';
  }
  document.addEventListener('fsj:entry-loading',atualizar);
+ document.addEventListener('fsj:fonte-operacional',atualizar);
  document.addEventListener('fsj:entry-validated',atualizar);
  document.addEventListener('DOMContentLoaded',atualizar);
  window.addEventListener('pageshow',atualizar);
