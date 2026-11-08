@@ -14,3 +14,10 @@ Aprovada pelo Proprietário em 08/11/2026. Aplica-se a todas as telas Desktop, C
 10. Em caso de falha de autenticação, rede ou autorização, mostrar erro explícito e impedir operações que dependam de dados não confirmados. Nunca inventar conteúdo para preencher a tela.
 
 **Preservação:** Não modificar o FSJ.VM em consequência desta regra.
+## Condição default reafirmada pelo Proprietário — 08/11/2026
+
+- Toda informação de registro operacional apresentada em qualquer tela deve ser obtida e confirmada no Supabase; **jamais** tomar dados do navegador (localStorage, sessionStorage, cache ou estado em memória) como fonte de verdade.
+- Informações locais podem existir como estado técnico temporário, mas não devem ser exibidas como atuais sem confirmação da base.
+- Sempre que a tela utilizar dados não confirmados ou a consulta central falhar, mostrar **tarja vermelha de AMBIENTE NÃO VALIDADO**, sem números antigos apresentados como atuais.
+- Esta regra é padrão para qualquer novo desenvolvimento, edição de layout ou navegação, incluindo Desktop, Celular e APK. Não modificar o FSJ.VM.
+- O monitor inicial no index.html é uma proteção geral; a auditoria individual das telas e de suas fontes de dados permanece necessária para assegurar cumprimento integral.
