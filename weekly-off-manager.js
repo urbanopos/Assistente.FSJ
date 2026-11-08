@@ -22,6 +22,39 @@ function folgasVirarSemana(){
  return true;
 }
 
+// A aba Pessoas é a única fonte de verdade para perfil, caixas de seleção e jornada.
+// Nunca reconstruir S.people com um subconjunto de colunas de Folgas.
+function fsjSincronizarCadastroPessoas(rows){
+ if(!Array.isArray(rows))return;
+ const known=new Map((Array.isArray(S.people)?S.people:[]).map(p=>[String(p.id),p]));
+ for(const row of rows){
+  if(!row||row.id==null)continue;
+  const id=String(row.id),old=known.get(id)||{};
+  const value=(key,fallback)=>Object.prototype.hasOwnProperty.call(row,key)?row[key]:fallback;
+  known.set(id,{...old,id,
+   numeroUsuario:value('numero_usuario',old.numeroUsuario),
+   name:value('nome',old.name)||value('identificacao',old.nick)||id,
+   nick:value('identificacao',old.nick)||value('nome',old.name)||id,
+   phone:value('whatsapp',old.phone),email:value('email',old.email),
+   type:value('tipo',old.type),active:value('ativo',old.active)!==false,
+   videosChamadas:value('videos_chamadas',old.videosChamadas)===true,
+   whatsapp7h:value('receber_tarefas_whatsapp',old.whatsapp7h)===true,
+   requireWeeklyOff:value('exigir_folga_semanal',old.requireWeeklyOff)!==false,
+   daysOff:value('folgas_semanais',old.daysOff)||[],
+   datesOff:value('folgas_datas',old.datesOff)||[],
+   dayOffReasons:value('folgas_motivos',old.dayOffReasons)||{},
+   vacationStart:value('ferias_inicio',old.vacationStart)||null,
+   vacationEnd:value('ferias_fim',old.vacationEnd)||null,
+   workStart:String(value('jornada_inicio',old.workStart)||'07:00').slice(0,5),
+   lunchStart:String(value('almoco_inicio',old.lunchStart)||'12:00').slice(0,5),
+   lunchReturn:String(value('almoco_retorno',old.lunchReturn)||'14:00').slice(0,5),
+   workFinish:String(value('jornada_fim',old.workFinish)||'16:20').slice(0,5)
+  });
+ }
+ S.people=[...known.values()];
+ if(typeof renderPersonSelect==='function')renderPersonSelect();
+ fsjPreencherSeletorFolgas();
+}
 function fsjPreencherSeletorFolgas(){
  const select=document.getElementById('folgasPessoaSelect');if(!select)return;
  const source=document.getElementById('personSelect');
@@ -59,12 +92,7 @@ async function fsjCarregarPessoasFolgas(){
    if(!Array.isArray(rows))throw Error('Resposta inválida do cadastro de pessoas');
    if(!rows.length){const status=document.getElementById('folgasStatus');if(status)status.textContent='A consulta de pessoas retornou vazia. Verifique o cadastro em Pessoas e Grupos.';}
    if(rows.length){
-    const known=new Map((Array.isArray(S.people)?S.people:[]).map(p=>[String(p.id),p]));
-    for(const row of rows){
-     const id=String(row.id),old=known.get(id)||{};
-     known.set(id,{...old,id,name:row.nome||old.name||row.identificacao||id,nick:row.identificacao||old.nick||row.nome,active:row.ativo!==false,whatsapp7h:row.receber_tarefas_whatsapp===true});
-    }
-    S.people=[...known.values()];
+    fsjSincronizarCadastroPessoas(rows);
    }
    fsjPreencherSeletorFolgas();
    // A seleção de pessoas deve funcionar mesmo se a agenda semanal estiver indisponível.
@@ -103,12 +131,8 @@ async function carregarFolgas(){
   if(folgasVirarSemana()){carregarFolgas();return;}
   folgasAgenda=agenda;
   if(Array.isArray(agenda.pessoas)){
-   const known=new Map((Array.isArray(S.people)?S.people:[]).map(p=>[String(p.id),p]));
-   for(const row of agenda.pessoas){
-    const id=String(row.id),old=known.get(id)||{};
-    known.set(id,{...old,id,name:row.nome||old.name||row.identificacao||id,nick:row.identificacao||old.nick||row.nome,active:row.ativo!==false,whatsapp7h:row.receber_tarefas_whatsapp===true});
-   }
-   S.people=[...known.values()];
+   // A agenda não substitui o cadastro central; só uma consulta completa pode atualizar perfis.
+   await fsjCarregarPessoasFolgas();
    fsjPreencherSeletorFolgas();
   }
   input.value=folgasAgenda.semana;
