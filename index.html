@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261105-folgas-confirmacao-04">
+<meta name="fsj-build" content="20261108-grupos-pessoas-real-02">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -2258,7 +2258,7 @@ dlg.querySelector('iframe').srcdoc=html;dlg.showModal();
 (function(){
  const faixa=document.getElementById('fsjFaixaNaoOperacional');
  function atualizar(){
-  const real=window.fsjPainelPronto===true && typeof brisaDadosCarregados!=='undefined' && brisaDadosCarregados===true;
+  const real=typeof fsjPainelPronto!=='undefined' && fsjPainelPronto===true && typeof brisaDadosCarregados!=='undefined' && brisaDadosCarregados===true;
   const simulado=/simulad|demo|preview|visitante/i.test(location.pathname) || new URLSearchParams(location.search).has('simulador');
   if(simulado){faixa.hidden=false;faixa.textContent='AMBIENTE DE SIMULAÇÃO — NÃO OPERACIONAL. Dados não representam os registros reais da Fazenda São José.';return;}
   faixa.hidden=real;
