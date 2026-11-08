@@ -230,7 +230,7 @@ function selecionarPessoaFolgas(){
  void fsjConfirmarPerfilFolgas();
  // O calendário operacional pertence a Folgas e Férias, não ao cadastro Pessoas.
  // Ao escolher o funcionário, abrir diretamente a marcação mensal existente.
- if(document.getElementById('folgasPessoaSelect')?.value && typeof fsjAbrirCalendarioFolgas==='function'){
+ if(typeof fsjAbrirCalendarioFolgas==='function'){
   fsjAbrirCalendarioFolgas();
  }
  fsjRenderFolgas();
