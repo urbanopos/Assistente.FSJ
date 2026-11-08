@@ -68,9 +68,13 @@ function fsjRenderPerfilPessoaFolgas(){
  list.replaceChildren();
  const items=[['Cadastro ativo',p.active===true],['Vídeos e Chamadas',p.videosChamadas===true],['Receber tarefas às 7h pelo WhatsApp',p.whatsapp7h===true],['Exigir escolha de folga semanal',p.requireWeeklyOff!==false]];
  for(const [label,checked] of items){
-  const wrap=document.createElement('label');
-  const input=document.createElement('input');input.type='checkbox';input.checked=checked;input.disabled=true;
-  wrap.append(input,document.createTextNode(' '+label));list.append(wrap);
+  // Apenas texto: nenhum checkbox, select ou controle que possa ser transformado por plugins de interface.
+  const item=document.createElement('div');
+  item.setAttribute('role','listitem');
+  item.style.cssText='padding:9px 11px;border:1px solid #c8d8d8;border-radius:8px;background:#f6faf8;color:#173b2a;line-height:1.4';
+  const mark=document.createElement('strong');
+  mark.textContent=checked?'✓ Marcado — ':'○ Desmarcado — ';
+  item.append(mark,document.createTextNode(label));list.append(item);
  }
 }
 function fsjPreencherSeletorFolgas(){
