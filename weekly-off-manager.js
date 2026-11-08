@@ -77,6 +77,29 @@ function fsjRenderPerfilPessoaFolgas(){
   item.append(mark,document.createTextNode(label));list.append(item);
  }
 }
+let fsjPerfilFolgasConsulta=0;
+async function fsjConfirmarPerfilFolgas(){
+ const select=document.getElementById('folgasPessoaSelect'),id=select?.value;
+ const seq=++fsjPerfilFolgasConsulta;
+ if(!id){fsjRenderPerfilPessoaFolgas();return;}
+ const panel=document.getElementById('fsjFolgasPerfilPessoa');
+ if(panel)panel.hidden=false;
+ const title=document.getElementById('fsjFolgasTipoPessoa');
+ if(title)title.textContent='Consultando perfil atualizado em Pessoas...';
+ const list=document.getElementById('fsjFolgasChecksPessoa');
+ if(list)list.replaceChildren();
+ try{
+  const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=*');
+  if(seq!==fsjPerfilFolgasConsulta||select.value!==id)return;
+  if(!Array.isArray(rows)||rows.length!==1)throw Error('Cadastro não encontrado');
+  fsjSincronizarCadastroPessoas(rows);
+  fsjRenderPerfilPessoaFolgas();
+ }catch(e){
+  if(seq!==fsjPerfilFolgasConsulta||select.value!==id)return;
+  if(title)title.textContent='Não foi possível confirmar o perfil na aba Pessoas.';
+  if(list)list.replaceChildren();
+ }
+}
 function fsjPreencherSeletorFolgas(){
  const select=document.getElementById('folgasPessoaSelect');if(!select)return;
  const source=document.getElementById('personSelect');
@@ -204,7 +227,7 @@ function fsjRenderFolgas(){
 
 }
 function selecionarPessoaFolgas(){
- fsjRenderPerfilPessoaFolgas();
+ void fsjConfirmarPerfilFolgas();
  // O calendário operacional pertence a Folgas e Férias, não ao cadastro Pessoas.
  // Ao escolher o funcionário, abrir diretamente a marcação mensal existente.
  if(document.getElementById('folgasPessoaSelect')?.value && typeof fsjAbrirCalendarioFolgas==='function'){
