@@ -52,8 +52,26 @@ function fsjSincronizarCadastroPessoas(rows){
   });
  }
  S.people=[...known.values()];
+ fsjRenderPerfilPessoaFolgas();
  if(typeof renderPersonSelect==='function')renderPersonSelect();
  fsjPreencherSeletorFolgas();
+}
+function fsjRenderPerfilPessoaFolgas(){
+ const panel=document.getElementById('fsjFolgasPerfilPessoa');
+ const select=document.getElementById('folgasPessoaSelect');
+ if(!panel||!select)return;
+ const p=(Array.isArray(S.people)?S.people:[]).find(x=>String(x.id)===String(select.value));
+ panel.hidden=!p;
+ if(!p){document.getElementById('fsjFolgasChecksPessoa').replaceChildren();return;}
+ document.getElementById('fsjFolgasTipoPessoa').textContent='Tipo de usuário: '+String(p.type||'Não informado');
+ const list=document.getElementById('fsjFolgasChecksPessoa');
+ list.replaceChildren();
+ const items=[['Cadastro ativo',p.active===true],['Vídeos e Chamadas',p.videosChamadas===true],['Receber tarefas às 7h pelo WhatsApp',p.whatsapp7h===true],['Exigir escolha de folga semanal',p.requireWeeklyOff!==false]];
+ for(const [label,checked] of items){
+  const wrap=document.createElement('label');
+  const input=document.createElement('input');input.type='checkbox';input.checked=checked;input.disabled=true;
+  wrap.append(input,document.createTextNode(' '+label));list.append(wrap);
+ }
 }
 function fsjPreencherSeletorFolgas(){
  const select=document.getElementById('folgasPessoaSelect');if(!select)return;
@@ -72,6 +90,7 @@ function fsjPreencherSeletorFolgas(){
  select.replaceChildren(new Option(options.length?'Selecione uma pessoa':'Cadastro de pessoas não carregado',''));
  for(const item of options)select.add(new Option(item.label,item.id));
  if(previous&&options.some(o=>o.id===previous))select.value=previous;
+ fsjRenderPerfilPessoaFolgas();
 }
 (function fsjVincularCadastroPessoas(){
  const source=document.getElementById('personSelect');
@@ -145,6 +164,7 @@ async function carregarFolgas(){
 
 function fsjRenderFolgas(){
  const select=document.getElementById('folgasPessoaSelect');if(!select)return;
+ fsjRenderPerfilPessoaFolgas();
  // Não reconstruir o elemento select a cada atualização de tela: isso interrompe
  // o menu nativo do navegador enquanto o Proprietário escolhe a pessoa.
  const chosen=select.value;
@@ -180,6 +200,7 @@ function fsjRenderFolgas(){
 
 }
 function selecionarPessoaFolgas(){
+ fsjRenderPerfilPessoaFolgas();
  // O calendário operacional pertence a Folgas e Férias, não ao cadastro Pessoas.
  // Ao escolher o funcionário, abrir diretamente a marcação mensal existente.
  if(document.getElementById('folgasPessoaSelect')?.value && typeof fsjAbrirCalendarioFolgas==='function'){
