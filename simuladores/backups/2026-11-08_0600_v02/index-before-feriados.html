@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FSJ — Simuladores Celular | Executor e Proprietário</title>
+<meta name="fsj-simulador-versao" content="1.0.1">
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#203b2c;background:#eef2ef}*{box-sizing:border-box}body{margin:0;padding:14px}.intro{max-width:980px;margin:0 auto 12px;color:#395548;font-size:13px}.shell{max-width:980px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.phone{min-width:0;border:2px solid #1e503d;border-radius:20px;background:#f6f9f6;overflow:hidden;display:flex;flex-direction:column;height:min(790px,calc(100dvh - 84px));min-height:550px}.phone.owner{border-color:#335d88;background:#f4f8fc}.phone header{background:#194b3c;color:white;padding:13px 15px}.phone.owner header{background:#234e73}.phone header strong{font-size:18px}.phone header small{display:block;font-size:11px;color:#dceab7;margin-top:3px}.phone.owner header small{color:#e0edf9}.screen{padding:10px;overflow:hidden;flex:1;min-height:0}.screen h2{font-size:17px;color:#194b3c;margin:3px 0 8px}.owner .screen h2{color:#234e73}.screen h3{font-size:15px;margin:13px 0 7px}.muted{font-size:12px;color:#63786b;line-height:1.5}.item{padding:8px;background:#fff;border:1px solid #d4e3d7;border-radius:10px;margin:8px 0;cursor:pointer}.item:focus-visible{outline:3px solid #84b99c}.item b{color:#20533d}.owner .item b{color:#254f75}.item p{margin:5px 0;font-size:13px}.item small{font-size:11px;color:#63786b}.item.overdue{background:#fff7ec;border-color:#eab578}.item.overdue b{color:#a6570f}.button{display:block;width:100%;padding:8px 9px;margin:5px 0;border:0;border-radius:9px;background:#22784e;color:white;font-weight:600;cursor:pointer;min-height:40px;font-size:14px}.button:hover{filter:brightness(.96)}.button.secondary{background:white;color:#20593e;border:1px solid #adcdb9}.button.small{font-size:12px;padding:7px;width:auto;min-height:32px;margin:0}.button.blue{background:#2d648d}.button.warn{background:#9b542b}button:disabled{opacity:.45;cursor:not-allowed}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}.tabs button{margin:0}.tabs .inactive{background:#e4ede6;color:#32533f}.owner .tabs .inactive{background:#e0e9f3;color:#2e5775}label{display:block;font-size:12px;font-weight:650;margin:5px 0 3px}select,input,textarea{font:inherit;font-size:12px;width:100%;padding:7px;border:1px solid #b5cdbb;border-radius:8px;background:white;color:#203b2c}textarea{min-height:70px;max-height:130px;resize:none}.calendar-head{display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.calendar .weekday{text-align:center;font-size:10px;color:#63786b;padding:5px 0}.calendar button{min-width:0;height:31px;font-size:12px;border:1px solid #d9e4dc;background:#fff;border-radius:5px;cursor:pointer;color:#213e2c;padding:0}.calendar button.done{background:#206b49;color:white;font-weight:bold}.calendar button.selected{outline:2px solid #2e7194;outline-offset:-2px}.calendar button.weekly{background:#d5e9f8}.calendar button.holiday{background:#f8e3b7}.calendar button.comp{background:#dcead0}.calendar button.vacation{background:#eadcf6}.calendar button:disabled{cursor:default}.calendar-hint{font-weight:700;color:#24563f;margin:12px 0 5px;font-size:13px}.calendar-note{background:white;border:1px solid #d9e4dc;border-radius:8px;padding:10px;margin-top:10px;font-size:12px}.legend{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:11px;margin-top:10px}.swatch{display:inline-block;width:12px;height:12px;border:1px solid #bbb;vertical-align:middle;margin-right:5px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.kpi{border:1px solid #dae7ec;background:white;color:#234e73;padding:10px 3px;border-radius:9px;cursor:pointer;text-align:center}.kpi b{display:block;font-size:21px}.kpi small{font-size:10px}.panel{padding:12px;background:white;border:1px solid #d6e4dd;border-radius:9px;margin:9px 0}.owner .panel{border-color:#d8e3ee}.tag{font-weight:bold;color:#276d45}.owner .tag{color:#234e73}.foot{background:#e3eee6;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:5px}.owner .foot{background:#e4edf5}.foot .button{width:auto;padding:8px 10px;font-size:12px;margin:0;min-height:34px}.foot span{font-size:11px;color:#456150}.link{color:#a6570f;text-decoration:underline;cursor:pointer}.hint-blue{background:#e7f0f7;border-left:3px solid #356f9d;padding:10px;margin:10px 0;font-size:12px;color:#33566e}.hint-green{background:#e4f0e8;border-left:3px solid #397b58;padding:10px;margin:10px 0;font-size:12px}.footer-note{max-width:980px;margin:13px auto 0;color:#5e7668;font-size:12px}@media(max-width:680px){body{padding:6px;overflow-x:auto}.shell{grid-template-columns:repeat(2,minmax(325px,1fr));gap:10px;min-width:660px}.phone{height:calc(100dvh - 62px);min-height:430px}.intro,.footer-note{padding:0 6px}}
+.people-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.people-actions .button{margin:4px 0}.people-actions .button:first-child{flex:1}.form-section{padding:9px;background:#fff;border:1px solid #cadbe5;border-radius:10px;margin-top:10px}.form-section label:first-child{margin-top:0}.form-section input[readonly],.form-section select:disabled{background:#f0f4f6;color:#546875}.form-section .check-row{display:flex;align-items:flex-start;gap:9px;padding:12px 9px;background:#f1f6fa;border:1px solid #dce7ed;border-radius:8px;margin:12px 0}.form-section .check-row input{width:19px;height:19px;flex:0 0 19px;margin:1px 0 0;accent-color:#22784e}.form-section .check-row label{margin:0;font-weight:600;line-height:1.4}.form-section .check-row small{display:block;margin-top:3px;font-weight:400;color:#5c7080}.people-feedback{background:#e6f3e8;color:#205a3d;border:1px solid #b5dcc0;padding:10px;border-radius:8px;font-size:12px;margin:10px 0}.people-feedback.bad{background:#fff3e9;color:#924313;border-color:#efc59e}.people-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}.people-list .panel{margin:0;font-size:12px;padding:9px}.form-section .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.form-section .form-actions .button{margin:4px 0}.owner .form-section{background:#fff}
+
+/* Modelos de relatório do Proprietário — exclusivamente demonstrativos */
+.report-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0 13px}
+.report-option{border:1px solid #bfcedc;background:#fff;color:#234e73;border-radius:8px;padding:9px 7px;text-align:left;cursor:pointer;font:600 12px system-ui;min-height:49px}
+.report-option.active{background:#234e73;border-color:#234e73;color:#fff}
+.report-option small{display:block;margin-top:3px;font-size:10px;font-weight:400;opacity:.85}
+.report-filters{background:#eef5fa;border:1px solid #d3e2ef;border-radius:9px;padding:10px;margin:9px 0}
+.report-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 9px}
+.report-filters label{margin:6px 0 3px}
+.report-filters select,.report-filters input{min-width:0;padding:8px;font-size:12px}
+.report-sheet{background:white;border:1px solid #c8d7e6;border-radius:10px;padding:12px;margin:12px 0}
+.report-sheet h3{font-size:16px;margin:4px 0 3px;color:#234e73}
+.report-sheet .report-subtitle{font-size:11px;color:#657a89;margin:0 0 11px}
+.report-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0}
+.report-metric{border:1px solid #d5e0ec;border-radius:8px;padding:9px 5px;text-align:center;background:#f6fafc}
+.report-metric strong{display:block;font-size:21px;color:#234e73}.report-metric span{font-size:10px;color:#526b7b}
+.report-table-wrap{width:100%;overflow-x:auto;border:1px solid #e0e6ee;border-radius:6px}
+.report-table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.35}
+.report-table th,.report-table td{padding:8px 6px;border-bottom:1px solid #e1e9f0;text-align:left;vertical-align:top}
+.report-table th{background:#eaf2f9;color:#244d6e;font-weight:700}
+.report-table tr:last-child td{border-bottom:0}
+.report-tag{display:inline-block;background:#e9f3ec;color:#256140;border-radius:5px;padding:3px 5px;font-size:10px;font-weight:650}
+.report-empty{padding:12px;color:#6a7c85;font-size:12px}
+.report-footer{border-top:1px solid #e4eaf1;margin-top:10px;padding-top:8px;font-size:10px;color:#697f8e}
+.report-controls{display:grid;grid-template-columns:1fr;gap:7px}.report-controls .button{font-size:12px}
+.report-page-hidden{display:none}
+.report-result-heading h2{margin-bottom:5px}
+.report-result-heading p{margin:0}
+.report-menu-actions{margin-top:12px}
+.report-result-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0}
+.report-result-actions .button{margin:0;font-size:12px;padding:7px;min-height:36px}
+.report-result-actions .button.secondary{color:#234e73}
+.report-paging{display:flex;justify-content:space-between;gap:6px;align-items:center;margin:8px 0}
+.report-paging .button{flex:0 1 auto;color:#234e73;font-size:10px}
+.report-paging span{font-size:11px;white-space:nowrap;color:#234e73;font-weight:700}
+.report-result-heading,.report-menu-actions{margin-bottom:6px}
+.report-options .report-option{min-height:68px}
+
+
+.wa-message{font-size:12px;line-height:1.4;margin:8px 0}.wa-message p{margin:5px 0}.wa-tasks{border-top:1px solid #e2e9e2;margin-top:5px}.wa-tasks p{padding:3px 0;border-bottom:1px solid #ecf0ec}.owner-primary-actions .button{background:#176341}
+/* Cabeçalho único em todas as páginas; mantém foto e botão Sair sempre visíveis. */
+.phone header{flex:0 0 auto;padding:10px 11px}
+.head-row{display:flex;justify-content:space-between;align-items:center;gap:7px}
+.head-brand{min-width:0}.head-brand strong{font-size:15px}.head-brand small{font-size:10px;margin-top:1px}
+.head-brand .head-user{font-size:10px;color:#f0f5ec;margin-top:4px}
+.head-user b{color:white}.head-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.avatar-slot{margin:0;display:flex;width:36px;height:36px;align-items:center;justify-content:center;border:1px solid #ddedeb;background:white;border-radius:50%;cursor:pointer;overflow:hidden;color:#234e73;font-size:21px}
+.avatar-slot img{height:100%;width:100%;object-fit:cover}
+.logout{background:#a23224;color:white;border:0;border-radius:7px;min-height:33px;font-weight:700;padding:0 8px;cursor:pointer;font-size:11px}
+.sim-page{height:100%;overflow:hidden}.sim-page[hidden]{display:none!important}
+.foot .button{min-height:31px;padding:6px 8px;font-size:11px}
+.calendar button.leaf-checked{background:#185b42;color:white;font-weight:800}
+.calendar button.leaf-checked::after{content:' ✓'}
+.calendar button.leaf-pending{outline:2px solid #ae632a;outline-offset:-2px}
+.calendar .weekday{padding:3px 0}.calendar-head{margin:5px 0}
+.calendar-note{padding:7px;margin-top:6px}
+.legend{margin-top:6px}
+.check-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:#38674b;margin:5px 0}
+.check-legend b{color:#1b6245}
+.paged-note{color:#526d61;font-size:11px;margin:5px 0}
+.notice-count{display:inline-block;border-radius:9px;padding:3px 7px;background:#ffebd6;color:#93430c;font-size:11px;font-weight:700}
+.acknowledged{font-size:11px;color:#276b48;font-weight:700;margin:5px 0}
+.suggestions-counter{margin-left:4px;padding:2px 5px;background:#eaf7ee;color:#206b49;border-radius:8px}
+.report-result-actions{margin:6px 0}.report-sheet{padding:8px;margin:6px 0}.report-metrics{margin:5px 0}
+.report-metric{padding:4px 3px}.report-metric strong{font-size:16px}
+.report-table th,.report-table td{padding:5px 4px;font-size:10px}
+.report-sheet .report-subtitle{margin:0 0 6px}.report-footer{margin-top:5px;padding-top:4px}
+.report-controls .button{padding:6px;min-height:30px;margin:2px 0}
+.report-paging{margin:3px 0}
+@media(max-width:860px){.head-brand strong{font-size:13px}.head-brand .head-user{font-size:9px}.logout{padding:0 6px}}
+
+.sim-context{flex:0 0 auto;display:flex;gap:7px;align-items:center;padding:4px 9px;background:#e9f1e9;border-bottom:1px solid #d4e6d9}
+.sim-context label{margin:0;flex:0 0 auto;font-size:10px;white-space:nowrap}
+.sim-context select{min-width:0;flex:1;padding:5px;font-size:11px}
+.empty-intro{background:#fff;border:1px dashed #cad6ca;padding:12px;border-radius:8px;font-size:12px;color:#486654}
+@media print{
+ body{padding:0!important;background:white!important}
+ .intro,.footer-note,.phone:not(.owner),.owner header,.owner .foot,.report-options,.report-filters,.report-controls,.report-preface,.report-result-actions,.report-paging{display:none!important}
+ .shell{display:block!important;max-width:none!important}
+ .phone.owner,.phone.owner .screen{border:0!important;border-radius:0!important;display:block!important;height:auto!important;min-height:0!important;overflow:visible!important;padding:0!important;background:white!important}
+ .report-sheet{border:0!important;border-radius:0!important;margin:0!important;padding:0!important}
+ .report-page-hidden{display:table-row!important}
+ .report-table-wrap{overflow:visible!important}
+ .report-table{font-size:10px!important}
+}
+
+
+/* Pessoas e Grupos: dois atalhos na primeira página, formação em tela sequencial. */
+.people-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.people-actions .button{width:100%;margin:4px 0;font-size:12px;padding:8px 5px}
+.group-members{display:grid;grid-template-columns:1fr;gap:5px;margin:7px 0}
+.group-member{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px;background:#edf4fa;color:#234e73;border:1px solid #ccddeb;border-radius:8px;padding:7px 9px;font-size:12px;text-align:left;cursor:pointer}
+.group-member span{overflow-wrap:anywhere}.group-member b{font-size:18px;color:#a14b35}
+.group-link{display:flex;flex-direction:column;gap:3px;text-align:left;width:100%;border:1px solid #cadbe7;border-radius:8px;background:#fff;color:#234e73;padding:9px;margin:5px 0;cursor:pointer}
+.group-link small{color:#5e7180;font-size:11px}.group-link span{align-self:flex-end;text-decoration:underline;font-size:10px}
+/* Simuladores individuais com motor e armazenamento unificados. */
+body[data-fsj-view="proprietario"] .phone:not(.owner),body[data-fsj-view="executor"] .phone.owner{display:none!important}
+body[data-fsj-view="proprietario"] .shell,body[data-fsj-view="executor"] .shell{grid-template-columns:minmax(320px,430px);max-width:440px;min-width:0;justify-content:center}
+body[data-fsj-view="proprietario"] .intro,body[data-fsj-view="executor"] .intro,body[data-fsj-view="proprietario"] .footer-note,body[data-fsj-view="executor"] .footer-note{max-width:440px}
+@media(max-width:680px){body[data-fsj-view="proprietario"] .shell,body[data-fsj-view="executor"] .shell{min-width:0;grid-template-columns:minmax(0,1fr)}}
+.fsj-compat-warning{background:#fff1db;border:2px solid #bf7713;border-radius:8px;padding:10px;color:#6a350c;font-size:13px;font-weight:600;margin:0 auto 10px;max-width:980px}
+.fsj-compat-warning[hidden]{display:none!important}
+</style></head>
+<body>
+<div class="intro">SIMULADOR DE TESTE · Dados e conclusões fictícios, sem acesso à produção. O que for registrado no Proprietário aparece imediatamente no Executor correspondente, nesta página.</div>
+<div class="fsj-compat-warning" id="fsjCompatWarning" role="alert" hidden></div>
+<div class="shell">
+<section class="phone" aria-label="Simulador Celular Executor"><header>
+<div class="head-row"><div class="head-brand"><strong>🌿 Fazenda São José</strong><small>ASSISTENTE FSJ — CELULAR</small><small class="head-user">Perfil: <b>Executor</b> · <span id="exUserIdentity">Nenhum executor cadastrado</span></small></div><div class="head-actions"><label class="avatar-slot" for="photoEx" title="Selecionar foto de Carlos"><span id="avatarEx">👤</span></label><input id="photoEx" type="file" accept="image/*" hidden onchange="choosePhoto('ex',this)"><button class="logout" onclick="logoutDemo('ex')">Sair</button></div></div></header><div class="sim-context"><label for="simExecutor">Ver como Executor (teste)</label><select id="simExecutor" onchange="selectExUser(this.value)"><option value="">Cadastre um usuário no Proprietário</option></select></div><main class="screen" id="executor"></main><footer class="foot"><button class="button secondary" onclick="back('ex')">‹ Anterior</button><span id="exPages">1 / 1</span><button class="button" onclick="navigate('ex','home')">Início</button></footer></section>
+<section class="phone owner" aria-label="Simulador Proprietário"><header>
+<div class="head-row"><div class="head-brand"><strong>🌿 Fazenda São José</strong><small>ASSISTENTE FSJ — CELULAR</small><small class="head-user">Perfil: <b>Proprietário</b> · Nome: <b>Urbano</b></small></div><div class="head-actions"><label class="avatar-slot" for="photoOwner" title="Selecionar foto do Proprietário"><span id="avatarOwner">👤</span></label><input id="photoOwner" type="file" accept="image/*" hidden onchange="choosePhoto('owner',this)"><button class="logout" onclick="logoutDemo('owner')">Sair</button></div></div></header><main class="screen" id="proprietario"></main><footer class="foot"><button class="button secondary" onclick="back('owner')">‹ Anterior</button><span id="ownerPages">1 / 1</span><button class="button" onclick="navigate('owner','home')">Início</button></footer></section>
+</div>
+<div class="footer-note">Simulação local, sem acesso ao cadastro central. Cadastros e tarefas começam vazios e são compartilhados imediatamente entre os dois painéis; o navegador guarda os dados de teste quando permitido. Nada é salvo na Fazenda São José. O Proprietário pode consultar suas tarefas periódicas no calendário.</div>
+<script>
+'use strict';
+// Regra: versões incompatíveis dos dois perfis produzem aviso visível.
+const FSJ_SIMULADOR_VERSAO='1.0.0';
+const FSJ_SIMULADOR_CONTRATO={proprietario:'1.0.0',executor:'1.0.0'};
+const FSJ_SIMULADOR_RECURSOS_PROPRIETARIO=['cadastros','grupos','atribuicao-tarefas','folgas','relatorios','sugestoes','pendencias'];
+const FSJ_SIMULADOR_RECURSOS_EXECUTOR=['cadastros','grupos','atribuicao-tarefas','folgas','relatorios','sugestoes','pendencias'];
+function fsjCheckSimulatorCompatibility(){
+ const missing=FSJ_SIMULADOR_RECURSOS_PROPRIETARIO.filter(r=>!FSJ_SIMULADOR_RECURSOS_EXECUTOR.includes(r));
+ const mismatch=FSJ_SIMULADOR_CONTRATO.proprietario!==FSJ_SIMULADOR_CONTRATO.executor;
+ const warning=document.getElementById('fsjCompatWarning');
+ if(!warning)return;
+ warning.hidden=!missing.length&&!mismatch;
+ if(!warning.hidden)warning.textContent='AVISO DE COMPATIBILIDADE: Proprietário e Executor não estão compatibilizados. '+
+  (missing.length?'Recursos pendentes: '+missing.join(', ')+'. ':'')+
+  (mismatch?'Contratos distintos: Proprietário '+FSJ_SIMULADOR_CONTRATO.proprietario+', Executor '+FSJ_SIMULADOR_CONTRATO.executor+'. ':'')+
+  'Adequar o Executor antes de considerar a melhoria concluída.';
+}
+const FSJ_SIMULADOR_VIEW=new URLSearchParams(location.search).get('perfil');
+if(FSJ_SIMULADOR_VIEW==='proprietario'||FSJ_SIMULADOR_VIEW==='executor')document.body.dataset.fsjView=FSJ_SIMULADOR_VIEW;
+// Tarefas inteiramente demonstrativas. A tarefa do Proprietário está identificada como fictícia.
+// Cadastros, tarefas e atribuicoes do simulador iniciam TOTALMENTE vazios.
+// Proprietario Urbano e uma identidade fixa do painel, nao um cadastro ficticio.
+const jobs=[];
+const groups=[];
+const state={ex:{screen:'home',personId:'',section:'individual',task:null,month:10,year:2026,selected:null,answer:'',msg:'',overdue:false,page:0,loggedOut:false},owner:{screen:'home',mode:'all',executor:'',supervisor:'',task:null,month:10,year:2026,selected:null,section:'all',status:'Todas',draft:'Em aberto',personId:'',personFormMode:'existing',peopleFeedback:'',groupEditIndex:-1,groupDraftName:'',groupDraftMembers:[],groupPick:'',groupFeedback:'',reportKind:'gerencial',reportPage:0,reportPages:1,reportReturn:'reports',reportPerson:'Todos',reportSupervisor:'Todos',reportStatus:'Todas',reportFrequency:'Todas',reportScope:'Todos',reportStart:'',reportEnd:'',whatsappPerson:'',whatsappStatus:'',page:0,leavePerson:'',leaveType:'Folga semanal',leaveDates:[],loggedOut:false}};
+const people=[];
+const personKey=p=>p?.apelido||p?.nome||'';
+const personLabel=p=>p?.apelido&&p.apelido!==p.nome?p.nome+' (apelido: '+p.apelido+')':(p?.nome||'');
+const newPersonValue='__novo__';
+const personProfiles=['Executor','Visitante','Gestor','Empregado','Terceirizados'];
+let demoPersonSequence=0;
+const marks={};
+// Feriado é comum; as demais datas são específicas do usuário do simulador.
+const absences={};
+const personAbsences={};
+const absenceFor=(person,date)=>personAbsences[person]?.[date]||absences[date]||'';
+const acknowledgements=[];const suggestions=[];
+const pages={ex:[],owner:[]};
+const maxPhotoBytes=3*1024*1024;
+function choosePhoto(which,input){const file=input.files?.[0];if(!file)return;
+ if(!file.type.startsWith('image/')||file.size>maxPhotoBytes){alert('Escolha uma foto de até 3 MB.');input.value='';return;}
+ const r=new FileReader();r.onload=()=>{const target=$(which==='ex'?'avatarEx':'avatarOwner');if(target)target.innerHTML='<img src="'+esc(r.result)+'" alt="Foto do usuário">'};r.readAsDataURL(file);
+}
+function logoutDemo(which){state[which].loggedOut=true;state[which].screen='loggedOut';render()}
+function loginDemo(which){state[which].loggedOut=false;navigate(which,'home')}
+function currentExecutor(){return people.find(p=>p.id===state.ex.personId)||null}
+function executorName(){return personKey(currentExecutor())}
+function selectExUser(id){state.ex.personId=people.some(p=>p.id===id)?id:'';state.ex.task=null;state.ex.screen='home';state.ex.page=0;const slot=$('avatarEx');if(slot)slot.textContent='👤';render()}
+function syncExecutorSelector(){
+ const select=$('simExecutor');if(!select)return;
+ const chosen=state.ex.personId;
+ const canExecute=people.filter(p=>p.perfil!=='Visitante'&&p.perfil!=='Gestor');
+ if(chosen&&!canExecute.some(p=>p.id===chosen))state.ex.personId='';
+ select.innerHTML='<option value="">Selecione um executor cadastrado</option>'+canExecute.map(p=>`<option value="${esc(p.id)}" ${p.id===state.ex.personId?'selected':''}>${esc(personLabel(p))}</option>`).join('');
+ const person=currentExecutor();
+ $('exUserIdentity').textContent=person?'Nome: '+person.nome+(person.apelido?' · Apelido: '+person.apelido:''):'Nenhum executor cadastrado';
+ const avatar=$('photoEx');if(avatar)avatar.parentElement.title=person?'Selecionar foto de '+person.nome:'Foto do Executor';
+}
+function receiveSuggestion(){const value=$('suggestionText')?.value.trim()||'';if(!value){alert('Escreva sua sugestão.');return;}suggestions.unshift({id:suggestions.length+1,text:value,person:executorName(),status:'Recebida',date:new Date().toLocaleDateString('pt-BR')});navigate('ex','done')}
+function reviewSuggestion(id,decision){const suggestion=suggestions.find(x=>x.id===id);if(suggestion)suggestion.status=decision;render()}
+function acknowledgeOverdue(){const s=state.ex,t=taskById(s.task);if(!t)return;
+ const key=t.id+'|'+t.deadline+'|'+executorName();if(!acknowledgements.some(a=>a.key===key)){acknowledgements.unshift({key,task:t.id,person:executorName(),due:t.deadline,date:new Date().toLocaleString('pt-BR'),message:'Tomei ciência da tarefa não cumprida: '+t.id+' — '+t.name+'. Prazo: '+fmt(t.deadline)});}
+ s.msg='Ciência encaminhada ao Proprietário neste simulador.';navigate('ex','ackDone');
+}
+function showTaskMonth(which,id){const t=taskById(id),s=state[which];if(!t)return;
+ s.task=id;s.selected=null;if(t.deadline){const [y,m]=t.deadline.split('-').map(Number);s.year=y;s.month=m-1;}s.screen=which==='ex'?'overdueCalendar':'overdueCalendar';render();}
+function setLeafPerson(name){state.owner.leavePerson=name;state.owner.leaveDates=[];state.owner.selected=null;render()}
+function toggleLeafDay(day){const s=state.owner,key=daykey(s.year,s.month,day);s.selected=day;
+ if(s.leaveDates.includes(key))s.leaveDates=s.leaveDates.filter(x=>x!==key);
+ else s.leaveDates=[...s.leaveDates,key];render();}
+function saveLeaves(){const s=state.owner;if(!s.leaveDates.length){alert('Marque pelo menos um dia no calendário.');return;}
+ const person=s.leavePerson;const map=personAbsences[person]||(personAbsences[person]={});
+ for(const day of s.leaveDates){if(s.leaveType==='Remover marcação')delete map[day];else map[day]=s.leaveType;}
+ s.leaveFeedback=s.leaveDates.length+' dia(s) atualizado(s) para '+person+' — apenas neste simulador.';
+ s.leaveDates=[];render();}
+
+const names=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const daykey=(y,m,d)=>`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const fmt=iso=>iso?iso.slice(8,10)+'/'+iso.slice(5,7)+'/'+iso.slice(0,4):'—';
+function navigate(which,screen){const s=state[which];s.screen=screen;s.selected=null;s.page=0;if(which==='ex')s.answer='';render()}
+function back(w){const s=state[w];if(s.page>0){setPage(w,s.page-1);return;}if(w==='ex'){if(s.screen==='evidence'||s.screen==='questions'){navigate(w,'detail')}else if(['detail','overdueCalendar','ackDone'].includes(s.screen)){navigate(w,s.overdue?'overdue':'tasks')}else navigate(w,'home')}else{if(s.screen==='newPerson'||s.screen==='groupForm')navigate(w,'people');else if(s.screen==='newTask')navigate(w,'home');else if(s.screen==='whatsapp')navigate(w,'home');else if(s.screen==='reportResult'){if(s.reportPage>0){s.reportPage--;render()}else navigate(w,'reports')}else if(s.screen==='reportFilters')navigate(w,s.reportReturn||'reports');else if(s.screen==='reports')navigate(w,'home');else if(s.screen==='overdueCalendar')navigate(w,'overdue');else if(['calendar','detail','edit'].includes(s.screen))navigate(w,'tasks');else navigate(w,'home')}}
+function moveMonth(which,n){const s=state[which],d=new Date(s.year,s.month+n,1);s.month=d.getMonth();s.year=d.getFullYear();s.selected=null;if(which==='owner')s.leaveDates=[];render()}
+function taskById(id){return jobs.find(t=>t.id===id)}
+function openEx(id,overdue=false){const s=state.ex,t=taskById(id);if(!t)return;s.task=id;s.overdue=overdue;s.answer='';s.msg='';s.executionDate=null;if(overdue){showTaskMonth('ex',id);return;}navigate('ex',t.periodic==='Pontual'?'detail':'calendar')}
+function openOwner(id){const s=state.owner,t=taskById(id);if(!t)return;s.task=id;s.draft=t.status;navigate('owner',t.periodic==='Pontual'?'detail':'calendar')}
+function setExecutor(value){const s=state.owner;s.executor=value;s.supervisor='';s.mode='executor';s.section='individual';s.status='Todas';s.screen='tasks';render()}
+function setSupervisor(value){const s=state.owner;s.supervisor=value;s.executor='';s.mode='supervisor';s.section='individual';s.status='Todas';s.screen='tasks';render()}
+let demoTaskSequence=0;
+function newTaskForm(){navigate('owner','newTask')}
+function saveTaskInSimulator(){
+ const description=$('taskDescription')?.value.trim()||'';
+ const person=$('taskPerson')?.value||'';
+ const groupName=$('taskGroup')?.value||'';
+ const period=$('taskFrequency')?.value||'Pontual';
+ const deadline=$('taskDeadline')?.value||'';
+ const supervisor=$('taskSupervisor')?.value||'';
+ if(!description){alert('Informe a descrição da tarefa.');return}
+ if(!person&&!groupName){alert('Selecione um Executor ou Grupo de executores.');return}
+ if(person&&groupName){alert('Escolha responsabilidade individual OU de grupo.');return}
+ if(period!=='Pontual'&&!deadline){alert('Informe a primeira data da tarefa periódica.');return}
+ let performers=[];
+ if(groupName){const g=groups.find(g=>g.name===groupName);if(!g||!g.members.length){alert('O grupo deve ter pelo menos um integrante.');return}performers=[...g.members]}
+ else performers=[person];
+ const suffix={'Diária':'D','Semanal':'S','Mensal':'M','Pontual':'P'}[period]||'P';
+ const id='SIM-'+String(++demoTaskSequence).padStart(5,'0')+' '+suffix;
+ jobs.push({id,name:description,exec:performers,group:groupName,periodic:period,status:'Em aberto',supervisor,deadline});
+ state.owner.mode='all';state.owner.status='Todas';state.owner.section='all';navigate('owner','tasks');
+}
+function renderNewTaskForm(){
+ const opts=people.filter(p=>p.perfil!=='Visitante').map(p=>`<option value="${esc(personKey(p))}">${esc(personLabel(p))}</option>`).join('');
+ const supervisors=people.filter(p=>p.supervisor).map(p=>`<option value="${esc(personKey(p))}">${esc(personLabel(p))}</option>`).join('');
+ return `<h2>Registrar tarefa</h2><p class="muted">A tarefa ficará visível imediatamente no Executor atribuído.</p>
+ <label for="taskDescription">Descrição da tarefa</label><textarea id="taskDescription" placeholder="Descreva a atividade" required></textarea>
+ <label for="taskPerson">Executor individual</label><select id="taskPerson" onchange="if(this.value)document.getElementById('taskGroup').value=''"><option value="">Selecione um executor</option><option value="Proprietário">Urbano (Proprietário)</option>${opts}</select>
+ <label for="taskGroup">Ou grupo executor</label><select id="taskGroup" onchange="if(this.value)document.getElementById('taskPerson').value=''"><option value="">Nenhum grupo</option>${groups.map(g=>`<option value="${esc(g.name)}">${esc(g.name)}</option>`).join('')}</select>
+ <div class="twocol"><div><label for="taskFrequency">Periodicidade</label><select id="taskFrequency">${['Diária','Semanal','Mensal','Pontual'].map(x=>`<option>${x}</option>`).join('')}</select></div><div><label for="taskDeadline">Primeiro prazo</label><input id="taskDeadline" type="date" value="${todayFSJ()}"></div></div>
+ <label for="taskSupervisor">Supervisor autorizado (opcional)</label><select id="taskSupervisor"><option value="">Sem supervisor</option>${supervisors}</select>
+ <button class="button" onclick="saveTaskInSimulator()">Salvar tarefa</button><button class="button secondary" onclick="navigate('owner','tasks')">Cancelar</button>`;
+}
+// Apenas demonstrativo: não há integração com WhatsApp nem disparo real.
+function selectWhatsAppPerson(personId){
+ const s=state.owner;
+ s.whatsappPerson=people.some(p=>p.id===personId)?personId:'';
+ s.whatsappStatus='';render();
+}
+function simulatedWhatsAppSend(){
+ const s=state.owner,p=people.find(x=>x.id===s.whatsappPerson);
+ if(!p){alert('Selecione uma pessoa cadastrada para preparar o disparo.');return;}
+ s.whatsappStatus='Disparo apenas simulado para '+personLabel(p)+'. Nenhuma mensagem foi enviada ao WhatsApp.';
+ render();
+}
+function renderWhatsAppSimulator(){
+ const s=state.owner,recipients=people.filter(p=>p.perfil!=='Visitante'&&p.perfil!=='Gestor');
+ const p=recipients.find(x=>x.id===s.whatsappPerson)||null;
+ const tasks=p?jobs.filter(j=>j.exec.includes(personKey(p))&&!['Arquivado','Concluída'].includes(j.status)):[];
+ let h='<h2>Disparo WhatsApp</h2><p class="muted">Preparação demonstrativa da mensagem para o usuário cadastrado. Nenhuma mensagem será enviada de verdade.</p>';
+ h+='<label for="whatsappPerson">Selecionar destinatário</label><select id="whatsappPerson" onchange="selectWhatsAppPerson(this.value)"><option value="">Selecione uma pessoa</option>';
+ h+=recipients.map(x=>`<option value="${esc(x.id)}" ${p&&p.id===x.id?'selected':''}>${esc(personLabel(x))}</option>`).join('')+'</select>';
+ if(!recipients.length)h+='<div class="empty-intro">Nenhum destinatário cadastrado. Cadastre primeiro um Executor em Pessoas e Grupos.</div>';
+ if(p){
+  h+='<div class="panel wa-message"><b>Prévia da mensagem</b><p>Fazenda São José — tarefas em '+esc(new Date().toLocaleDateString('pt-BR',{timeZone:'America/Recife'}))+'</p>';
+  h+='<p><strong>Destinatário:</strong> '+esc(personLabel(p))+'</p>';
+  if(!tasks.length)h+='<p>Não há tarefas abertas, em execução ou pendentes atribuídas a este destinatário.</p>';
+  else h+='<div class="wa-tasks">'+tasks.map((t,i)=>`<p><b>${i+1}. ${esc(t.id)}</b> — ${esc(t.name)}<br><small>${esc(t.group?'Grupo: '+t.group:'Individual')} · ${esc(t.status)}</small></p>`).join('')+'</div>';
+  h+='</div><button type="button" class="button blue" onclick="simulatedWhatsAppSend()">Simular disparo da mensagem</button>';
+ }
+ if(s.whatsappStatus)h+='<div class="people-feedback" role="status">'+esc(s.whatsappStatus)+'</div>';
+ h+='<button type="button" class="button secondary" onclick="navigate(\'owner\',\'home\')">Voltar ao início</button>';
+ return h;
+}
+function saveStatus(){const s=state.owner,t=taskById(s.task);if(t)t.status=s.draft;navigate('owner','tasks')}
+function openOwnerAll(status='Em aberto'){const s=state.owner;s.mode='all';s.executor='';s.supervisor='';s.section='all';s.status=status;navigate('owner','tasks')}
+function openOwnerBySituation(status){openOwnerAll(status)}
+
+function getScope(){const s=state.owner;if(s.mode==='all')return jobs;if(s.mode==='supervisor'){return jobs.filter(t=>!!s.supervisor&&t.supervisor===s.supervisor)}return jobs.filter(t=>!!s.executor&&t.exec.includes(s.executor))}
+function todayFSJ(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
+function graceExpired(deadline){if(!/^\d{4}-\d{2}-\d{2}$/.test(deadline||''))return false;const limit=new Date(deadline+'T12:00:00-03:00');if(!Number.isFinite(limit.getTime()))return false;return todayFSJ()>=new Date(limit.getTime()+2*86400000).toISOString().slice(0,10)}
+function overdue(){return jobs.filter(t=>t.periodic!=='Pontual'&&graceExpired(t.deadline)&&!['Concluída','Arquivado'].includes(t.status))}
+function calendar(which,leaf=false){const s=state[which],t=taskById(s.task),first=new Date(s.year,s.month,1).getDay(),count=new Date(s.year,s.month+1,0).getDate();let h=`<div class="calendar-head"><button class="button secondary small" onclick="moveMonth('${which}',-1)">‹</button><strong>${names[s.month]} ${s.year}</strong><button class="button secondary small" onclick="moveMonth('${which}',1)">›</button></div><div class="calendar">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div class="weekday">${d}</div>`).join('')}${Array.from({length:first},()=>'<span></span>').join('')}`;
+for(let d=1;d<=count;d++){const date=daykey(s.year,s.month,d),actor=t?marks[t.id+'|'+date]:null,absence=absences[date];const effectiveAbsence=leaf?absenceFor(which==='owner'?s.leavePerson:executorName(),date):'';
+const leafChecked=leaf&&which==='owner'&&s.leaveDates.includes(date);
+const cls=leaf?({'Folga semanal':'weekly','Feriado':'holiday','Folga compensatória':'comp','Férias':'vacation'}[effectiveAbsence]||''):actor?'done':'';
+const selected=s.selected===d?' selected':'';
+h+=`<button type="button" class="${cls}${selected}${leafChecked?' leaf-checked':''}" onclick="clickDay('${which}',${d},${leaf})" aria-pressed="${leafChecked?'true':'false'}" aria-label="Dia ${d}${actor?' realizado por '+esc(actor):''}${effectiveAbsence?' — '+esc(effectiveAbsence):''}">${d}${!leaf&&actor?' ✓':''}</button>`}
+
+h+='</div>';return h}
+function clickDay(which,day,leaf){const s=state[which];
+ if(which==='owner'&&leaf){toggleLeafDay(day);return;}
+ s.selected=day;
+ if(which==='ex'&&!leaf&&s.screen!=='overdueCalendar'){
+ const key=s.task+'|'+daykey(s.year,s.month,day);s.executionDate=daykey(s.year,s.month,day);if(marks[key])delete marks[key];else marks[key]=executorName();
+ }
+ render();}
+
+function renderEx(){const s=state.ex,t=taskById(s.task);let h='';
+if(s.screen==='home'){h='<h2>Página inicial</h2>'+(!currentExecutor()?'<div class="empty-intro">Nenhum usuário Executor cadastrado. Cadastre uma pessoa no painel Proprietário e selecione-a acima para ver suas atribuições.</div>':'');for(const [label,p] of [['Minhas Tarefas','tasks'],['Tarefas Não Cumpridas','overdue'],['Folgas e Férias','leaves'],['TV FSJ','tv'],['Sugestão de Tarefas','suggest']])h+=`<button class="button" onclick="navigate('ex','${p}')">${label}</button>`}
+else if(s.screen==='tasks'){h='<h2>Minhas Tarefas</h2><div class="tabs"><button class="button '+(s.section==='individual'?'':'inactive')+'" onclick="state.ex.section=\'individual\';render()">Individuais</button><button class="button '+(s.section==='group'?'':'inactive')+'" onclick="state.ex.section=\'group\';render()">De Grupo</button></div>';jobs.filter(j=>j.exec.includes(executorName())&&!!j.group===(s.section==='group')).forEach(j=>h+=`<div class="item" onclick="openEx('${j.id}')"><b>${esc(j.id)} ›</b><p>${esc(j.name)}</p><small>${j.periodic} · ${j.status}</small></div>`)}
+else if(s.screen==='overdue'){h='<h2>Tarefas Não Cumpridas</h2><p class="muted">Links de ocorrências periódicas não concluídas após tolerância de um dia.</p>';for(const group of [false,true]){h+=`<h3>${group?'Grupos':'Individuais'}</h3>`;const list=overdue().filter(j=>j.exec.includes(executorName())&&!!j.group===group);if(!list.length)h+='<p class="muted">Nenhuma pendência neste grupo.</p>';for(const j of list)h+=`<div class="item overdue" onclick="showTaskMonth('ex','${j.id}')"><b class="link">${esc(j.id)} — ${esc(j.name)}</b><p class="muted">Prazo: ${fmt(j.deadline)}</p></div>`}}
+else if(s.screen==='overdueCalendar'){
+ h='<h2>Tarefa Não Cumprida — ciência</h2><p class="tag">'+esc(t?.id)+'</p><p>'+esc(t?.name)+'</p>'+
+ '<p class="muted">Prazo vencido em '+fmt(t?.deadline)+' · Calendário do mês da ocorrência</p>'+calendar('ex')+
+ '<div class="calendar-note">Este calendário é consultivo. Tomar ciência não significa que a tarefa foi concluída.</div>'+
+ '<button class="button" onclick="acknowledgeOverdue()">✓ Dar ciência e enviar ao Proprietário</button>';
+}
+else if(s.screen==='ackDone'){h='<h2>Ciência registrada</h2><div class="panel">Sua ciência foi enviada ao Proprietário <b>neste simulador</b>. A tarefa continua pendente até que sua execução seja registrada.</div><button class="button" onclick="navigate(\'ex\',\'overdue\')">Voltar às tarefas não cumpridas</button>'}
+else if(s.screen==='leaves'||s.screen==='calendar'){const leaf=s.screen==='leaves';h=`<h2>${leaf?'Folgas e Férias':'Calendário da tarefa'}</h2>${!leaf?`<p class="tag">${esc(t?.id)}</p><p>${esc(t?.name)}</p>`:'<p class="muted">Calendário de consulta — sem edição de folgas.</p>'}`+calendar('ex',leaf);if(leaf){h+='<div class="legend">'+[['Folga semanal','#d5e9f8'],['Feriado','#f8e3b7'],['Folga compensatória','#dcead0'],['Férias','#eadcf6']].map(([name,color])=>`<span><i class="swatch" style="background:${color}"></i>${name}</span>`).join('')+'</div>';if(s.selected)h+=`<div class="calendar-note">${s.selected} de ${names[s.month]}: ${absenceFor(executorName(),daykey(s.year,s.month,s.selected))||'Sem afastamento registrado'}</div>`}else{h+='<p class="calendar-hint">Marcar os dias em que a tarefa foi realizada.</p><p class="muted">Toque em um dia para marcar ou desmarcar. Marcações demonstrativas.</p><button class="button" onclick="navigate(\'ex\',\'detail\')">Abrir tarefa e responder</button>'}}
+else if(s.screen==='detail'){
+ h=`<p class="muted">Detalhes da tarefa</p><h2>${esc(t?.id)}</h2><div class="panel">${esc(t?.name)}</div>${s.overdue?`<p class="muted">Ocorrência vencida: ${fmt(t?.deadline)}</p>`:''}`;
+ h+='<h3>Concluída a tarefa?</h3><div class="twocol"><button class="button" onclick="state.ex.answer=\'SIM\';navigate(\'ex\',\'evidence\')">SIM</button><button class="button warn" onclick="state.ex.answer=\'NÃO\';render()">NÃO</button></div>';
+ if(s.answer==='NÃO')h+='<label for="exNote">Justificativa do não cumprimento</label><textarea id="exNote" placeholder="Informe o motivo da não conclusão"></textarea><button class="button" onclick="finishEx(false)">Registrar justificativa</button>';
+ h+='<button class="button secondary" onclick="navigate(\'ex\',\'questions\')">Dúvidas sobre a tarefa</button>';
+}
+else if(s.screen==='evidence'){h='<p class="muted">Comprovação — após SIM</p><h2>Comprovação da conclusão</h2><textarea placeholder="Observações da execução"></textarea><button class="button" onclick="finishEx(true)">Confirmar conclusão (simulação)</button>'}
+else if(s.screen==='done'){h='<h2>✓ Registro simulado</h2><p>O registro foi alterado apenas nesta página.</p><button class="button" onclick="navigate(\'ex\',\'tasks\')">Voltar às tarefas</button>'}
+else if(s.screen==='tv'){h='<h2>TV FSJ</h2><div class="panel">📺 Biblioteca de vídeos e chamadas (simulação)</div>'}
+else if(s.screen==='suggest'||s.screen==='questions'){
+ if(s.screen==='suggest')h='<h2>Sugestão de Tarefas</h2><textarea id="suggestionText" placeholder="Descreva sua sugestão para o Proprietário"></textarea><button class="button" onclick="receiveSuggestion()">Enviar sugestão ao Proprietário</button>';
+ else h='<h2>Dúvidas sobre a tarefa</h2><textarea placeholder="Descreva sua dúvida"></textarea><button class="button" onclick="navigate(\'ex\',\'done\')">Enviar dúvida (simulação)</button>';
+}
+else if(s.screen==='loggedOut')h='<h2>Simulação encerrada</h2><div class="panel">Você saiu apenas do simulador Executor.</div><button class="button" onclick="loginDemo(\'ex\')">Entrar novamente</button>';
+
+$('executor').innerHTML=h;
+ paginate('ex');
+}
+function finishEx(done){const s=state.ex,t=taskById(s.task);if(!done&&!$('exNote')?.value.trim()){alert('Informe a justificativa.');return}if(t){t.status=done?'Concluída':'Pendente';if(done){const date=s.executionDate||daykey(s.year,s.month,s.selected||new Date().getDate());marks[t.id+'|'+date]=executorName()}}navigate('ex','done')}
+function selectOwnerPerson(id){
+ const s=state.owner;
+ s.personId=id;
+ s.personFormMode=id===newPersonValue?'new':'existing';
+ s.peopleFeedback='';
+ s.screen='people';
+ render();
+}
+function newOwnerPerson(){
+ const s=state.owner;
+ s.personId=newPersonValue;
+ s.personFormMode='new';
+ s.peopleFeedback='';
+ navigate('owner','newPerson');
+}
+function personField(id,value,type='text',placeholder='',extra=''){
+ return `<input type="${type}" id="${id}" value="${esc(value)}" placeholder="${esc(placeholder)}" ${extra}>`;
+}
+function renderPersonFields(){
+ const s=state.owner,existing=people.find(p=>p.id===s.personId)||null;
+ const p=s.personFormMode==='new'?null:existing;
+ const name=p?.nome||'',nickname=p?.apelido||'',phone=p?.celular||'',email=p?.email||'',profile=p?.perfil||'Executor',supervisor=p?.supervisor===true;
+ let h='<div class="form-section" id="fsjPersonForm">';
+ h+=`<h3>${p?'Dados cadastrais de '+esc(p.nome):'Novo cadastro de usuário'}</h3>`;
+ h+='<p class="muted">Informações demonstrativas do simulador. Campos de contato vazios não significam ausência no cadastro real.</p>';
+ h+=`<label for="personName">Nome</label>${personField('personName',name,'text','Nome completo','maxlength="120" autocomplete="off"')}`;
+  h+=`<label for="personNickname">Apelido</label>${personField('personNickname',nickname,'text','Como é conhecido','maxlength="80" autocomplete="off"')}`;
+ h+=`<label for="personPhone">Celular</label>${personField('personPhone',phone,'tel','DDD + número','maxlength="20" inputmode="tel"')}`;
+ h+=`<label for="personEmail">E-mail</label>${personField('personEmail',email,'email','usuario@exemplo.com','maxlength="180" autocomplete="off"')}`;
+ h+='<label for="personProfile">Perfil</label><select id="personProfile" '+(p?.protegido?'disabled title="A condição de Proprietário não pode ser alterada neste formulário"':'')+'>';
+ const options=p?.protegido?['Proprietário']:personProfiles;
+ h+=options.map(option=>`<option value="${esc(option)}" ${option===profile?'selected':''}>${esc(option)}</option>`).join('')+'</select>';
+ h+='<div class="check-row"><input id="personSupervisor" type="checkbox" '+(supervisor?'checked':'')+'><label for="personSupervisor">Autorizar como Supervisor<small>Marcação independente do perfil. Permite acompanhar tarefas de terceiros autorizadas pelo Proprietário.</small></label></div>';
+ h+='<div class="form-actions"><button class="button" type="button" onclick="savePersonInSimulator()">Salvar cadastro</button><button class="button secondary" type="button" onclick="cancelPersonForm()">Cancelar</button></div>';
+ h+='</div>';
+ return h;
+}
+function savePersonInSimulator(){
+ const s=state.owner;
+ const nome=$('personName')?.value.trim()||'';
+  const apelido=$('personNickname')?.value.trim()||'';
+ const celular=$('personPhone')?.value.trim()||'';
+ const email=$('personEmail')?.value.trim()||'';
+ const perfil=$('personProfile')?.value||'Executor';
+ const supervisor=$('personSupervisor')?.checked===true;
+ const existing=people.find(p=>p.id===s.personId);
+ const error=(message)=>{s.peopleFeedback=message;const box=$('personFeedback');if(box){box.textContent=message;box.className='people-feedback bad';box.hidden=false;}return;};
+ if(!nome)return error('Informe o Nome para salvar o cadastro.');
+ if(nome.length>120)return error('O nome ultrapassa o tamanho permitido.');
+  if(apelido.length>80)return error('O apelido ultrapassa o tamanho permitido.');
+ if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return error('Informe um e-mail válido.');
+ if(celular){const digits=celular.replace(/\D/g,'');if(digits.length<10||digits.length>13)return error('Informe o celular com DDD (10 a 13 dígitos).');}
+ if(people.some(p=>p.id!==existing?.id&&[p.nome,p.apelido].filter(Boolean).some(value=>[nome,apelido].filter(Boolean).some(candidate=>value.localeCompare(candidate,'pt-BR',{sensitivity:'base'})===0))))return error('Já existe uma pessoa com este nome ou apelido no simulador.');
+ if(existing?.protegido&&nome!==existing.nome)return error('O nome do Proprietário é protegido neste simulador.');
+const previousName=existing?personKey(existing):null;
+  const data={nome,apelido,celular,email,perfil:existing?.protegido?'Proprietário':perfil,supervisor};
+ if(existing){Object.assign(existing,data)}
+ else{const newId='p_demo_'+(++demoPersonSequence);people.push({id:newId,...data});s.personId=newId;if(!state.ex.personId&&data.perfil!=='Visitante'&&data.perfil!=='Gestor')state.ex.personId=newId;if(!s.leavePerson)s.leavePerson=personKey(data);}
+ const currentName=personKey(existing||data);
+  if(previousName&&previousName!==currentName){
+  for(const j of jobs){j.exec=j.exec.map(x=>x===previousName?currentName:x);if(j.supervisor===previousName)j.supervisor=currentName;}for(const g of groups)g.members=g.members.map(x=>x===previousName?currentName:x);
+  for(const key of Object.keys(marks))if(marks[key]===previousName)marks[key]=currentName;
+   if(s.executor===previousName)s.executor=currentName;
+   if(s.supervisor===previousName)s.supervisor=currentName;
+   if(personAbsences[previousName]){personAbsences[currentName]=personAbsences[previousName];delete personAbsences[previousName];}
+   if(s.leavePerson===previousName)s.leavePerson=currentName;
+   if(s.reportPerson===previousName)s.reportPerson=currentName;
+   if(s.reportSupervisor===previousName)s.reportSupervisor=currentName;
+ }
+ if(!supervisor&&s.supervisor===currentName){s.supervisor='';s.mode='executor';}
+ s.personFormMode='existing';
+ s.screen='people';
+ s.peopleFeedback=(existing?'Cadastro atualizado':'Novo usuário cadastrado')+' apenas neste simulador: '+(apelido?nome+' ('+apelido+')':nome)+'.';
+ render();
+}
+function cancelPersonForm(){
+ const s=state.owner;
+ if(s.screen==='newPerson'||s.personFormMode==='new'){s.personFormMode='existing';s.personId='';}
+ s.peopleFeedback='';navigate('owner','people');
+}
+// Formação de grupos: cada grupo é único, composto por pessoas já cadastradas.
+// As tarefas de grupo são um registro coletivo; editar os membros atualiza seu vínculo demonstrativo.
+function eligibleGroupPeople(){return people.filter(p=>p.perfil!=='Visitante'&&p.perfil!=='Gestor')}
+function openGroupFormation(index=-1){
+ const s=state.owner,g=Number.isInteger(index)&&index>=0?groups[index]:null;
+ s.groupEditIndex=g?index:-1;
+ s.groupDraftName=g?.name||'';
+ s.groupDraftMembers=g?[...g.members]:[];
+ s.groupPick='';s.groupFeedback='';
+ navigate('owner','groupForm');
+}
+function addGroupMember(){
+ const s=state.owner,key=$('groupMemberSelect')?.value||'';
+ if(!key){s.groupFeedback='Escolha uma pessoa cadastrada para adicionar.';render();return}
+ const p=eligibleGroupPeople().find(p=>personKey(p)===key);
+ if(!p){s.groupFeedback='A pessoa selecionada não está disponível como integrante de grupo.';render();return}
+ if(!s.groupDraftMembers.includes(key))s.groupDraftMembers.push(key);
+ s.groupPick='';s.groupFeedback='';render();
+}
+function removeGroupMember(index){
+ const s=state.owner;
+ s.groupDraftMembers.splice(index,1);
+ s.groupFeedback='';render();
+}
+function saveGroupInSimulator(){
+ const s=state.owner;
+ const name=(s.groupDraftName||$('groupName')?.value||'').trim().replace(/\s+/g,' ');
+ const members=[...new Set(s.groupDraftMembers)].filter(key=>eligibleGroupPeople().some(p=>personKey(p)===key));
+ const error=msg=>{s.groupFeedback=msg;render()};
+ if(!name)return error('Informe o nome do grupo.');
+ if(name.length>100)return error('O nome do grupo deve ter até 100 caracteres.');
+ if(!members.length)return error('Selecione pelo menos uma pessoa cadastrada.');
+ if(groups.some((g,i)=>i!==s.groupEditIndex&&g.name.localeCompare(name,'pt-BR',{sensitivity:'base'})===0))return error('Já existe um grupo com este nome.');
+ const existing=s.groupEditIndex>=0?groups[s.groupEditIndex]:null;
+ if(existing){
+  const previous=existing.name;
+  existing.name=name;existing.members=members;
+  for(const t of jobs)if(t.group===previous){t.group=name;t.exec=[...members]}
+ }else groups.push({name,members});
+ s.groupDraftName='';s.groupDraftMembers=[];s.groupEditIndex=-1;s.groupPick='';s.groupFeedback='';
+ s.peopleFeedback=(existing?'Grupo atualizado: ':'Grupo formado: ')+name+' — '+members.length+' integrante(s).';
+ navigate('owner','people');
+}
+function renderGroupFormation(){
+ const s=state.owner,existing=s.groupEditIndex>=0?groups[s.groupEditIndex]:null;
+ const canJoin=eligibleGroupPeople();
+ let h='<h2>Formação de Grupos</h2><p class="muted">Defina a denominação do grupo e selecione as pessoas já cadastradas. As tarefas atribuídas ao grupo serão compartilhadas entre seus integrantes.</p>';
+ h+=`<label for="groupName">Nome do grupo</label><input id="groupName" maxlength="100" autocomplete="off" placeholder="Ex.: Equipe de Irrigação" value="${esc(s.groupDraftName)}" oninput="state.owner.groupDraftName=this.value">`;
+ h+='<label for="groupMemberSelect">Selecionar pessoa cadastrada</label>';
+ h+='<select id="groupMemberSelect" onchange="state.owner.groupPick=this.value"><option value="">Escolha um usuário</option>';
+ h+=canJoin.filter(p=>!s.groupDraftMembers.includes(personKey(p))).map(p=>`<option value="${esc(personKey(p))}" ${s.groupPick===personKey(p)?'selected':''}>${esc(personLabel(p))}</option>`).join('')+'</select>';
+ h+='<button type="button" class="button blue" onclick="addGroupMember()" '+(canJoin.length?'':'disabled')+'>+ Adicionar integrante</button>';
+ if(!canJoin.length)h+='<p class="muted">Primeiro cadastre um usuário Executor, Empregado ou Terceirizado em Pessoas e Grupos.</p>';
+ h+='<h3>Integrantes selecionados ('+s.groupDraftMembers.length+')</h3>';
+ if(!s.groupDraftMembers.length)h+='<p class="muted">Nenhum integrante adicionado.</p>';
+ else h+='<div class="group-members">'+s.groupDraftMembers.map((key,i)=>{
+  const p=people.find(p=>personKey(p)===key);
+  return `<button type="button" class="group-member" onclick="removeGroupMember(${i})" title="Retirar integrante"><span>${esc(p?personLabel(p):key)}</span><b aria-hidden="true">×</b></button>`;
+ }).join('')+'</div>';
+ if(s.groupFeedback)h+='<div class="people-feedback bad" role="alert">'+esc(s.groupFeedback)+'</div>';
+ h+='<div class="twocol"><button type="button" class="button" onclick="saveGroupInSimulator()">'+(existing?'Salvar alterações':'Salvar grupo')+'</button><button type="button" class="button secondary" onclick="navigate(\'owner\',\'people\')">Cancelar</button></div>';
+ return h;
+}
+function renderPeopleScreen(){
+ const s=state.owner;
+ let h='<h2>Pessoas e Grupos</h2>';
+ h+='<label for="ownerPersonSelect">Selecionar usuário cadastrado</label>';
+ h+='<select id="ownerPersonSelect" onchange="selectOwnerPerson(this.value)"><option value="">Escolha o nome</option>';
+ h+=people.map(p=>`<option value="${esc(p.id)}" ${s.personId===p.id?'selected':''}>${esc(personLabel(p))}</option>`).join('');
+ h+=`<option value="${newPersonValue}" ${s.personFormMode==='new'?'selected':''}>+ Novo Usuário</option></select>`;
+ h+='<div class="people-actions"><button class="button blue" onclick="newOwnerPerson()">+ Novo cadastro</button><button class="button blue" onclick="openGroupFormation()">Formação de Grupos</button></div>';
+ if(s.peopleFeedback)h+=`<div class="people-feedback" id="personFeedback" role="status">${esc(s.peopleFeedback)}</div>`;
+ else h+='<div id="personFeedback" role="status" hidden></div>';
+ if((s.personId&&s.personId!==newPersonValue&&s.personFormMode==='existing')||s.personFormMode==='new')h+=renderPersonFields();
+ else h+='<p class="muted">Selecione um nome para consultar seu cadastro; escolha Novo Usuário para cadastrar uma pessoa, ou Formação de Grupos para reunir usuários.</p>';
+ h+='<h3>Grupos cadastrados</h3>';
+ if(!groups.length)h+='<p class="muted">Nenhum grupo cadastrado neste simulador.</p>';
+ else h+=groups.map((g,i)=>{
+  const members=g.members.map(key=>{const p=people.find(p=>personKey(p)===key);return p?personLabel(p):key});
+  return `<button type="button" class="group-link" onclick="openGroupFormation(${i})"><strong>${esc(g.name)}</strong><small>${esc(members.join(' · '))}</small><span>Editar ›</span></button>`;
+ }).join('');
+ h+='<button class="button secondary" onclick="resetSimulatorData()">Zerar dados do simulador</button>';
+ return h;
+}
+
+// Relatórios dentro do mesmo simulador: modelos e filtros demonstrativos.
+const reportKinds=[
+ ['gerencial','Resumo Gerencial','Indicadores gerais por situação'],
+ ['acoes','Ações e Retornos','Tarefas individuais e de grupo'],
+ ['periodicas','Execuções Periódicas','Dias realizados e responsáveis'],
+ ['atrasos','Não Cumpridas','Tarefas com prazo vencido'],
+ ['supervisao','Supervisão','Acompanhamento das tarefas'],
+ ['folgas','Folgas e Férias','Agenda de afastamentos']
+];
+const reportLeavePeople={};
+function setReportKind(kind){if(!reportKinds.some(r=>r[0]===kind))return;state.owner.reportKind=kind;state.owner.reportPage=0;navigate('owner','reportResult')}
+function openReportFilters(){const s=state.owner;s.reportReturn=s.screen==='reportResult'?'reportResult':'reports';navigate('owner','reportFilters')}
+function returnFromReportFilters(){navigate('owner',state.owner.reportReturn||'reports')}
+function reportTurnPage(delta){const s=state.owner;s.reportPage=Math.max(0,Math.min(s.reportPages-1,s.reportPage+delta));render()}
+function setReportFilter(prop,value){const supported=['reportPerson','reportSupervisor','reportStatus','reportFrequency','reportScope','reportStart','reportEnd'];if(!supported.includes(prop))return;state.owner[prop]=value;state.owner.reportPage=0;render()}
+function resetReportFilters(){Object.assign(state.owner,{reportPerson:'Todos',reportSupervisor:'Todos',reportStatus:'Todas',reportFrequency:'Todas',reportScope:'Todos',reportStart:'2026-11-01',reportEnd:'2026-11-30',reportPage:0});render()}
+function reportInPeriod(date){const s=state.owner;return (!s.reportStart||date>=s.reportStart)&&(!s.reportEnd||date<=s.reportEnd)}
+function reportTaskFilter(t,checkDate=true){const s=state.owner;
+ if(s.reportPerson!=='Todos'&&!t.exec.includes(s.reportPerson))return false;
+ if(s.reportSupervisor!=='Todos'&&t.supervisor!==s.reportSupervisor)return false;
+ if(s.reportStatus!=='Todas'&&t.status!==s.reportStatus)return false;
+ if(s.reportFrequency!=='Todas'&&t.periodic!==s.reportFrequency)return false;
+ if(s.reportScope==='Individuais'&&t.group)return false;
+ if(s.reportScope==='Grupos'&&!t.group)return false;
+ if(checkDate&&!reportInPeriod(t.deadline))return false;
+ return true;
+}
+// Cada resultado é exibido numa tela própria, paginado sem rolagem vertical da tela de seleção.
+const reportPageSize=4;
+function reportTable(headers,rows){
+ const s=state.owner;
+ s.reportPages=Math.max(1,Math.ceil(rows.length/reportPageSize));
+ s.reportPage=Math.max(0,Math.min(s.reportPage,s.reportPages-1));
+ if(!rows.length)return '<div class="report-empty">Nenhum registro demonstrativo encontrado para os filtros selecionados.</div>';
+ const first=s.reportPage*reportPageSize;
+ return '<div class="report-table-wrap"><table class="report-table"><thead><tr>'+headers.map(x=>`<th scope="col">${esc(x)}</th>`).join('')+'</tr></thead><tbody>'+rows.map((row,i)=>`<tr${i<first||i>=first+reportPageSize?' class="report-page-hidden"':''}>`+row.map(value=>`<td>${esc(value)}</td>`).join('')+'</tr>').join('')+'</tbody></table></div>';
+}
+function reportMetric(label,n){return `<div class="report-metric"><strong>${n}</strong><span>${esc(label)}</span></div>`}
+function reportTableRows(kind){
+ const subset=jobs.filter(j=>reportTaskFilter(j,kind!=='periodicas'));
+ if(kind==='acoes')return reportTable(['Tarefa','Executor / Grupo','Situação','Periodicidade','Prazo'],subset.map(j=>[j.id+' — '+j.name,j.group?'Grupo '+j.group:j.exec.join(' + '),j.status,j.periodic,fmt(j.deadline)]));
+ if(kind==='periodicas'){
+  const rows=[];
+  for(const [markKey,actor] of Object.entries(marks)){
+   const split=markKey.lastIndexOf('|'),id=markKey.slice(0,split),date=markKey.slice(split+1),t=taskById(id);
+   if(t&&t.periodic!=='Pontual'&&reportInPeriod(date)&&reportTaskFilter(t,false))rows.push([fmt(date),t.id,t.name,t.group?'Grupo '+t.group:'Individual',actor,'Realizada']);
+  }
+  rows.sort((a,b)=>b[0].split('/').reverse().join('-').localeCompare(a[0].split('/').reverse().join('-'))||a[1].localeCompare(b[1]));
+  return reportTable(['Data','Tarefa','Descrição','Responsabilidade','Registrado por','Resultado'],rows);
+ }
+ if(kind==='atrasos')return reportTable(['Tarefa','Responsável','Prazo','Situação'],subset.filter(j=>overdue().includes(j)).map(j=>[j.id+' — '+j.name,j.group?'Grupo '+j.group:j.exec.join(' + '),fmt(j.deadline),j.status]));
+ if(kind==='supervisao')return reportTable(['Tarefa','Executor / Grupo','Supervisor','Situação'],subset.filter(j=>j.supervisor).map(j=>[j.id+' — '+j.name,j.group?'Grupo '+j.group:j.exec.join(' + '),j.supervisor,j.status]));
+ if(kind==='folgas'){
+  const byUser=Object.entries(personAbsences).flatMap(([person,dates])=>Object.entries(dates).map(([date,type])=>({date,type,person})));
+  const holidays=Object.entries(absences).map(([date,type])=>({date,type,person:'Todos — feriado'}));
+  const rows=[...byUser,...holidays].filter(r=>reportInPeriod(r.date)).filter(r=>state.owner.reportPerson==='Todos'||r.person===state.owner.reportPerson||r.person.startsWith('Todos —'));
+  rows.sort((a,b)=>a.date.localeCompare(b.date));
+  return reportTable(['Data','Pessoa','Tipo de afastamento'],rows.map(r=>[fmt(r.date),r.person,r.type]));
+ }
+ if(kind==='gerencial'){
+  const categories=['Em aberto','Em execução','Concluída','Pendente','Aguardando gestão','Arquivado'];
+  return reportTable(['Situação','Quantidade de tarefas','Individuais','Grupos'],categories.map(status=>[status,String(subset.filter(t=>t.status===status).length),String(subset.filter(t=>t.status===status&&!t.group).length),String(subset.filter(t=>t.status===status&&!!t.group).length)]));
+ }
+ return '';
+}
+function renderOwnerReports(){
+ const s=state.owner;
+ let h='<h2>Relatórios</h2><p class="muted report-preface">Selecione um modelo. O resultado abrirá na página seguinte, sem aparecer abaixo desta lista.</p>';
+ h+='<div class="report-options" role="group" aria-label="Modelos de relatórios">'+reportKinds.map(([id,title,desc])=>`<button type="button" class="report-option" onclick="setReportKind('${id}')">${esc(title)}<small>${esc(desc)} ›</small></button>`).join('')+'</div>';
+ h+='<div class="report-menu-actions"><button class="button blue" onclick="openReportFilters()">⚙ Ajustar filtros dos relatórios</button><p class="muted">Os modelos serão apresentados numa tela sequencial, com páginas numeradas e retorno a esta seleção.</p></div>';
+ return h;
+}
+function renderOwnerReportFilters(){
+ const s=state.owner,model=reportKinds.find(x=>x[0]===s.reportKind)||reportKinds[0];
+ let h='<h2>Filtros dos relatórios</h2><p class="muted">Ajuste os critérios antes de abrir o modelo. Esta tela não contém resultados.</p>';
+ h+='<div class="report-filters"><strong style="font-size:13px;color:#234e73">Seleção de critérios</strong><div class="report-filter-grid">';
+ const options=(values,selected)=>values.map(v=>`<option value="${esc(v)}" ${v===selected?'selected':''}>${esc(people.find(p=>personKey(p)===v)?personLabel(people.find(p=>personKey(p)===v)):v)}</option>`).join('');
+ h+=`<div><label for="reportPerson">Executor</label><select id="reportPerson" onchange="setReportFilter('reportPerson',this.value)">${options(['Todos',...people.map(personKey)],s.reportPerson)}</select></div>`;
+ h+=`<div><label for="reportSupervisor">Supervisor</label><select id="reportSupervisor" onchange="setReportFilter('reportSupervisor',this.value)">${options(['Todos',...people.filter(p=>p.supervisor).map(personKey)],s.reportSupervisor)}</select></div>`;
+ if(model[0]!=='folgas'){
+ h+=`<div><label for="reportStatus">Situação</label><select id="reportStatus" onchange="setReportFilter('reportStatus',this.value)">${options(['Todas','Em aberto','Em execução','Concluída','Pendente','Aguardando gestão','Arquivado'],s.reportStatus)}</select></div>`;
+ h+=`<div><label for="reportFrequency">Periodicidade</label><select id="reportFrequency" onchange="setReportFilter('reportFrequency',this.value)">${options(['Todas','Diária','Semanal','Pontual'],s.reportFrequency)}</select></div>`;
+ h+=`<div><label for="reportScope">Responsabilidade</label><select id="reportScope" onchange="setReportFilter('reportScope',this.value)">${options(['Todos','Individuais','Grupos'],s.reportScope)}</select></div>`;
+ }
+ h+=`<div><label for="reportStart">Data inicial</label><input id="reportStart" type="date" value="${esc(s.reportStart)}" onchange="setReportFilter('reportStart',this.value)"></div>`;
+ h+=`<div><label for="reportEnd">Data final</label><input id="reportEnd" type="date" value="${esc(s.reportEnd)}" onchange="setReportFilter('reportEnd',this.value)"></div>`;
+ h+='</div><button class="button secondary" style="margin-bottom:0" onclick="resetReportFilters()">Limpar filtros</button></div>';
+ h+='<button class="button blue" onclick="returnFromReportFilters()">Aplicar filtros e voltar</button>';
+ return h;
+}
+function renderOwnerReportResult(){
+ const s=state.owner,model=reportKinds.find(x=>x[0]===s.reportKind)||reportKinds[0];
+ const filtered=jobs.filter(j=>reportTaskFilter(j,model[0]!=='periodicas'));
+ let h=`<div class="report-result-heading"><p class="muted">RELATÓRIOS › RESULTADO</p><h2>${esc(model[1])}</h2></div>`;
+ h+='<div class="report-result-actions"><button class="button secondary" onclick="navigate(\'owner\',\'reports\')">‹ Modelos</button><button class="button secondary" onclick="openReportFilters()">Filtros</button></div>';
+ if(s.reportStart&&s.reportEnd&&s.reportStart>s.reportEnd)h+='<p class="people-feedback bad">A data inicial precisa ser anterior ou igual à data final.</p>';
+ h+=`<section class="report-sheet" id="ownerReportSheet" aria-label="Prévia do relatório"><small class="tag">FAZENDA SÃO JOSÉ · RELATÓRIO DEMONSTRATIVO</small><h3>${esc(model[1])}</h3><p class="report-subtitle">Modelo de ${esc(model[2].toLowerCase())} · Período: ${fmt(s.reportStart)} a ${fmt(s.reportEnd)}</p>`;
+ if(model[0]==='gerencial')h+='<div class="report-metrics">'+reportMetric('Tarefas',filtered.length)+reportMetric('Individuais',filtered.filter(j=>!j.group).length)+reportMetric('Grupos',filtered.filter(j=>!!j.group).length)+'</div>';
+ if(model[0]==='periodicas'){const records=Object.entries(marks).filter(([key])=>{const i=key.lastIndexOf('|'),t=taskById(key.slice(0,i)),d=key.slice(i+1);return t&&t.periodic!=='Pontual'&&reportTaskFilter(t,false)&&reportInPeriod(d)});h+='<div class="report-metrics">'+reportMetric('Dias registrados',records.length)+reportMetric('Tarefas distintas',new Set(records.map(([k])=>k.slice(0,k.lastIndexOf('|')))).size)+reportMetric('Grupos realizados',records.filter(([k])=>!!taskById(k.slice(0,k.lastIndexOf('|')))?.group).length)+'</div>'}
+ if(model[0]==='atrasos'){const pending=filtered.filter(t=>overdue().includes(t));h+='<div class="report-metrics">'+reportMetric('Vencidas',pending.length)+reportMetric('Individuais',pending.filter(t=>!t.group).length)+reportMetric('Grupos',pending.filter(t=>!!t.group).length)+'</div>'}
+ if(model[0]==='acoes')h+='<p class="muted">Tarefas cadastradas no simulador. Cada tarefa de grupo aparece apenas uma vez.</p>';
+ if(model[0]==='supervisao')h+='<p class="muted">O registro de supervisão é consultivo e não concede novos poderes ao Supervisor.</p>';
+ if(model[0]==='folgas')h+='<p class="muted">Agenda preenchida somente com datas cadastradas neste simulador.</p>';
+ if(s.reportStart&&s.reportEnd&&s.reportStart>s.reportEnd)h+='<div class="report-empty">Ajuste o período para emitir a prévia.</div>';
+ else h+=reportTableRows(model[0]);
+ h+='<p class="report-footer">Exemplo de layout e informações. Nenhuma consulta ao banco real, emissão oficial ou gravação de registros foi realizada.</p></section>';
+ h+='<div class="report-controls"><button class="button blue" onclick="printOwnerReport()">Imprimir relatório completo</button></div>';
+ h+=`<div class="report-paging"><button class="button secondary small" onclick="reportTurnPage(-1)" ${s.reportPage<=0?'disabled':''}>‹ Página anterior</button><span>Folha ${s.reportPage+1} / ${s.reportPages}</span><button class="button secondary small" onclick="reportTurnPage(1)" ${s.reportPage>=s.reportPages-1?'disabled':''}>Próxima página ›</button></div>`;
+ return h;
+}
+function printOwnerReport(){if(state.owner.screen!=='reportResult')return;window.print()}
+
+function renderOwner(){const s=state.owner,t=taskById(s.task);let h='';
+const menu=[['Minhas Tarefas','tasks'],['Tarefas Não Cumpridas','overdue'],['Pessoas e Grupos','people'],['Folgas e Férias','leaves'],['Relatórios','reports'],['Supervisão','supervision'],['TV FSJ','tv'],['Ver Sugestões','suggestions']];
+if(s.screen==='home'){const counts=['Em aberto','Concluída','Pendente','Aguardando gestão'];h='<h2>Painel do Proprietário</h2><div class="kpis">'+counts.map((status,i)=>`<button class="kpi" onclick="openOwnerBySituation('${status}')"><b>${jobs.filter(j=>j.status===status).length}</b><small>${['Abertas','Concluídas','Pendentes','Perguntas'][i]}</small></button>`).join('')+'</div><div class="twocol owner-primary-actions" style="margin-top:9px"><button class="button" onclick="newTaskForm()">Registro de Tarefas</button><button class="button" onclick="navigate(\'owner\',\'whatsapp\')">Disparo WhatsApp</button></div><div class="twocol" style="margin-top:6px">'+menu.map(([label,target])=>`<button class="button" onclick="${target==='tasks'?"openOwnerAll('Em aberto')":"navigate('owner','"+target+"')"}">${label}</button>`).join('')+'</div><button class="button secondary" onclick="navigate(\'owner\',\'recovery\')">Recuperar cadastros e fazer backup</button>'}
+else if(s.screen==='tasks'||s.screen==='supervision'){
+  h='<h2>Demandas e retornos</h2><button class="button blue" onclick="newTaskForm()">+ Registrar nova tarefa</button><p class="muted">Tarefas compartilhadas com o Executor no painel à esquerda.</p>';
+  h+=`<label for="ownerExecutor">Selecionar usuário Executor</label><select id="ownerExecutor" onchange="setExecutor(this.value)"><option value="">Selecione o executor</option><option value="Proprietário" ${s.mode==='executor'&&s.executor==='Proprietário'?'selected':''}>Urbano (Proprietário — minhas tarefas)</option>${people.filter(p=>p.perfil!=='Visitante').map(p=>`<option value="${esc(personKey(p))}" ${s.mode==='executor'&&s.executor===personKey(p)?'selected':''}>${esc(personLabel(p))}${p.protegido?' (minhas tarefas)':''}</option>`).join('')}</select>`;
+  h+=`<label for="ownerSupervisor">Selecionar usuário Supervisor</label><select id="ownerSupervisor" onchange="setSupervisor(this.value)"><option value="">Selecione o supervisor</option>${people.filter(p=>p.supervisor).map(p=>`<option value="${esc(personKey(p))}" ${s.mode==='supervisor'&&s.supervisor===personKey(p)?'selected':''}>${esc(personLabel(p))}</option>`).join('')}</select>`;
+  h+='<div class="tabs" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:7px"><button class="button '+(s.section==='all'?'':'inactive')+'" onclick="state.owner.section=\'all\';render()">Todas</button><button class="button '+(s.section==='individual'?'':'inactive')+'" onclick="state.owner.section=\'individual\';render()">Individuais</button><button class="button '+(s.section==='group'?'':'inactive')+'" onclick="state.owner.section=\'group\';render()">Grupos</button></div>';
+  h+=`<label for="statusFilter">Situação</label><select id="statusFilter" onchange="state.owner.status=this.value;render()">${['Todas','Em aberto','Em execução','Pendente','Concluída','Aguardando gestão','Arquivado'].map(p=>`<option ${p===s.status?'selected':''}>${p}</option>`).join('')}</select>`;
+  const list=getScope().filter(j=>(s.section==='all'||!!j.group===(s.section==='group'))&&(s.status==='Todas'||j.status===s.status));
+  h+=`<p class="muted">${list.length} tarefa(s) · ${s.mode==='all'?'de todos os usuários':s.mode==='supervisor'?`supervisionadas por ${esc(s.supervisor||'—')}`:`do executor ${esc(s.executor||'—')}`}</p>`;
+  if(s.mode!=='all'&&!s.executor&&!s.supervisor)h+='<div class="panel">Selecione uma pessoa para consultar tarefas.</div>';
+  else if(!list.length)h+='<div class="panel">Nenhuma tarefa encontrada.</div>';
+  else for(const j of list)h+=`<div class="item" role="button" tabindex="0" onclick="openOwner('${j.id}')" onkeydown="if(event.key==='Enter')openOwner('${j.id}')"><b>${esc(j.id)} ›</b><p>${esc(j.name)}</p><small>${j.periodic} · ${j.status}${j.group?' · Grupo '+j.group:''}</small></div>`;
+  if(s.executor==='Proprietário'&&s.mode==='executor')h+='<div class="hint-green">Minhas tarefas periódicas: toque no código de uma tarefa para abrir seu calendário consultivo.</div>';
+}
+else if(s.screen==='calendar'){h=`<h2>Calendário consultivo da tarefa</h2><p class="tag">${esc(t?.id)}</p><p>${esc(t?.name)}</p><p class="muted">Executor(es): ${esc(t?.exec.join(' + '))} · ${esc(t?.periodic)}</p>`+calendar('owner');h+='<div class="hint-blue"><b>Somente consulta:</b> o Proprietário visualiza os dias já marcados pelo executor. O calendário não permite marcar, apagar nem alterar conclusões nesta tela.</div>';
+ if(s.selected){const date=daykey(s.year,s.month,s.selected),actor=marks[t.id+'|'+date];h+=`<div class="calendar-note"><strong>Dia ${s.selected}/${s.month+1}/${s.year}</strong><p>${actor?`✓ Tarefa realizada — registrada por ${esc(actor)}`:'Sem realização registrada nesta data.'}</p></div>`}
+ h+='<div class="twocol"><button class="button secondary" onclick="navigate(\'owner\',\'tasks\')">Voltar à lista</button><button class="button blue" onclick="navigate(\'owner\',\'edit\')">Editar situação</button></div>'}
+else if(s.screen==='detail'){h=`<h2>Detalhes da tarefa</h2><div class="panel"><b>${esc(t?.id)}</b><p>${esc(t?.name)}</p><small>Situação: ${esc(t?.status)}</small></div><button class="button secondary" onclick="navigate('owner','tasks')">Voltar à lista</button>`}
+else if(s.screen==='edit'){h=`<h2>Editar situação (simulação)</h2><p>${esc(t?.id)} — ${esc(t?.name)}</p><select onchange="state.owner.draft=this.value">${['Em aberto','Em execução','Pendente','Concluída','Arquivado'].map(x=>`<option ${x===s.draft?'selected':''}>${x}</option>`).join('')}</select><button class="button" onclick="saveStatus()">Salvar situação (simulação)</button>`}
+else if(s.screen==='overdue'){
+ h='<h2>Tarefas Não Cumpridas</h2><p class="muted">Clique na tarefa para consultar seu calendário. Ciências recebidas dos executores:</p>';
+ if(!acknowledgements.length)h+='<p class="muted">Nenhuma ciência recebida.</p>';
+ else for(const ack of acknowledgements)h+='<div class="acknowledged">✓ '+esc(ack.person)+' deu ciência de '+esc(ack.task)+' · '+esc(ack.date)+'</div>';
+for(const group of [false,true]){h+=`<h3>${group?'De Grupo':'Individuais'}</h3>`;for(const j of overdue().filter(t=>!!t.group===group))h+=`<div class="item overdue" onclick="showTaskMonth('owner','${j.id}')"><b class="link">${esc(j.id)} — ${esc(j.name)}</b><p class="muted">Prazo: ${fmt(j.deadline)}</p></div>`}}
+else if(s.screen==='leaves'){
+ h='<h2>Folgas e Férias</h2><p class="muted">Selecione a pessoa e marque os dias diretamente no calendário.</p>';
+ h+='<label for="leavePerson">Selecionar usuário</label><select id="leavePerson" onchange="setLeafPerson(this.value)" aria-label="Selecionar pessoa para folgas">'+people.map(p=>'<option value="'+esc(personKey(p))+'" '+(personKey(p)===s.leavePerson?'selected':'')+'>'+esc(personLabel(p))+'</option>').join('')+'</select>';
+ h+=calendar('owner',true);
+ h+='<div class="check-legend">✓ <b>Dias escolhidos:</b> '+s.leaveDates.length+' · Toque para marcar/desmarcar.</div>';
+ h+='<label for="leaveType">Tipo de afastamento</label><select id="leaveType" onchange="state.owner.leaveType=this.value">'+['Folga semanal','Feriado','Folga compensatória','Férias','Remover marcação'].map(x=>'<option '+(x===s.leaveType?'selected':'')+'>'+x+'</option>').join('')+'</select>';
+ h+='<button class="button" onclick="saveLeaves()" '+(!s.leaveDates.length?'disabled':'')+'>Salvar dias marcados (simulação)</button>';
+ if(s.leaveFeedback)h+='<p class="acknowledged">'+esc(s.leaveFeedback)+'</p>';
+ if(s.selected)h+='<div class="paged-note">Dia '+s.selected+': '+esc(absenceFor(s.leavePerson,daykey(s.year,s.month,s.selected))||'Sem registro')+'</div>';
+}
+else if(s.screen==='overdueCalendar'){
+ h='<h2>Calendário — tarefa não cumprida</h2><p class="tag">'+esc(t?.id)+'</p><p>'+esc(t?.name)+'</p>'+
+ '<p class="muted">Prazo: '+fmt(t?.deadline)+'</p>'+calendar('owner')+
+ '<p class="calendar-note">Calendário consultivo. O usuário envia ciência separadamente, sem concluir a tarefa.</p>';
+ const ack=acknowledgements.find(a=>a.task===t?.id);if(ack)h+='<div class="acknowledged">✓ Ciência recebida de '+esc(ack.person)+' em '+esc(ack.date)+'</div>';
+}
+
+else if(s.screen==='recovery'){h=fsjRenderRecoveryScreen()}
+else if(s.screen==='people'){h=renderPeopleScreen()}
+else if(s.screen==='groupForm'){h=renderGroupFormation()}
+else if(s.screen==='newTask'){h=renderNewTaskForm()}
+else if(s.screen==='whatsapp'){h=renderWhatsAppSimulator()}
+else if(s.screen==='newPerson'){h='<h2>Novo cadastro</h2><p class="muted">Preencha o cadastro de uma nova pessoa. Ao salvar, ela ficará disponível na lista de usuários deste simulador.</p><div id="personFeedback" role="status" hidden></div>'+renderPersonFields()}
+else if(s.screen==='reports'){h=renderOwnerReports()}
+else if(s.screen==='reportFilters'){h=renderOwnerReportFilters()}
+else if(s.screen==='reportResult'){h=renderOwnerReportResult()}
+else if(s.screen==='tv'){h='<h2>TV FSJ</h2><div class="panel">📺 Biblioteca de vídeos e chamadas (simulação)</div>'}
+else if(s.screen==='suggestions'){
+ h='<h2>Ver Sugestões</h2><p class="muted">Sugestões encaminhadas pelos executores para avaliação do Proprietário.</p>';
+ if(!suggestions.length)h+='<div class="panel">Nenhuma sugestão recebida neste simulador.</div>';
+ for(const suggestion of suggestions){h+='<div class="panel"><b>Enviado por '+esc(suggestion.person)+'</b><p>'+esc(suggestion.text)+'</p><small>'+esc(suggestion.date)+' · '+esc(suggestion.status)+'</small>';
+ if(suggestion.status==='Recebida')h+='<div class="twocol"><button class="button" onclick="reviewSuggestion('+suggestion.id+',\'Aprovada\')">Aprovar</button><button class="button secondary" onclick="reviewSuggestion('+suggestion.id+',\'Rejeitada\')">Rejeitar</button></div>';
+ h+='</div>'}
+}
+else if(s.screen==='loggedOut')h='<h2>Simulação encerrada</h2><div class="panel">Você saiu apenas do simulador Proprietário.</div><button class="button" onclick="loginDemo(\'owner\')">Entrar novamente</button>';
+
+$('proprietario').innerHTML=h;
+paginate('owner');
+}
+
+// Visibilidade por páginas sequenciais, sem rolagem vertical nas telas do simulador.
+function setPage(which,n){const s=state[which];s.page=Math.max(0,Math.min(pages[which].length-1,n));showPage(which)}
+function showPage(which){const s=state[which],list=pages[which],holder=$(which==='ex'?'executor':'proprietario');
+ for(let i=0;i<list.length;i++)list[i].hidden=i!==s.page;
+ const id=which==='ex'?'exPages':'ownerPages',label=$(id),foot=label.parentElement;
+ const prev=foot.querySelector('button:first-child'),next=foot.querySelector('button:last-child');
+ const total=Math.max(1,list.length);
+ label.textContent=(s.page+1)+' / '+total;
+ if(prev){prev.textContent=s.page?'‹ Página anterior':'‹ Voltar';prev.onclick=()=>{if(s.page>0)setPage(which,s.page-1);else back(which)}}
+ if(next){next.textContent=s.page<total-1?'Próxima ›':'Início';next.onclick=()=>s.page<total-1?setPage(which,s.page+1):navigate(which,'home')}
+}
+function paginate(which){const holder=$(which==='ex'?'executor':'proprietario'),s=state[which];
+ const original=[...holder.children];holder.replaceChildren();pages[which]=[];
+ const create=()=>{const el=document.createElement('div');el.className='sim-page';holder.append(el);pages[which].push(el);return el};
+ let current=create();const maxH=Math.max(100,holder.clientHeight-2);
+ const overflow=el=>el.scrollHeight>maxH+2;
+ const pushNode=node=>{current.append(node);
+   if(overflow(current)&&current.childNodes.length>1){current.removeChild(node);current=create();current.append(node)}
+   if(overflow(current)&&node.nodeType===1&&node.children.length>1){
+     // Dividir blocos longos em páginas consecutivas, mantendo os controles no DOM.
+     const children=[...node.children];if(!children.length)return;
+     node.replaceChildren();let host=node;
+     for(const child of children){host.append(child);
+       if(overflow(current)&&host.children.length>1){host.removeChild(child);current=create();host=node.cloneNode(false);host.removeAttribute('id');current.append(host);host.append(child)}
+     }
+   }
+ };
+ for(const node of original)pushNode(node);
+ s.page=Math.max(0,Math.min(s.page,pages[which].length-1));showPage(which);
+}
+
+let fsjApplyingRemoteData=false;
+const FSJ_DEMO_STORAGE_KEY='fsj_sim_executor_proprietario_limpo_v1_20261107';
+const FSJ_SIM_SNAPSHOTS_KEY='fsj_sim_backup_historico_v1_20261107';
+let fsjAllowEmptyReset=false,fsjRecoveryFeedback='';
+function fsjValidPayload(data){return !!data&&Array.isArray(data.people)&&Array.isArray(data.jobs)&&Array.isArray(data.groups)}
+function fsjLocalSnapshots(){
+ try{const entries=JSON.parse(localStorage.getItem(FSJ_SIM_SNAPSHOTS_KEY)||'[]');return Array.isArray(entries)?entries:[]}catch(e){return []}
+}
+function fsjArchiveRaw(raw){
+ if(!raw)return;
+ try{
+  const entries=fsjLocalSnapshots();
+  if(entries[0]&&entries[0].raw===raw)return;
+  entries.unshift({date:new Date().toLocaleString('pt-BR'),raw});
+  // No mínimo 30 versões anteriores por origem, sem envio para o GitHub.
+  localStorage.setItem(FSJ_SIM_SNAPSHOTS_KEY,JSON.stringify(entries.slice(0,30)));
+ }catch(e){/* Bloqueio ou limite de armazenamento local: exportação manual continua disponível. */}
+}
+function fsjCurrentData(){
+ return {people,jobs,groups,marks,absences,personAbsences,acknowledgements,suggestions,
+  demoPersonSequence,demoTaskSequence,executorPreview:state.ex.personId};
+}
+function fsjExportData(){
+ const raw=localStorage.getItem(FSJ_DEMO_STORAGE_KEY)||JSON.stringify(fsjCurrentData());
+ const b=new Blob([raw],{type:'application/json;charset=utf-8'});
+ const url=URL.createObjectURL(b),a=document.createElement('a');
+ a.href=url;a.download='FSJ-simuladores-backup-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+ fsjRecoveryFeedback='Cópia JSON preparada para salvar no Chrome.';if(state.owner.screen==='recovery')render();
+}
+function fsjApplyRecoveredData(raw){
+ let parsed;
+ try{parsed=JSON.parse(raw)}catch(e){fsjRecoveryFeedback='Arquivo ou texto inválido: não é JSON.';render();return}
+ if(!fsjValidPayload(parsed)){fsjRecoveryFeedback='Cópia inválida: faltam pessoas, tarefas ou grupos.';render();return}
+ if(!confirm('Restaurar '+parsed.people.length+' pessoa(s), '+parsed.jobs.length+' tarefa(s) e '+parsed.groups.length+' grupo(s)? Os registros atuais serão preservados no histórico.'))return;
+ try{
+  fsjArchiveRaw(localStorage.getItem(FSJ_DEMO_STORAGE_KEY));
+  localStorage.setItem(FSJ_DEMO_STORAGE_KEY,JSON.stringify(parsed));
+  restoreSimulatorSession();fsjRecoveryFeedback='Registros restaurados: '+people.length+' pessoa(s).';
+  state.owner.screen='recovery';render();
+ }catch(e){fsjRecoveryFeedback='O Chrome bloqueou a gravação. Tente exportar primeiro a cópia de segurança.';render()}
+}
+function fsjRestoreSnapshot(index){
+ const item=fsjLocalSnapshots()[index];
+ if(item&&item.raw)fsjApplyRecoveredData(item.raw);
+}
+async function fsjImportBackupFile(input){
+ const f=input?.files?.[0];if(!f)return;
+ try{fsjApplyRecoveredData(await f.text())}
+ catch(e){fsjRecoveryFeedback='Falha na leitura do arquivo.';render()}
+}
+function fsjImportBackupText(){
+ const raw=document.getElementById('fsjRecoveryJson')?.value?.trim();
+ if(!raw){fsjRecoveryFeedback='Cole o JSON obtido na versão original ou escolha o arquivo de backup.';render();return}
+ fsjApplyRecoveredData(raw);
+}
+function fsjRenderRecoveryScreen(){
+ const snapshots=fsjLocalSnapshots();
+ let h='<h2>Recuperar cadastros e backups</h2>';
+ h+='<p class="muted">Registros atuais: <b>'+people.length+' pessoa(s)</b>, '+jobs.length+' tarefa(s), '+groups.length+' grupo(s). Esta ferramenta não acessa o sistema operacional nem envia dados ao GitHub.</p>';
+ h+='<button class="button" onclick="fsjExportData()">Salvar cópia dos registros atuais (.json)</button>';
+ h+='<h3>Histórico local ('+snapshots.length+')</h3>';
+ if(!snapshots.length)h+='<div class="panel">Nenhuma versão anterior encontrada <b>neste endereço</b>. Os registros podem continuar no Chrome no endereço original onde foram cadastrados.</div>';
+ else h+=snapshots.map((item,i)=>{let p={people:[],jobs:[],groups:[]};try{p=JSON.parse(item.raw)}catch(e){}return '<button class="button secondary" onclick="fsjRestoreSnapshot('+i+')">Restaurar '+esc(item.date)+' — '+(p.people?.length||0)+' pessoa(s), '+(p.jobs?.length||0)+' tarefas</button>'}).join('');
+ h+='<h3>Importar registros da versão anterior</h3><label for="fsjRecoveryFile">Selecionar cópia JSON</label><input type="file" id="fsjRecoveryFile" accept=".json,application/json" onchange="fsjImportBackupFile(this)">';
+ h+='<label for="fsjRecoveryJson">Ou colar dados JSON extraídos do Chrome anterior</label><textarea id="fsjRecoveryJson" rows="2" placeholder="Cole o conteúdo JSON, sem enviar dados pessoais pelo chat"></textarea><button class="button blue" onclick="fsjImportBackupText()">Restaurar JSON colado</button>';
+ h+='<p class="muted">Importante: o Chrome mantém os dados separados por endereço/origem. Se você cadastrou as quatro pessoas em um arquivo HTML ou link anterior, abra <b>aquele mesmo endereço</b> no mesmo Chrome para recuperá-las. Não limpe os dados do site.</p>';
+ if(fsjRecoveryFeedback)h+='<div class="people-feedback" role="status">'+esc(fsjRecoveryFeedback)+'</div>';
+ return h;
+}
+function saveSimulatorSession(){
+ if(fsjApplyingRemoteData)return;
+ try{
+  const current=JSON.stringify(fsjCurrentData());
+  const previous=localStorage.getItem(FSJ_DEMO_STORAGE_KEY);
+  if(previous===current)return;
+  if(previous){
+   fsjArchiveRaw(previous);
+   let old=null;try{old=JSON.parse(previous)}catch(e){return} // não destruir dados ilegíveis
+   if(!fsjAllowEmptyReset&&fsjValidPayload(old)&&old.people.length>0&&people.length===0){
+    restoreSimulatorSession();return; // protege cadastros no carregamento
+   }
+  }
+  localStorage.setItem(FSJ_DEMO_STORAGE_KEY,current);
+ }catch(err){/* Falha ao salvar não deve apagar o histórico local. */}
+}
+function restoreSimulatorSession(){
+ let saved=null;try{saved=JSON.parse(localStorage.getItem(FSJ_DEMO_STORAGE_KEY)||'null')}catch(err){}
+ if(!saved||!Array.isArray(saved.people)||!Array.isArray(saved.jobs)||!Array.isArray(saved.groups))return;
+ people.splice(0,people.length,...saved.people);jobs.splice(0,jobs.length,...saved.jobs);groups.splice(0,groups.length,...saved.groups);
+ for(const [dest,source] of [[marks,saved.marks],[absences,saved.absences],[personAbsences,saved.personAbsences]]){
+  for(const key of Object.keys(dest))delete dest[key];
+  if(source&&typeof source==='object'&&!Array.isArray(source))Object.assign(dest,source);
+ }
+ acknowledgements.splice(0,acknowledgements.length,...(Array.isArray(saved.acknowledgements)?saved.acknowledgements:[]));
+ suggestions.splice(0,suggestions.length,...(Array.isArray(saved.suggestions)?saved.suggestions:[]));
+ demoPersonSequence=Number(saved.demoPersonSequence)||people.length;
+ demoTaskSequence=Number(saved.demoTaskSequence)||jobs.length;
+ state.ex.personId=saved.executorPreview||'';
+ if(!state.ex.personId&&people.length)state.ex.personId=people.find(p=>p.perfil!=='Visitante'&&p.perfil!=='Gestor')?.id||'';
+ if(people.length)state.owner.leavePerson=personKey(people[0]);
+}
+function resetSimulatorData(){
+ if(prompt('ATENÇÃO: os registros serão apagados. Digite ZERAR para confirmar (uma cópia será preservada):')!=='ZERAR')return;
+ fsjArchiveRaw(localStorage.getItem(FSJ_DEMO_STORAGE_KEY));
+ fsjAllowEmptyReset=true;
+ people.length=0;jobs.length=0;groups.length=0;acknowledgements.length=0;suggestions.length=0;
+ for(const data of [marks,absences,personAbsences])for(const k of Object.keys(data))delete data[k];
+ demoPersonSequence=0;demoTaskSequence=0;
+ state.ex.personId='';state.ex.task=null;state.ex.screen='home';state.ex.page=0;
+ Object.assign(state.owner,{executor:'',supervisor:'',personId:'',leavePerson:'',mode:'all',status:'Todas',section:'all',task:null,groupEditIndex:-1,groupDraftName:'',groupDraftMembers:[],groupPick:'',groupFeedback:'',screen:'home',page:0});
+ try{localStorage.removeItem(FSJ_DEMO_STORAGE_KEY)}catch(err){}
+ render();fsjAllowEmptyReset=false;
+}
+function fsjClearRemoteData(){
+ people.length=0;jobs.length=0;groups.length=0;acknowledgements.length=0;suggestions.length=0;
+ for(const data of [marks,absences,personAbsences])for(const key of Object.keys(data))delete data[key];
+ demoPersonSequence=0;demoTaskSequence=0;
+ state.ex.personId='';state.ex.task=null;state.ex.screen='home';state.ex.page=0;
+ state.owner.personId='';state.owner.task=null;state.owner.screen='home';state.owner.page=0;
+}
+// Sincronização imediata entre abas do mesmo Chrome/domínio, sem serviço de produção.
+window.addEventListener('storage',function(event){
+ if(event.key!==FSJ_DEMO_STORAGE_KEY)return;
+ fsjApplyingRemoteData=true;
+ try{if(event.newValue)restoreSimulatorSession();else fsjClearRemoteData();render()}
+ finally{fsjApplyingRemoteData=false}
+});
+function render(){syncExecutorSelector();renderEx();renderOwner();fsjCheckSimulatorCompatibility();saveSimulatorSession()};restoreSimulatorSession();render();
+</script></body></html>
