@@ -1010,6 +1010,7 @@ function clearPerson(){const codigo=document.getElementById('fsjNumeroUsuarioPes
 async function fsjConfirmarPermissoesFicha(id){
  const seq=++fsjFichaConsultaSequencia;
  const btn=document.getElementById('savePersonTopBtn');
+ let confirmed=false;
  if(btn)btn.disabled=true;
  try{
   const rows=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(id)+'&select=id,tipo,ativo,videos_chamadas,receber_tarefas_whatsapp,exigir_folga_semanal');
@@ -1022,6 +1023,7 @@ async function fsjConfirmarPermissoesFicha(id){
   ptype.value=p.type;pactive.checked=p.active;pVideosChamadas.checked=p.videosChamadas;
   pwhatsapp7h.checked=p.whatsapp7h;pRequireWeeklyOff.checked=p.requireWeeklyOff;
   if(typeof renderPersonRecord==='function')renderPersonRecord();
+  confirmed=true;
  }catch(err){
   if(seq===fsjFichaConsultaSequencia&&String(pid.value)===String(id)){
    const status=document.getElementById('peopleStatus');
@@ -1029,7 +1031,7 @@ async function fsjConfirmarPermissoesFicha(id){
    return;
   }
  }finally{
-  if(seq===fsjFichaConsultaSequencia&&btn)btn.disabled=false;
+  if(seq===fsjFichaConsultaSequencia&&btn)btn.disabled=!confirmed;
  }
 }
 function editPerson(id){let p=S.people.find(p=>p.id===id);if(!p)return;const codigo=document.getElementById('fsjNumeroUsuarioPessoa');if(codigo)codigo.textContent='Número de usuário FSJ: '+(p.numeroUsuario||'atualize o cadastro para consultar');showPersonSettings(p);document.getElementById('personSelect').value=id;pVacationStart.value=p.vacationStart||'';pVacationEnd.value=p.vacationEnd||'';pid.value=id;pname.value=p.name;pnick.value=p.nick;pphone.value=p.phone;document.getElementById('pemail').value=p.email||'';ptype.value=p.type;pactive.checked=p.active===true;pVideosChamadas.checked=p.videosChamadas===true;pwhatsapp7h.checked=p.whatsapp7h===true;pRequireWeeklyOff.checked=p.requireWeeklyOff!==false;personDatesOff=[...(p.datesOff||[])];personDayReasons={...(p.dayOffReasons||{})};pworkstart.value=p.workStart||'07:00';plunchstart.value=p.lunchStart||'12:00';plunchreturn.value=p.lunchReturn||'14:00';pworkfinish.value=p.workFinish||'16:20';renderPersonHours();pdayoffdate.value='';renderPersonDatesOff();renderPersonRecord();if(typeof fsjSupervisorEdit==='function')fsjSupervisorEdit(id);if(typeof fsjOwnerBadges==='function')fsjOwnerBadges();navTo('fichaPessoa');void fsjConfirmarPermissoesFicha(id)}
