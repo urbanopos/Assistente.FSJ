@@ -2188,6 +2188,30 @@ dlg.querySelector('iframe').srcdoc=html;dlg.showModal();
 </script><script id="fsjOwnerIndicatorsIndexRouting">/* Index é a fonte da faixa de indicadores do Proprietário. */
 (function(){function position(){const menu=document.getElementById('fsjPhoneOwnerMenu'),row=document.getElementById('fsjOwnerIndicatorsRow');if(!menu||!row)return false;if(!menu.contains(row))menu.prepend(row);return true}if(!position()){const obs=new MutationObserver(()=>{if(position())obs.disconnect()});obs.observe(document.documentElement,{childList:true,subtree:true});document.addEventListener('DOMContentLoaded',position,{once:true})}})();
 </script>
+
+<style id="fsj-faixa-validacao-real">
+#fsjFaixaNaoOperacional{position:sticky;top:0;z-index:2147483000;background:#a40000;color:#fff;text-align:center;padding:11px 16px;font:700 15px/1.4 Arial,sans-serif;box-shadow:0 2px 8px #0004}
+#fsjFaixaNaoOperacional[hidden]{display:none!important}
+</style>
+<div id="fsjFaixaNaoOperacional" role="alert" aria-live="polite">AMBIENTE NÃO VALIDADO — Dados operacionais ainda não confirmados no Supabase. Não efetue alterações.</div>
+<script id="fsj-monitor-realidade">
+(function(){
+ const faixa=document.getElementById('fsjFaixaNaoOperacional');
+ function atualizar(){
+  const real=window.fsjPainelPronto===true && typeof brisaDadosCarregados!=='undefined' && brisaDadosCarregados===true;
+  const simulado=/simulad|demo|preview|visitante/i.test(location.pathname) || new URLSearchParams(location.search).has('simulador');
+  if(simulado){faixa.hidden=false;faixa.textContent='AMBIENTE DE SIMULAÇÃO — NÃO OPERACIONAL. Dados não representam os registros reais da Fazenda São José.';return;}
+  faixa.hidden=real;
+  if(!real)faixa.textContent='AMBIENTE NÃO VALIDADO — Dados operacionais ainda não confirmados no Supabase. Não efetue alterações.';
+ }
+ document.addEventListener('fsj:entry-loading',atualizar);
+ document.addEventListener('DOMContentLoaded',atualizar);
+ window.addEventListener('pageshow',atualizar);
+ const observador=new MutationObserver(atualizar);
+ const status=document.getElementById('loginStatus');if(status)observador.observe(status,{childList:true,characterData:true,subtree:true});
+ atualizar();
+})();
+</script>
 </body></html>
 
 
