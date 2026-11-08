@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261108-grupos-operacionais-04">
+<meta name="fsj-build" content="20261108-indicadores-supabase-05">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -1554,7 +1554,7 @@ async function fsjAbrirPerguntas(){
  try{await Promise.all([fsjAtualizarRetornos(false),fsjCarregarRespostasPerguntas()]);fsjPerguntaIndice=0;fsjRenderPerguntas();}
  catch(e){status.textContent='Não foi possível carregar as perguntas. Confira a conexão e tente novamente.';}
 }
-function abrirDemandasSituacao(situacao){if(!['Em aberto','Concluída','Pendente','Aguardando gestão'].includes(situacao))return;window.fsjFiltroResumoSituacao=situacao;navTo('tarefasPorSituacao');fsjRenderTarefasPorSituacao();}
+async function abrirDemandasSituacao(situacao){if(!['Em aberto','Concluída','Pendente','Aguardando gestão'].includes(situacao))return;try{await fsjAtualizarRetornos();window.fsjFiltroResumoSituacao=situacao;navTo('tarefasPorSituacao');fsjRenderTarefasPorSituacao();}catch(e){alert('Não foi possível consultar os dados atuais do Supabase. Tente novamente.');}}
 let fsjExecucoes=[];
 let fsjTemposExecucoes=[];
 function fsjIntervaloHoras(start,end){if(!start||!end)return '—';const ms=new Date(end).getTime()-new Date(start).getTime();return Number.isFinite(ms)&&ms>=0?(ms/3600000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' h':'—';}
@@ -1823,14 +1823,16 @@ async function fsjAtualizarRetornos(updateView=true){
   if(fsjAtualizacaoEmCurso)return fsjAtualizacaoEmCurso;
   fsjAtualizacaoEmCurso=(async()=>{
     const executionDay=fsjDia(new Date());
-    const [tasks,answers,executions]=await Promise.all([api('/rest/v1/tarefas?select=id,situacao,duracao_execucao_minutos,exige_supervisao,concluida_por,concluida_em,prioridade,codigo_tarefa,reaberta_em,reaberta_dia,reabertura_motivo'),fsjLerRetornos(),fsjLerExecucoesTempos()]);
+    const [tasks,answers,executions,responsaveis]=await Promise.all([api('/rest/v1/tarefas?select=*'),fsjLerRetornos(),fsjLerExecucoesTempos(),api('/rest/v1/tarefa_responsaveis?select=tarefa_id,pessoa_id')]);
+    if(!Array.isArray(tasks)||!Array.isArray(responsaveis)||!Array.isArray(answers))throw new Error('Consulta incompleta ao Supabase');
     fsjTemposExecucoes=executions;
     fsjExecucoes=executions.filter(e=>e.dia===executionDay||e.estado==='em_andamento');
     if(window.fsjExited)return;
     const central=new Map(tasks.map(t=>[t.id,t]));
     const day=fsjDia(new Date());
-    S.tasks=S.tasks.map(t=>{
-      const row=central.get(t.id);if(!row)return t;
+    S.tasks=tasks.map(row=>{
+      const t=S.tasks.find(x=>x.id===row.id)||{id:row.id,response:'',question:'',attachments:[]};
+      t.code=row.codigo_tarefa;t.text=row.descricao;t.personIds=responsaveis.filter(x=>x.tarefa_id===row.id).map(x=>x.pessoa_id);t.groupId=row.grupo_id||'';t.daily=!!row.diaria;t.frequency=row.periodicidade||(row.diaria?'diaria':'pontual');t.created=row.criada_em;
       let status=row.situacao;if(t.daily&&row.reaberta_em&&row.reaberta_dia!==day&&status==='Pendente')status='Em aberto';
       if(t.daily&&status==='Concluída'&&row.concluida_em&&fsjDia(row.concluida_em)!==day)status='Em aberto';
       return fsjAplicarRetornos({...t,status,supervision:!!row.exige_supervisao,timedMinutes:row.duracao_execucao_minutos??null,reopenedAt:row.reaberta_em,reopenedDay:row.reaberta_dia,reopenReason:row.reabertura_motivo,code:row.codigo_tarefa,priority:row.prioridade||'normal',centralStatus:row.situacao,completedBy:status==='Concluída'?(row.concluida_por||''):''},answers,day);
@@ -1845,10 +1847,10 @@ async function fsjAtualizarRetornos(updateView=true){
       kq.textContent=S.tasks.filter(t=>t.status==='Aguardando gestão').length;
       renderDemandas();renderListaSupervisao();renderDemandasGrupos();if(currentPage==='tarefasEmExecucao')fsjRenderTarefasEmExecucao();if(currentPage==='tarefasPorSituacao')fsjRenderTarefasPorSituacao();if(currentPage==='perguntasGestor')fsjRenderPerguntas();if(currentPage==='relatorios')monthly();
     }
-    document.getElementById('retornosSyncStatus').textContent='Respostas atualizadas em '+fsjDataHora(new Date())+'.';
+    document.getElementById('retornosSyncStatus').textContent='Tarefas e respostas consultadas no Supabase em '+fsjDataHora(new Date())+'.';
     ultimaAtualizacao.textContent='Dados: '+fsjDataHora(new Date());
   })();
-  try{await fsjAtualizacaoEmCurso;}catch(e){document.getElementById('retornosSyncStatus').textContent='Não foi possível atualizar as respostas. Confira a conexão e o acesso do gestor.';throw e;}
+  try{await fsjAtualizacaoEmCurso;}catch(e){document.getElementById('retornosSyncStatus').textContent='FALHA NA CONSULTA AO SUPABASE — Indicadores indisponíveis. Não utilize números anteriores.';for(const id of ['ko','kc','kp','kq']){const el=document.getElementById(id);if(el)el.textContent='—';}throw e;}
   finally{fsjAtualizacaoEmCurso=null;}
 }
 function fsjAtualizacaoAutomatica(){
