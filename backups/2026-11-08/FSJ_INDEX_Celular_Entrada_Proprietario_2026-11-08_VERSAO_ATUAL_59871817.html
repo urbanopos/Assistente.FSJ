@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta http-equiv="Cache-Control" content="no-store">
+<title>Assistente FSJ — Celular — Proprietário</title>
+<style>body{font:16px system-ui,sans-serif;color:#173d2b;margin:2rem}a{color:#155b3c}</style>
+</head>
+<body>
+<h1>Assistente FSJ — Proprietário</h1>
+<p>Encaminhando para a interface existente, com validação das permissões pelo sistema.</p>
+<p><a id="entry" href="../../index.html">Abrir sistema</a></p>
+<script>
+/* Ponto de entrada reservado para o perfil Proprietário.
+   Não concede permissões e não interpreta o nome da rota como autenticação.
+   Conserva o token e os demais parâmetros originais. */
+(function () {
+  'use strict';
+  const url = new URL('../../index.html', location.href);
+  url.search = location.search;
+  url.hash = location.hash;
+  document.getElementById('entry').href = url.href;
+  location.replace(url.href);
+})();
+</script>
+</body>
+</html>
