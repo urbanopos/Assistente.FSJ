@@ -927,12 +927,12 @@ document.addEventListener('click',function fsjAbrirFolgasPeloMenu(ev){
  else if(typeof navTo==='function')navTo('folgasGestor');
  const pessoa=document.getElementById('folgasPessoaSelect');
  if(pessoa&&typeof fsjCarregarPessoasFolgas==='function')void fsjCarregarPessoasFolgas();
- // O calendário aparece somente após selecionar um funcionário.
+ if(typeof fsjAbrirCalendarioFolgas==='function')fsjAbrirCalendarioFolgas();
 },true);
 function fsjAbrirCalendarioFolgas(){
  const person=document.getElementById('folgasPessoaSelect');
  const panel=document.getElementById('fsjFolgasCalendarioLateral');
- if(!panel||!person?.value)return;
+ if(!panel)return;
  const cal=document.getElementById('fsjCalendarioFolgas');
  const title=document.getElementById('fsjMesFolgasTitulo');
  const editor=document.getElementById('fsjFolgaMotivoEditor');
@@ -945,7 +945,7 @@ function fsjAbrirCalendarioFolgas(){
  if(dates&&!panel.contains(dates))panel.appendChild(dates);
  panel.hidden=false;
  renderPersonDatesOff();
- if(typeof fsjPrepararCalendario==='function')void fsjPrepararCalendario();
+ if(person?.value&&typeof fsjPrepararCalendario==='function')void fsjPrepararCalendario();
 }
 function fsjMudarMes(delta){const [y,m]=fsjMesFolgas.split('-').map(Number);const d=new Date(y,m-1+delta,1);fsjMesFolgas=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');renderPersonDatesOff();}
 function fsjSelecionarDiaFolga(d){
@@ -998,11 +998,37 @@ async function fsjSalvarFolgaDoDia(){
  finally{botao.disabled=false;}
 }
 function fsjConfirmarMotivoFolga(){if(document.getElementById('fsjFolgaMotivo').value==='Folga compensatória'){document.getElementById('fsjFolgaMotivoEditor').hidden=true;alert('A folga compensatória exige vínculo com a data do feriado. Somente o Proprietário pode registrá-la em Folgas e feriados > Selecionar pessoa > Registrar folga compensatória, dentro do feriado correspondente.');return;}if(typeof fsjCalendarDirty!=='undefined'){fsjCalendarDirty=true;fsjCalendarStatus('Alterações pendentes. Clique em Salvar datas.');}const v=document.getElementById('fsjFolgaMotivo').value,d=fsjDataFolgaAtual;if(!d||!v)return;if(v==='__remover'){personDatesOff=personDatesOff.filter(x=>x!==d);delete personDayReasons[d];}else{if(!personDatesOff.includes(d))personDatesOff.push(d);personDatesOff.sort();personDayReasons[d]=v;}document.getElementById('fsjFolgaMotivoEditor').hidden=true;renderPersonDatesOff();}
+async function fsjRenderCalendarioFeriadosDefault(){
+ const cal=document.getElementById('fsjCalendarioFolgas');
+ if(!cal||document.getElementById('folgasPessoaSelect')?.value)return;
+ const mes=fsjMesFolgas,seq=++fsjCalendarioDefaultConsulta;
+ const [ano,numero]=mes.split('-').map(Number),primeiro=new Date(ano,numero-1,1),total=new Date(ano,numero,0).getDate();
+ document.getElementById('fsjMesFolgasTitulo').textContent=primeiro.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ cal.inert=true;
+ let legenda=document.getElementById('fsjLegendaFeriadosDefault');
+ if(!legenda){legenda=document.createElement('div');legenda.id='fsjLegendaFeriadosDefault';legenda.style.cssText='margin-top:12px;line-height:1.5';cal.after(legenda);}
+ legenda.textContent='Consultando feriados do mês...';
+ try{
+  const feriados=await api('/rest/v1/feriados_fsj?dia=gte.'+mes+'-01&dia=lte.'+mes+'-'+String(total).padStart(2,'0')+'&select=dia,nome&order=dia.asc');
+  if(seq!==fsjCalendarioDefaultConsulta||document.getElementById('folgasPessoaSelect')?.value||fsjMesFolgas!==mes)return;
+  const mapa=new Map();for(const h of feriados||[]){if(h?.dia&&h?.nome)mapa.set(h.dia,String(h.nome));}
+  let html=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(x=>'<span class="fsj-cal-head">'+x+'</span>').join('');
+  for(let i=0;i<primeiro.getDay();i++)html+='<span></span>';
+  for(let i=1;i<=total;i++){const dia=mes+'-'+String(i).padStart(2,'0'),motivo=mapa.get(dia)||'';html+='<div class="fsj-dia-folga'+(motivo?' marcado':'')+'" style="cursor:default" title="'+esc(motivo)+'"><strong>'+i+'</strong>'+(motivo?'<small>Feriado</small>':'')+'</div>';}
+  cal.innerHTML=html;
+  legenda.innerHTML='<strong>Feriados do mês</strong>'+(mapa.size?'<ul style="margin:6px 0;padding-left:20px">'+[...mapa].map(([dia,nome])=>'<li>'+esc(dia.slice(8,10)+'/'+dia.slice(5,7)+'/'+dia.slice(0,4))+' — '+esc(nome)+'</li>').join('')+'</ul>':'<p>Nenhum feriado cadastrado neste mês.</p>');
+ }catch(e){if(seq!==fsjCalendarioDefaultConsulta)return;cal.replaceChildren();legenda.textContent='Não foi possível consultar os feriados da armazenagem central: '+e.message;}
+}
+let fsjCalendarioDefaultConsulta=0;
 function renderPersonDatesOff(){
  const root=document.getElementById('pdayoffdates');if(!root)return;
  root.replaceChildren(); // Datas e motivos já aparecem nos próprios dias do calendário.
  const cal=document.getElementById('fsjCalendarioFolgas');if(!cal)return;
  const editor=document.getElementById('fsjFolgaMotivoEditor');if(editor)editor.hidden=true;
+ const semPessoa=!document.getElementById('folgasPessoaSelect')?.value;
+ const legenda=document.getElementById('fsjLegendaFeriadosDefault');if(legenda)legenda.hidden=!semPessoa;
+ if(semPessoa){void fsjRenderCalendarioFeriadosDefault();return;}
+ ++fsjCalendarioDefaultConsulta;cal.inert=false;
  const [ano,mes]=fsjMesFolgas.split('-').map(Number);const primeiro=new Date(ano,mes-1,1);const dias=new Date(ano,mes,0).getDate();const inicio=primeiro.getDay();
  document.getElementById('fsjMesFolgasTitulo').textContent=primeiro.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
  let html=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(x=>'<span class="fsj-cal-head">'+x+'</span>').join('');
