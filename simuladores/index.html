@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ — Simuladores Celular | Executor e Proprietário</title>
-<meta name="fsj-simulador-versao" content="1.0.1">
+<meta name="fsj-simulador-versao" content="1.0.2">
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#203b2c;background:#eef2ef}*{box-sizing:border-box}body{margin:0;padding:14px}.intro{max-width:980px;margin:0 auto 12px;color:#395548;font-size:13px}.shell{max-width:980px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.phone{min-width:0;border:2px solid #1e503d;border-radius:20px;background:#f6f9f6;overflow:hidden;display:flex;flex-direction:column;height:min(790px,calc(100dvh - 84px));min-height:550px}.phone.owner{border-color:#335d88;background:#f4f8fc}.phone header{background:#194b3c;color:white;padding:13px 15px}.phone.owner header{background:#234e73}.phone header strong{font-size:18px}.phone header small{display:block;font-size:11px;color:#dceab7;margin-top:3px}.phone.owner header small{color:#e0edf9}.screen{padding:10px;overflow:hidden;flex:1;min-height:0}.screen h2{font-size:17px;color:#194b3c;margin:3px 0 8px}.owner .screen h2{color:#234e73}.screen h3{font-size:15px;margin:13px 0 7px}.muted{font-size:12px;color:#63786b;line-height:1.5}.item{padding:8px;background:#fff;border:1px solid #d4e3d7;border-radius:10px;margin:8px 0;cursor:pointer}.item:focus-visible{outline:3px solid #84b99c}.item b{color:#20533d}.owner .item b{color:#254f75}.item p{margin:5px 0;font-size:13px}.item small{font-size:11px;color:#63786b}.item.overdue{background:#fff7ec;border-color:#eab578}.item.overdue b{color:#a6570f}.button{display:block;width:100%;padding:8px 9px;margin:5px 0;border:0;border-radius:9px;background:#22784e;color:white;font-weight:600;cursor:pointer;min-height:40px;font-size:14px}.button:hover{filter:brightness(.96)}.button.secondary{background:white;color:#20593e;border:1px solid #adcdb9}.button.small{font-size:12px;padding:7px;width:auto;min-height:32px;margin:0}.button.blue{background:#2d648d}.button.warn{background:#9b542b}button:disabled{opacity:.45;cursor:not-allowed}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}.tabs button{margin:0}.tabs .inactive{background:#e4ede6;color:#32533f}.owner .tabs .inactive{background:#e0e9f3;color:#2e5775}label{display:block;font-size:12px;font-weight:650;margin:5px 0 3px}select,input,textarea{font:inherit;font-size:12px;width:100%;padding:7px;border:1px solid #b5cdbb;border-radius:8px;background:white;color:#203b2c}textarea{min-height:70px;max-height:130px;resize:none}.calendar-head{display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.calendar .weekday{text-align:center;font-size:10px;color:#63786b;padding:5px 0}.calendar button{min-width:0;height:31px;font-size:12px;border:1px solid #d9e4dc;background:#fff;border-radius:5px;cursor:pointer;color:#213e2c;padding:0}.calendar button.done{background:#206b49;color:white;font-weight:bold}.calendar button.selected{outline:2px solid #2e7194;outline-offset:-2px}.calendar button.weekly{background:#d5e9f8}.calendar button.holiday{background:#f8e3b7}.calendar button.comp{background:#dcead0}.calendar button.vacation{background:#eadcf6}.calendar button:disabled{cursor:default}.calendar-hint{font-weight:700;color:#24563f;margin:12px 0 5px;font-size:13px}.calendar-note{background:white;border:1px solid #d9e4dc;border-radius:8px;padding:10px;margin-top:10px;font-size:12px}.legend{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:11px;margin-top:10px}.swatch{display:inline-block;width:12px;height:12px;border:1px solid #bbb;vertical-align:middle;margin-right:5px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.kpi{border:1px solid #dae7ec;background:white;color:#234e73;padding:10px 3px;border-radius:9px;cursor:pointer;text-align:center}.kpi b{display:block;font-size:21px}.kpi small{font-size:10px}.panel{padding:12px;background:white;border:1px solid #d6e4dd;border-radius:9px;margin:9px 0}.owner .panel{border-color:#d8e3ee}.tag{font-weight:bold;color:#276d45}.owner .tag{color:#234e73}.foot{background:#e3eee6;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:5px}.owner .foot{background:#e4edf5}.foot .button{width:auto;padding:8px 10px;font-size:12px;margin:0;min-height:34px}.foot span{font-size:11px;color:#456150}.link{color:#a6570f;text-decoration:underline;cursor:pointer}.hint-blue{background:#e7f0f7;border-left:3px solid #356f9d;padding:10px;margin:10px 0;font-size:12px;color:#33566e}.hint-green{background:#e4f0e8;border-left:3px solid #397b58;padding:10px;margin:10px 0;font-size:12px}.footer-note{max-width:980px;margin:13px auto 0;color:#5e7668;font-size:12px}@media(max-width:680px){body{padding:6px;overflow-x:auto}.shell{grid-template-columns:repeat(2,minmax(325px,1fr));gap:10px;min-width:660px}.phone{height:calc(100dvh - 62px);min-height:430px}.intro,.footer-note{padding:0 6px}}
 .people-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.people-actions .button{margin:4px 0}.people-actions .button:first-child{flex:1}.form-section{padding:9px;background:#fff;border:1px solid #cadbe5;border-radius:10px;margin-top:10px}.form-section label:first-child{margin-top:0}.form-section input[readonly],.form-section select:disabled{background:#f0f4f6;color:#546875}.form-section .check-row{display:flex;align-items:flex-start;gap:9px;padding:12px 9px;background:#f1f6fa;border:1px solid #dce7ed;border-radius:8px;margin:12px 0}.form-section .check-row input{width:19px;height:19px;flex:0 0 19px;margin:1px 0 0;accent-color:#22784e}.form-section .check-row label{margin:0;font-weight:600;line-height:1.4}.form-section .check-row small{display:block;margin-top:3px;font-weight:400;color:#5c7080}.people-feedback{background:#e6f3e8;color:#205a3d;border:1px solid #b5dcc0;padding:10px;border-radius:8px;font-size:12px;margin:10px 0}.people-feedback.bad{background:#fff3e9;color:#924313;border-color:#efc59e}.people-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}.people-list .panel{margin:0;font-size:12px;padding:9px}.form-section .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.form-section .form-actions .button{margin:4px 0}.owner .form-section{background:#fff}
@@ -109,6 +109,12 @@ body[data-fsj-view="proprietario"] .intro,body[data-fsj-view="executor"] .intro,
 @media(max-width:680px){body[data-fsj-view="proprietario"] .shell,body[data-fsj-view="executor"] .shell{min-width:0;grid-template-columns:minmax(0,1fr)}}
 .fsj-compat-warning{background:#fff1db;border:2px solid #bf7713;border-radius:8px;padding:10px;color:#6a350c;font-size:13px;font-weight:600;margin:0 auto 10px;max-width:980px}
 .fsj-compat-warning[hidden]{display:none!important}
+.holiday-footer{padding:8px 10px;border-radius:9px;border:1px solid #d4e3d9;background:#fff;font-size:11px;margin:7px 0;line-height:1.35}
+.holiday-footer strong{display:block;color:#194b3c;margin-bottom:5px}
+.holiday-footer p{margin:4px 0}
+.holiday-footer div{padding:3px 0;border-bottom:1px solid #edf3ee}
+.holiday-footer small{display:block;color:#697c70;margin-top:6px;font-size:10px}
+.holiday-default-label{font-size:12px;background:#e5f0ea;padding:7px;border-radius:7px}
 </style></head>
 <body>
 <div class="intro">SIMULADOR DE TESTE · Dados e conclusões fictícios, sem acesso à produção. O que for registrado no Proprietário aparece imediatamente no Executor correspondente, nesta página.</div>
@@ -187,11 +193,21 @@ function acknowledgeOverdue(){const s=state.ex,t=taskById(s.task);if(!t)return;
 }
 function showTaskMonth(which,id){const t=taskById(id),s=state[which];if(!t)return;
  s.task=id;s.selected=null;if(t.deadline){const [y,m]=t.deadline.split('-').map(Number);s.year=y;s.month=m-1;}s.screen=which==='ex'?'overdueCalendar':'overdueCalendar';render();}
-function setLeafPerson(name){state.owner.leavePerson=name;state.owner.leaveDates=[];state.owner.selected=null;render()}
+function setLeafPerson(name){
+ const s=state.owner,p=people.find(x=>personKey(x)===name);
+ s.leavePerson=p?personKey(p):'';
+ s.leaveDates=[];s.selected=null;s.leaveFeedback='';s.page=0;
+ render();
+}
+function returnToDefaultLeaves(){
+ const s=state.owner;
+ s.leavePerson='';s.leaveDates=[];s.selected=null;s.leaveFeedback='';s.page=0;
+ render();
+}
 function toggleLeafDay(day){const s=state.owner,key=daykey(s.year,s.month,day);s.selected=day;
  if(s.leaveDates.includes(key))s.leaveDates=s.leaveDates.filter(x=>x!==key);
  else s.leaveDates=[...s.leaveDates,key];render();}
-function saveLeaves(){const s=state.owner;if(!s.leaveDates.length){alert('Marque pelo menos um dia no calendário.');return;}
+function saveLeaves(){const s=state.owner;if(!s.leavePerson){alert('Selecione primeiro um usuário.');return;}if(!s.leaveDates.length){alert('Marque pelo menos um dia no calendário.');return;}
  const person=s.leavePerson;const map=personAbsences[person]||(personAbsences[person]={});
  for(const day of s.leaveDates){if(s.leaveType==='Remover marcação')delete map[day];else map[day]=s.leaveType;}
  s.leaveFeedback=s.leaveDates.length+' dia(s) atualizado(s) para '+person+' — apenas neste simulador.';
@@ -201,8 +217,52 @@ const names=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agos
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const daykey=(y,m,d)=>`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 const fmt=iso=>iso?iso.slice(8,10)+'/'+iso.slice(5,7)+'/'+iso.slice(0,4):'—';
-function navigate(which,screen){const s=state[which];s.screen=screen;s.selected=null;s.page=0;if(which==='ex')s.answer='';render()}
-function back(w){const s=state[w];if(s.page>0){setPage(w,s.page-1);return;}if(w==='ex'){if(s.screen==='evidence'||s.screen==='questions'){navigate(w,'detail')}else if(['detail','overdueCalendar','ackDone'].includes(s.screen)){navigate(w,s.overdue?'overdue':'tasks')}else navigate(w,'home')}else{if(s.screen==='newPerson'||s.screen==='groupForm')navigate(w,'people');else if(s.screen==='newTask')navigate(w,'home');else if(s.screen==='whatsapp')navigate(w,'home');else if(s.screen==='reportResult'){if(s.reportPage>0){s.reportPage--;render()}else navigate(w,'reports')}else if(s.screen==='reportFilters')navigate(w,s.reportReturn||'reports');else if(s.screen==='reports')navigate(w,'home');else if(s.screen==='overdueCalendar')navigate(w,'overdue');else if(['calendar','detail','edit'].includes(s.screen))navigate(w,'tasks');else navigate(w,'home')}}
+const fsjHolidaysByMonthDay={
+ '01-01':'Confraternização Universal',
+ '04-21':'Tiradentes',
+ '05-01':'Dia do Trabalho',
+ '09-07':'Independência do Brasil',
+ '10-12':'Nossa Senhora Aparecida',
+ '11-02':'Finados',
+ '11-15':'Proclamação da República',
+ '11-20':'Dia Nacional de Zumbi e da Consciência Negra',
+ '12-25':'Natal'
+};
+function fsjHolidayCause(date){
+ const fixed=fsjHolidaysByMonthDay[date.slice(5)];
+ if(fixed)return fixed;
+ const custom=absences[date];
+ if(typeof custom==='string'&&/^Feriado/i.test(custom)){
+  return custom.replace(/^Feriado\s*[:—-]?\s*/i,'').trim()||'Feriado geral cadastrado no simulador';
+ }
+ return '';
+}
+function fsjHolidayFooter(year,month){
+ const count=new Date(year,month+1,0).getDate();
+ const found=[];
+ for(let d=1;d<=count;d++){
+  const reason=fsjHolidayCause(daykey(year,month,d));
+  if(reason)found.push({day:d,reason});
+ }
+ let h='<div class="holiday-footer"><strong>Feriados do mês — motivo de cada marcação</strong>';
+ if(!found.length)h+='<p>Nenhum feriado nacional de data fixa ou feriado geral cadastrado neste mês.</p>';
+ else for(const t of found)h+='<div><b>'+String(t.day).padStart(2,'0')+'/'+String(month+1).padStart(2,'0')+'</b> — '+esc(t.reason)+'</div>';
+ h+='<small>Feriados municipais, estaduais e de data móvel ainda não cadastrados não são incluídos automaticamente.</small></div>';
+ return h;
+}
+function navigate(which,screen){
+ const s=state[which];
+ if(which==='owner'&&screen==='leaves'&&s.screen!=='leaves'){
+  s.leavePerson='';s.leaveDates=[];s.leaveFeedback='';
+  const [year,month]=todayFSJ().split('-').map(Number);
+  s.year=year;s.month=month-1;
+ }
+ if(which==='owner'&&s.screen==='leaves'&&screen!=='leaves'){
+  s.leavePerson='';s.leaveDates=[];s.leaveFeedback='';
+ }
+ s.screen=screen;s.selected=null;s.page=0;if(which==='ex')s.answer='';render();
+}
+function back(w){const s=state[w];if(s.page>0){setPage(w,s.page-1);return;}if(w==='ex'){if(s.screen==='evidence'||s.screen==='questions'){navigate(w,'detail')}else if(['detail','overdueCalendar','ackDone'].includes(s.screen)){navigate(w,s.overdue?'overdue':'tasks')}else navigate(w,'home')}else{if(s.screen==='newPerson'||s.screen==='groupForm')navigate(w,'people');else if(s.screen==='newTask')navigate(w,'home');else if(s.screen==='whatsapp')navigate(w,'home');else if(s.screen==='reportResult'){if(s.reportPage>0){s.reportPage--;render()}else navigate(w,'reports')}else if(s.screen==='reportFilters')navigate(w,s.reportReturn||'reports');else if(s.screen==='reports')navigate(w,'home');else if(s.screen==='leaves'){if(s.leavePerson)returnToDefaultLeaves();else navigate(w,'home')}else if(s.screen==='overdueCalendar')navigate(w,'overdue');else if(['calendar','detail','edit'].includes(s.screen))navigate(w,'tasks');else navigate(w,'home')}}
 function moveMonth(which,n){const s=state[which],d=new Date(s.year,s.month+n,1);s.month=d.getMonth();s.year=d.getFullYear();s.selected=null;if(which==='owner')s.leaveDates=[];render()}
 function taskById(id){return jobs.find(t=>t.id===id)}
 function openEx(id,overdue=false){const s=state.ex,t=taskById(id);if(!t)return;s.task=id;s.overdue=overdue;s.answer='';s.msg='';s.executionDate=null;if(overdue){showTaskMonth('ex',id);return;}navigate('ex',t.periodic==='Pontual'?'detail':'calendar')}
@@ -280,16 +340,24 @@ function getScope(){const s=state.owner;if(s.mode==='all')return jobs;if(s.mode=
 function todayFSJ(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function graceExpired(deadline){if(!/^\d{4}-\d{2}-\d{2}$/.test(deadline||''))return false;const limit=new Date(deadline+'T12:00:00-03:00');if(!Number.isFinite(limit.getTime()))return false;return todayFSJ()>=new Date(limit.getTime()+2*86400000).toISOString().slice(0,10)}
 function overdue(){return jobs.filter(t=>t.periodic!=='Pontual'&&graceExpired(t.deadline)&&!['Concluída','Arquivado'].includes(t.status))}
-function calendar(which,leaf=false){const s=state[which],t=taskById(s.task),first=new Date(s.year,s.month,1).getDay(),count=new Date(s.year,s.month+1,0).getDate();let h=`<div class="calendar-head"><button class="button secondary small" onclick="moveMonth('${which}',-1)">‹</button><strong>${names[s.month]} ${s.year}</strong><button class="button secondary small" onclick="moveMonth('${which}',1)">›</button></div><div class="calendar">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div class="weekday">${d}</div>`).join('')}${Array.from({length:first},()=>'<span></span>').join('')}`;
-for(let d=1;d<=count;d++){const date=daykey(s.year,s.month,d),actor=t?marks[t.id+'|'+date]:null,absence=absences[date];const effectiveAbsence=leaf?absenceFor(which==='owner'?s.leavePerson:executorName(),date):'';
-const leafChecked=leaf&&which==='owner'&&s.leaveDates.includes(date);
-const cls=leaf?({'Folga semanal':'weekly','Feriado':'holiday','Folga compensatória':'comp','Férias':'vacation'}[effectiveAbsence]||''):actor?'done':'';
-const selected=s.selected===d?' selected':'';
-h+=`<button type="button" class="${cls}${selected}${leafChecked?' leaf-checked':''}" onclick="clickDay('${which}',${d},${leaf})" aria-pressed="${leafChecked?'true':'false'}" aria-label="Dia ${d}${actor?' realizado por '+esc(actor):''}${effectiveAbsence?' — '+esc(effectiveAbsence):''}">${d}${!leaf&&actor?' ✓':''}</button>`}
-
-h+='</div>';return h}
+function calendar(which,leaf=false){
+ const s=state[which],t=taskById(s.task),first=new Date(s.year,s.month,1).getDay(),count=new Date(s.year,s.month+1,0).getDate();
+ const genericHoliday=leaf&&which==='owner'&&!s.leavePerson;
+ let h=`<div class="calendar-head"><button class="button secondary small" onclick="moveMonth('${which}',-1)">‹</button><strong>${names[s.month]} ${s.year}</strong><button class="button secondary small" onclick="moveMonth('${which}',1)">›</button></div><div class="calendar">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div class="weekday">${d}</div>`).join('')}${Array.from({length:first},()=>'<span></span>').join('')}`;
+ for(let d=1;d<=count;d++){
+  const date=daykey(s.year,s.month,d),actor=t?marks[t.id+'|'+date]:null;
+  const holidayReason=leaf?fsjHolidayCause(date):'';
+  const effectiveAbsence=leaf?(genericHoliday?(holidayReason?'Feriado':''):absenceFor(which==='owner'?s.leavePerson:executorName(),date)|| (holidayReason?'Feriado':'')):'';
+  const leafChecked=leaf&&which==='owner'&&!genericHoliday&&s.leaveDates.includes(date);
+  const cls=leaf?({'Folga semanal':'weekly','Feriado':'holiday','Folga compensatória':'comp','Férias':'vacation'}[effectiveAbsence]||''):actor?'done':'';
+  const selected=s.selected===d?' selected':'';
+  const description=holidayReason?' — Feriado: '+holidayReason:effectiveAbsence?' — '+effectiveAbsence:'';
+  h+=`<button type="button" class="${cls}${selected}${leafChecked?' leaf-checked':''}" onclick="clickDay('${which}',${d},${leaf})" aria-pressed="${leafChecked?'true':'false'}" aria-label="Dia ${d}${actor?' realizado por '+esc(actor):''}${esc(description)}">${d}${!leaf&&actor?' ✓':''}</button>`;
+ }
+ return h+'</div>';
+}
 function clickDay(which,day,leaf){const s=state[which];
- if(which==='owner'&&leaf){toggleLeafDay(day);return;}
+ if(which==='owner'&&leaf){if(!s.leavePerson){s.selected=day;render();return;}toggleLeafDay(day);return;}
  s.selected=day;
  if(which==='ex'&&!leaf&&s.screen!=='overdueCalendar'){
  const key=s.task+'|'+daykey(s.year,s.month,day);s.executionDate=daykey(s.year,s.month,day);if(marks[key])delete marks[key];else marks[key]=executorName();
@@ -631,14 +699,29 @@ else if(s.screen==='overdue'){
  else for(const ack of acknowledgements)h+='<div class="acknowledged">✓ '+esc(ack.person)+' deu ciência de '+esc(ack.task)+' · '+esc(ack.date)+'</div>';
 for(const group of [false,true]){h+=`<h3>${group?'De Grupo':'Individuais'}</h3>`;for(const j of overdue().filter(t=>!!t.group===group))h+=`<div class="item overdue" onclick="showTaskMonth('owner','${j.id}')"><b class="link">${esc(j.id)} — ${esc(j.name)}</b><p class="muted">Prazo: ${fmt(j.deadline)}</p></div>`}}
 else if(s.screen==='leaves'){
- h='<h2>Folgas e Férias</h2><p class="muted">Selecione a pessoa e marque os dias diretamente no calendário.</p>';
- h+='<label for="leavePerson">Selecionar usuário</label><select id="leavePerson" onchange="setLeafPerson(this.value)" aria-label="Selecionar pessoa para folgas">'+people.map(p=>'<option value="'+esc(personKey(p))+'" '+(personKey(p)===s.leavePerson?'selected':'')+'>'+esc(personLabel(p))+'</option>').join('')+'</select>';
- h+=calendar('owner',true);
- h+='<div class="check-legend">✓ <b>Dias escolhidos:</b> '+s.leaveDates.length+' · Toque para marcar/desmarcar.</div>';
- h+='<label for="leaveType">Tipo de afastamento</label><select id="leaveType" onchange="state.owner.leaveType=this.value">'+['Folga semanal','Feriado','Folga compensatória','Férias','Remover marcação'].map(x=>'<option '+(x===s.leaveType?'selected':'')+'>'+x+'</option>').join('')+'</select>';
- h+='<button class="button" onclick="saveLeaves()" '+(!s.leaveDates.length?'disabled':'')+'>Salvar dias marcados (simulação)</button>';
- if(s.leaveFeedback)h+='<p class="acknowledged">'+esc(s.leaveFeedback)+'</p>';
- if(s.selected)h+='<div class="paged-note">Dia '+s.selected+': '+esc(absenceFor(s.leavePerson,daykey(s.year,s.month,s.selected))||'Sem registro')+'</div>';
+ const p=people.find(x=>personKey(x)===s.leavePerson);
+ h='<h2>Folgas e Feriados</h2>';
+ h+='<label for="leavePerson">Selecionar pessoa cadastrada</label>';
+ h+='<select id="leavePerson" onchange="setLeafPerson(this.value)" aria-label="Selecionar pessoa para folgas">';
+ h+='<option value="">Calendário geral — somente feriados</option>';
+ h+=people.map(person=>'<option value="'+esc(personKey(person))+'" '+(p?.id===person.id?'selected':'')+'>'+esc(personLabel(person))+'</option>').join('')+'</select>';
+ if(!p){
+  h+='<p class="holiday-default-label"><b>Calendário geral:</b> somente feriados do mês. Selecione uma pessoa para consultar e registrar as folgas e férias de seu perfil.</p>';
+  h+=calendar('owner',true)+fsjHolidayFooter(s.year,s.month);
+  if(s.selected){
+   const date=daykey(s.year,s.month,s.selected),reason=fsjHolidayCause(date);
+   h+='<div class="paged-note">Dia '+s.selected+': '+esc(reason||'Sem feriado geral nesta data')+'</div>';
+  }
+ }else{
+  h+='<p class="muted"><b>'+esc(personLabel(p))+'</b> · Perfil: '+esc(p.perfil)+(p.supervisor?' · Supervisor':'')+'</p>';
+  h+=calendar('owner',true);
+  h+='<div class="check-legend">✓ <b>Dias escolhidos:</b> '+s.leaveDates.length+' · Toque para marcar ou desmarcar.</div>';
+  h+='<label for="leaveType">Tipo de afastamento</label><select id="leaveType" onchange="state.owner.leaveType=this.value">'+['Folga semanal','Feriado','Folga compensatória','Férias','Remover marcação'].map(x=>'<option '+(x===s.leaveType?'selected':'')+'>'+x+'</option>').join('')+'</select>';
+  h+='<button class="button" onclick="saveLeaves()" '+(!s.leaveDates.length?'disabled':'')+'>Salvar dias marcados (simulação)</button>';
+  if(s.leaveFeedback)h+='<p class="acknowledged">'+esc(s.leaveFeedback)+'</p>';
+  if(s.selected)h+='<div class="paged-note">Dia '+s.selected+': '+esc(absenceFor(s.leavePerson,daykey(s.year,s.month,s.selected))||fsjHolidayCause(daykey(s.year,s.month,s.selected))||'Sem marcação')+'</div>';
+  h+='<button class="button secondary" onclick="returnToDefaultLeaves()">‹ Voltar ao calendário geral</button>';
+ }
 }
 else if(s.screen==='overdueCalendar'){
  h='<h2>Calendário — tarefa não cumprida</h2><p class="tag">'+esc(t?.id)+'</p><p>'+esc(t?.name)+'</p>'+
@@ -801,7 +884,7 @@ function restoreSimulatorSession(){
  demoTaskSequence=Number(saved.demoTaskSequence)||jobs.length;
  state.ex.personId=saved.executorPreview||'';
  if(!state.ex.personId&&people.length)state.ex.personId=people.find(p=>p.perfil!=='Visitante'&&p.perfil!=='Gestor')?.id||'';
- if(people.length)state.owner.leavePerson=personKey(people[0]);
+ // Nunca selecionar pessoa automaticamente; a tela de folgas abre somente com feriados.
 }
 function resetSimulatorData(){
  if(prompt('ATENÇÃO: os registros serão apagados. Digite ZERAR para confirmar (uma cópia será preservada):')!=='ZERAR')return;
