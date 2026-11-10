@@ -518,6 +518,42 @@ body.fsj-simple-mode #reservaInstallShare{display:none!important}
 #fsjOwnerIndicatorsRow{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important;width:100%;grid-column:1/-1;break-inside:avoid;margin:0 0 8px}
 #fsjOwnerIndicatorsRow>.kpi{grid-column:auto!important;min-width:0!important;width:auto!important;max-width:none!important;text-align:center!important;padding:8px 3px!important;box-sizing:border-box;font-size:clamp(9px,2.4vw,12px)!important;overflow-wrap:normal!important}
 #fsjOwnerIndicatorsRow>.kpi b{font-size:clamp(18px,5.5vw,27px)!important;display:block}
+
+/* FSJ Desktop Proprietário: moldura de Pessoas reorganizada, sem alterar a lógica operacional.
+   Reversão: backup/antes-ficha-pessoas-desktop-20261110 */
+@media (min-width: 900px) {
+  #personSettings:not([hidden]) {
+    display:grid!important;
+    grid-template-columns:minmax(0, 1fr) minmax(310px, 340px);
+    grid-template-areas:"titulo titulo" "supervisao calendario" "jornada calendario" "ferias calendario" "acoes calendario";
+    column-gap:14px;row-gap:12px;align-items:start;
+    padding:12px 14px 16px;
+    border:1px solid #b8dbe9;border-radius:12px;background:#fff;
+  }
+  #personSettings>h3{grid-area:titulo;margin:0 0 2px;padding:10px 12px;background:#e2f6fc;border-radius:7px;color:#153a57}
+  #personSettings>fieldset{margin:0!important;min-width:0;border:1px solid #b8dbe9!important;border-radius:9px!important;padding:12px!important;background:#fff}
+  #personSettings>fieldset:nth-of-type(1){grid-area:supervisao}
+  #personSettings>fieldset:nth-of-type(2){grid-area:jornada}
+  #personSettings>fieldset:nth-of-type(3){grid-area:ferias}
+  #personSettings>fieldset:nth-of-type(4){grid-area:calendario;align-self:stretch}
+  #personSettings>fieldset>legend{font-size:15px;font-weight:700;color:#16476a;background:#e2f6fc;border-radius:5px;padding:6px 11px}
+  #personSettings>div.row:last-child{grid-area:acoes;justify-content:flex-end;margin-top:4px}
+  #personSettings>fieldset:nth-of-type(2)>div.row:first-of-type{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  #personSettings>fieldset:nth-of-type(2)>div.row:first-of-type>div{min-width:0}
+  #personSettings>fieldset:nth-of-type(2)>div.row:first-of-type select,
+  #personSettings>fieldset:nth-of-type(2)>div.row:first-of-type input{width:100%;max-width:100%}
+  #personSettings>fieldset:nth-of-type(2)>div.row:nth-of-type(2){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+  #personSettings>fieldset:nth-of-type(2)>div.row:nth-of-type(2)>div{min-width:0}
+  #personSettings>fieldset:nth-of-type(2)>div.row:nth-of-type(2) input{width:100%;min-width:0}
+  #personSettings #pJornadaDias{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px!important}
+  #personSettings #pJornadaDias label{font-size:12px;white-space:normal!important}
+  #personSettings #pworkend{background:#eaf7fc;border-radius:6px;padding:9px;color:#20506c}
+  #personSettings #fsjCalendarioFolgas{width:100%;max-width:100%}
+}
+@media (max-width:899px){
+  #personSettings:not([hidden]){display:block}
+  #personSettings>fieldset{margin:10px 0!important}
+}
 </style><link rel="stylesheet" href="./mobile-pages.css?v=20261020-brisa-menu-02">
 <script>document.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('fsj-ambiente');if(!el)return;const host=location.hostname.toLowerCase();const isGit=host==='urbanopos.github.io';const isVm=host==='192.168.77.2'||host==='localhost'||host==='127.0.0.1'||host.endsWith('.local');const texto=document.getElementById('fsj-ambiente-texto');const simbolo=document.getElementById('fsj-ambiente-simbolo');if(texto)texto.textContent=isGit?'GIT':isVm?'VM':'—';if(simbolo){simbolo.src=isGit?'./icons/assistente-fsj-casa-180.png':'./fsj-logotipo.webp';simbolo.style.display=(isGit||isVm)?'block':'none';}el.title=(isGit?'GitHub Pages':isVm?'Máquina virtual / ambiente local':'Ambiente não identificado')+' — toque para atualizar';el.style.background=isGit?'#dbeafe':isVm?'#dcfce7':'#e5e7eb';el.style.color=isGit?'#1e40af':isVm?'#166534':'#374151';});</script>
 <script>async function fsjAtualizarAmbiente(){const el=document.getElementById('fsj-ambiente');if(el){el.disabled=true;el.title='Atualizando...';}try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}const u=new URL(location.href);u.searchParams.set('fsj_atualizar',String(Date.now()));location.replace(u.href);}catch(e){location.reload();}}</script>
