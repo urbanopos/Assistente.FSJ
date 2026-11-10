@@ -2226,6 +2226,11 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  document.addEventListener('fsj:ownership-updated',sync);document.addEventListener('DOMContentLoaded',sync);setInterval(sync,2500);
 })();
 </script>
+<style id="fsjExecucaoDesktopPaginationFix">
+/* A pagina Tarefas em Execucao tem sua propria lista. Barras globais de outras
+   secoes nao devem aparecer no rodape desta tela. */
+#gestor:has(#tarefasEmExecucao:not(.hidden)) .fsj-task-pagination {display:none!important}
+</style>
 <style id="fsjResponsiveViewportDefault">
 /* DEFAULT: densidade adaptativa por plataforma; não interfere na versão Celular. */
 @media (min-width:701px){
