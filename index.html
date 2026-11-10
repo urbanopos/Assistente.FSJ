@@ -1616,7 +1616,7 @@ function fsjRenderTarefasEmExecucao(){
  if(!filters){
   filters=document.createElement('div');filters.id='fsjArquivoFiltros';filters.style.cssText='display:flex;flex-wrap:wrap;gap:12px;margin:12px 0';
   for(const [id,title] of [['fsjArquivoPessoa','Executor Individual'],['fsjArquivoGrupo','Grupo Executor']]){
-   const label=document.createElement('label');label.textContent=title+' ';const select=document.createElement('select');select.id=id;select.style.cssText='max-width:100%;min-width:160px';select.addEventListener('change',fsjRenderTarefasEmExecucao);label.append(select);filters.append(label);
+   const label=document.createElement('label');label.textContent=title+' ';const select=document.createElement('select');select.id=id;select.style.cssText='max-width:100%;min-width:160px';select.addEventListener('change',()=>{if(select.value){const other=document.getElementById(id==='fsjArquivoPessoa'?'fsjArquivoGrupo':'fsjArquivoPessoa');if(other)other.value='';}fsjRenderTarefasEmExecucao();});label.append(select);filters.append(label);
   }
   box.before(filters);
  }
@@ -1634,7 +1634,7 @@ function fsjRenderTarefasEmExecucao(){
   if(gsel.value&&String(t.groupId||'')!==gsel.value)return false;
   return true;
  }).sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),'pt-BR',{numeric:true}));
- if(!tasks.length){box.textContent='Nenhuma tarefa encontrada para os filtros selecionados.';return;}
+ if(!tasks.length){box.textContent='Nenhuma tarefa encontrada para os filtros selecionados.';const pager=document.getElementById('fsjExecucaoPaginador');if(pager){pager.replaceChildren();pager.hidden=true;}return;}
  for(const [label,items] of [['Tarefas individuais',tasks.filter(t=>!t.groupId)],['Tarefas de grupo',tasks.filter(t=>!!t.groupId)]]){
   const section=document.createElement('section');const h=document.createElement('h3');h.textContent=label+' ('+items.length+')';section.append(h);
   for(const t of items){
