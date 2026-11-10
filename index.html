@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261108-filtros-kpi-proprietario-07">
+<meta name="fsj-build" content="20261110-tarefas-edicao-arquivamento-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -1611,26 +1611,59 @@ function fsjRenderTarefasEmExecucao(){
  const box=document.getElementById('fsjExecucaoLista');if(!box)return;
  box.replaceChildren();
  if(window.fsjOwnerVerified!==true){box.textContent='Consulta exclusiva do Proprietário autenticado.';return;}
+ const page=document.getElementById('tarefasEmExecucao');
+ let filters=page.querySelector('#fsjArquivoFiltros');
+ if(!filters){
+  filters=document.createElement('div');filters.id='fsjArquivoFiltros';filters.style.cssText='display:flex;flex-wrap:wrap;gap:12px;margin:12px 0';
+  for(const [id,title] of [['fsjArquivoPessoa','Executor Individual'],['fsjArquivoGrupo','Grupo Executor']]){
+   const label=document.createElement('label');label.textContent=title+' ';const select=document.createElement('select');select.id=id;select.style.cssText='max-width:100%;min-width:160px';select.addEventListener('change',fsjRenderTarefasEmExecucao);label.append(select);filters.append(label);
+  }
+  box.before(filters);
+ }
+ const psel=document.getElementById('fsjArquivoPessoa'),gsel=document.getElementById('fsjArquivoGrupo');
+ const setOptions=(sel,values)=>{const prev=sel.value;sel.replaceChildren(...values.map(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;return o;}));sel.value=values.some(([v])=>v===prev)?prev:'';};
+ setOptions(psel,[['','Todas as pessoas'],...(S.people||[]).map(p=>[String(p.id),p.nick||p.name||String(p.id)])]);
+ setOptions(gsel,[['','Todos os grupos'],...(S.groups||[]).map(g=>[String(g.id),g.name||String(g.id)])]);
+
  const active=(Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[]).filter(e=>e.estado==='em_andamento'&&e.iniciado_em&&!e.concluido_em);
- const tasks=new Map((S.tasks||[]).map(t=>[String(t.id),t]));
- const rows=active.map(e=>({e,t:tasks.get(String(e.tarefa_id))})).filter(x=>x.t).sort((a,b)=>new Date(a.e.iniciado_em)-new Date(b.e.iniciado_em));
- if(!rows.length){box.textContent='Nenhuma tarefa com execução ativa registrada.';return;}
- for(const [label,items] of [['Tarefas individuais',rows.filter(x=>!x.t.groupId)],['Tarefas de grupo',rows.filter(x=>!!x.t.groupId)]]){
+ const activeMap=new Map(active.map(e=>[String(e.tarefa_id),e]));
+ const tasks=(S.tasks||[]).filter(t=>{
+  const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status);
+  if(archived)return false;
+  if(psel.value&&(!(!t.groupId&&(t.personIds||[]).some(id=>String(id)===psel.value))))return false;
+  if(gsel.value&&String(t.groupId||'')!==gsel.value)return false;
+  return true;
+ }).sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),'pt-BR',{numeric:true}));
+ if(!tasks.length){box.textContent='Nenhuma tarefa encontrada para os filtros selecionados.';return;}
+ for(const [label,items] of [['Tarefas individuais',tasks.filter(t=>!t.groupId)],['Tarefas de grupo',tasks.filter(t=>!!t.groupId)]]){
   const section=document.createElement('section');const h=document.createElement('h3');h.textContent=label+' ('+items.length+')';section.append(h);
-  if(!items.length){const p=document.createElement('p');p.className='muted';p.textContent='Nenhuma execução ativa nesta categoria.';section.append(p);}
-  for(const {e,t} of items){
+  for(const t of items){
+   const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status),e=activeMap.get(String(t.id));
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:12px;margin:10px 0';
-   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+' — '+(t.text||'Sem descrição');
-   task.addEventListener('click',()=>fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency));
-   article.append(task);
+   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+' — '+(t.text||'Sem descrição');task.addEventListener('click',()=>fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency));article.append(task);
+   if(archived){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
    const group=(S.groups||[]).find(g=>String(g.id)===String(t.groupId));
-   const who=person(e.pessoa_id);
-   const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Executor',who?.nick||who?.name||'Não identificado'],['Início',fsjDataHora(e.iniciado_em)],['Última retomada',e.retomado_em?fsjDataHora(e.retomado_em):'—'],['Situação','Em execução']];
-   for(const [key,value] of fields){const p=document.createElement('p');p.style.margin='6px 0';const strong=document.createElement('strong');strong.textContent=key+': ';p.append(strong,document.createTextNode(String(value)));article.append(p);}
+   const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Responsável',names(t)],['Periodicidade',t.frequency||'pontual'],['Situação',archived?'Arquivada':(e?'Em execução':t.status||'Em aberto')]];
+   if(e)fields.push(['Início',fsjDataHora(e.iniciado_em)]);
+   if(t.lastEditAt){fields.push(['Última edição',fsjDataHora(t.lastEditAt)],['Editado por',t.lastEditBy||'—']);}
+   for(const [key,value] of fields){const p=document.createElement('p');p.style.margin='6px 0';const strong=document.createElement('strong');strong.textContent=key+': ';p.append(strong,document.createTextNode(String(value||'—')));article.append(p);}
+   if(!archived){const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap';const edit=document.createElement('button');edit.type='button';edit.textContent='Editar';edit.addEventListener('click',()=>editTask(t.id));const archive=document.createElement('button');archive.type='button';archive.textContent='Arquivar';archive.style.cssText='background:#a43b1a;color:white';archive.addEventListener('click',()=>fsjArquivarTarefaProprietario(t));actions.append(edit,archive);article.append(actions);}
    section.append(article);
   }
   box.append(section);
  }
+}
+async function fsjArquivarTarefaProprietario(t){
+ if(window.fsjOwnerVerified!==true)return alert('Operação exclusiva do Proprietário.');
+ if(!confirm('Arquivar '+(t.code||'esta tarefa')+'? O registro e a numeração serão preservados.'))return;
+ try{
+  const result=await api('/rest/v1/rpc/fsj_arquivar_tarefa_proprietario',{method:'POST',body:JSON.stringify({p_tarefa:t.id})});
+  if(!result||result.ok!==true)throw new Error('Resposta de arquivamento não confirmada');
+  await fsjAtualizarRetornos(false);
+  fsjRenderTarefasEmExecucao();
+  alert((t.code||'Tarefa')+' arquivada com sucesso. Histórico preservado.');
+ }catch(e){alert('Arquivamento não realizado: '+e.message);}
+
 }
 
 function fsjExecucaoTexto(e){const who=person(e.pessoa_id).nick||person(e.pessoa_id).name,stamp=value=>value?fsjDataHora(new Date(value)):'';return who+' — '+(e.estado==='em_andamento'?'Em andamento • Início: '+stamp(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+stamp(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+stamp(e.suspenso_em)+' • Início: '+stamp(e.iniciado_em):'Concluída em '+stamp(e.concluido_em));}
@@ -1845,7 +1878,7 @@ async function fsjAtualizarRetornos(updateView=true){
   if(fsjAtualizacaoEmCurso)return fsjAtualizacaoEmCurso;
   fsjAtualizacaoEmCurso=(async()=>{
     const executionDay=fsjDia(new Date());
-    const [tasks,answers,executions,responsaveis]=await Promise.all([api('/rest/v1/tarefas?select=*'),fsjLerRetornos(),fsjLerExecucoesTempos(),api('/rest/v1/tarefa_responsaveis?select=tarefa_id,pessoa_id')]);
+    const [tasks,answers,executions,responsaveis,auditoria]=await Promise.all([api('/rest/v1/tarefas?select=*'),fsjLerRetornos(),fsjLerExecucoesTempos(),api('/rest/v1/tarefa_responsaveis?select=tarefa_id,pessoa_id'),api('/rest/v1/rpc/fsj_consultar_auditoria_proprietario',{method:'POST',body:'{}'}).catch(()=>null)]);
     if(!Array.isArray(tasks)||!Array.isArray(responsaveis)||!Array.isArray(answers))throw new Error('Consulta incompleta ao Supabase');
     fsjTemposExecucoes=executions;
     fsjExecucoes=executions.filter(e=>e.dia===executionDay||e.estado==='em_andamento');
@@ -1854,6 +1887,7 @@ async function fsjAtualizarRetornos(updateView=true){
     const day=fsjDia(new Date());
     S.tasks=tasks.map(row=>{
       const t=S.tasks.find(x=>x.id===row.id)||{id:row.id,response:'',question:'',attachments:[]};
+      const edits=(auditoria?.edicoes||[]).filter(e=>e.tarefa_id===row.id).sort((a,b)=>String(b.em).localeCompare(String(a.em)));t.lastEditAt=edits[0]?.em||null;t.lastEditBy=edits[0]?.por||null;
       t.code=row.codigo_tarefa;t.text=row.descricao;t.personIds=responsaveis.filter(x=>x.tarefa_id===row.id).map(x=>x.pessoa_id);t.groupId=row.grupo_id||'';t.daily=!!row.diaria;t.frequency=row.periodicidade||(row.diaria?'diaria':'pontual');t.created=row.criada_em;
       let status=row.situacao;if(t.daily&&row.reaberta_em&&row.reaberta_dia!==day&&status==='Pendente')status='Em aberto';
       if(t.daily&&status==='Concluída'&&row.concluida_em&&fsjDia(row.concluida_em)!==day)status='Em aberto';
