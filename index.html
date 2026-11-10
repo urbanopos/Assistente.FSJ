@@ -1674,7 +1674,7 @@ function fsjRenderTarefasEmExecucao(){
    const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+' — '+(t.text||'Sem descrição');task.addEventListener('click',()=>fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency));article.append(task);
    if(archived){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
    const group=(S.groups||[]).find(g=>String(g.id)===String(t.groupId));
-   const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Responsável',names(t)],['Periodicidade',t.frequency||'pontual'],['Situação',archived?'Arquivada':(e?'Em execução':t.status||'Em aberto')]];
+   const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Responsável',names(t)],['Registro',t.created?fsjDataHora(t.created):'Data/hora não disponível'],['Periodicidade',t.frequency||'pontual'],['Situação',archived?'Arquivada':(e?'Em execução':t.status||'Em aberto')]];
    if(e)fields.push(['Início',fsjDataHora(e.iniciado_em)]);
    if(t.lastEditAt){fields.push(['Última edição',fsjDataHora(t.lastEditAt)],['Editado por',t.lastEditBy||'—']);}
    for(const [key,value] of fields){const p=document.createElement('p');p.style.margin='6px 0';const strong=document.createElement('strong');strong.textContent=key+': ';p.append(strong,document.createTextNode(String(value||'—')));article.append(p);}
