@@ -774,3 +774,8 @@ Instalação web pela atualização automática existente. Publicação Pages e 
 Solicitado: seleção independente de executor individual e grupo para Proprietário, Gestor e Supervisor na tela Tarefas de Terceiros. O filtro de grupo deve consultar tarefas coletivas pelo grupo, sem exigir executor individual. Consulta respeita permissões e não autoriza execução por Supervisor.
 
 Publicado parcialmente: simulador Celular/Proprietario/FSJ-Simulador-Celular-Proprietario-v1.1.0.html, commit 55d3f7b7db3104dcafe29e2891b143fafa7cd3d7. Não equivale à implantação operacional em index.html ou à validação em aparelho. Não houve alteração dos dados, serviços, APK, backup ou mecanismos de recuperação.
+
+
+## 10/11/2026 — Tarefas em Execução, Proprietário
+
+Solicitado e publicado no arquivo principal `index.html`, commit `ce440395f044eea67fda42d73c933f8dd0fa356b`: filtros Executor Individual e Grupo Executor; botões Editar e Arquivar por tarefa ativa; edição por formulário existente; arquivamento lógico pela RPC `fsj_arquivar_tarefa_proprietario` com bloqueio de execução em andamento; exibição da última edição e seu autor por consulta protegida `fsj_consultar_auditoria_proprietario`. O banco possui a tabela `fsj_tarefas_edicoes` e gatilho de auditoria em `tarefas`. O arquivamento mantém o código e histórico. A URL principal é `https://urbanopos.github.io/Assistente.FSJ/`. Backup anterior: branch `backup/antes-filtros-exclusao-proprietario-20261110`. Publicação no GitHub não comprova propagação no Pages nem teste em sessão real; validar antes de arquivar tarefas reais. A consulta do histórico completo das alterações e o rastreamento de mudanças na tabela de responsáveis ainda requerem aperfeiçoamento.
