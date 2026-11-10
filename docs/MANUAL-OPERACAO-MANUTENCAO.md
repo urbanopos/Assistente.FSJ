@@ -787,3 +787,7 @@ Criado `desktop-lateral/index.html` (commit `7cfd42fb5bfb5ab04e96c648a22a229bfee
 
 ## Teste reversível — moldura inferior da Ficha de Pessoas Desktop (10/11/2026)
 Backup: branch `backup/antes-ficha-pessoas-desktop-20261110`. Alteração de CSS apenas em `index.html` da branch main, commit `69539e7fddc36dfea592d778209fe76905bcdfe6`. Organiza a seção `#personSettings` em grade Desktop com Supervisão, Jornada, Férias e Calendário à direita, mantendo os IDs, handlers e controles originais, e a paleta azul-clara. Não altera layout de celular (media query mínima de 900px), banco de dados, FSJ.VM ou os campos superiores. Testar visualmente no GitHub Pages e testar as ações existentes sem alterar registros reais desnecessariamente. Em caso de regressão, restaurar o CSS anterior a partir do backup, sem reverter outras mudanças independentes.
+
+
+### Compactação visual da ficha Desktop (10/11/2026)
+Commit `2345dd7707327c04f3308eed8f4e2966761d48c3`: CSS em `index.html`, restrito a telas >=1050px e `#fichaPessoa.fsj-ficha-editando`. Alinha Nome completo, Nome de identificação, WhatsApp, E-mail e Tipo em uma linha; reduz espaços verticais do bloco cadastral e moldura inferior. Não altera funções, IDs, banco, calendário ou versão Celular. Backup base: `backup/antes-ficha-pessoas-desktop-20261110`. Verificação visual no GitHub Pages ainda necessária.
