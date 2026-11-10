@@ -783,3 +783,7 @@ Solicitado e publicado no arquivo principal `index.html`, commit `ce440395f044ee
 
 ## Desktop lateral experimental — 10/11/2026
 Criado `desktop-lateral/index.html` (commit `7cfd42fb5bfb5ab04e96c648a22a229bfee32ef1`) como protótipo visual de navegação paralela. O Menu Principal horizontal de produção não foi modificado. O protótipo não consulta dados reais, não autentica usuários, não altera perfis e não realiza gravações no Supabase ou na FSJ.VM. As áreas de conteúdo são representações sem operações; não confundir com consulta funcional. Teste de navegação pelo usuário pendente; integração somente de leitura e verificação de permissões ainda pendentes. Para reversão, remover a pasta experimental sem alterar o index oficial.
+
+
+## Teste reversível — moldura inferior da Ficha de Pessoas Desktop (10/11/2026)
+Backup: branch `backup/antes-ficha-pessoas-desktop-20261110`. Alteração de CSS apenas em `index.html` da branch main, commit `69539e7fddc36dfea592d778209fe76905bcdfe6`. Organiza a seção `#personSettings` em grade Desktop com Supervisão, Jornada, Férias e Calendário à direita, mantendo os IDs, handlers e controles originais, e a paleta azul-clara. Não altera layout de celular (media query mínima de 900px), banco de dados, FSJ.VM ou os campos superiores. Testar visualmente no GitHub Pages e testar as ações existentes sem alterar registros reais desnecessariamente. Em caso de regressão, restaurar o CSS anterior a partir do backup, sem reverter outras mudanças independentes.
