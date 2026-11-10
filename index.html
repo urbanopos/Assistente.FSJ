@@ -1007,6 +1007,19 @@ function fsjAlternarCalendarioPessoa(botao){
  botao.setAttribute('aria-expanded',String(abrir));
  if(abrir)renderPersonDatesOff();
 }
+/* Ajustar rótulo ao estado real do calendário ao abrir a ficha. */
+function fsjSincronizarRotuloCalendarioPessoa(){
+ const botao=document.querySelector('#personSettings .fsj-cal-refresh');
+ const cal=document.getElementById('fsjCalendarioFolgas');
+ const titulo=document.getElementById('fsjMesFolgasTitulo');
+ if(!botao||!cal||!titulo)return;
+ const aberto=!cal.hidden&&!titulo.parentElement.hidden;
+ botao.textContent=aberto?'Fechar calendário':'Abrir calendário do mês atual';
+ botao.setAttribute('aria-expanded',String(aberto));
+}
+document.addEventListener('click',function(event){
+ if(event.target.closest('#fichaPessoa')&&!event.target.closest('.fsj-cal-refresh'))queueMicrotask(fsjSincronizarRotuloCalendarioPessoa);
+},true);
 function fsjAbrirCalendarioFolgas(){
  const person=document.getElementById('folgasPessoaSelect');
  const panel=document.getElementById('fsjFolgasCalendarioLateral');
