@@ -1615,7 +1615,7 @@ function fsjRenderTarefasEmExecucao(){
  let filters=page.querySelector('#fsjArquivoFiltros');
  if(!filters){
   filters=document.createElement('div');filters.id='fsjArquivoFiltros';filters.style.cssText='display:flex;flex-wrap:wrap;gap:12px;margin:12px 0';
-  for(const [id,title] of [['fsjArquivoPessoa','Pessoa'],['fsjArquivoGrupo','Grupo'],['fsjArquivoSituacao','Situação']]){
+  for(const [id,title] of [['fsjArquivoPessoa','Executor Individual'],['fsjArquivoGrupo','Grupo Executor'],['fsjArquivoSituacao','Situação']]){
    const label=document.createElement('label');label.textContent=title+' ';const select=document.createElement('select');select.id=id;select.style.cssText='max-width:100%;min-width:160px';select.addEventListener('change',fsjRenderTarefasEmExecucao);label.append(select);filters.append(label);
   }
   box.before(filters);
@@ -1628,7 +1628,7 @@ function fsjRenderTarefasEmExecucao(){
  const active=(Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[]).filter(e=>e.estado==='em_andamento'&&e.iniciado_em&&!e.concluido_em);
  const activeMap=new Map(active.map(e=>[String(e.tarefa_id),e]));
  const tasks=(S.tasks||[]).filter(t=>{
-  const archived=t.centralStatus==='Arquivada'||t.status==='Arquivada';
+  const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status);
   if(ssel.value==='arquivadas'&&!archived)return false;
   if(!ssel.value&&archived)return false;
   if(psel.value&&!(t.personIds||[]).some(id=>String(id)===psel.value))return false;
@@ -1639,7 +1639,7 @@ function fsjRenderTarefasEmExecucao(){
  for(const [label,items] of [['Tarefas individuais',tasks.filter(t=>!t.groupId)],['Tarefas de grupo',tasks.filter(t=>!!t.groupId)]]){
   const section=document.createElement('section');const h=document.createElement('h3');h.textContent=label+' ('+items.length+')';section.append(h);
   for(const t of items){
-   const archived=t.centralStatus==='Arquivada'||t.status==='Arquivada',e=activeMap.get(String(t.id));
+   const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status),e=activeMap.get(String(t.id));
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:12px;margin:10px 0';
    const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+' — '+(t.text||'Sem descrição');task.addEventListener('click',()=>fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency));article.append(task);
    if(archived){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
@@ -1657,7 +1657,14 @@ function fsjRenderTarefasEmExecucao(){
 async function fsjArquivarTarefaProprietario(t){
  if(window.fsjOwnerVerified!==true)return alert('Operação exclusiva do Proprietário.');
  if(!confirm('Arquivar '+(t.code||'esta tarefa')+'? O registro e a numeração serão preservados.'))return;
- alert('Arquivamento protegido: a gravação será habilitada somente após validação da autorização e da auditoria no Supabase. Nenhum registro foi alterado.');
+ try{
+  const result=await api('/rest/v1/rpc/fsj_arquivar_tarefa_proprietario',{method:'POST',body:JSON.stringify({p_tarefa:t.id})});
+  if(!result||result.ok!==true)throw new Error('Resposta de arquivamento não confirmada');
+  await fsjAtualizarRetornos(false);
+  fsjRenderTarefasEmExecucao();
+  alert((t.code||'Tarefa')+' arquivada com sucesso. Histórico preservado.');
+ }catch(e){alert('Arquivamento não realizado: '+e.message);}
+
 }
 
 function fsjExecucaoTexto(e){const who=person(e.pessoa_id).nick||person(e.pessoa_id).name,stamp=value=>value?fsjDataHora(new Date(value)):'';return who+' — '+(e.estado==='em_andamento'?'Em andamento • Início: '+stamp(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+stamp(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+stamp(e.suspenso_em)+' • Início: '+stamp(e.iniciado_em):'Concluída em '+stamp(e.concluido_em));}
