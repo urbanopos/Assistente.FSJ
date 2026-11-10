@@ -1653,7 +1653,7 @@ function fsjRenderTarefasEmExecucao(){
   box.append(section);
  }
  const cards=[...box.querySelectorAll('section > article')];
- const perPage=1; // Uma tarefa por página: nenhuma rolagem vertical
+ const perPage=2; // Duas tarefas por página no Desktop, sem rolagem vertical
  const pages=Math.max(1,Math.ceil(cards.length/perPage));
  const filterKey=psel.value+'|'+gsel.value;
  const priorKey=box.dataset.fsjFilterKey;
