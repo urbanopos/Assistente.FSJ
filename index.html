@@ -988,24 +988,35 @@ document.addEventListener('click',function fsjAbrirFolgasPeloMenu(ev){
 /* Na ficha Pessoas, alternar o calendário sem transferi-lo para Folgas e Férias. */
 function fsjAlternarCalendarioPessoa(botao){
  const ficha=document.getElementById('personSettings');
- if(!ficha||ficha.hidden)return;
- const campo=botao.closest('fieldset');
+ const campo=botao?.closest('fieldset');
  const cal=document.getElementById('fsjCalendarioFolgas');
  const titulo=document.getElementById('fsjMesFolgasTitulo');
+ if(!ficha||ficha.hidden||!campo||!cal||!titulo)return;
+ const linha=titulo.parentElement;
  const editor=document.getElementById('fsjFolgaMotivoEditor');
  const datas=document.getElementById('pdayoffdates');
- if(!campo||!cal||!titulo)return;
- const linha=titulo.parentElement;
+ // Os controles pertencem à ficha Pessoas, não ao painel Folgas e Férias.
  if(linha.parentElement!==campo)campo.insertBefore(linha,botao);
  if(cal.parentElement!==campo)campo.insertBefore(cal,botao);
- if(editor&&editor.parentElement!==campo)botao.after(editor);
+ if(editor&&editor.parentElement!==campo)campo.insertBefore(editor,botao);
  if(datas&&datas.parentElement!==campo)campo.appendChild(datas);
- const abrir=cal.hidden||linha.hidden;
- linha.hidden=!abrir;cal.hidden=!abrir;
+ const estavaAberto=botao.getAttribute('aria-expanded')==='true'&&!cal.hidden&&!linha.hidden;
+ const abrir=!estavaAberto;
+ linha.hidden=!abrir;
+ cal.hidden=!abrir;
+ // Evitar conflitos com regras antigas de CSS que forçam display:grid.
+ linha.style.setProperty('display',abrir?'flex':'none','important');
+ cal.style.setProperty('display',abrir?'grid':'none','important');
  if(editor)editor.hidden=true;
  botao.textContent=abrir?'Fechar calendário':'Abrir calendário do mês atual';
  botao.setAttribute('aria-expanded',String(abrir));
- if(abrir)renderPersonDatesOff();
+ if(abrir){
+   renderPersonDatesOff();
+   // Reforçar o estado após a atualização assíncrona do calendário.
+   linha.hidden=false;cal.hidden=false;
+   linha.style.setProperty('display','flex','important');
+   cal.style.setProperty('display','grid','important');
+ }
 }
 /* Ajustar rótulo ao estado real do calendário ao abrir a ficha. */
 function fsjSincronizarRotuloCalendarioPessoa(){
