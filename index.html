@@ -1652,6 +1652,27 @@ function fsjRenderTarefasEmExecucao(){
   }
   box.append(section);
  }
+ const cards=[...box.querySelectorAll('section > article')];
+ const perPage=window.innerHeight<850?2:3;
+ const pages=Math.max(1,Math.ceil(cards.length/perPage));
+ let pageIndex=0;
+ let pager=document.getElementById('fsjExecucaoPaginador');
+ if(!pager){pager=document.createElement('nav');pager.id='fsjExecucaoPaginador';pager.setAttribute('aria-label','Navegação das tarefas em execução');box.after(pager);}
+ pager.style.cssText='display:flex;align-items:center;justify-content:center;gap:16px;padding:10px;position:sticky;bottom:4px;background:#f3fafb;border:1px solid #cbded6;border-radius:10px;z-index:6';
+ const back=document.createElement('button'),forward=document.createElement('button'),counter=document.createElement('strong');
+ back.type=forward.type='button';back.textContent='←';forward.textContent='→';
+ for(const button of [back,forward])button.style.cssText='min-width:48px;min-height:44px;background:#175b40;color:white;border:0;border-radius:9px;font-size:22px';
+ function showPage(){
+  cards.forEach((card,i)=>{card.hidden=i<pageIndex*perPage||i>=(pageIndex+1)*perPage;});
+  box.querySelectorAll('section').forEach(section=>{section.hidden=![...section.querySelectorAll('article')].some(card=>!card.hidden);});
+  counter.textContent=(pageIndex+1)+' / '+pages;
+  back.disabled=pageIndex===0;forward.disabled=pageIndex>=pages-1;
+  back.style.opacity=back.disabled?'.45':'1';forward.style.opacity=forward.disabled?'.45':'1';
+ }
+ back.addEventListener('click',()=>{if(pageIndex>0){pageIndex--;showPage();page.scrollIntoView({block:'start',behavior:'auto'});}});
+ forward.addEventListener('click',()=>{if(pageIndex<pages-1){pageIndex++;showPage();page.scrollIntoView({block:'start',behavior:'auto'});}});
+ pager.replaceChildren(back,counter,forward);pager.hidden=pages<=1;
+ showPage();
 }
 async function fsjArquivarTarefaProprietario(t){
  if(window.fsjOwnerVerified!==true)return alert('Operação exclusiva do Proprietário.');
