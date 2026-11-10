@@ -1634,7 +1634,7 @@ function fsjRenderTarefasEmExecucao(){
   if(gsel.value&&String(t.groupId||'')!==gsel.value)return false;
   return true;
  }).sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),'pt-BR',{numeric:true}));
- if(!tasks.length){box.textContent='Nenhuma tarefa encontrada para os filtros selecionados.';const pager=document.getElementById('fsjExecucaoPaginador');if(pager){pager.replaceChildren();pager.hidden=true;}return;}
+ if(!tasks.length){box.dataset.fsjPageIndex='0';box.textContent='Nenhuma tarefa encontrada para os filtros selecionados.';const pager=document.getElementById('fsjExecucaoPaginador');if(pager){pager.replaceChildren();pager.hidden=true;}return;}
  for(const [label,items] of [['Tarefas individuais',tasks.filter(t=>!t.groupId)],['Tarefas de grupo',tasks.filter(t=>!!t.groupId)]]){
   const section=document.createElement('section');const h=document.createElement('h3');h.textContent=label+' ('+items.length+')';section.append(h);
   for(const t of items){
@@ -1655,7 +1655,11 @@ function fsjRenderTarefasEmExecucao(){
  const cards=[...box.querySelectorAll('section > article')];
  const perPage=1; // Uma tarefa por página: nenhuma rolagem vertical
  const pages=Math.max(1,Math.ceil(cards.length/perPage));
- let pageIndex=0;
+ const filterKey=psel.value+'|'+gsel.value;
+ const priorKey=box.dataset.fsjFilterKey;
+ let pageIndex=priorKey===filterKey?Number(box.dataset.fsjPageIndex||0):0;
+ pageIndex=Math.max(0,Math.min(pageIndex,pages-1));
+ box.dataset.fsjFilterKey=filterKey;
  let pager=document.getElementById('fsjExecucaoPaginador');
  if(!pager){pager=document.createElement('nav');pager.id='fsjExecucaoPaginador';pager.setAttribute('aria-label','Navegação das tarefas em execução');box.after(pager);}else if(pager.previousElementSibling!==box){box.after(pager);}
  box.querySelectorAll('.fsj-task-pagination').forEach(el=>el.remove());
@@ -1666,11 +1670,12 @@ function fsjRenderTarefasEmExecucao(){
  function showPage(){
   cards.forEach((card,i)=>{card.hidden=i<pageIndex*perPage||i>=(pageIndex+1)*perPage;card.style.display=card.hidden?'none':'';});
   box.querySelectorAll('section').forEach(section=>{section.hidden=![...section.querySelectorAll('article')].some(card=>!card.hidden);section.style.display=section.hidden?'none':'';});
+  box.dataset.fsjPageIndex=String(pageIndex);
   counter.textContent=(pageIndex+1)+' / '+pages;
   back.disabled=pageIndex===0;forward.disabled=pageIndex>=pages-1;
   back.style.opacity=back.disabled?'.45':'1';forward.style.opacity=forward.disabled?'.45':'1';
  }
- back.addEventListener('click',()=>{if(pageIndex>0){pageIndex--;showPage();page.scrollIntoView({block:'start',behavior:'auto'});}});
+ back.addEventListener('click',()=>{if(pageIndex>0){pageIndex--;showPage();}});
  forward.addEventListener('click',()=>{if(pageIndex<pages-1){pageIndex++;showPage();page.scrollIntoView({block:'start',behavior:'auto'});}});
  pager.replaceChildren(back,counter,forward);pager.hidden=pages<=1;
  showPage();
