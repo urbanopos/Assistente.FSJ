@@ -791,3 +791,7 @@ Backup: branch `backup/antes-ficha-pessoas-desktop-20261110`. Alteração de CSS
 
 ### Compactação visual da ficha Desktop (10/11/2026)
 Commit `2345dd7707327c04f3308eed8f4e2966761d48c3`: CSS em `index.html`, restrito a telas >=1050px e `#fichaPessoa.fsj-ficha-editando`. Alinha Nome completo, Nome de identificação, WhatsApp, E-mail e Tipo em uma linha; reduz espaços verticais do bloco cadastral e moldura inferior. Não altera funções, IDs, banco, calendário ou versão Celular. Backup base: `backup/antes-ficha-pessoas-desktop-20261110`. Verificação visual no GitHub Pages ainda necessária.
+
+
+### Correção calendário na Ficha Pessoas (10/11/2026)
+Commit `f9a72f9e59059e69dc1df0215ad3bd8dbd842bfc`: botão da moldura de calendário alterna entre abrir/fechar, sem chamar a função que transfere o calendário para a aba Folgas e Férias. A grade Desktop força calendário na coluna direita, preservando campos e gravações. A aba Folgas e Férias mantém sua função `fsjAbrirCalendarioFolgas()` inalterada. Validar manualmente no GitHub Pages, especialmente navegação de meses e persistência das marcações. Backup original: `backup/antes-ficha-pessoas-desktop-20261110`.
