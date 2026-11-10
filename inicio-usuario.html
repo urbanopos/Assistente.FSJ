@@ -51,6 +51,9 @@ body.fsj-executor-v1 #page0 .executor-banner{background:#f8e8af;margin:-12px -12
   }
   if(!route)return;
   const target=new URL('./celular/'+route+'/index.html',location.href);
+  // A rota do perfil e as permissoes sao verificadas novamente a cada acesso.
+  // A versao evita reutilizar o HTML antigo no navegador integrado do WhatsApp.
+  target.searchParams.set('fsj_layout','20261110-perfil-atual');
   target.hash='token='+encodeURIComponent(token);
   location.replace(target.href);
  }).catch(()=>{});
