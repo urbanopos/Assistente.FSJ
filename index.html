@@ -2424,6 +2424,43 @@ dlg.querySelector('iframe').srcdoc=html;dlg.showModal();
 <style id="fsj-faixa-validacao-real">
 #fsjFaixaNaoOperacional{position:sticky;top:0;z-index:2147483000;background:#a40000;color:#fff;text-align:center;padding:11px 16px;font:700 15px/1.4 Arial,sans-serif;box-shadow:0 2px 8px #0004}
 #fsjFaixaNaoOperacional[hidden]{display:none!important}
+
+/* FSJ: ajuste compacto de Pessoas, exclusivo Desktop Proprietário (10/11/2026).
+   Cinco campos cadastrais em uma linha; demais controles e calendário preservados. */
+@media (min-width: 1050px) {
+ #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields {
+   display:grid!important;
+   grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.05fr) minmax(0,1.15fr) minmax(160px,.85fr)!important;
+   gap:7px!important;align-items:end!important;
+ }
+ #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields>div:has(#ptype){
+   grid-column:5!important;grid-row:1!important;
+   min-width:0!important;width:100%!important;max-width:none!important;
+ }
+ #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields>div:not(:has(#ptype)):nth-child(-n+4){
+   grid-row:1!important;min-width:0!important;
+ }
+ #fichaPessoa.fsj-ficha-editando #fsjFichaEnvioAoLadoTipo{
+   grid-column:1/-1!important;grid-row:auto!important;
+ }
+ #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields input,
+ #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields select{
+   width:100%!important;min-width:0!important;max-width:100%!important;
+ }
+ #fichaPessoa.fsj-ficha-editando #personBasicFields{padding:9px 11px!important;margin:5px 0!important}
+ #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields label{margin-bottom:3px!important}
+ #fichaPessoa.fsj-ficha-editando #personBasicFields .muted{line-height:1.3!important;margin:2px 0!important}
+ #fichaPessoa.fsj-ficha-editando #personSettings:not([hidden]){
+   row-gap:7px!important;padding:8px 11px 10px!important;
+ }
+ #fichaPessoa.fsj-ficha-editando #personSettings>h3{padding:6px 10px!important;margin:0!important}
+ #fichaPessoa.fsj-ficha-editando #personSettings>fieldset{padding:8px 10px!important}
+ #fichaPessoa.fsj-ficha-editando #personSettings>fieldset>legend{padding:3px 8px!important}
+ #fichaPessoa.fsj-ficha-editando #personSettings fieldset p{margin:5px 0!important;line-height:1.3!important}
+ #fichaPessoa.fsj-ficha-editando #personSettings fieldset .row{row-gap:5px!important}
+ #fichaPessoa.fsj-ficha-editando #personSettings #pJornadaDias{gap:3px 6px!important}
+ #fichaPessoa.fsj-ficha-editando #personSettings #pworkend{padding:5px 7px!important}
+}
 </style>
 <div id="fsjFaixaNaoOperacional" role="alert" aria-live="polite">AMBIENTE NÃO VALIDADO — Dados operacionais ainda não confirmados no Supabase. Não efetue alterações.</div>
 <script id="fsj-monitor-realidade">
