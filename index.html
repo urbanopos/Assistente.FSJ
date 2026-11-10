@@ -1657,7 +1657,8 @@ function fsjRenderTarefasEmExecucao(){
  const pages=Math.max(1,Math.ceil(cards.length/perPage));
  let pageIndex=0;
  let pager=document.getElementById('fsjExecucaoPaginador');
- if(!pager){pager=document.createElement('nav');pager.id='fsjExecucaoPaginador';pager.setAttribute('aria-label','Navegação das tarefas em execução');box.after(pager);}
+ if(!pager){pager=document.createElement('nav');pager.id='fsjExecucaoPaginador';pager.setAttribute('aria-label','Navegação das tarefas em execução');box.after(pager);}else if(pager.previousElementSibling!==box){box.after(pager);}
+ box.querySelectorAll('.fsj-task-pagination').forEach(el=>el.remove());
  pager.style.cssText='display:flex;align-items:center;justify-content:center;gap:16px;padding:10px;position:sticky;bottom:4px;background:#f3fafb;border:1px solid #cbded6;border-radius:10px;z-index:6';
  const back=document.createElement('button'),forward=document.createElement('button'),counter=document.createElement('strong');
  back.type=forward.type='button';back.textContent='←';forward.textContent='→';
@@ -2261,6 +2262,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 /* A pagina Tarefas em Execucao tem sua propria lista. Barras globais de outras
    secoes nao devem aparecer no rodape desta tela. */
 #gestor:has(#tarefasEmExecucao:not(.hidden)) .fsj-task-pagination {display:none!important}
+#gestor #tarefasEmExecucao #fsjExecucaoLista [hidden]{display:none!important}
 </style>
 <style id="fsjResponsiveViewportDefault">
 /* DEFAULT: densidade adaptativa por plataforma; não interfere na versão Celular. */
@@ -2309,7 +2311,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  function refresh(){
   if(!document.getElementById('gestor')||document.getElementById('gestor').classList.contains('hidden'))return;
   document.querySelectorAll('#gestor #taskRows,#gestor #fsjPessoaGruposRows,#gestor #demandaGrupoRows,#gestor #listaSupervisaoConteudo tbody,#gestor #report tbody,#gestor #employeeTasks tbody').forEach(apply);
-  document.querySelectorAll('#gestor #fsjExecucaoLista section,#gestor #fsjResumoSituacaoLista section').forEach(section=>{const items=[...section.children].filter(x=>x.tagName==='ARTICLE');if(items.length)apply(section);});
+  document.querySelectorAll('#gestor #fsjResumoSituacaoLista section').forEach(section=>{const items=[...section.children].filter(x=>x.tagName==='ARTICLE');if(items.length)apply(section);});
  }
  let scheduled=false;
  const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh();});};
