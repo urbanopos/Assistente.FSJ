@@ -19,16 +19,29 @@
   tarefas.style.cssText='background:#176341;color:white;border:0;border-radius:10px;min-height:60px;padding:12px 18px;font-weight:700;width:100%';
   novo.append(tarefas);
   linhaFinal.after(novo);
-  // O botão Folgas e feriados já existe no menu verde; não duplicá-lo.
+  // Eliminar efetivamente os cartões da antiga página 1, não apenas ocultar
+  // seus conteúdos: elementos vazios também ocupam espaço na paginação CSS.
+  const cartaoAntigo=tarefas.closest('.card');
+  if(cartaoAntigo&&cartaoAntigo!==novo)cartaoAntigo.remove();
+  const aviso=root.querySelector('#fsjAplicativosNativos');
+  if(aviso)aviso.remove();
   const antigoFolgas=root.querySelector('#folgasResumo')?.closest('.card');
   if(antigoFolgas)antigoFolgas.remove();
-  // Aviso sobre instaladores ainda não validados não ocupa a página inicial móvel.
-  const aviso=root.querySelector('#fsjAplicativosNativos');
-  if(aviso)aviso.hidden=true;
-  // A área principal com botões precede os avisos secundários.
-  const primeiroBotao=root.querySelector('#fsjHomeTvButton');
-  const areaInicial=root.querySelector('#retornosSyncStatus');
-  if(areaInicial&&primeiroBotao)root.insertBefore(primeiroBotao,areaInicial);
+  // Colocar os comandos verdes à frente dos indicadores e textos informativos.
+  const indicadores=root.querySelector('#fsjOwnerIndicatorsRow');
+  const primeiraAcao=root.querySelector('#fsjHomeTvButton');
+  if(indicadores&&primeiraAcao){
+   const acoes=[
+    primeiraAcao,
+    root.querySelector('#fsjHomeEmergencyTasksRow'),
+    root.querySelector('#fsjHomePeopleLeavesRow'),
+    root.querySelector('#fsjHomeRunningTasksButton'),
+    linhaFinal,
+    novo
+   ];
+   for(const acao of acoes)if(acao)indicadores.before(acao);
+  }
+  // O estado de sincronização permanece acessível após o menu, sem bloqueá-lo.
   root.dataset.fsjOwnerHomeReordered='1';
  }
  function setup(root){
