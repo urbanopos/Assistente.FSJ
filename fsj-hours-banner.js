@@ -17,7 +17,11 @@
   let banner=document.getElementById('fsjHoursBanner');
   if(!banner&&show){
    banner=document.createElement('aside');banner.id='fsjHoursBanner';banner.className='fsj-hours-banner';banner.setAttribute('role','status');
-   banner.innerHTML='<div class="fsj-hours-clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v6l4 2"></path></svg></div><div class="fsj-hours-copy"><p class="fsj-hours-eyebrow">CONSULTA DE TAREFAS</p><p class="fsj-hours-text">Consulta disponível das 7h às 12h e das 14h às 16h20, horário de Pernambuco.</p><p class="fsj-hours-note">Horário de Pernambuco</p><a class="fsj-hours-tv" href="https://192.168.77.2:8443/" target="_self" rel="noreferrer">▶ TV FSJ — Vídeos e Chamadas</a></div>';
+   // Somente o link de TV do usuário individual muda; nenhuma regra de bloqueio é alterada.
+   const tvParams=new URLSearchParams(location.hash.slice(1));
+   const tvToken=tvParams.get('quadro')||tvParams.get('token')||new URLSearchParams(location.search).get('token')||'';
+   const tvHref=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tvToken)?'./tv-espectador.html#token='+encodeURIComponent(tvToken):'https://192.168.77.2:8443/';
+   banner.innerHTML='<div class="fsj-hours-clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v6l4 2"></path></svg></div><div class="fsj-hours-copy"><p class="fsj-hours-eyebrow">CONSULTA DE TAREFAS</p><p class="fsj-hours-text">Consulta disponível das 7h às 12h e das 14h às 16h20, horário de Pernambuco.</p><p class="fsj-hours-note">Horário de Pernambuco</p><a class="fsj-hours-tv" href="'+tvHref+'" target="_self" rel="noreferrer">▶ TV FSJ — Vídeos e Chamadas</a></div>';
 
    // Fora dos quadros protegidos: o aviso continua visível ao ocultar toda a tela.
    (document.querySelector('main')||document.body).prepend(banner);
