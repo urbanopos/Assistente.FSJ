@@ -49,7 +49,8 @@ function init(){
  }
   `;document.head.append(style);
  const info=wrap.querySelector('#fsjTvPortalInfo');
- const vmOrigin=new URL(window.FSJ_VIDEO_VM_URL||'https://192.168.1.114/').origin;
+ const fsjTVMobile=/Android|iPhone|iPod/i.test(navigator.userAgent)||navigator.userAgentData?.mobile===true;
+ const vmOrigin=new URL(fsjTVMobile&&typeof FSJ_VIDEO_VM_URL==='string'?FSJ_VIDEO_VM_URL:(window.FSJ_VIDEO_VM_URL||'https://192.168.1.114/')).origin;
  let currentSection='inicio';
  function sendSection(section){
   if(frame.contentWindow&&frame.dataset.ssoReady==='1')frame.contentWindow.postMessage({type:'fsj-tv-navigate',section},vmOrigin);
