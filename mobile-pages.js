@@ -11,10 +11,10 @@
   const tarefas=root.querySelector('#fsjTarefasNaoCumpridas');
   const tv=root.querySelector('#fsjHomeTvButton');
   if(!tarefas||!tv)return;
-  const antigoCartao=tarefas.closest('.card');
+  const antigoCartao=tarefas.closest('.card'); // Capturar antes de mover o botão.
   const menu=document.createElement('div');
   menu.id='fsjOwnerSingleHome';
-  menu.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;align-content:start';
+  menu.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:100%;align-content:start;box-sizing:border-box';
   const ids=['fsjHomeTvButton','fsjHomeEmergencyTasksRow','fsjHomePeopleLeavesRow','fsjHomeRunningTasksButton','fsjHomeAvisosDiagnosticoRow'];
   for(const id of ids){
    const el=root.querySelector('#'+id);
@@ -25,7 +25,7 @@
   tarefas.style.cssText='background:#176341;color:#fff;border:0;border-radius:10px;min-height:48px;padding:8px;font-weight:700;width:100%';
   overdue.append(tarefas);menu.append(overdue);
   // Preservar os botões restantes da antiga tela inicial, sem duplicar IDs.
-  const outros=[...root.querySelectorAll('button')].filter(btn=>!menu.contains(btn)&&!btn.closest('#fsjAplicativosNativos'));
+  const outros=[...root.querySelectorAll('button')].filter(btn=>!menu.contains(btn)&&!btn.closest('#fsjAplicativosNativos')&&!btn.closest('#fsjOwnerIndicatorsRow'));
   for(const btn of outros){
    if(btn.closest('#fsjOwnerIndicatorsRow'))continue; // Indicadores são consultas, não botões de menu.
    if(btn.closest('.card')||btn.parentElement===root){
@@ -33,7 +33,7 @@
     const wrapper=document.createElement('div');wrapper.style.cssText='min-width:0';wrapper.append(btn);menu.append(wrapper);
    }
   }
-  root.prepend(menu);
+  root.prepend(menu); // Somente conteúdo do dashboard; cabeçalho externo intocado.
   if(antigoCartao)antigoCartao.remove();
   for(const id of ['fsjAplicativosNativos','fsjOwnerIndicatorsRow','retornosSyncStatus']){
    const el=root.querySelector('#'+id);if(el)el.remove();
@@ -42,7 +42,7 @@
   // Layout compacto exclusivamente para a tela inicial do proprietário móvel.
   const style=document.createElement('style');style.textContent=
    '@media(max-width:700px){#fsjOwnerSingleHome{break-inside:avoid;column-span:all!important}'+
-   '#fsjOwnerSingleHome button{font-size:clamp(12px,3.4vw,16px)!important;min-height:44px!important;padding:7px!important;line-height:1.15!important}'+
+   '#fsjOwnerSingleHome button{font-size:clamp(12px,3.2vw,15px)!important;min-height:42px!important;padding:6px!important;line-height:1.15!important}'+
    '#fsjOwnerSingleHome #fsjHomeTvButton,#fsjOwnerSingleHome #fsjHomeRunningTasksButton,#fsjOwnerSingleHome #fsjHomeOverdueRow{grid-column:1/-1!important}'+
    '#fsjOwnerSingleHome #fsjHomeEmergencyTasksRow,#fsjOwnerSingleHome #fsjHomePeopleLeavesRow,#fsjOwnerSingleHome #fsjHomeAvisosDiagnosticoRow{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}'+
    '#dashboard .fsj-page-flow{row-gap:0!important}}';
