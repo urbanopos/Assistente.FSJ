@@ -1091,6 +1091,31 @@ async function fsjSalvarFolgaDoDia(){
   finally{botao.disabled=false;}
   return;
  }
+ // Exclusão: executar diretamente, sem depender do editor de motivos.
+ // A gravação central é confirmada antes de considerar a remoção concluída.
+ if(motivo==='__remover'){
+  const dia=fsjDataFolgaAtual;
+  const datasAntes=[...personDatesOff],motivosAntes={...personDayReasons};
+  personDatesOff=personDatesOff.filter(x=>x!==dia);
+  delete personDayReasons[dia];
+  fsjCalendarDirty=true;
+  botao.disabled=true;
+  try{
+   const ok=await fsjSalvarDatasCalendario();
+   if(ok){editor.hidden=true;renderPersonDatesOff();}
+   else{
+    personDatesOff=datasAntes;personDayReasons=motivosAntes;
+    editor.hidden=false;
+    if(feedback)feedback.textContent=document.getElementById('fsjCalendarStatus')?.textContent||'Remoção não confirmada.';
+    renderPersonDatesOff();editor.hidden=false;
+   }
+  }catch(e){
+   personDatesOff=datasAntes;personDayReasons=motivosAntes;
+   fsjCalendarStatus('Falha ao remover a folga: '+e.message);
+   renderPersonDatesOff();editor.hidden=false;
+  }finally{botao.disabled=false;}
+  return;
+ }
  fsjConfirmarMotivoFolga();
  botao.disabled=true;
  try{
