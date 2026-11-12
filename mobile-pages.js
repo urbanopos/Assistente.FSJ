@@ -76,6 +76,13 @@
   executionStyle.textContent='@media(max-width:700px){'+
    '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile{min-width:0!important;max-width:100%!important;padding:8px!important;box-sizing:border-box!important}'+
    '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile .fsj-page-navigation{display:none!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile>.fsj-page-navigation{display:none!important;height:0!important;padding:0!important;margin:0!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile .fsj-page-flow>h2{margin:2px 0!important;font-size:18px!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile .fsj-page-flow>p{margin:2px 0!important;font-size:12px!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista section>h3{margin:4px 0!important;font-size:15px!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista section article p{margin:2px 0!important;font-size:13px!important;line-height:1.25!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista section article .fsj-task-number{font-size:15px!important;padding:6px!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista section article{padding:7px!important;margin:4px 0!important}'+
    '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile .fsj-page-viewport{overflow-x:hidden!important;overflow-y:auto!important;min-width:0!important;width:100%!important}'+
    '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile .fsj-page-flow{display:flex!important;flex-direction:column!important;columns:auto!important;column-count:auto!important;width:100%!important;height:auto!important;gap:8px!important;min-width:0!important}'+
    '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista{width:100%!important;min-width:0!important;overflow:visible!important}'+
