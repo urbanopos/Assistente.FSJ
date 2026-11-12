@@ -795,3 +795,8 @@ Commit `2345dd7707327c04f3308eed8f4e2966761d48c3`: CSS em `index.html`, restrito
 
 ### Correção calendário na Ficha Pessoas (10/11/2026)
 Commit `f9a72f9e59059e69dc1df0215ad3bd8dbd842bfc`: botão da moldura de calendário alterna entre abrir/fechar, sem chamar a função que transfere o calendário para a aba Folgas e Férias. A grade Desktop força calendário na coluna direita, preservando campos e gravações. A aba Folgas e Férias mantém sua função `fsjAbrirCalendarioFolgas()` inalterada. Validar manualmente no GitHub Pages, especialmente navegação de meses e persistência das marcações. Backup original: `backup/antes-ficha-pessoas-desktop-20261110`.
+
+
+## Correção do calendário periódico no celular — 12/11/2026
+
+Commit `a420938a7b7aee62dc081b6a13ede7bf1603be92` (GitHub, publicação web sujeita à propagação do Pages). No `responder.html`, o bloqueio visual por estado `readonly/checking` foi retirado somente dos botões de dias do calendário. Permanecem bloqueados dias futuros, indisponíveis, concluídos, visitantes e datas anteriores à tolerância sem autorização do Proprietário. O servidor `resposta-tarefa` continua sendo a autoridade para validar o token, a data e a autorização, recusando duplicidade. A seta de próximo mês agora consulta o mês solicitado antes de exibir as marcações. Nenhuma mudança no Desktop ou na função Supabase foi feita. Teste operacional ainda pendente no link do executor/supervisor; confirmar hoje, ontem, atraso, duplicidade e mês seguinte. O commit anterior permite recuperação via histórico do GitHub.
