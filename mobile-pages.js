@@ -5,7 +5,34 @@
  const mobile=matchMedia('(max-width:700px)'),states=new Map();
  let frame=0;
  const element=(tag,className)=>{const el=document.createElement(tag);el.className=className;return el;};
+ function organizarInicioProprietario(root){
+  if(root.id!=='dashboard'||!matchMedia('(max-width:700px)').matches)return;
+  if(root.dataset.fsjOwnerHomeReordered==='1')return;
+  const tarefas=root.querySelector('#fsjTarefasNaoCumpridas');
+  const linhaFinal=root.querySelector('#fsjHomeAvisosDiagnosticoRow');
+  const tv=root.querySelector('#fsjHomeTvButton');
+  if(!tarefas||!linhaFinal||!tv)return;
+  // Manter o comando único de tarefas não cumpridas entre os botões verdes.
+  const novo=document.createElement('div');
+  novo.id='fsjHomeOverdueRow';
+  novo.style.cssText='grid-column:1 / -1;width:100%';
+  tarefas.style.cssText='background:#176341;color:white;border:0;border-radius:10px;min-height:60px;padding:12px 18px;font-weight:700;width:100%';
+  novo.append(tarefas);
+  linhaFinal.after(novo);
+  // O botão Folgas e feriados já existe no menu verde; não duplicá-lo.
+  const antigoFolgas=root.querySelector('#folgasResumo')?.closest('.card');
+  if(antigoFolgas)antigoFolgas.remove();
+  // Aviso sobre instaladores ainda não validados não ocupa a página inicial móvel.
+  const aviso=root.querySelector('#fsjAplicativosNativos');
+  if(aviso)aviso.hidden=true;
+  // A área principal com botões precede os avisos secundários.
+  const primeiroBotao=root.querySelector('#fsjHomeTvButton');
+  const areaInicial=root.querySelector('#retornosSyncStatus');
+  if(areaInicial&&primeiroBotao)root.insertBefore(primeiroBotao,areaInicial);
+  root.dataset.fsjOwnerHomeReordered='1';
+ }
  function setup(root){
+  organizarInicioProprietario(root);
   const viewport=element('div','fsj-page-viewport'),flow=element('div','fsj-page-flow');
   while(root.firstChild)flow.append(root.firstChild);
   viewport.append(flow);
