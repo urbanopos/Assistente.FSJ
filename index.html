@@ -1757,7 +1757,7 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial){
  const panel=document.createElement('section');panel.style.cssText='width:min(690px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:12px;padding:18px;color:#17382c';
  overlay.append(panel);document.body.append(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove()};
  const top=document.createElement('div');top.style.cssText='display:flex;justify-content:space-between;gap:10px';
- const title=document.createElement('strong');title.textContent=(t.code||'Tarefa')+' — '+t.text+' — '+fsjFrequencyLabel(t);
+ const title=document.createElement('strong');title.textContent=(t.code||'Tarefa')+(fsjFrequency(t)==='pontual'?'':' '+({diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'E',anual:'A'}[fsjFrequency(t)]||''))+' — '+t.text+' — '+fsjFrequencyLabel(t);
  const close=document.createElement('button');close.textContent='Fechar';close.onclick=()=>overlay.remove();top.append(title,close);panel.append(top);
  const who=document.createElement('p');who.textContent='Responsável: '+names(t)+' • Consulta do Proprietário';panel.append(who);
  const nav=document.createElement('div');nav.style.cssText='display:flex;align-items:center;gap:14px;margin:12px 0';
@@ -1825,7 +1825,7 @@ function fsjRenderTarefasEmExecucao(){
   for(const t of items){
    const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status),e=activeMap.get(String(t.id));
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:12px;margin:10px 0';
-   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+' — '+(t.text||'Sem descrição')+' — '+fsjFrequencyLabel(t);task.addEventListener('click',()=>{if(fsjFrequency(t)!=='pontual'){fsjCalendarioExecucaoDesktop(t);}else{fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);}});article.append(task);
+   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+(fsjFrequency(t)==='pontual'?'':' '+({diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'E',anual:'A'}[fsjFrequency(t)]||''))+' — '+(t.text||'Sem descrição')+' — '+fsjFrequencyLabel(t);task.addEventListener('click',()=>{if(fsjFrequency(t)!=='pontual'){fsjCalendarioExecucaoDesktop(t);}else{fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);}});article.append(task);
    if(archived){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
    const group=(S.groups||[]).find(g=>String(g.id)===String(t.groupId));
    const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Responsável',names(t)],['Registro',t.created?fsjDataHora(t.created):'Data/hora não disponível'],['Periodicidade',t.frequency||'pontual'],['Situação',archived?'Arquivada':(e?'Em execução':t.status||'Em aberto')]];
