@@ -33,19 +33,32 @@
     const wrapper=document.createElement('div');wrapper.style.cssText='min-width:0';wrapper.append(btn);menu.append(wrapper);
    }
   }
+  const indicadores=root.querySelector('#fsjOwnerIndicatorsRow');
+  if(indicadores)root.prepend(indicadores);
   root.prepend(menu); // Somente conteúdo do dashboard; cabeçalho externo intocado.
   if(antigoCartao)antigoCartao.remove();
-  for(const id of ['fsjAplicativosNativos','fsjOwnerIndicatorsRow','retornosSyncStatus']){
-   const el=root.querySelector('#'+id);if(el)el.remove();
+  // Preservar indicadores e elementos de sincronizacao: nunca remover dados do painel.
+  // Avisos e agenda permanecem montados para suas rotinas, mas nao ocupam a tela inicial.
+  for(const id of ['fsjAplicativosNativos','retornosSyncStatus']){
+   const el=root.querySelector('#'+id);if(el)el.classList.add('fsj-owner-home-secondary');
   }
-  const agenda=root.querySelector('#folgasResumo')?.closest('.card');if(agenda)agenda.remove();
+  const agenda=root.querySelector('#folgasResumo')?.closest('.card');if(agenda)agenda.classList.add('fsj-owner-home-secondary');
   // Layout compacto exclusivamente para a tela inicial do proprietário móvel.
   const style=document.createElement('style');style.textContent=
    '@media(max-width:700px){#fsjOwnerSingleHome{break-inside:avoid;column-span:all!important}'+
    '#fsjOwnerSingleHome button{font-size:clamp(12px,3.2vw,15px)!important;min-height:42px!important;padding:6px!important;line-height:1.15!important}'+
    '#fsjOwnerSingleHome #fsjHomeTvButton,#fsjOwnerSingleHome #fsjHomeRunningTasksButton,#fsjOwnerSingleHome #fsjHomeOverdueRow{grid-column:1/-1!important}'+
    '#fsjOwnerSingleHome #fsjHomeEmergencyTasksRow,#fsjOwnerSingleHome #fsjHomePeopleLeavesRow,#fsjOwnerSingleHome #fsjHomeAvisosDiagnosticoRow{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}'+
-   '#dashboard .fsj-page-flow{row-gap:0!important}}';
+   '#dashboard .fsj-page-flow{row-gap:0!important}'+
+   '#dashboard .fsj-owner-home-secondary{display:none!important}'+
+   '#dashboard.fsj-owner-single-page .fsj-page-navigation{display:none!important}'+
+   '#dashboard.fsj-owner-single-page .fsj-page-viewport{overflow-y:auto!important;overflow-x:hidden!important;height:100%!important}'+
+   '#dashboard.fsj-owner-single-page .fsj-page-flow{display:flex!important;flex-direction:column!important;column-count:auto!important;columns:auto!important;width:100%!important;height:auto!important;gap:6px!important}'+
+   '#dashboard.fsj-owner-single-page #fsjOwnerSingleHome{order:2!important}'+
+   '#dashboard.fsj-owner-single-page #fsjOwnerIndicatorsRow{order:1!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important;width:100%!important}'+
+   '#dashboard.fsj-owner-single-page #fsjOwnerIndicatorsRow .kpi{min-width:0!important;padding:5px 2px!important;text-align:center!important;font-size:10px!important}'+
+   '#dashboard.fsj-owner-single-page #fsjOwnerIndicatorsRow .kpi b{font-size:20px!important}'+
+   '}';
   document.head.append(style);
   root.dataset.fsjOwnerHomeReordered='2';
  }
@@ -65,6 +78,7 @@
    const navRow=element('div','fsj-page-nav-row');navRow.append(prev,status,next);footer.append(navRow);
   // Preservar a estrutura original de páginas e a navegação móvel.
   root.append(viewport,footer);root.classList.add('fsj-page-shell');
+  if(root.id==='dashboard'&&root.dataset.fsjOwnerHomeReordered==='2')root.classList.add('fsj-owner-single-page');
   const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null,answer,answerAnchor};states.set(root,state);
   prev.onclick=()=>{if(location.pathname.endsWith('/quadro.html')&&state.index===0){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.assign('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));}return;}if(state.index>0){turn(state,state.index-1);return;}if(location.pathname.endsWith('/quadro.html')){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.replace('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));return;}return;}goBack();};next.onclick=()=>turn(state,state.index+1);
   viewport.addEventListener('scroll',()=>{if(!mobile.matches)return;const index=Math.round(viewport.scrollLeft/state.stride);if(Number.isFinite(index)&&index!==state.index){state.index=index;update(state);}});
@@ -96,7 +110,7 @@
   state.status.setAttribute('aria-label','Página '+(state.index+1)+' de '+state.count);
   const showAnswer=!!state.answer&&!!window.fsjTaskAnswerVisible?.();
   if(state.answer){state.answer.hidden=!showAnswer;}state.status.hidden=false;
-  state.footer.hidden=false;
+  state.footer.hidden=state.root.classList.contains('fsj-owner-single-page');
  }
  function turn(state,index){
   state.index=index;update(state);
@@ -129,15 +143,15 @@
    // A Brisa fica junto ao seletor Ir para; o rodapé contém apenas navegação.
    if(manager&&typeof window.fsjPlaceBrisa==='function')window.fsjPlaceBrisa();
 
-   // Always reserve navigation height, so showing it cannot alter page count.
-   state.footer.hidden=false;
+   // Tela inicial unica do proprietario nao usa paginador.
+   state.footer.hidden=state.root.classList.contains('fsj-owner-single-page');
    const width=state.viewport.clientWidth;
    const height=state.viewport.clientHeight;
    if(!width||!height)continue;
    state.flow.style.setProperty('--fsj-page-width',width+'px');
    state.flow.style.setProperty('--fsj-page-height',height+'px');
    state.stride=width+24;
-   state.count=Math.max(1,Math.ceil((state.flow.scrollWidth+24-1)/state.stride));
+   state.count=state.root.classList.contains('fsj-owner-single-page')?1:Math.max(1,Math.ceil((state.flow.scrollWidth+24-1)/state.stride));
    if(state.pendingIndex!==null&&state.flow.querySelector('#content')?.style.display==='block'){state.index=state.pendingIndex;state.pendingIndex=null;}
    turn(state,state.index);
    if(state.flow.contains(document.activeElement))reveal(state,document.activeElement);
