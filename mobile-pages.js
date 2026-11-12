@@ -69,6 +69,22 @@
   viewport.append(flow);
   for(const label of flow.querySelectorAll('label')){const control=label.nextElementSibling;if(control?.matches('input:not([type=hidden]),select,textarea')){const group=element('div','fsj-control-group');label.before(group);group.append(label,control);}}
   if(root.id==='dashboard'){root.classList.remove('grid');flow.classList.add('grid');}
+
+  // Exclusivo do Proprietario Celular: cartoes responsivos e paginacao unica.
+  const executionStyle=document.createElement('style');
+  executionStyle.id='fsj-owner-execution-mobile-style';
+  executionStyle.textContent='@media(max-width:700px){'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile{min-width:0!important;max-width:100%!important;padding:8px!important;box-sizing:border-box!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile .fsj-page-navigation{display:none!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile .fsj-page-viewport{overflow-x:hidden!important;overflow-y:auto!important;min-width:0!important;width:100%!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile .fsj-page-flow{display:flex!important;flex-direction:column!important;columns:auto!important;column-count:auto!important;width:100%!important;height:auto!important;gap:8px!important;min-width:0!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista{width:100%!important;min-width:0!important;overflow:visible!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista section{width:100%!important;min-width:0!important;box-sizing:border-box!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista article{width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow-wrap:anywhere!important;margin:6px 0!important;padding:10px!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoLista button{max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important}'+
+   '#gestor #tarefasEmExecucao.fsj-owner-execution-mobile #fsjExecucaoPaginador{position:static!important;display:flex!important;flex-wrap:wrap!important;gap:8px!important;max-width:100%!important;box-sizing:border-box!important;margin:8px 0!important}'+
+   '}';
+  document.head.append(executionStyle);
   const footer=element('nav','fsj-page-navigation');footer.setAttribute('aria-label','Páginas desta tela');
   const prev=element('button',''),next=element('button',''),status=element('span','fsj-page-count');
   prev.type=next.type='button';prev.textContent='←';next.textContent='→';prev.className=next.className='fsj-nav-arrow';prev.setAttribute('aria-label','Anterior');next.setAttribute('aria-label','Próximo');
@@ -79,6 +95,8 @@
   // Preservar a estrutura original de páginas e a navegação móvel.
   root.append(viewport,footer);root.classList.add('fsj-page-shell');
   if(root.id==='dashboard'&&root.dataset.fsjOwnerHomeReordered==='2')root.classList.add('fsj-owner-single-page');
+  // Tarefas em Execucao: paginação própria, sem segunda barra do paginador global.
+  if(root.id==='tarefasEmExecucao'&&document.getElementById('gestor'))root.classList.add('fsj-owner-execution-mobile');
   const state={root,viewport,flow,footer,prev,next,status,index:0,count:1,stride:0,pendingIndex:null,answer,answerAnchor};states.set(root,state);
   prev.onclick=()=>{if(location.pathname.endsWith('/quadro.html')&&state.index===0){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.assign('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));}return;}if(state.index>0){turn(state,state.index-1);return;}if(location.pathname.endsWith('/quadro.html')){const t=new URLSearchParams(location.hash.slice(1)).get('token')||'';if(/^[0-9a-f-]{36}$/i.test(t)){location.replace('./inicio-usuario.html?fsj_atualizar='+Date.now()+'#token='+encodeURIComponent(t));return;}return;}goBack();};next.onclick=()=>turn(state,state.index+1);
   viewport.addEventListener('scroll',()=>{if(!mobile.matches)return;const index=Math.round(viewport.scrollLeft/state.stride);if(Number.isFinite(index)&&index!==state.index){state.index=index;update(state);}});
@@ -110,7 +128,7 @@
   state.status.setAttribute('aria-label','Página '+(state.index+1)+' de '+state.count);
   const showAnswer=!!state.answer&&!!window.fsjTaskAnswerVisible?.();
   if(state.answer){state.answer.hidden=!showAnswer;}state.status.hidden=false;
-  state.footer.hidden=state.root.classList.contains('fsj-owner-single-page');
+  state.footer.hidden=(state.root.classList.contains('fsj-owner-single-page')||state.root.classList.contains('fsj-owner-execution-mobile'));
  }
  function turn(state,index){
   state.index=index;update(state);
@@ -144,14 +162,14 @@
    if(manager&&typeof window.fsjPlaceBrisa==='function')window.fsjPlaceBrisa();
 
    // Tela inicial unica do proprietario nao usa paginador.
-   state.footer.hidden=state.root.classList.contains('fsj-owner-single-page');
+   state.footer.hidden=(state.root.classList.contains('fsj-owner-single-page')||state.root.classList.contains('fsj-owner-execution-mobile'));
    const width=state.viewport.clientWidth;
    const height=state.viewport.clientHeight;
    if(!width||!height)continue;
    state.flow.style.setProperty('--fsj-page-width',width+'px');
    state.flow.style.setProperty('--fsj-page-height',height+'px');
    state.stride=width+24;
-   state.count=state.root.classList.contains('fsj-owner-single-page')?1:Math.max(1,Math.ceil((state.flow.scrollWidth+24-1)/state.stride));
+   state.count=(state.root.classList.contains('fsj-owner-single-page')||state.root.classList.contains('fsj-owner-execution-mobile'))?1:Math.max(1,Math.ceil((state.flow.scrollWidth+24-1)/state.stride));
    if(state.pendingIndex!==null&&state.flow.querySelector('#content')?.style.display==='block'){state.index=state.pendingIndex;state.pendingIndex=null;}
    turn(state,state.index);
    if(state.flow.contains(document.activeElement))reveal(state,document.activeElement);
