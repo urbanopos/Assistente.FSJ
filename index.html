@@ -1746,6 +1746,52 @@ function fsjRenderTarefasPorSituacao(){
  }
 }
 
+
+/* FSJ 2026-11-12 — calendário de consulta exclusivo do Proprietário Desktop,
+   na aba Tarefas em Execução. Não grava nem modifica registros. */
+async function fsjCalendarioExecucaoDesktop(t,mesInicial){
+ if(window.fsjOwnerVerified!==true||window.matchMedia('(max-width:700px)').matches)return;
+ const anterior=document.getElementById('fsjCalendarioExecucaoDesktop');if(anterior)anterior.remove();
+ const overlay=document.createElement('div');overlay.id='fsjCalendarioExecucaoDesktop';
+ overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#0008;display:flex;align-items:center;justify-content:center;padding:18px';
+ const panel=document.createElement('section');panel.style.cssText='width:min(690px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:12px;padding:18px;color:#17382c';
+ overlay.append(panel);document.body.append(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove()};
+ const top=document.createElement('div');top.style.cssText='display:flex;justify-content:space-between;gap:10px';
+ const title=document.createElement('strong');title.textContent=(t.code||'Tarefa')+' — '+t.text+' — '+fsjFrequencyLabel(t);
+ const close=document.createElement('button');close.textContent='Fechar';close.onclick=()=>overlay.remove();top.append(title,close);panel.append(top);
+ const who=document.createElement('p');who.textContent='Responsável: '+names(t)+' • Consulta do Proprietário';panel.append(who);
+ const nav=document.createElement('div');nav.style.cssText='display:flex;align-items:center;gap:14px;margin:12px 0';
+ const prev=document.createElement('button'),next=document.createElement('button'),month=document.createElement('strong');prev.textContent='←';next.textContent='→';nav.append(prev,month,next);panel.append(nav);
+ const status=document.createElement('p');status.setAttribute('role','status');panel.append(status);
+ const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';panel.append(grid);
+ let cursor=mesInicial?new Date(mesInicial+'-01T12:00:00'):new Date();cursor=new Date(cursor.getFullYear(),cursor.getMonth(),1);
+ const today=fsjDia(new Date()),start=String(t.created||'').slice(0,10);
+ const freq=fsjFrequency(t);
+ function expected(day){if(!start||day<start)return false;const a=new Date(start+'T12:00:00Z'),b=new Date(day+'T12:00:00Z');const delta=Math.round((b-a)/86400000);if(delta<0)return false;
+  if(freq==='diaria')return true;if(freq==='semanal')return delta%7===0;if(freq==='quinzenal')return delta%14===0;
+  const months=(b.getUTCFullYear()-a.getUTCFullYear())*12+b.getUTCMonth()-a.getUTCMonth();
+  const step=({mensal:1,trimestral:3,semestral:6,anual:12})[freq];
+  return !!step&&months>=0&&months%step===0&&b.getUTCDate()===a.getUTCDate();
+ }
+ async function draw(){
+  const y=cursor.getFullYear(),m=cursor.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0');month.textContent=cursor.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});grid.replaceChildren();status.textContent='Consultando conclusões registradas…';
+  for(const w of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']){const e=document.createElement('b');e.textContent=w;e.style.textAlign='center';grid.append(e)}
+  for(let k=0;k<new Date(y,m,1).getDay();k++)grid.append(document.createElement('span'));
+  try{
+   const end=new Date(Date.UTC(y,m+1,1)).toISOString().slice(0,10);
+   const rows=await api('/rest/v1/retornos?select=dia_previsto,tipo,cancelado_por_revisao&tarefa_id=eq.'+encodeURIComponent(t.id)+'&dia_previsto=gte.'+prefix+'-01&dia_previsto=lt.'+end+'&tipo=eq.sim&cancelado_por_revisao=is.null&limit=1000');
+   if(!overlay.isConnected)return;
+   const done=new Set(rows.map(x=>x.dia_previsto).filter(Boolean));status.textContent='Verde: CONCLUÍDA • Vermelho: NÃO CONCLUÍDA (prazo vencido) • Cinza: sem vencimento ou futuro';
+   for(let day=1;day<=new Date(y,m+1,0).getDate();day++){
+    const date=prefix+'-'+String(day).padStart(2,'0'),completed=done.has(date),overdue=expected(date)&&date<today&&!completed;
+    const cell=document.createElement('div');cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+(completed?'#167044':overdue?'#b91c1c':'#edf0ed')+';color:'+(completed||overdue?'white':'#34483b');
+    const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=completed?'CONCLUÍDA':overdue?'NÃO CONCLUÍDA':'';cell.append(n,label);grid.append(cell);
+   }
+  }catch(err){status.textContent='Não foi possível consultar os registros: '+err.message;}
+ }
+ prev.onclick=()=>{cursor=new Date(cursor.getFullYear(),cursor.getMonth()-1,1);draw()};
+ next.onclick=()=>{cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1);draw()};draw();
+}
 function fsjRenderTarefasEmExecucao(){
  const box=document.getElementById('fsjExecucaoLista');if(!box)return;
  box.replaceChildren();
@@ -1779,7 +1825,7 @@ function fsjRenderTarefasEmExecucao(){
   for(const t of items){
    const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status),e=activeMap.get(String(t.id));
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:12px;margin:10px 0';
-   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+' — '+(t.text||'Sem descrição');task.addEventListener('click',()=>fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency));article.append(task);
+   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+' — '+(t.text||'Sem descrição')+' — '+fsjFrequencyLabel(t);task.addEventListener('click',()=>{if(fsjFrequency(t)!=='pontual'){fsjCalendarioExecucaoDesktop(t);}else{fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);}});article.append(task);
    if(archived){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
    const group=(S.groups||[]).find(g=>String(g.id)===String(t.groupId));
    const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Responsável',names(t)],['Registro',t.created?fsjDataHora(t.created):'Data/hora não disponível'],['Periodicidade',t.frequency||'pontual'],['Situação',archived?'Arquivada':(e?'Em execução':t.status||'Em aberto')]];
