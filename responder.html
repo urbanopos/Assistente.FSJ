@@ -267,7 +267,7 @@ function fsjCalendarioExecutor(info){
   bar.replaceChildren();grid.replaceChildren();
   const prev=document.createElement('button');prev.type='button';prev.textContent='←';prev.onclick=()=>{const d=new Date(year,month-1,1);year=d.getFullYear();month=d.getMonth();fetchMonth();};
   const title=document.createElement('strong');title.textContent=new Date(year,month,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  const next=document.createElement('button');next.type='button';next.textContent='→';next.onclick=()=>{const d=new Date(year,month+1,1);year=d.getFullYear();month=d.getMonth();draw();};
+  const next=document.createElement('button');next.type='button';next.textContent='→';next.onclick=()=>{const d=new Date(year,month+1,1);year=d.getFullYear();month=d.getMonth();fetchMonth();};
   bar.append(prev,title,next);
   for(const label of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']){const h=document.createElement('strong');h.textContent=label;h.style.cssText='text-align:center;font-size:12px';grid.append(h);}
   for(let n=0;n<new Date(year,month,1).getDay();n++)grid.append(document.createElement('span'));
@@ -278,7 +278,7 @@ function fsjCalendarioExecutor(info){
    const state=unavailable.has(date)?'dispensada':(byDay.get(date)||'sem_registro');
    const colors={cumprida:'#bde8c5',nao_cumprida:'#ffd2c8',dispensada:'#e2e2e2',em_execucao:'#cde3ff',prevista:'#fff1c4',sem_registro:'#f4f6f5'};
    button.style.cssText='min-width:0;min-height:45px;padding:4px;border:1px solid #aecdc0;border-radius:6px;background:'+(colors[state]||colors.sem_registro)+';color:#17382c';button.title=date+' — '+state.replaceAll('_',' ');
-   const ownerReady=document.documentElement.dataset.fsjOwnerMode==='unlocked'&&!!window.fsjOwnerDiagnosticToken;const yesterday=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date(Date.now()-86400000));button.disabled=date>recife||unavailable.has(date)||state==='cumprida'||!!info.visitante||calendarBusy||(date<yesterday&&!ownerReady)||['readonly','checking'].includes(document.documentElement.dataset.fsjOwnerMode);
+   const ownerReady=document.documentElement.dataset.fsjOwnerMode==='unlocked'&&!!window.fsjOwnerDiagnosticToken;const yesterday=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date(Date.now()-86400000));button.disabled=date>recife||unavailable.has(date)||state==='cumprida'||!!info.visitante||calendarBusy||(date<yesterday&&!ownerReady);
    if(!button.disabled)button.title='Registrar conclusão do dia '+date;
    button.onclick=async()=>{if(calendarBusy)return;if(!confirm('Confirmar a conclusão da tarefa no dia '+date.split('-').reverse().join('/')+'?'))return;calendarBusy=true;draw();try{const jwt=window.fsjOwnerDiagnosticToken;const headers={'Content-Type':'application/json'};if(document.documentElement.dataset.fsjOwnerMode==='unlocked'&&jwt)headers.Authorization='Bearer '+jwt;const r=await fetch(endpoint,{method:'POST',headers,body:JSON.stringify({action:'calendar-complete',token,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Falha ao salvar');byDay.set(date,'cumprida');status.textContent='Conclusão registrada para '+date.split('-').reverse().join('/')+(result.atrasada?' — regularização de atraso':'');await fetchMonth();}catch(e){status.textContent=e.message||'Não foi possível registrar';}finally{calendarBusy=false;draw();}};
    grid.append(button);
