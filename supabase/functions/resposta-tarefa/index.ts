@@ -141,7 +141,7 @@ Deno.serve(async req=>{
    if(!periodic)return respond({erro:'Tarefa não periódica'},400);
    if(data.action==='calendar-complete'){
     const day=String(data.dia||'');
-    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(day)||!Number.isFinite(Date.parse(day+'T12:00:00Z'))||new Date(day+'T12:00:00Z').toISOString().slice(0,10)!==day||day>todayLocal)return respond({erro:'Data inválida ou futura'},400);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!Number.isFinite(Date.parse(day+'T12:00:00Z'))||new Date(day+'T12:00:00Z').toISOString().slice(0,10)!==day||day>todayLocal)return respond({erro:'Data inválida ou futura'},400);
     if(!owner&&day!==todayLocal&&day!==yesterdayLocal)return respond({erro:'Somente o Proprietário pode regularizar dias anteriores à tolerância'},403);
     if(visitante)return respond({erro:'Perfil de consulta não pode concluir tarefas'},403);
     if(tasks[0].situacao==='Arquivado')return respond({erro:'Tarefa arquivada'},403);
@@ -150,7 +150,7 @@ Deno.serve(async req=>{
     const inserted=await db('retornos?select=id,dia_previsto',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({tarefa_id:link.tarefa_id,pessoa_id:link.pessoa_id,dia_previsto:day,origem:owner?'regularizacao_proprietario':'calendario_executor',tipo:'sim',conteudo:owner?'Regularizado pelo Proprietário; atraso preservado.':'Concluído pelo calendário periódico.'})});
     return respond({ok:true,registro:inserted[0],atrasada:day<yesterdayLocal,regularizada_pelo_proprietario:owner});
    }
-   if(!/^\\d{4}-\\d{2}$/.test(calendarMonth))return respond({erro:'Mês inválido'},400);
+   if(!/^\d{4}-\d{2}$/.test(calendarMonth))return respond({erro:'Mês inválido'},400);
    const start=calendarMonth+'-01',end=new Date(Date.UTC(Number(calendarMonth.slice(0,4)),Number(calendarMonth.slice(5,7)),1)).toISOString().slice(0,10);
    const records=await db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia_previsto=gte.'+start+'&dia_previsto=lt.'+end+'&select=dia_previsto,tipo,origem');
    return respond({mes:calendarMonth,dias:records.filter((x:any)=>x.tipo==='sim').map((x:any)=>({dia:x.dia_previsto,situacao:'cumprida'})),proprietario:owner});
