@@ -6,43 +6,48 @@
  let frame=0;
  const element=(tag,className)=>{const el=document.createElement(tag);el.className=className;return el;};
  function organizarInicioProprietario(root){
-  if(root.id!=='dashboard'||!matchMedia('(max-width:700px)').matches)return;
-  if(root.dataset.fsjOwnerHomeReordered==='1')return;
+  if(root.id!=='dashboard'||!mobile.matches||!document.getElementById('gestor'))return;
+  if(root.dataset.fsjOwnerHomeReordered==='2')return;
   const tarefas=root.querySelector('#fsjTarefasNaoCumpridas');
-  const linhaFinal=root.querySelector('#fsjHomeAvisosDiagnosticoRow');
   const tv=root.querySelector('#fsjHomeTvButton');
-  if(!tarefas||!linhaFinal||!tv)return;
-  // Manter o comando único de tarefas não cumpridas entre os botões verdes.
-  const novo=document.createElement('div');
-  novo.id='fsjHomeOverdueRow';
-  novo.style.cssText='grid-column:1 / -1;width:100%';
-  tarefas.style.cssText='background:#176341;color:white;border:0;border-radius:10px;min-height:60px;padding:12px 18px;font-weight:700;width:100%';
-  novo.append(tarefas);
-  linhaFinal.after(novo);
-  // Eliminar efetivamente os cartões da antiga página 1, não apenas ocultar
-  // seus conteúdos: elementos vazios também ocupam espaço na paginação CSS.
-  const cartaoAntigo=tarefas.closest('.card');
-  if(cartaoAntigo&&cartaoAntigo!==novo)cartaoAntigo.remove();
-  const aviso=root.querySelector('#fsjAplicativosNativos');
-  if(aviso)aviso.remove();
-  const antigoFolgas=root.querySelector('#folgasResumo')?.closest('.card');
-  if(antigoFolgas)antigoFolgas.remove();
-  // Colocar os comandos verdes à frente dos indicadores e textos informativos.
-  const indicadores=root.querySelector('#fsjOwnerIndicatorsRow');
-  const primeiraAcao=root.querySelector('#fsjHomeTvButton');
-  if(indicadores&&primeiraAcao){
-   const acoes=[
-    primeiraAcao,
-    root.querySelector('#fsjHomeEmergencyTasksRow'),
-    root.querySelector('#fsjHomePeopleLeavesRow'),
-    root.querySelector('#fsjHomeRunningTasksButton'),
-    linhaFinal,
-    novo
-   ];
-   for(const acao of acoes)if(acao)indicadores.before(acao);
+  if(!tarefas||!tv)return;
+  const antigoCartao=tarefas.closest('.card');
+  const menu=document.createElement('div');
+  menu.id='fsjOwnerSingleHome';
+  menu.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;align-content:start';
+  const ids=['fsjHomeTvButton','fsjHomeEmergencyTasksRow','fsjHomePeopleLeavesRow','fsjHomeRunningTasksButton','fsjHomeAvisosDiagnosticoRow'];
+  for(const id of ids){
+   const el=root.querySelector('#'+id);
+   if(el){el.style.margin='0';el.style.width='100%';el.style.minWidth='0';menu.append(el);}
   }
-  // O estado de sincronização permanece acessível após o menu, sem bloqueá-lo.
-  root.dataset.fsjOwnerHomeReordered='1';
+  const overdue=document.createElement('div');overdue.id='fsjHomeOverdueRow';
+  overdue.style.cssText='grid-column:1/-1';
+  tarefas.style.cssText='background:#176341;color:#fff;border:0;border-radius:10px;min-height:48px;padding:8px;font-weight:700;width:100%';
+  overdue.append(tarefas);menu.append(overdue);
+  // Preservar os botões restantes da antiga tela inicial, sem duplicar IDs.
+  const outros=[...root.querySelectorAll('button')].filter(btn=>!menu.contains(btn)&&!btn.closest('#fsjAplicativosNativos'));
+  for(const btn of outros){
+   if(btn.closest('#fsjOwnerIndicatorsRow'))continue; // Indicadores são consultas, não botões de menu.
+   if(btn.closest('.card')||btn.parentElement===root){
+    btn.style.cssText+=';background:#176341;color:white;border:0;border-radius:10px;min-height:48px;padding:8px;font-weight:700;width:100%';
+    const wrapper=document.createElement('div');wrapper.style.cssText='min-width:0';wrapper.append(btn);menu.append(wrapper);
+   }
+  }
+  root.prepend(menu);
+  if(antigoCartao)antigoCartao.remove();
+  for(const id of ['fsjAplicativosNativos','fsjOwnerIndicatorsRow','retornosSyncStatus']){
+   const el=root.querySelector('#'+id);if(el)el.remove();
+  }
+  const agenda=root.querySelector('#folgasResumo')?.closest('.card');if(agenda)agenda.remove();
+  // Layout compacto exclusivamente para a tela inicial do proprietário móvel.
+  const style=document.createElement('style');style.textContent=
+   '@media(max-width:700px){#fsjOwnerSingleHome{break-inside:avoid;column-span:all!important}'+
+   '#fsjOwnerSingleHome button{font-size:clamp(12px,3.4vw,16px)!important;min-height:44px!important;padding:7px!important;line-height:1.15!important}'+
+   '#fsjOwnerSingleHome #fsjHomeTvButton,#fsjOwnerSingleHome #fsjHomeRunningTasksButton,#fsjOwnerSingleHome #fsjHomeOverdueRow{grid-column:1/-1!important}'+
+   '#fsjOwnerSingleHome #fsjHomeEmergencyTasksRow,#fsjOwnerSingleHome #fsjHomePeopleLeavesRow,#fsjOwnerSingleHome #fsjHomeAvisosDiagnosticoRow{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}'+
+   '#dashboard .fsj-page-flow{row-gap:0!important}}';
+  document.head.append(style);
+  root.dataset.fsjOwnerHomeReordered='2';
  }
  function setup(root){
   organizarInicioProprietario(root);
