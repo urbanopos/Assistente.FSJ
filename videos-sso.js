@@ -1,7 +1,9 @@
 /* FSJ_SSO_TV_WEB_V1 */
 (()=>{
  const frame=document.getElementById('fsjVideoFrame'),state=document.getElementById('fsjVideoEstado');if(!frame||!state)return;
- const vm=new URL(FSJ_VIDEO_VM_URL);let nonce='',working=false;
+ const fsjTVMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||navigator.userAgentData?.mobile===true;
+ // Somente celular: acesso remoto à VM pela Hi-Link; Desktop conserva a origem original.
+ const vm=new URL(fsjTVMobile?'https://168.196.84.147/':FSJ_VIDEO_VM_URL);let nonce='',working=false;
  const note=state.nextElementSibling;if(note?.textContent.includes('autenticação única'))note.textContent='A TV FSJ usa o acesso do Assistente FSJ. A VM verifica a identidade e a autorização do proprietário. Outros perfis permanecem bloqueados.';
  async function access(){let token=await recuperarAcessoGestor();if(!token)throw Error('Entre no Assistente FSJ para abrir a TV FSJ.');let exp=0;try{const data=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');exp=JSON.parse(atob(data)).exp||0;}catch{}if(exp<Date.now()/1000+90)token=await renovarSessao();return token;}
  window.addEventListener('message',async event=>{
