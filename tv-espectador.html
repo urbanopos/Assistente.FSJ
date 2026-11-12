@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Cache-Control" content="no-store">
+<title>TV FSJ — Espectador</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#173b2a;background:#f6fbf8;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#175541;color:#fff;padding:10px 14px}
+header strong{font-size:16px}
+header a{font-size:14px;font-weight:600;color:#fff;text-decoration:none;border:1px solid #fff9;border-radius:8px;padding:8px 12px}
+main{display:flex;flex:1;min-height:0;position:relative}
+#tv{flex:1;width:100%;height:100%;border:0}
+#status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:22px;line-height:1.5;background:#f6fbf8;font-weight:600}
+#status[hidden]{display:none}
+</style>
+</head>
+<body>
+<header><strong>TV FSJ · Espectador</strong><a id="voltar" href="./inicio-usuario.html">Voltar ao Assistente</a></header>
+<main>
+<iframe id="tv" title="TV FSJ — Vídeos e Chamadas" allow="autoplay; fullscreen" referrerpolicy="no-referrer"></iframe>
+<div id="status" role="status">Conectando à TV FSJ pelo acesso existente…</div>
+</main>
+<script>
+(()=>{
+'use strict';
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const token=new URLSearchParams(location.hash.slice(1)).get('token')||'';
+const url=new URL('https://192.168.77.2:8443/');
+const origin=url.origin;
+const frame=document.getElementById('tv');
+const status=document.getElementById('status');
+const back=document.getElementById('voltar');
+let nonce='';
+let timer=null;
+function message(text){status.textContent=text;status.hidden=false}
+if(!uuid.test(token)){message('Acesso individual não identificado. Abra a TV pelo botão do seu Assistente FSJ.');return}
+back.href='./entrada-index-celular.html#token='+encodeURIComponent(token);
+window.addEventListener('message',event=>{
+ if(event.origin!==origin||event.source!==frame.contentWindow)return;
+ const d=event.data;
+ if(!d||typeof d.nonce!=='string'||!/^[0-9a-f-]{36}$/i.test(d.nonce))return;
+ if(d.type==='fsj-sso-ready'){
+  nonce=d.nonce;
+  message('Validando sua autorização de Vídeos e Chamadas…');
+  frame.contentWindow.postMessage({type:'fsj-sso-token',nonce,access_token:token},origin);
+ }else if(d.nonce===nonce&&d.type==='fsj-sso-ok'){
+  clearTimeout(timer);status.hidden=true;
+ }else if(d.nonce===nonce&&d.type==='fsj-sso-error'){
+  clearTimeout(timer);message(String(d.message||'Acesso à TV FSJ não autorizado.'));
+ }
+});
+url.searchParams.set('fsj_aba','1');
+frame.src=url.href;
+timer=setTimeout(()=>{
+ if(!status.hidden)message('A TV FSJ não respondeu. Confira a conexão do celular à VPN da Fazenda São José e o acesso à máquina virtual.');
+},18000);
+})();
+</script>
+</body>
+</html>
