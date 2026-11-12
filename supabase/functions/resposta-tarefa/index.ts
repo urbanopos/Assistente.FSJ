@@ -132,6 +132,29 @@ Deno.serve(async req=>{
   const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,exige_supervisao,reaberta_dia,reaberta_em,reabertura_motivo,prioridade,diaria,codigo_tarefa,periodicidade'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo,tipo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return respond({erro:'Tarefa indisponível'},404);
   if(!ownerTokenAccess&&(tasks[0].situacao==='Arquivado'||(tasks[0].situacao==='Concluída'&&!tasks[0].diaria)))return respond({erro:'Tarefa não disponível para este perfil'},403);
+  // Calendário periódico: registros por ocorrência, com autorização especial do titular.
+  const periodic=['diaria','semanal','quinzenal','mensal','trimestral','semestral','anual'].includes(String(tasks[0].periodicidade||'').toLowerCase());
+  const todayLocal=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date());
+  const yesterdayLocal=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date(Date.now()-86400000));
+  const calendarMonth=String(data.mes||todayLocal.slice(0,7));
+  if(['calendar','calendar-complete'].includes(data.action)){
+   if(!periodic)return respond({erro:'Tarefa não periódica'},400);
+   if(data.action==='calendar-complete'){
+    const day=String(data.dia||'');
+    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(day)||!Number.isFinite(Date.parse(day+'T12:00:00Z'))||new Date(day+'T12:00:00Z').toISOString().slice(0,10)!==day||day>todayLocal)return respond({erro:'Data inválida ou futura'},400);
+    if(!owner&&day!==todayLocal&&day!==yesterdayLocal)return respond({erro:'Somente o Proprietário pode regularizar dias anteriores à tolerância'},403);
+    if(visitante)return respond({erro:'Perfil de consulta não pode concluir tarefas'},403);
+    if(tasks[0].situacao==='Arquivado')return respond({erro:'Tarefa arquivada'},403);
+    const existing=await db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia_previsto=eq.'+day+'&tipo=eq.sim&select=id');
+    if(existing.length)return respond({erro:'Dia já concluído',ja_concluida:true},409);
+    const inserted=await db('retornos?select=id,dia_previsto',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({tarefa_id:link.tarefa_id,pessoa_id:link.pessoa_id,dia_previsto:day,origem:owner?'regularizacao_proprietario':'calendario_executor',tipo:'sim',conteudo:owner?'Regularizado pelo Proprietário; atraso preservado.':'Concluído pelo calendário periódico.'})});
+    return respond({ok:true,registro:inserted[0],atrasada:day<yesterdayLocal,regularizada_pelo_proprietario:owner});
+   }
+   if(!/^\\d{4}-\\d{2}$/.test(calendarMonth))return respond({erro:'Mês inválido'},400);
+   const start=calendarMonth+'-01',end=new Date(Date.UTC(Number(calendarMonth.slice(0,4)),Number(calendarMonth.slice(5,7)),1)).toISOString().slice(0,10);
+   const records=await db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia_previsto=gte.'+start+'&dia_previsto=lt.'+end+'&select=dia_previsto,tipo,origem');
+   return respond({mes:calendarMonth,dias:records.filter((x:any)=>x.tipo==='sim').map((x:any)=>({dia:x.dia_previsto,situacao:'cumprida'})),proprietario:owner});
+  }
   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()).slice(0,7)+'-01',p_pessoa:link.pessoa_id})});
   const visitante=!ownerTokenAccess&&String(people[0].tipo||'').trim().toLowerCase()==='visitante';
   const detail={visitante,revisao:tasks[0].reaberta_em?{dia:tasks[0].reaberta_dia,em:tasks[0].reaberta_em,motivo:tasks[0].reabertura_motivo}:null,progresso_mensal:progress[link.tarefa_id]||null,tarefa:tasks[0].descricao,codigo_tarefa:tasks[0].codigo_tarefa,periodicidade:tasks[0].periodicidade||'pontual',prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()),respondido:!!link.respondido_em||tasks[0].situacao==='Arquivado'};
