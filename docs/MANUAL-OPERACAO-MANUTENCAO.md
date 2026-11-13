@@ -167,6 +167,8 @@ Referências: [itens faltantes](itens-faltantes.md), [execução e suspensão](i
 
 **Botões da videoteca no celular do Proprietário — 13/11/2026.** Assistir, Edição e Administração ficam nessa ordem, em uma linha logo abaixo do seletor de vídeos. O pacote `TV-FSJ-Proprietario-Botoes.zip` aplica a mudança de apresentação na VM.
 
+**Navegação da Edição da TV no celular do Proprietário — 13/11/2026.** A área Edição recebe cabeçalho da Fazenda São José, com retorno à TV, e rodapé com setas e numeração da videoteca e do vídeo institucional. O pacote `TV-FSJ-Proprietario-Navegacao-Edicao.zip` foi testado localmente e aguarda aplicação na VM e conferência no Galaxy. Consulte o [contrato da TV](tv-fsj/modo-espectador-contrato.md).
+
 **Acesso à TV FSJ pelo link individual — 13/11/2026.** O botão da TV abre o Espectador para Executor, Supervisor e Gestor ativos, conforme a identificação no cadastro Pessoas. A área administrativa usa a sessão autenticada do Proprietário. O perfil Visitante mantém a TV demonstrativa. O pacote `TV-FSJ-Acesso-Sem-Aviso.zip` foi preparado para substituir o certificado privado por um certificado público no mesmo endereço da Hi-Link. A emissão e a validação em aparelho externo aguardam instalação na VM.
 
 Vídeos e Chamadas é uma aba do sistema; não tratar Reserva como novo aplicativo independente. Os nomes antigos de diretórios e serviços são identificadores técnicos legados.

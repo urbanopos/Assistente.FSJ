@@ -66,6 +66,12 @@ O Proprietário confirmou o funcionamento da versão anterior no Galaxy. Nesta a
 
 O pacote `TV-FSJ-Proprietario-Botoes.zip` atualiza o HTML e acrescenta a regra de estilo. O instalador salva as versões anteriores em `antes-botoes-proprietario-*` e valida a entrega da folha de estilos por HTTPS, sem reiniciar o serviço. Para restaurar, recoloque os dois arquivos dessa cópia. A posição e a ordem foram conferidas no HTML e o espaço dos rótulos foi estimado para larguras de 320 a 430 px. A conferência visual no Galaxy fica para depois de aplicar o pacote.
 
+### Cabeçalho e navegação da Edição no celular do Proprietário — 13/11/2026
+
+A Edição móvel recebe cabeçalho da Fazenda São José com link de volta à abertura da TV e iniciais do nome da sessão autenticada. O rodapé mostra as setas e a posição na sequência de **Editar videoteca** e **Vídeo institucional**. Quando a VM divide uma seção em várias páginas, o rodapé também mostra a posição dentro da seção. O fluxo conserva os formulários, a sessão do Proprietário e as permissões atuais.
+
+O pacote `TV-FSJ-Proprietario-Navegacao-Edicao.zip` atualiza `owner.js` na pasta `~/.local/share/fsj-tv-espectador`, faz cópia em `antes-navegacao-edicao-*` e verifica o JavaScript servido por HTTPS na porta 9443. A atualização dispensa reinício. Para recuperar, recoloque `owner.js` da cópia na pasta do serviço e reabra Edição. Os testes locais cobriram retorno, setas, numeração, subpáginas, escopo móvel e recuperação. A aplicação na VM e o teste visual no Galaxy estão pendentes.
+
 ### Certificado público para os links individuais — 13/11/2026
 
 O Galaxy da supervisora Regina exibiu o aviso de privacidade antes de carregar a página da TV. A pessoa e a autorização de supervisão estavam ativas e havia link vigente. A entrada do Gestor móvel também usa o fluxo Espectador após confirmar seu perfil; a TV de Visitante continua demonstrativa. O Espectador verifica o link individual e a pessoa ativa no servidor. A área administrativa do Proprietário exige a sessão autenticada e a titularidade.
