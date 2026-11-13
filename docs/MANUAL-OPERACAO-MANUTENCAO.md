@@ -157,6 +157,8 @@ Referências: [itens faltantes](itens-faltantes.md), [execução e suspensão](i
 
 **Entrada pelo cadastro Pessoas — 13/11/2026.** Nos índices móveis de Executor e Supervisor, o botão verde usa o link individual vigente para validar o destinatário ativo no cadastro Pessoas, inclusive no espelho. A VM recebe somente um código de TV válido por até 60 segundos e cria sessão de Espectador, sem exigir conta ou senha própria da TV. O espectador recebe vídeos compartilhados e, quando houver vínculo, os vídeos autorizados para sua conta. A abertura depende da instalação do pacote do piloto na VM e do certificado confiável no celular. Veja o [contrato do Espectador](tv-fsj/modo-espectador-contrato.md).
 
+**Saída da TV no celular — 13/11/2026.** Ao tocar em **Sair da TV**, o Espectador encerra a sessão da TV e usa a página de origem do navegador para voltar ao mesmo índice móvel de Executor ou Supervisor. O link individual permanece no Assistente e o formulário de senha é removido da interface Espectador. A correção é aplicada na VM pelo pacote `TV-FSJ-Saida-Celular.zip`. Consulte o [contrato do Espectador](tv-fsj/modo-espectador-contrato.md).
+
 Vídeos e Chamadas é uma aba do sistema; não tratar Reserva como novo aplicativo independente. Os nomes antigos de diretórios e serviços são identificadores técnicos legados.
 
 A TV inicia no cartaz com logotipo e botão de reprodução; ao terminar o institucional, retorna à tela estática. A TV pode ser assistida a qualquer horário por participante autorizado. Essa permissão não elimina automaticamente restrições de chamadas.
