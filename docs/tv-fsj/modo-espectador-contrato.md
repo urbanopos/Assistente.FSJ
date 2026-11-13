@@ -70,7 +70,13 @@ O pacote `TV-FSJ-Proprietario-Botoes.zip` atualiza o HTML e acrescenta a regra d
 
 A Edição móvel recebe cabeçalho da Fazenda São José com link de volta à abertura da TV e iniciais do nome da sessão autenticada. O rodapé mostra as setas e a posição na sequência de **Editar videoteca** e **Vídeo institucional**. Quando a VM divide uma seção em várias páginas, o rodapé também mostra a posição dentro da seção. O fluxo conserva os formulários, a sessão do Proprietário e as permissões atuais.
 
-O pacote `TV-FSJ-Proprietario-Navegacao-Edicao.zip` atualiza `owner.js` na pasta `~/.local/share/fsj-tv-espectador`, faz cópia em `antes-navegacao-edicao-*` e verifica o JavaScript servido por HTTPS na porta 9443. A atualização dispensa reinício. Para recuperar, recoloque `owner.js` da cópia na pasta do serviço e reabra Edição. Os testes locais cobriram retorno, setas, numeração, subpáginas, escopo móvel e recuperação. A aplicação na VM e o teste visual no Galaxy estão pendentes.
+O pacote `TV-FSJ-Proprietario-Navegacao-Edicao.zip` atualiza `owner.js` na pasta `~/.local/share/fsj-tv-espectador`, faz cópia em `antes-navegacao-edicao-*` e verifica o JavaScript servido por HTTPS na porta 9443. A atualização dispensa reinício. Para recuperar, recoloque `owner.js` da cópia na pasta do serviço e reabra Edição. Os testes locais cobriram retorno, setas, numeração, subpáginas, escopo móvel e recuperação. O Proprietário confirmou pelo terminal a aplicação na VM. O teste visual no Galaxy segue pendente.
+
+### Prévia e ações do vídeo selecionado na Edição móvel — 13/11/2026
+
+Na TV FSJ do Proprietário, selecionar um vídeo em **Edição → Editar videoteca** abre a prévia no topo, logo abaixo dos dois botões da seção. **Diretório** troca o tema da videoteca, **Denominação** atualiza o título, **Cortes** salva um trecho como novo vídeo e **Exclusão** pede confirmação. O corte exige FFmpeg e FFprobe na VM e aceita arquivos MP4 e WebM. A cópia é MP4, mantém o tema e as permissões do original e entra como vídeo da videoteca. O institucional ativo permanece protegido contra exclusão.
+
+O pacote `TV-FSJ-Proprietario-Editor-de-Video.zip` parte da navegação móvel instalada e atualiza `owner.js`, `owner_proxy.py` e `owner_video_edit.py`. O instalador confere a versão, guarda os arquivos originais em `antes-editor-de-video-*`, reinicia o serviço da porta 9443 e verifica a entrega e a recusa de renomeação e corte sem sessão. Para recuperar a interface anterior, restaure `owner.js` e `owner_proxy.py`, retire `owner_video_edit.py` e reinicie `fsj-tv-espectador.service`. A recuperação de código preserva alterações de vídeos feitas depois da instalação. A prévia, os controles e o recorte real com vídeo de amostra passaram em testes locais. A aplicação na VM e a conferência no Galaxy estão pendentes.
 
 ### Certificado público para os links individuais — 13/11/2026
 
