@@ -22,3 +22,10 @@
 
 ## Estado
 Contrato registrado no repositório. **Pendente de implementação e publicação do servidor VM**, que não está acessível para deploy nesta integração GitHub/Supabase. Não apresentar como ativado.
+
+## Botão verde no celular — preparação de 13/11/2026
+
+- O fluxo de link individual e espelho entra em `celular/layouts/executor/index.html` ou `celular/layouts/supervisor/index.html`. A preparação troca o IP privado pelo destino público `https://168.196.84.147/espectador` depois da validação de identidade já existente. O expediente continua a ser aplicado apenas aos recursos de tarefas. A URL da TV não recebe o token do quadro, identificadores de pessoa ou indicação de privilégio.
+- O navegador alcançou a entrada pública, mas rejeitou o certificado para esse endereço. A VM ainda precisa servir a rota dedicada com autenticação de TV e verificar o vínculo e a autorização de cada pessoa. A abertura do cartaz original e a reprodução no celular ainda não foram validadas. A versão de produção da navegação segue na branch `main`.
+- Validar no Wi-Fi da fazenda e nos dados móveis. Testar o link espelho com uma pessoa habilitada e uma pessoa sem autorização para a TV. A liberação do botão no descanso deve coexistir com o bloqueio das tarefas. Validar o certificado e os controles de servidor antes da publicação da rota.
+- A mudança de navegação será distribuída pelo GitHub Pages quando a alteração for integrada. Para recuperar o caminho anterior, reverter o commit dos índices móveis e sua documentação. Esta preparação não instala arquivos na VM nem requer cópia do banco.
