@@ -161,6 +161,8 @@ Referências: [itens faltantes](itens-faltantes.md), [execução e suspensão](i
 
 **TV FSJ do Proprietário no celular pela Hi-Link — 13/11/2026.** O botão verde abre a TV já existente na VM pela porta 9443. A entrada valida a sessão autenticada e a titularidade ativa, abre uma sessão de TV separada e volta ao Assistente em **Sair da TV**. A entrada do Espectador tem rota própria. A validação central está publicada e a ativação na VM requer `TV-FSJ-Proprietario-Hi-Link.zip`. Veja o [contrato da TV](tv-fsj/modo-espectador-contrato.md).
 
+**Compatibilidade da sessão do Proprietário — 13/11/2026.** O serviço da porta 9443 passa a reconhecer o cookie de sessão da TV que contém `Partitioned`, inclusive quando a versão local do Python não reconhece esse atributo. O pacote `TV-FSJ-Proprietario-Correcao-Sessao.zip` atualiza a leitura do cookie no piloto. A correção foi testada localmente com o cabeçalho da VM e aguarda aplicação e teste no Galaxy.
+
 Vídeos e Chamadas é uma aba do sistema; não tratar Reserva como novo aplicativo independente. Os nomes antigos de diretórios e serviços são identificadores técnicos legados.
 
 A TV inicia no cartaz com logotipo e botão de reprodução; ao terminar o institucional, retorna à tela estática. A TV pode ser assistida a qualquer horário por participante autorizado. Essa permissão não elimina automaticamente restrições de chamadas.
