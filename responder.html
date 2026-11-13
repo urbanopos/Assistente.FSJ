@@ -248,10 +248,14 @@ function fsjExibirRespostasGestor(dados){
  for(const r of rows){const card=document.createElement('div');card.className='msg';const when=document.createElement('p');when.className='muted';when.textContent='Respondida em '+new Date(r.respondida_em).toLocaleString('pt-BR',{timeZone:'America/Recife'});const body=document.createElement('p');body.textContent=r.resposta;card.append(when,body);painel.append(card);}
 }
 
+// FSJ calendário periódico — conclusão exclusiva pelos botões do calendário.
+// Escopo restrito ao responder.html: nenhuma alteração no fluxo de tarefas pontuais.
+<style id="fsj-periodic-calendar-only-style">html.fsj-periodic-calendar-only #executionControl,html.fsj-periodic-calendar-only #form{display:none!important}html.fsj-periodic-calendar-only #fsjCalendarioExecutor{display:block!important}</style>
 // FSJ calendário periódico — consulta dos dias; conclusão permanece no fluxo SIM existente.
 function fsjCalendarioExecutor(info){
  const frequency=String(info?.periodicidade||'').toLowerCase();
  if(!['diaria','semanal','quinzenal','mensal','trimestral','semestral','anual'].includes(frequency))return;
+ document.documentElement.classList.add('fsj-periodic-calendar-only');
  let old=document.getElementById('fsjCalendarioExecutor');if(old)old.remove();
  const host=document.createElement('section');host.id='fsjCalendarioExecutor';host.className='card';
  host.style.cssText='margin:12px 0;padding:12px;max-width:100%;box-sizing:border-box';
