@@ -1806,16 +1806,24 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
    const end=new Date(Date.UTC(y,m+1,1)).toISOString().slice(0,10);
    const rows=await api('/rest/v1/retornos?select=dia_previsto,tipo,cancelado_por_revisao&tarefa_id=eq.'+encodeURIComponent(t.id)+'&dia_previsto=gte.'+prefix+'-01&dia_previsto=lt.'+end+'&tipo=eq.sim&cancelado_por_revisao=is.null'+(pessoaId?'&pessoa_id=eq.'+encodeURIComponent(pessoaId):'')+'&limit=1000');
    const personLocal=(S.people||[]).find(p=>String(p.id)===String(pessoaId))||{};
-   let official={};if(pessoaId){try{const officialPerson=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(pessoaId)+'&select=folgas_datas,folgas_motivos,ferias_inicio,ferias_fim');official=officialPerson[0]||{};}catch(e){console.warn('Calendário: usando folgas já carregadas da ficha Pessoas',e);}}
+   let official={};let holidays=[];
+   if(pessoaId){
+    const jwt=localStorage.getItem('fsj_access_token')||'';
+    if(jwt){
+     const res=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({action:'consultar-folgas',pessoa_id:pessoaId,mes:prefix})});
+     const data=await res.json();if(!res.ok)throw Error('Folgas e feriados: '+(data.erro||res.status));official=data;holidays=data.feriados||[];
+    }else{throw Error('Sessão do Proprietário necessária para consultar folgas e feriados');}
+   }
    const offDates=new Set([...(personLocal.datesOff||[]),...(official.folgas_datas||[])]);
    const reasons={...(personLocal.dayOffReasons||{}),...(official.folgas_motivos||{})};
+   const holidayReasons=new Map(holidays.filter(h=>h.dia).map(h=>[h.dia,String(h.nome||'Feriado')]));
    official.ferias_inicio=official.ferias_inicio||personLocal.vacationStart;
    official.ferias_fim=official.ferias_fim||personLocal.vacationEnd;
-   const offReason=date=>{if(!pessoaId)return '';if(offDates.has(date))return String(reasons[date]||'Folga');if(official.ferias_inicio&&official.ferias_fim&&date>=official.ferias_inicio&&date<=official.ferias_fim)return 'Férias';return ''};
+   const offReason=date=>{if(!pessoaId)return '';if(offDates.has(date))return String(reasons[date]||'Folga');if(official.ferias_inicio&&official.ferias_fim&&date>=official.ferias_inicio&&date<=official.ferias_fim)return 'Férias';if(holidayReasons.has(date))return 'Feriado — '+holidayReasons.get(date);return ''};
    if(!overlay.isConnected)return;
    const done=new Set(rows.map(x=>x.dia_previsto).filter(Boolean));status.textContent='Verde: CONCLUÍDA • Vermelho: NÃO CONCLUÍDA (prazo vencido) • Verde claro: folga • Amarelo: feriado • Azul claro: férias • Cinza: sem vencimento ou futuro'+(pessoaId?' • Toque em um dia pendente para registrar a conclusão como Proprietário.':'');
    for(let day=1;day<=new Date(y,m+1,0).getDate();day++){
-    const date=prefix+'-'+String(day).padStart(2,'0'),completed=done.has(date),reason=offReason(date),holiday=/feriad/i.test(reason),vacation=/férias/i.test(reason),overdue=expected(date)&&date<today&&!completed&&!reason;
+    const date=prefix+'-'+String(day).padStart(2,'0'),completed=done.has(date),reason=offReason(date),holiday=holidayReasons.has(date)||/^Feriado/i.test(reason),vacation=/^Férias/i.test(reason),overdue=expected(date)&&date<today&&!completed&&!reason;
     const cell=document.createElement('div');cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+(completed?'#167044':reason?(vacation?'#c9dcfa':holiday?'#f9e3a9':'#bde7c9'):overdue?'#b91c1c':'#edf0ed')+';color:'+(completed||overdue?'white':'#34483b');
     if(pessoaId&&expected(date)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
 
