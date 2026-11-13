@@ -65,3 +65,11 @@ O pacote `TV-FSJ-Proprietario-Layout.zip` atualiza somente a entrada móvel do P
 O Proprietário confirmou o funcionamento da versão anterior no Galaxy. Nesta atualização, **Assistir**, **Edição** e **Administração** aparecem nessa ordem, na mesma linha abaixo do seletor de vídeos. O CSS acrescentado aplica-se somente ao grupo de botões do Proprietário. Os comandos e a lógica de reprodução usam o mesmo código já instalado.
 
 O pacote `TV-FSJ-Proprietario-Botoes.zip` atualiza o HTML e acrescenta a regra de estilo. O instalador salva as versões anteriores em `antes-botoes-proprietario-*` e valida a entrega da folha de estilos por HTTPS, sem reiniciar o serviço. Para restaurar, recoloque os dois arquivos dessa cópia. A posição e a ordem foram conferidas no HTML e o espaço dos rótulos foi estimado para larguras de 320 a 430 px. A conferência visual no Galaxy fica para depois de aplicar o pacote.
+
+### Certificado público para os links individuais — 13/11/2026
+
+O Galaxy da supervisora Regina exibiu o aviso de privacidade antes de carregar a página da TV. A pessoa e a autorização de supervisão estavam ativas e havia link vigente. A entrada do Gestor móvel também usa o fluxo Espectador após confirmar seu perfil; a TV de Visitante continua demonstrativa. O Espectador verifica o link individual e a pessoa ativa no servidor. A área administrativa do Proprietário exige a sessão autenticada e a titularidade.
+
+O pacote `TV-FSJ-Acesso-Sem-Aviso.zip` solicita um certificado público para `168.196.84.147`, usando Certbot 5.10.0. A validação e a renovação usam TCP 80 na Hi-Link, encaminhada pelo Dell até `192.168.77.2:9080`. A entrada de TV continua em TCP 9443 e as portas 443 e 8443 mantêm seus serviços atuais. A renovação automática usa um timer do usuário da VM e o servidor recarrega o certificado para novas conexões. O instalador confirma a cadeia, o IP e uma simulação de renovação antes de trocar o certificado servido. Recuperação: restaure `espectador.py` de `antes-https-publico-*`, remova `public_tls.py`, reinicie o piloto e desative `fsj-tv-https-renovar.timer`.
+
+Os testes locais cobriram a recarga do certificado sem reiniciar o servidor, perfis móveis e a recusa de cadastro inativo. A emissão real depende do encaminhamento na Hi-Link e o teste final precisa do link próprio em um aparelho que use as autoridades confiáveis padrão.
