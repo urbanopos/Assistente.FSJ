@@ -71,7 +71,37 @@ function init(){
   if(b.dataset.tv==='voltar'){currentSection='inicio';wrap.classList.remove('fsj-tv-viewing');frame.hidden=true;window.navTo?.('dashboard');return;}
   connect(b.dataset.tv);
  });
+ let openingOwner=false;
+ async function openOwnerMobile(){
+  if(!fsjPainelPronto||window.fsjExited||window.fsjOwnerVerified!==true){
+   window.alert('Entre no Assistente FSJ como Proprietário para abrir a TV.');
+   return;
+  }
+  if(openingOwner)return;
+  openingOwner=true;
+  try{
+   const status=await fetch('https://168.196.84.147:9443/proprietario/disponivel',{
+    cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(7000),
+   });
+   if(!status.ok)throw Error('A TV do Proprietário ainda não está disponível pela Hi-Link.');
+   const token=await recuperarAcessoGestor();
+   if(!token)throw Error('Entre novamente no Assistente FSJ para abrir a TV.');
+   if(window.fsjExited||window.fsjOwnerVerified!==true)return;
+   const code=await fetch(ARMAZ_URL+'/functions/v1/fsj-tv-proprietario-acesso',{
+    method:'POST',cache:'no-store',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token,apikey:ARMAZ_KEY},
+    body:JSON.stringify({action:'issue'}),signal:AbortSignal.timeout(10000),
+   });
+   const data=await code.json();
+   if(!code.ok||typeof data.code!=='string'||!/^[A-Za-z0-9_-]{42,20000}$/.test(data.code)){
+    throw Error(data.erro||'Não foi possível confirmar a titularidade para a TV.');
+   }
+   if(window.fsjExited||window.fsjOwnerVerified!==true)return;
+   location.assign('https://168.196.84.147:9443/proprietario#acesso='+encodeURIComponent(data.code));
+  }catch(error){window.alert(error.message);}
+  finally{openingOwner=false;}
+ }
  window.abrirTVFSJPortal=function(){
+  if(window.FSJ_PLATFORM?.platform==='celular')return openOwnerMobile();
   if(typeof window.abrirVideosReserva!=='function')return;
   window.abrirVideosReserva();
   currentSection='inicio';wrap.classList.remove('fsj-tv-viewing');

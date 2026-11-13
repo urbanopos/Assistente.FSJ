@@ -159,6 +159,8 @@ Referências: [itens faltantes](itens-faltantes.md), [execução e suspensão](i
 
 **Saída da TV no celular — 13/11/2026.** Ao tocar em **Sair da TV**, o Espectador encerra a sessão da TV e usa a página de origem do navegador para voltar ao mesmo índice móvel de Executor ou Supervisor. O link individual permanece no Assistente e o formulário de senha é removido da interface Espectador. A correção é aplicada na VM pelo pacote `TV-FSJ-Saida-Celular.zip`. Consulte o [contrato do Espectador](tv-fsj/modo-espectador-contrato.md).
 
+**TV FSJ do Proprietário no celular pela Hi-Link — 13/11/2026.** O botão verde abre a TV já existente na VM pela porta 9443. A entrada valida a sessão autenticada e a titularidade ativa, abre uma sessão de TV separada e volta ao Assistente em **Sair da TV**. A entrada do Espectador tem rota própria. A validação central está publicada e a ativação na VM requer `TV-FSJ-Proprietario-Hi-Link.zip`. Veja o [contrato da TV](tv-fsj/modo-espectador-contrato.md).
+
 Vídeos e Chamadas é uma aba do sistema; não tratar Reserva como novo aplicativo independente. Os nomes antigos de diretórios e serviços são identificadores técnicos legados.
 
 A TV inicia no cartaz com logotipo e botão de reprodução; ao terminar o institucional, retorna à tela estática. A TV pode ser assistida a qualquer horário por participante autorizado. Essa permissão não elimina automaticamente restrições de chamadas.
