@@ -149,11 +149,14 @@ Deno.serve(async req=>{
     const existing=await db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia_previsto=eq.'+day+'&tipo=eq.sim&select=id');
     if(existing.length)return respond({erro:'Dia já concluído',ja_concluida:true},409);
     const inserted=await db('retornos?select=id,dia_previsto',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({tarefa_id:link.tarefa_id,pessoa_id:link.pessoa_id,dia_previsto:day,origem:owner?'regularizacao_proprietario':'calendario_executor',tipo:'sim',conteudo:owner?'Regularizado pelo Proprietário; atraso preservado.':'Concluído pelo calendário periódico.'})});
-    return respond({ok:true,registro:inserted[0],atrasada:day<yesterdayLocal,regularizada_pelo_proprietario:owner});
+    return respond({ok:true,registro:inserted[0],atrasada:day<yesterdayLocal,regularizada_pelo_proprietario:owner,indisponiveis:offs});
    }
    if(!/^\d{4}-\d{2}$/.test(calendarMonth))return respond({erro:'Mês inválido'},400);
    const start=calendarMonth+'-01',end=new Date(Date.UTC(Number(calendarMonth.slice(0,4)),Number(calendarMonth.slice(5,7)),1)).toISOString().slice(0,10);
    const records=await db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia_previsto=gte.'+start+'&dia_previsto=lt.'+end+'&select=dia_previsto,tipo,origem');
+   const personCalendar=await db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=folgas_datas,folgas_motivos,ferias_inicio,ferias_fim');
+   const pc=personCalendar[0]||{};const offs=(pc.folgas_datas||[]).filter((d:string)=>d>=start&&d<end).map((d:string)=>({dia:d,motivo:String(pc.folgas_motivos?.[d]||'Folga')}));
+   if(pc.ferias_inicio&&pc.ferias_fim){for(let d=new Date(Math.max(Date.parse(start+'T12:00:00Z'),Date.parse(pc.ferias_inicio+'T12:00:00Z')));d.getTime()<=Date.parse(pc.ferias_fim+'T12:00:00Z')&&d.toISOString().slice(0,10)<end;d.setUTCDate(d.getUTCDate()+1)){const day=d.toISOString().slice(0,10);if(!offs.some((x:any)=>x.dia===day))offs.push({dia:day,motivo:'Férias'});}}
    return respond({mes:calendarMonth,dias:records.filter((x:any)=>x.tipo==='sim').map((x:any)=>({dia:x.dia_previsto,situacao:'cumprida'})),proprietario:owner});
   }
   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()).slice(0,7)+'-01',p_pessoa:link.pessoa_id})});
