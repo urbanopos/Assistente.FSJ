@@ -21,4 +21,10 @@
 6. Nenhuma alteração na rotina WhatsApp das 7h.
 
 ## Estado
-Contrato registrado no repositório. **Pendente de implementação e publicação do servidor VM**, que não está acessível para deploy nesta integração GitHub/Supabase. Não apresentar como ativado.
+Piloto Espectador instalado na VM em serviço separado. A entrada respondeu HTTP 200 pelo Dell, vídeos sem sessão retornaram 403 e a rota de manutenção retornou 404. A regra TCP 9443 está ativa no roteador da Hi-Link e aponta para a porta 9443 do Dell. O acesso ao endereço público e a reprodução autenticada no celular aguardam validação.
+
+## Botão verde no celular — 13/11/2026
+
+- O fluxo de link individual e espelho entra em `celular/layouts/executor/index.html` ou `celular/layouts/supervisor/index.html`. O botão verde abre `https://168.196.84.147:9443/espectador` depois da validação do destinatário. Durante o descanso, o botão continua disponível e as tarefas seguem o expediente. A URL da TV não recebe o token de tarefas, identificadores de pessoa ou privilégios.
+- A navegação é distribuída pelo GitHub Pages a partir de `main`. Validar pelo botão verde no link espelho, com o Wi-Fi da Fazenda ligado. Para entrar no Espectador, o aparelho deve confiar na CA da Fazenda e a conta deve estar autorizada na TV.
+- Para recuperar o destino anterior, reverter a alteração nos dois índices móveis e a documentação correspondente. Essa recuperação no GitHub não requer alterações no banco nem na VM.

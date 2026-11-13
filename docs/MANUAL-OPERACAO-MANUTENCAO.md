@@ -153,6 +153,8 @@ Referências: [itens faltantes](itens-faltantes.md), [execução e suspensão](i
 
 ## TV FSJ e biblioteca
 
+**Acesso móvel pela Hi-Link — 13/11/2026.** O botão verde dos índices móveis de Executor e Supervisor passa a apontar para a [entrada Espectador da Hi-Link](https://168.196.84.147:9443/espectador) após a validação do destinatário, inclusive em acesso espelho e durante o descanso. A VM autentica o Espectador com credencial própria da TV. O piloto responde localmente na VM e pelo Dell. O encaminhamento TCP 9443 foi configurado no roteador Hi-Link para o Dell, e o teste no celular depende da confiança na CA da Fazenda no aparelho. Na mesma entrega, a identificação da versão do índice principal foi alinhada à versão já declarada no HTML, para evitar recargas indevidas. A situação, os testes e a recuperação estão no [contrato do Espectador](tv-fsj/modo-espectador-contrato.md).
+
 Vídeos e Chamadas é uma aba do sistema; não tratar Reserva como novo aplicativo independente. Os nomes antigos de diretórios e serviços são identificadores técnicos legados.
 
 A TV inicia no cartaz com logotipo e botão de reprodução; ao terminar o institucional, retorna à tela estática. A TV pode ser assistida a qualquer horário por participante autorizado. Essa permissão não elimina automaticamente restrições de chamadas.
