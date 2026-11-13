@@ -1805,8 +1805,12 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
   try{
    const end=new Date(Date.UTC(y,m+1,1)).toISOString().slice(0,10);
    const rows=await api('/rest/v1/retornos?select=dia_previsto,tipo,cancelado_por_revisao&tarefa_id=eq.'+encodeURIComponent(t.id)+'&dia_previsto=gte.'+prefix+'-01&dia_previsto=lt.'+end+'&tipo=eq.sim&cancelado_por_revisao=is.null'+(pessoaId?'&pessoa_id=eq.'+encodeURIComponent(pessoaId):'')+'&limit=1000');
-   const officialPerson=pessoaId?await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(pessoaId)+'&select=folgas_datas,folgas_motivos,ferias_inicio,ferias_fim'):[];
-   const official=officialPerson[0]||{};const offDates=new Set(official.folgas_datas||[]);const reasons=official.folgas_motivos||{};
+   const personLocal=(S.people||[]).find(p=>String(p.id)===String(pessoaId))||{};
+   let official={};if(pessoaId){try{const officialPerson=await api('/rest/v1/pessoas?id=eq.'+encodeURIComponent(pessoaId)+'&select=folgas_datas,folgas_motivos,ferias_inicio,ferias_fim');official=officialPerson[0]||{};}catch(e){console.warn('Calendário: usando folgas já carregadas da ficha Pessoas',e);}}
+   const offDates=new Set([...(personLocal.datesOff||[]),...(official.folgas_datas||[])]);
+   const reasons={...(personLocal.dayOffReasons||{}),...(official.folgas_motivos||{})};
+   official.ferias_inicio=official.ferias_inicio||personLocal.vacationStart;
+   official.ferias_fim=official.ferias_fim||personLocal.vacationEnd;
    const offReason=date=>{if(!pessoaId)return '';if(offDates.has(date))return String(reasons[date]||'Folga');if(official.ferias_inicio&&official.ferias_fim&&date>=official.ferias_inicio&&date<=official.ferias_fim)return 'Férias';return ''};
    if(!overlay.isConnected)return;
    const done=new Set(rows.map(x=>x.dia_previsto).filter(Boolean));status.textContent='Verde: CONCLUÍDA • Vermelho: NÃO CONCLUÍDA (prazo vencido) • Verde claro: folga • Amarelo: feriado • Azul claro: férias • Cinza: sem vencimento ou futuro'+(pessoaId?' • Toque em um dia pendente para registrar a conclusão como Proprietário.':'');
