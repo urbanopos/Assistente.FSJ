@@ -133,6 +133,7 @@ Deno.serve(async req=>{
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return respond({erro:'Tarefa indisponível'},404);
   if(!ownerTokenAccess&&(tasks[0].situacao==='Arquivado'||(tasks[0].situacao==='Concluída'&&!tasks[0].diaria)))return respond({erro:'Tarefa não disponível para este perfil'},403);
   // Calendário periódico: registros por ocorrência, com autorização especial do titular.
+  const visitante=!ownerTokenAccess&&String(people[0].tipo||'').trim().toLowerCase()==='visitante';
   const periodic=['diaria','semanal','quinzenal','mensal','trimestral','semestral','anual'].includes(String(tasks[0].periodicidade||'').toLowerCase());
   const todayLocal=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date());
   const yesterdayLocal=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date(Date.now()-86400000));
@@ -156,7 +157,6 @@ Deno.serve(async req=>{
    return respond({mes:calendarMonth,dias:records.filter((x:any)=>x.tipo==='sim').map((x:any)=>({dia:x.dia_previsto,situacao:'cumprida'})),proprietario:owner});
   }
   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()).slice(0,7)+'-01',p_pessoa:link.pessoa_id})});
-  const visitante=!ownerTokenAccess&&String(people[0].tipo||'').trim().toLowerCase()==='visitante';
   const detail={visitante,revisao:tasks[0].reaberta_em?{dia:tasks[0].reaberta_dia,em:tasks[0].reaberta_em,motivo:tasks[0].reabertura_motivo}:null,progresso_mensal:progress[link.tarefa_id]||null,tarefa:tasks[0].descricao,codigo_tarefa:tasks[0].codigo_tarefa,periodicidade:tasks[0].periodicidade||'pontual',prioridade:tasks[0].prioridade||'normal',responsavel:people[0].identificacao||people[0].nome,dia:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()),respondido:!!link.respondido_em||tasks[0].situacao==='Arquivado'};
   if(data.action==='detail'){const [executions,answers,gestorReplies]=await Promise.all([db('execucoes_tarefa?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia=eq.'+new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date())+'&select=estado,iniciado_em,retomado_em,suspenso_em,concluido_em'),db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=tarefa_id,tipo,criado_em,dia_previsto&order=criado_em.desc'),db('respostas_perguntas_gestor?pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=pergunta_id,resposta,respondida_em&order=respondida_em.desc')]);return respond({...detail,situacao:taskSituation(tasks[0],answers,new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date())),execucao:executions[0]||null, respostas_gestor:gestorReplies});}
   if(visitante)return respond({erro:'Perfil Visitante: acesso demonstrativo, sem registro de ações.'},403);
