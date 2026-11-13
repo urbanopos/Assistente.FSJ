@@ -163,6 +163,8 @@ Referências: [itens faltantes](itens-faltantes.md), [execução e suspensão](i
 
 **Compatibilidade da sessão do Proprietário — 13/11/2026.** O serviço da porta 9443 passa a reconhecer o cookie de sessão da TV que contém `Partitioned`, inclusive quando a versão local do Python não reconhece esse atributo. O pacote `TV-FSJ-Proprietario-Correcao-Sessao.zip` atualiza a leitura do cookie no piloto. A correção foi testada localmente com o cabeçalho da VM e aguarda aplicação e teste no Galaxy.
 
+**Tela inicial da TV do Proprietário — 13/11/2026.** A entrada do Proprietário usa o padrão visual do Espectador, com cartaz, botão central e videoteca. Os botões **Administração** e **Edição** abrem os controles existentes da TV. O cartaz permanece fixo até o toque para reproduzir. A mudança requer o pacote `TV-FSJ-Proprietario-Layout.zip` na VM.
+
 Vídeos e Chamadas é uma aba do sistema; não tratar Reserva como novo aplicativo independente. Os nomes antigos de diretórios e serviços são identificadores técnicos legados.
 
 A TV inicia no cartaz com logotipo e botão de reprodução; ao terminar o institucional, retorna à tela estática. A TV pode ser assistida a qualquer horário por participante autorizado. Essa permissão não elimina automaticamente restrições de chamadas.
