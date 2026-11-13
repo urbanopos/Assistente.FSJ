@@ -165,6 +165,8 @@ Referências: [itens faltantes](itens-faltantes.md), [execução e suspensão](i
 
 **Tela inicial da TV do Proprietário — 13/11/2026.** A entrada do Proprietário usa o padrão visual do Espectador, com cartaz, botão central e videoteca. Os botões **Administração** e **Edição** abrem os controles existentes da TV. O cartaz permanece fixo até o toque para reproduzir. A mudança requer o pacote `TV-FSJ-Proprietario-Layout.zip` na VM.
 
+**Botões da videoteca no celular do Proprietário — 13/11/2026.** Assistir, Edição e Administração ficam nessa ordem, em uma linha logo abaixo do seletor de vídeos. O pacote `TV-FSJ-Proprietario-Botoes.zip` aplica a mudança de apresentação na VM.
+
 Vídeos e Chamadas é uma aba do sistema; não tratar Reserva como novo aplicativo independente. Os nomes antigos de diretórios e serviços são identificadores técnicos legados.
 
 A TV inicia no cartaz com logotipo e botão de reprodução; ao terminar o institucional, retorna à tela estática. A TV pode ser assistida a qualquer horário por participante autorizado. Essa permissão não elimina automaticamente restrições de chamadas.
