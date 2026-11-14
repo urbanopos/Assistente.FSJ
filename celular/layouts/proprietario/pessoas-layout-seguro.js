@@ -19,10 +19,15 @@
     #cadPessoas.fsj-pessoas-mobile[data-fsj-tab="1"] .fsj-pessoas-secao-2,
     #cadPessoas.fsj-pessoas-mobile[data-fsj-tab="2"] .fsj-pessoas-secao-0,
     #cadPessoas.fsj-pessoas-mobile[data-fsj-tab="2"] .fsj-pessoas-secao-1{display:none!important}
-    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px 8px!important}\n    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields>div{min-width:0!important}\n    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields>div:has(#pphone),#cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields>div:has(#pemail){grid-column:1/-1}
+    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px 8px!important}
+    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields>div{min-width:0!important}
+    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields>div:has(#pphone),#cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields>div:has(#pemail){grid-column:1/-1}
     #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields>div{width:100%!important;margin-bottom:2px}
     #cadPessoas.fsj-pessoas-mobile #personBasicFields label{margin-bottom:2px}
-    #cadPessoas.fsj-pessoas-mobile #fsjOwnerAccessInPeople{display:block!important;margin:3px 0 8px!important}\n    #cadPessoas.fsj-pessoas-mobile #fsjOwnerAccessInPeople .muted:not([role=status]){display:none!important}\n    #cadPessoas.fsj-pessoas-mobile #personBasicFields input,#cadPessoas.fsj-pessoas-mobile #personBasicFields select{min-width:0!important}\n    #cadPessoas.fsj-pessoas-mobile .fsj-pessoas-rodape{position:relative;z-index:1}
+    #cadPessoas.fsj-pessoas-mobile #fsjOwnerAccessInPeople{display:block!important;margin:3px 0 8px!important}
+    #cadPessoas.fsj-pessoas-mobile #fsjOwnerAccessInPeople .muted:not([role=status]){display:none!important}
+    #cadPessoas.fsj-pessoas-mobile #personBasicFields input,#cadPessoas.fsj-pessoas-mobile #personBasicFields select{min-width:0!important}
+    #cadPessoas.fsj-pessoas-mobile .fsj-pessoas-rodape{position:relative;z-index:1}
     #cadPessoas.fsj-pessoas-mobile #fsjOwnerAccessInPeople>button{width:100%}
   }`;
   document.head.appendChild(css);
@@ -40,7 +45,9 @@
     host.dataset.fsjTabsReady='1';
     host.classList.add('fsj-pessoas-mobile');
     basic.classList.add('fsj-pessoas-secao-0');
-    owner.classList.add('fsj-pessoas-secao-1');\n    /* O link de acesso é uma ação da pessoa, não do formulário de novo cadastro. */\n    selector.before(owner);
+    owner.classList.add('fsj-pessoas-secao-1');
+    /* O link de acesso é uma ação da pessoa, não do formulário de novo cadastro. */
+    selector.before(owner);
     selector.classList.add('fsj-pessoas-secao-1');
     groups.classList.add('fsj-pessoas-secao-2');
     const tabs=document.createElement('div');tabs.className='fsj-pessoas-tabs';
@@ -84,7 +91,9 @@
       }
     }
     ocultarPaginadorLegado();
-    document.addEventListener('fsj:entry-validated',ocultarPaginadorLegado);\n    const obs=new MutationObserver(()=>ocultarPaginadorLegado());\n    obs.observe(host,{childList:true,subtree:true,characterData:true});
+    document.addEventListener('fsj:entry-validated',ocultarPaginadorLegado);
+    const obs=new MutationObserver(()=>ocultarPaginadorLegado());
+    obs.observe(host,{childList:true,subtree:true,characterData:true});
     /* Ficha selecionada continua no fluxo oficial, sem interceptar selectPerson. */
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
