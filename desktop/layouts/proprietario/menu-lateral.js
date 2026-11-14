@@ -234,6 +234,10 @@
           } else {
             window.fsjSimpleSelectGo(value);
           }
+          // As telas internas podem ter recebido o atributo hidden ao abrir módulos incorporados.
+          // A navegação original remove a classe hidden, mas não esse atributo.
+          const target = document.getElementById(value);
+          if (target && !target.classList.contains('hidden')) target.hidden = false;
         }
         sync();
       });
@@ -243,7 +247,7 @@
   }
 
   function sync() {
-    const options = [...menu.options].filter(option => !option.hidden);
+    const options = [...menu.options].filter(option => !option.hidden && option.value !== '__diagnostico');
     const available = eligible() && options.some(option => option.value === 'dashboard');
     const active = available && useSidebar;
     sidebar.hidden = !active;
