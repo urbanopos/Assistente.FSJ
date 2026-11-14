@@ -1,5 +1,13 @@
 # Assistente FSJ — Manual de operação e manutenção
 
+### Menu lateral do Proprietário no Desktop — 14/11/2026
+
+O build `20261114-menu-lateral-desktop-01` traz para o painel operacional a barra azul recolhível do protótipo Desktop Lateral. O adaptador só é carregado no Desktop. A barra aparece no painel após a validação de titularidade já existente e reutiliza os comandos do Menu Principal. O cabeçalho e as telas do painel permanecem em uso, com o conteúdo à direita. O Celular, os demais perfis e a entrada direta de emergência mantêm sua navegação.
+
+O modo lateral é o padrão no Desktop do Proprietário. **Usar menu anterior** restaura o menu anterior sem recarregar e **Ativar menu lateral** reativa a barra. A preferência é guardada no navegador. A recuperação pelo repositório consiste em reverter apenas o commit deste build, sem restaurar versões anteriores dos registros.
+
+Validação local: contrato de atualização automática e simulação dos 14 destinos, titularidade, emergência, destaque, recolhimento, retorno e isolamento Celular. Conferir a sessão real no Dell após a publicação. Consulte [Layout Desktop do Proprietário](../desktop/layouts/proprietario/README.md).
+
 ### Tela inicial mais compacta no Celular do Proprietário — 13/11/2026
 
 Build `20261113-inicio-proprietario-compacto-01`. O atalho superior de **Diagnóstico** deixa de ser criado no Celular. O comando da linha de **Avisos de devolução** e o acesso pelo menu conservam a validação do Proprietário. O ajuste reduz a margem acima do painel e o espaço em torno dos avisos e dos indicadores. O escopo é a tela inicial móvel do painel web.
