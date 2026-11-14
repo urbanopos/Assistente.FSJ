@@ -926,7 +926,7 @@ window.addEventListener('storage',function(event){
 });
 function render(){syncExecutorSelector();renderEx();renderOwner();fsjCheckSimulatorCompatibility();saveSimulatorSession()};function fsjSeedFirstVisit(){
  // Apenas primeira abertura: nunca sobrescrever cadastros ou reset deliberado.
- if(localStorage.getItem(FSJ_DEMO_STORAGE_KEY)!==null)return;
+ if(people.length||jobs.length)return;
  const demo=[
  {id:'p_demo_1',nome:'Ana Oliveira',apelido:'Ana',perfil:'Executor',supervisor:false},
  {id:'p_demo_2',nome:'Bruno Mendes',apelido:'Bruno',perfil:'Executor',supervisor:false},
@@ -943,5 +943,5 @@ function render(){syncExecutorSelector();renderEx();renderOwner();fsjCheckSimula
  );
  demoPersonSequence=4;demoTaskSequence=5;state.ex.personId='p_demo_1';
 }
-if(FSJ_VISITOR_MODE){localStorage.removeItem(FSJ_DEMO_STORAGE_KEY);fsjSeedFirstVisit();}else{restoreSimulatorSession();fsjSeedFirstVisit();}render();
+if(FSJ_VISITOR_MODE){try{localStorage.removeItem(FSJ_DEMO_STORAGE_KEY)}catch(e){}fsjSeedFirstVisit();}else{restoreSimulatorSession();fsjSeedFirstVisit();}render();
 </script></body></html>
