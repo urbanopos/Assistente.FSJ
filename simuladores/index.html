@@ -923,5 +923,24 @@ window.addEventListener('storage',function(event){
  try{if(event.newValue)restoreSimulatorSession();else fsjClearRemoteData();render()}
  finally{fsjApplyingRemoteData=false}
 });
-function render(){syncExecutorSelector();renderEx();renderOwner();fsjCheckSimulatorCompatibility();saveSimulatorSession()};restoreSimulatorSession();render();
+function render(){syncExecutorSelector();renderEx();renderOwner();fsjCheckSimulatorCompatibility();saveSimulatorSession()};function fsjSeedFirstVisit(){
+ // Apenas primeira abertura: nunca sobrescrever cadastros ou reset deliberado.
+ if(localStorage.getItem(FSJ_DEMO_STORAGE_KEY)!==null)return;
+ const demo=[
+ {id:'p_demo_1',nome:'Ana Oliveira',apelido:'Ana',perfil:'Executor',supervisor:false},
+ {id:'p_demo_2',nome:'Bruno Mendes',apelido:'Bruno',perfil:'Executor',supervisor:false},
+ {id:'p_demo_3',nome:'Clara Nunes',apelido:'Clara',perfil:'Executor',supervisor:true},
+ {id:'p_demo_4',nome:'Marina Costa',apelido:'Marina',perfil:'Visitante',supervisor:false}
+ ];
+ people.push(...demo);groups.push({name:'Equipe Jardim',members:['Ana','Bruno']});
+ jobs.push(
+ {id:'Tar-000001 D',name:'Alimentar as galinhas e verificar os bebedouros',exec:['Ana'],group:'',periodic:'Diária',status:'Em aberto',supervisor:'Clara',deadline:''},
+ {id:'Tar-000002 S',name:'Conferir cercas do piquete demonstrativo',exec:['Bruno'],group:'',periodic:'Semanal',status:'Em aberto',supervisor:'Clara',deadline:''},
+ {id:'Tar-000003 D',name:'Limpar os reservatórios de água',exec:['Ana','Bruno'],group:'Equipe Jardim',periodic:'Diária',status:'Em execução',supervisor:'Clara',deadline:''},
+ {id:'Tar-000004 P',name:'Organizar ferramentas do galpão',exec:['Bruno'],group:'',periodic:'Pontual',status:'Concluída',supervisor:'Clara',deadline:''},
+ {id:'Tar-000005 M',name:'Conferir identificação das árvores do pomar',exec:['Clara'],group:'',periodic:'Mensal',status:'Em aberto',supervisor:'',deadline:''}
+ );
+ demoPersonSequence=4;demoTaskSequence=5;state.ex.personId='p_demo_1';
+}
+restoreSimulatorSession();fsjSeedFirstVisit();render();
 </script></body></html>
