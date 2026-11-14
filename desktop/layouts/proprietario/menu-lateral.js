@@ -130,6 +130,19 @@
     maintenanceFrame.src = maintenanceLink.href;
   }
 
+  // Ponte única para todos os acessos (menu lateral, seletor e atalhos).
+  window.fsjOwnerOpenEmbeddedModule = function(module) {
+    if (!eligible() || !useSidebar) return false;
+    if (module === '__diagnostico') {
+      closeMaintenance();
+      openDiagnostic();
+    } else if (module === '__manutencao') {
+      openMaintenance();
+    } else return false;
+    sync();
+    return true;
+  };
+
   const sidebar = document.createElement('nav');
   sidebar.id = 'fsjOwnerSidebar';
   sidebar.hidden = true;
