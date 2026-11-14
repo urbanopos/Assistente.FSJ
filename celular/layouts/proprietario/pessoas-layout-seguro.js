@@ -5,7 +5,7 @@
   const css=document.createElement('style');
   css.textContent=`
   @media(max-width:900px){
-    #cadPessoas.fsj-pessoas-mobile{max-width:100%;margin-inline:auto;padding:12px!important}
+    #cadPessoas.fsj-pessoas-mobile{max-width:100%;margin-inline:auto;padding:12px!important}\n    #cadPessoas.fsj-pessoas-mobile .fsj-pessoas-tabs,#cadPessoas.fsj-pessoas-mobile .fsj-pessoas-rodape{display:flex!important}\n    #cadPessoas.fsj-pessoas-mobile .fsj-pessoas-tabs button{flex:1 1 0}\n    #cadPessoas.fsj-pessoas-mobile .fsj-pessoas-secao-0,#cadPessoas.fsj-pessoas-mobile .fsj-pessoas-secao-1,#cadPessoas.fsj-pessoas-mobile .fsj-pessoas-secao-2{visibility:visible}
     #cadPessoas.fsj-pessoas-mobile>h2{text-align:center;font-size:1.12rem;margin:0 0 7px}
     #cadPessoas .fsj-pessoas-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0 12px}
     #cadPessoas .fsj-pessoas-tabs button{min-width:0!important;padding:7px 2px!important;font-size:.8rem}
@@ -64,7 +64,7 @@
     back.addEventListener('click',()=>show(Math.max(0,Number(host.dataset.fsjTab||0)-1)));
     next.addEventListener('click',()=>show(Math.min(2,Number(host.dataset.fsjTab||0)+1)));
     host.querySelector('h2')?.after(tabs);host.appendChild(foot);
-    function show(i){
+    function show(i){\n      host.scrollIntoView({block:'start',behavior:'instant'});
       host.dataset.fsjTab=String(i);
       buttons.forEach((b,j)=>b.setAttribute('aria-selected',String(j===i)));
       count.textContent=(i+1)+' / 3 — '+['Cadastro','Pessoas','Grupos'][i];
