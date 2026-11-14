@@ -64,6 +64,26 @@
       back.disabled=i===0;next.disabled=i===2;
     }
     show(0);
+    /* Oculta apenas o paginador legado 1/2 da aba Cadastro.
+       Mantém seu DOM e handlers originais intactos para restauração. */
+    function ocultarPaginadorLegado(){
+      if(!window.matchMedia('(max-width:900px)').matches)return;
+      const candidatos=[...host.querySelectorAll('span,div,p,small')].filter(el=>
+        el.children.length===0 && /^1\\s*\\/\\s*2$/.test((el.textContent||'').trim()));
+      for(const contador of candidatos){
+        let linha=contador.parentElement;
+        for(let i=0;i<2&&linha&&linha!==host;i++,linha=linha.parentElement){
+          const botoes=[...linha.querySelectorAll('button')];
+          if(botoes.length===2&&botoes.every(b=>/^[\\s←→➜‹›❮❯-]*$/.test(b.textContent||''))){
+            linha.style.setProperty('display','none','important');
+            linha.dataset.fsjPaginadorLegadoOculto='1';
+            break;
+          }
+        }
+      }
+    }
+    ocultarPaginadorLegado();
+    document.addEventListener('fsj:entry-validated',ocultarPaginadorLegado);
     /* Ficha selecionada continua no fluxo oficial, sem interceptar selectPerson. */
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
