@@ -19,3 +19,9 @@ Os testes locais simularam páginas cheias, a última página, filtro vazio e ab
 Build `20261113-ocorrencias-periodicas-proprietario-01`. Na tela inicial móvel, **Tarefas Não Cumpridas** consulta tarefas periódicas por mês do vencimento e responsável, em páginas de duas tarefas. O calendário da tarefa mostra os botões dos dias com atraso em vermelho, as folgas em verde claro, feriados em amarelo e férias em azul claro. O toque mostra o período, o dia de tolerância e a eventual regularização. Para grupo, selecione o integrante para ver seu calendário.
 
 A consulta usa dados centrais autorizados e preserva os registros. Os testes locais verificaram o vencimento, folgas, férias, feriados, compensações, conclusões em tempo, atrasos e ocorrências coletivas. A confirmação no Galaxy segue pendente. Para recuperar a interface anterior, reverta o commit e aguarde o GitHub Pages servir a revisão.
+
+## Tarefas concluídas
+
+Build `20261113-concluidas-proprietario-01`. No painel inicial do Proprietário, o contador **Concluídas** abre as tarefas por executor da conclusão, com filtro e duas tarefas por página. O detalhe oferece **Arquivar** e **Devolver para ajustes**. A devolução exige motivo e reabre a conclusão selecionada. O arquivamento incide sobre a tarefa e preserva os registros. O Desktop mantém o fluxo anterior.
+
+Entrega pelo GitHub Pages. Testes locais com dados simulados passaram e a conferência no Galaxy está pendente. Para recuperar a interface anterior, reverta o commit deste ajuste e aguarde o GitHub Pages. Uma reversão da interface preserva as operações já registradas no servidor.

@@ -12,7 +12,7 @@ function fsjTaskNumber(code,frequency){
  return suffix?number+' '+suffix:number;
 }
 let fsjTaskDetailRequest=0;
-async function fsjOpenTaskDetails(code,description,context='',loadDetails,frequency){
+async function fsjOpenTaskDetails(code,description,context='',loadDetails,frequency,renderActions){
  const request=++fsjTaskDetailRequest;
  let dialog=document.getElementById('fsj-task-detail');
  if(!dialog){
@@ -28,6 +28,8 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
  document.getElementById('fsj-task-detail-meta').textContent=context;
  document.getElementById('fsj-task-detail-description').textContent=description||'Sem descrição registrada.';
  const history=document.getElementById('fsj-task-detail-history');history.replaceChildren();
+ dialog.querySelector('.fsj-completed-review')?.remove();
+ if(renderActions)history.before(renderActions());
  if(!dialog.open)dialog.showModal();
  if(!loadDetails)return;
  history.textContent='Consultando registros da tarefa…';
@@ -37,7 +39,7 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
   history.replaceChildren();
   for(const section of details.sections){const heading=document.createElement('h3');heading.textContent=section.title;history.append(heading);for(const entry of section.entries){const block=document.createElement('div');block.className='fsj-detail-entry';const text=document.createElement('p');text.textContent=entry.text;block.append(text);for(const action of entry.actions||[]){const button=document.createElement('button');button.type='button';button.textContent=action.label;button.addEventListener('click',async()=>{button.disabled=true;try{await action.run();}catch{const error=document.createElement('p');error.textContent='Não foi possível abrir o registro. Tente novamente.';block.append(error);}finally{button.disabled=false;}});block.append(button);}history.append(block);}}
  }catch{
-  if(request!==fsjTaskDetailRequest||!dialog.open)return;history.textContent='Não foi possível consultar os registros. Nenhuma informação de execução pode ser confirmada agora.';const retry=document.createElement('button');retry.type='button';retry.textContent='Tentar novamente';retry.onclick=()=>fsjOpenTaskDetails(code,description,context,loadDetails);history.append(retry);
+  if(request!==fsjTaskDetailRequest||!dialog.open)return;history.textContent='Não foi possível consultar os registros. Nenhuma informação de execução pode ser confirmada agora.';const retry=document.createElement('button');retry.type='button';retry.textContent='Tentar novamente';retry.onclick=()=>fsjOpenTaskDetails(code,description,context,loadDetails,frequency,renderActions);history.append(retry);
  }
 }
 const fsjTaskListStyle=document.createElement('style');

@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261113-ocorrencias-periodicas-proprietario-01">
+<meta name="fsj-build" content="20261113-concluidas-proprietario-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -644,7 +644,7 @@ async function fsjCompartilharWeb(modo){
 <div class="brisa-actions"><button id="brisaTalkBtn" class="primary" onclick="brisaEncerrarEscuta();brisaResposta.textContent='Microfone desligado. Toque no ícone redondo para conversar novamente.'" aria-pressed="false">Encerrar conversa</button><button id="brisaExpand" onclick="brisaExpandir()" aria-pressed="false">Ampliar</button><button onclick="fecharBrisa()">Minimizar</button></div>
 <label for="brisaPerguntaTexto">Ou escreva sua pergunta</label><div class="row"><input type="text" id="brisaPerguntaTexto" placeholder="Quais tarefas estão pendentes?" style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter'){event.preventDefault();brisaEnviarTexto()}"><button onclick="brisaEnviarTexto()">Consultar</button></div><label for="brisaVozEscolha">Voz da MarIA</label><select id="brisaVozEscolha" onchange="brisaSalvarVoz()"></select><label for="brisaRitmo">Ritmo da fala</label><select id="brisaRitmo" onchange="brisaSalvarRitmo(this.value)"><option value="0.85">Mais pausado</option><option value="1">Natural</option><option value="1.15">Mais rápido</option></select><button type="button" onclick="brisaApresentar()">Ouvir a voz escolhida</button><p id="brisaVoiceInfo" class="muted" role="status">Carregando a voz feminina fixa da MarIA…</p><details class="card"><summary>Conversar com o ChatGPT da minha assinatura</summary><p class="muted">1. Prepare e copie o contexto. 2. Abra o ChatGPT e cole o texto; você também pode continuar a conversa por voz lá. 3. Copie a resposta do ChatGPT e cole abaixo para a MarIA falar. A transferência é manual e não usa API.</p><button type="button" onclick="brisaPrepararChatGPT()">Preparar contexto da fazenda</button><label for="brisaContextoChatGPT">Confira o texto que será compartilhado</label><textarea id="brisaContextoChatGPT" rows="8" style="min-height:180px" placeholder="O contexto aparecerá aqui para sua revisão."></textarea><div class="row"><button type="button" onclick="brisaCopiarChatGPT()">Copiar contexto</button><a href="https://chatgpt.com/" target="fsj_chatgpt" rel="noopener noreferrer">Abrir ChatGPT</a></div><label for="brisaRetornoChatGPT">Cole a resposta do ChatGPT</label><textarea id="brisaRetornoChatGPT" placeholder="Cole aqui somente a resposta que deseja ouvir."></textarea><div class="row"><button type="button" onclick="brisaFalarRetornoChatGPT()">MarIA, leia a resposta</button><button type="button" onclick="brisaParar();brisaRetomarEscuta()">Parar áudio</button></div><p id="brisaTransferenciaStatus" class="muted" role="status" aria-live="polite"></p></details><p id="brisaResposta" class="msg" style="margin-top:14px">Ao abrir MarIA, a escuta começa e retoma após cada resposta. Minimizar mantém a escuta. Use Encerrar conversa para desligar. A escuta pausa ao sair desta aba e retoma ao voltar. Versão gratuita: consultas locais às tarefas, responsáveis e pendências, sem API de IA paga.</p>
 </div></aside>
-<script src="./task-list-ui.js?v=20261020-label-archive-02"></script><script src="./task-detail-manager.js?v=20261021-revisao-1"></script>
+<script src="./task-list-ui.js?v=20261113-concluidas-proprietario-01"></script><script src="./task-detail-manager.js?v=20261021-revisao-1"></script>
 <script>
 let fsjPainelPronto=false;
 // REGRA DEFAULT FSJ 08/11/2026: dados operacionais somente confirmados pelo Supabase.
@@ -683,7 +683,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261113-ocorrencias-periodicas-proprietario-01';
+const FSJ_BUILD='20261113-concluidas-proprietario-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1745,7 +1745,9 @@ function fsjRenderTarefasPorSituacao(){
  if(!box||!title||!filter||!count)return;
  const screen=document.getElementById('tarefasPorSituacao');
  const status=window.fsjFiltroResumoSituacao||'Em aberto';
- const paginate=status==='Em aberto'&&window.FSJ_PLATFORM?.platform==='celular'&&window.fsjOwnerVerified===true;
+ const mobileOwner=window.FSJ_PLATFORM?.platform==='celular'&&window.fsjOwnerVerified===true;
+ const completed=mobileOwner&&status==='Concluída';
+ const paginate=mobileOwner&&(status==='Em aberto'||completed);
  screen.classList.toggle('fsj-owner-open-tasks',paginate);
  let pager=document.getElementById('fsjOpenTasksPager');
  if(pager)pager.hidden=true;
@@ -1757,16 +1759,27 @@ function fsjRenderTarefasPorSituacao(){
   box.textContent='Consulta indisponível até a confirmação da base e das permissões do Proprietário.';
   return;
  }
+ if(completed&&!window.FSJOwnerCompleted){
+  count.textContent='';
+  box.textContent='A lista de concluídas não carregou. Reabra o Assistente FSJ.';
+  return;
+ }
  // Filtro opcional: por padrão TODAS as tarefas do estado, inclusive coletivas.
  const oldPerson=filter.value;
+ const allTasks=(S.tasks||[]).filter(t=>t.status===status);
+ const entries=completed?window.FSJOwnerCompleted.executors(allTasks,retornosDia||[],S.people||[],fsjDia(new Date()),fsjDia):[];
+ const byTask=new Map(entries.map(entry=>[entry.task.id,entry]));
  const people=[...(S.people||[])].sort((a,b)=>(a.nick||a.name||'').localeCompare(b.nick||b.name||'','pt-BR'));
+ const filterLabel=screen.querySelector('label[for="fsjResumoPessoaFiltro"]');
+ if(filterLabel)filterLabel.textContent=completed?'Filtrar por executor':'Filtrar por pessoa responsável';
  filter.replaceChildren();
- const all=document.createElement('option');all.value='';all.textContent='Todas as pessoas — todas as tarefas da situação';filter.append(all);
+ const all=document.createElement('option');all.value='';all.textContent=completed?'Todos os executores':'Todas as pessoas — todas as tarefas da situação';filter.append(all);
  for(const p of people){const option=document.createElement('option');option.value=String(p.id);option.textContent=p.nick&&p.nick!==p.name?p.nick+' — '+p.name:p.name;filter.append(option);}
  filter.value=people.some(p=>String(p.id)===oldPerson)?oldPerson:'';
- const allTasks=(S.tasks||[]).filter(t=>t.status===status);
- const selected=allTasks.filter(t=>!filter.value||(t.personIds||[]).some(id=>String(id)===filter.value)||(t.groupId&&((S.groups||[]).find(g=>String(g.id)===String(t.groupId))?.members||[]).some(id=>String(id)===filter.value))).sort(fsjCompareTaskPriority);
- count.textContent=selected.length+' tarefa(s) exibida(s) de '+allTasks.length+' nesta situação'+(filter.value?' · Pessoa selecionada':' · Todas as pessoas')+'.';
+ const selected=completed?entries.filter(entry=>!filter.value||entry.executor===filter.value).map(entry=>entry.task)
+  :allTasks.filter(t=>!filter.value||(t.personIds||[]).some(id=>String(id)===filter.value)||(t.groupId&&((S.groups||[]).find(g=>String(g.id)===String(t.groupId))?.members||[]).some(id=>String(id)===filter.value))).sort(fsjCompareTaskPriority);
+ count.textContent=completed?selected.length+' tarefa(s) concluída(s)'+(filter.value?' pelo executor selecionado.':' em todos os executores.')
+  :selected.length+' tarefa(s) exibida(s) de '+allTasks.length+' nesta situação'+(filter.value?' · Pessoa selecionada':' · Todas as pessoas')+'.';
  const individual=selected.filter(t=>!t.groupId),groups=selected.filter(t=>!!t.groupId);
  function renderSection(name,items,total){
   const section=document.createElement('section'),heading=document.createElement('h3');heading.textContent=name+' ('+total+')';section.append(heading);
@@ -1776,8 +1789,13 @@ function fsjRenderTarefasPorSituacao(){
    const button=document.createElement('button');button.type='button';button.className='fsj-task-number';
    const label=(t.code||'Tarefa')+' — '+(t.text||'');
    if(paginate){const name=document.createElement('span');name.textContent=label;button.append(name);}else button.textContent=label;
-   button.addEventListener('click',()=>fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency));
-   const detail=document.createElement('p');detail.className='muted';detail.textContent='Responsáveis: '+names(t)+' • Situação: '+(labels[status]||status);
+   const entry=byTask.get(t.id);
+   const meta=entry?'Concluída por '+entry.executorName+(entry.completedAt?' · '+fsjDataHora(entry.completedAt):''):'Responsáveis: '+names(t);
+   button.addEventListener('click',()=>fsjOpenTaskDetails(t.code,t.text,meta,()=>fsjLoadTaskDetails(t.id),t.frequency,entry?()=>window.FSJOwnerCompleted.review(entry,{
+    api,refresh:async()=>{await fsjAtualizarRetornos(true);fsjRenderTarefasPorSituacao();},
+    authorized:()=>window.fsjOwnerVerified===true&&!window.fsjExited
+   }):undefined));
+   const detail=document.createElement('p');detail.className='muted';detail.textContent=entry?meta+(t.groupId?' · Tarefa de grupo':''):meta+' • Situação: '+(labels[status]||status);
    article.append(button,detail);section.append(article);
   }
   box.append(section);
@@ -1788,28 +1806,36 @@ function fsjRenderTarefasPorSituacao(){
   return;
  }
  if(!pager){
-  pager=document.createElement('nav');pager.id='fsjOpenTasksPager';pager.setAttribute('aria-label','Páginas de tarefas em aberto');
+  pager=document.createElement('nav');pager.id='fsjOpenTasksPager';
   for(const [symbol,label] of [['←','Página anterior'],['→','Próxima página']]){
    const button=document.createElement('button');button.type='button';button.textContent=symbol;button.setAttribute('aria-label',label);pager.append(button);
   }
   const indicator=document.createElement('span');indicator.setAttribute('aria-live','polite');pager.lastElementChild.before(indicator);
  }
+ pager.setAttribute('aria-label',completed?'Páginas de tarefas concluídas':'Páginas de tarefas em aberto');
  // O paginador fica fora da área que o paginador genérico usa como viewport.
  if(pager.parentElement!==screen)screen.append(pager);
  const [previous,indicator,next]=pager.children;
  const pageSize=2;
- const ordered=individual.concat(groups);
+ const ordered=completed?selected:individual.concat(groups);
  const totalPages=Math.max(1,Math.ceil(ordered.length/pageSize));
- let page=pager.dataset.person===filter.value?Number(pager.dataset.page||0):0;
+ let page=pager.dataset.person===filter.value&&pager.dataset.status===status?Number(pager.dataset.page||0):0;
  page=Math.min(page,totalPages-1);
  pager.dataset.person=filter.value;
+ pager.dataset.status=status;
  function showPage(){
   const items=ordered.slice(page*pageSize,(page+1)*pageSize);
   const personal=items.filter(t=>!t.groupId),collective=items.filter(t=>!!t.groupId);
   box.replaceChildren();
-  if(personal.length)renderSection('Tarefas individuais',personal,individual.length);
-  if(collective.length)renderSection('Tarefas de grupo',collective,groups.length);
-  if(!items.length)box.textContent='Nenhuma tarefa em aberto para o filtro selecionado.';
+  if(completed){
+   const executors=new Map();
+   for(const task of items){const id=byTask.get(task.id).executor;if(!executors.has(id))executors.set(id,[]);executors.get(id).push(task);}
+   for(const [id,tasks] of executors)renderSection(byTask.get(tasks[0].id).executorName,tasks,entries.filter(entry=>entry.executor===id).length);
+  }else{
+   if(personal.length)renderSection('Tarefas individuais',personal,individual.length);
+   if(collective.length)renderSection('Tarefas de grupo',collective,groups.length);
+  }
+  if(!items.length)box.textContent=completed?'Nenhuma tarefa concluída para o filtro selecionado.':'Nenhuma tarefa em aberto para o filtro selecionado.';
   pager.dataset.page=String(page);
   indicator.textContent=(page+1)+' / '+totalPages;
   previous.disabled=page===0;
@@ -2216,7 +2242,7 @@ async function fsjAtualizarRetornos(updateView=true){
       t.code=row.codigo_tarefa;t.text=row.descricao;t.personIds=responsaveis.filter(x=>x.tarefa_id===row.id).map(x=>x.pessoa_id);t.groupId=row.grupo_id||'';t.daily=!!row.diaria;t.frequency=row.periodicidade||(row.diaria?'diaria':'pontual');t.created=row.criada_em;
       let status=row.situacao;if(t.daily&&row.reaberta_em&&row.reaberta_dia!==day&&status==='Pendente')status='Em aberto';
       if(t.daily&&status==='Concluída'&&row.concluida_em&&fsjDia(row.concluida_em)!==day)status='Em aberto';
-      return fsjAplicarRetornos({...t,status,supervision:!!row.exige_supervisao,timedMinutes:row.duracao_execucao_minutos??null,reopenedAt:row.reaberta_em,reopenedDay:row.reaberta_dia,reopenReason:row.reabertura_motivo,code:row.codigo_tarefa,priority:row.prioridade||'normal',centralStatus:row.situacao,completedBy:status==='Concluída'?(row.concluida_por||''):''},answers,day);
+      return fsjAplicarRetornos({...t,status,supervision:!!row.exige_supervisao,timedMinutes:row.duracao_execucao_minutos??null,reopenedAt:row.reaberta_em,reopenedDay:row.reaberta_dia,reopenReason:row.reabertura_motivo,code:row.codigo_tarefa,priority:row.prioridade||'normal',centralStatus:row.situacao,completedAt:row.concluida_em||'',completedBy:status==='Concluída'?(row.concluida_por||''):''},answers,day);
     });
     retornosDia=answers;
     await FSJDaily.load(null,document.getElementById('demandaFuncionario').value||'',true);
@@ -2326,6 +2352,7 @@ const fsjEditedFields=new Set();
 document.addEventListener('input',event=>{if(event.target.matches('input,textarea,select'))fsjEditedFields.add(event.target)});
 function fsjCanUpdate(){
  if(window.mariaDiagnosticBusy)return false;
+ if(document.querySelector('#fsj-task-detail[open] .fsj-completed-review'))return false;
  if(typeof fsjCalendarDirty!=='undefined'&&(fsjCalendarDirty||fsjCalendarBusy))return false;
  for(const field of fsjEditedFields){if(field.isConnected&&field.value&&field.value!==field.defaultValue)return false;}
  return !document.hidden&&!document.activeElement?.matches('input,textarea,select')&&!window.speechSynthesis?.speaking;
@@ -2354,6 +2381,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
 </script><script src="./calendar-records.js?v=20261105-relatorio-mensal-11"></script><script src="./weekly-off-manager.js?v=20261108-perfil-central-04"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
 <script src="./celular/ocorrencias-proprietario.js?v=20261113-ocorrencias-periodicas-proprietario-01"></script>
+<script src="./celular/conclusoes-proprietario.js?v=20261113-concluidas-proprietario-01"></script>
 <script src="./mobile-pages.js?v=20261113-ocorrencias-periodicas-proprietario-01"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261020-brisa-menu-02"></script>
@@ -2585,6 +2613,11 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 #tarefasPorSituacao.fsj-owner-open-tasks #fsjOpenTasksPager{display:grid;flex:none;grid-template-columns:52px 1fr 52px;align-items:center;text-align:center;gap:6px;padding:6px 0 max(4px,env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 #fsjOpenTasksPager button{min-height:44px;background:#175b40;color:#fff;border:0;font-size:22px}
 #fsjOpenTasksPager button:disabled{opacity:.45}
+#fsj-task-detail .fsj-completed-review{padding:8px 0;border-top:1px solid #bed5c2;border-bottom:1px solid #bed5c2}
+.fsj-completed-review-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.fsj-completed-review button{min-height:44px}
+.fsj-completed-review form[hidden]{display:none!important}
+.fsj-completed-review form button{margin:4px 6px 0 0}
 </style>
 <style id="fsjMissedTasksMobileLayout">
 #gestor #fsjNaoCumpridas.fsj-owner-missed-tasks>.fsj-page-navigation,

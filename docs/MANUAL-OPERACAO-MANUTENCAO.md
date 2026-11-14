@@ -20,6 +20,14 @@ Ao abrir a tarefa, os dias de atraso são marcados em vermelho no calendário. F
 
 Os testes locais cobriram a tolerância, o calendário, as conclusões e a tarefa coletiva. As fontes centrais foram conferidas por leitura. A validação visual no Galaxy segue pendente. Para recuperação, consulte [Layout Celular do Proprietário](../celular/layouts/proprietario/README.md).
 
+### Tarefas concluídas e revisão no Celular do Proprietário — 13/11/2026
+
+Build `20261113-concluidas-proprietario-01`. O contador **Concluídas** abre a lista por executor que registrou a conclusão, em páginas de duas tarefas. O filtro aceita todos os executores ou um executor específico. A tarefa de grupo aparece uma vez, atribuída ao autor da conclusão. Registros antigos sem autoria disponível aparecem como **Executor não identificado**.
+
+No detalhe, **Arquivar** aprova o arquivamento da tarefa e preserva o histórico. **Devolver para ajustes** exige motivo, reabre a conclusão no servidor e deixa a tarefa pendente para nova resposta. Em tarefas diárias, a devolução usa o registro do dia exibido. Ambas as ações exigem a sessão validada do Proprietário e usam os fluxos centrais existentes.
+
+O contrato de atualização e os testes simulados de paginação, autoria, confirmação, concorrência e repetição passaram. Nenhum registro operacional foi alterado nos testes. A validação em aparelho real segue pendente. Para recuperação, consulte [Layout Celular do Proprietário](../celular/layouts/proprietario/README.md).
+
 ## Critérios permanentes de acesso — 30/10/2026
 
 Consultar a decisão [Destinatário e perfil da sessão](decisoes/acesso-destinatario-sessao.md). O link individual determina o perfil destinatário; o Proprietário pode conferi-lo com as restrições daquele usuário. Em seu próprio link, destinatário e perfil coincidem como Proprietário, mediante identidade titular validada. Usuários comuns não podem obter titularidade por link encaminhado, URL, token isolado, estado local ou sessão salva. A autorização deve ser validada no servidor.
