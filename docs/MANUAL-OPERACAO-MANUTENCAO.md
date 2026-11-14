@@ -12,6 +12,14 @@ Build `20261113-tarefas-abertas-proprietario-01`. No painel web do Proprietário
 
 O teste no Galaxy confirmou as duas tarefas por página e revelou que o rodapé geral ainda aparecia. No build `20261113-tarefas-abertas-proprietario-02`, o paginador geral retira seu rodapé da tela **Em aberto**, conserva a altura do painel e recoloca o rodapé nas demais situações. A simulação de layout verificou a retirada, a troca de situação e a preservação do único rodapé de tarefas. A conferência da correção no Galaxy segue pendente. O ajuste é entregue pelo GitHub Pages. A recuperação e o escopo estão registrados em [Layout Celular do Proprietário](../celular/layouts/proprietario/README.md).
 
+### Ocorrências periódicas em Tarefas Não Cumpridas no Celular do Proprietário — 13/11/2026
+
+Build `20261113-ocorrencias-periodicas-proprietario-01`. O botão verde da tela inicial abre a consulta por mês do vencimento e responsável. A lista reúne tarefas periódicas que tiveram execução prevista e ficaram sem conclusão válida até o fim do dia seguinte ao vencimento, no horário de Recife. A tarefa coletiva aparece uma vez e aceita conclusão por integrante. Uma conclusão posterior ao prazo aparece como regularização ao abrir o dia.
+
+Ao abrir a tarefa, os dias de atraso são marcados em vermelho no calendário. Folgas fixas, escolhidas, registradas ou compensatórias, feriados e férias aparecem conforme o cadastro. Feriado com decisão de trabalho mantém a previsão. Em períodos de vários dias, o marcador fica no último dia de trabalho aplicável no calendário consultado e o botão detalha o vencimento original. O Desktop e os demais perfis seguem suas telas existentes.
+
+Os testes locais cobriram a tolerância, o calendário, as conclusões e a tarefa coletiva. As fontes centrais foram conferidas por leitura. A validação visual no Galaxy segue pendente. Para recuperação, consulte [Layout Celular do Proprietário](../celular/layouts/proprietario/README.md).
+
 ## Critérios permanentes de acesso — 30/10/2026
 
 Consultar a decisão [Destinatário e perfil da sessão](decisoes/acesso-destinatario-sessao.md). O link individual determina o perfil destinatário; o Proprietário pode conferi-lo com as restrições daquele usuário. Em seu próprio link, destinatário e perfil coincidem como Proprietário, mediante identidade titular validada. Usuários comuns não podem obter titularidade por link encaminhado, URL, token isolado, estado local ou sessão salva. A autorização deve ser validada no servidor.

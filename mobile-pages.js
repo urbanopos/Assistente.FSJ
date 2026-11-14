@@ -142,8 +142,9 @@
   state.viewport.scrollLeft=state.index*state.stride;
   state.viewport.scrollTop=0;
  }
+ const hasTaskPager=root=>root.classList.contains('fsj-owner-open-tasks')||root.classList.contains('fsj-owner-missed-tasks');
  function reveal(state,target){
-  if(state.root.classList.contains('fsj-owner-open-tasks')||!state.stride||!target.getClientRects().length)return;
+  if(hasTaskPager(state.root)||!state.stride||!target.getClientRects().length)return;
   const box=target.getBoundingClientRect(),base=state.viewport.getBoundingClientRect();
   const x=box.left-base.left+state.viewport.scrollLeft;
   turn(state,Math.floor((x+1)/state.stride));
@@ -156,8 +157,8 @@
   if(manager&&typeof window.fsjPlaceBrisa==='function')window.fsjPlaceBrisa();
   for(const state of states.values()){
    if(reset)state.index=0;
-   // A lista Em aberto do Proprietário tem seu próprio rodapé e suas próprias páginas.
-   const ownPager=state.root.classList.contains('fsj-owner-open-tasks');
+   // As listas móveis de tarefas com paginador próprio dispensam o rodapé geral.
+   const ownPager=hasTaskPager(state.root);
    if(ownPager)state.footer.remove();
    else if(!state.footer.parentElement)state.viewport.after(state.footer);
    if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;if(state.answer){state.answerAnchor?.after(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}continue;}

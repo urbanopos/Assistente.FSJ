@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261113-tarefas-abertas-proprietario-02">
+<meta name="fsj-build" content="20261113-ocorrencias-periodicas-proprietario-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -683,7 +683,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261113-tarefas-abertas-proprietario-02';
+const FSJ_BUILD='20261113-ocorrencias-periodicas-proprietario-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -699,7 +699,22 @@ let currentPage='dashboard',pageHistory=[],pageHistoryState=[];
 // Navegação leve: os dados gerais são carregados na entrada do sistema.
 // A troca de página não deve recarregar todas as tabelas da Armazenagem.
 let fsjNavSequence=0;
-function fsjAbrirNaoCumpridas(){navTo('fsjNaoCumpridas');const painel=document.getElementById('fsjNaoCumpridas');if(painel){painel.classList.remove('hidden');painel.hidden=false;}fsjRenderNaoCumpridas();}
+function fsjAbrirNaoCumpridas(){
+ navTo('fsjNaoCumpridas');
+ const painel=document.getElementById('fsjNaoCumpridas');
+ if(!painel)return;
+ painel.classList.remove('hidden');painel.hidden=false;
+ if(window.FSJ_PLATFORM?.platform==='celular'){
+  const box=document.getElementById('fsjNaoCumpridasLista');
+  const authorized=()=>window.fsjOwnerVerified===true&&!window.fsjExited;
+  if(!authorized()){box.textContent='Consulta exclusiva do Proprietário autenticado.';return;}
+  painel.classList.add('fsj-owner-missed-tasks');
+  if(window.fsjOpenOwnerMissedTasks)window.fsjOpenOwnerMissedTasks(box,api,authorized);
+  else box.textContent='A consulta de ocorrências não carregou. Reabra o Assistente FSJ.';
+  return;
+ }
+ fsjRenderNaoCumpridas();
+}
 function fsjRenderNaoCumpridas(){
  const box=document.getElementById('fsjNaoCumpridasLista');if(!box)return;
  box.replaceChildren();
@@ -2338,7 +2353,8 @@ document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
 </script><script src="./calendar-records.js?v=20261105-relatorio-mensal-11"></script><script src="./weekly-off-manager.js?v=20261108-perfil-central-04"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
-<script src="./mobile-pages.js?v=20261113-tarefas-abertas-proprietario-02"></script>
+<script src="./celular/ocorrencias-proprietario.js?v=20261113-ocorrencias-periodicas-proprietario-01"></script>
+<script src="./mobile-pages.js?v=20261113-ocorrencias-periodicas-proprietario-01"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261020-brisa-menu-02"></script>
 <script src="./app-maintenance.js?v=20261021-reparo-auto-1"></script><script src="./celular/duvidas.min.js?v=20261101-navegacao-sem-rolagem-47"></script><script src="./videos-sso.js?v=20261026-pagina-rapida-02"></script><script src="./tv-fsj-portal.js?v=20261113-proprietario-hi-link-01"></script><script src="./completion-review.js?v=20261021-1"></script>
@@ -2569,6 +2585,34 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 #tarefasPorSituacao.fsj-owner-open-tasks #fsjOpenTasksPager{display:grid;flex:none;grid-template-columns:52px 1fr 52px;align-items:center;text-align:center;gap:6px;padding:6px 0 max(4px,env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 #fsjOpenTasksPager button{min-height:44px;background:#175b40;color:#fff;border:0;font-size:22px}
 #fsjOpenTasksPager button:disabled{opacity:.45}
+</style>
+<style id="fsjMissedTasksMobileLayout">
+#gestor #fsjNaoCumpridas.fsj-owner-missed-tasks>.fsj-page-navigation,
+#fsjNaoCumpridas.fsj-owner-missed-tasks h2+p,
+#fsjNaoCumpridas.fsj-owner-missed-tasks button[onclick="navTo('dashboard')"],
+.fsj-occurrence-pager[hidden]{display:none!important}
+#fsjNaoCumpridas.fsj-owner-missed-tasks .fsj-page-viewport{overflow-x:hidden!important;overflow-y:auto!important}
+#fsjNaoCumpridas.fsj-owner-missed-tasks .fsj-page-flow{columns:auto!important;height:auto!important;width:100%!important}
+.fsj-occurrence-filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px}
+.fsj-occurrence-filters input,.fsj-occurrence-filters select{box-sizing:border-box;display:block;width:100%;min-width:0;min-height:44px;margin-top:4px;font:inherit}
+.fsj-occurrence-card{margin:8px 0;padding:6px;border:1px solid var(--line);border-radius:9px}
+.fsj-occurrence-card p{margin:5px 2px 0;font-size:.84rem;overflow-wrap:anywhere}
+.fsj-occurrence-open{display:block;width:100%;min-height:44px;text-align:left;color:#883e00;background:#fff3e2;border-color:#e7bf8a;font-weight:700;white-space:normal;overflow-wrap:anywhere}
+.fsj-occurrence-pager{display:grid;flex:none;grid-template-columns:52px 1fr 52px;align-items:center;text-align:center;gap:6px;padding:6px 0 max(4px,env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.fsj-occurrence-pager button{min-height:44px;background:#175b40;color:#fff;border:0;font-size:22px}
+.fsj-occurrence-pager button:disabled{opacity:.45}
+.fsj-occurrence-calendar{box-sizing:border-box;width:min(94vw,460px);max-height:92dvh;padding:12px;border:1px solid var(--line);border-radius:12px;color:var(--ink,#18372c);overflow:auto}
+.fsj-occurrence-calendar::backdrop{background:#0008}
+.fsj-occurrence-calendar h2{font-size:1rem;margin:0;overflow-wrap:anywhere}
+.fsj-occurrence-calendar h3,.fsj-occurrence-calendar p{margin:7px 0;font-size:.85rem}
+.fsj-occurrence-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;text-align:center}
+.fsj-occurrence-grid strong{font-size:.72rem}
+.fsj-occurrence-day{min-width:0;min-height:40px;padding:3px 1px;overflow-wrap:anywhere;font-size:.8rem}
+.fsj-occurrence-day small{display:block;font-size:.56rem;line-height:1}
+.fsj-occurrence-day[data-kind="late"]{background:#b91c1c;color:#fff;border-color:#991b1b;font-weight:700}
+.fsj-occurrence-day[data-kind="leave"]{background:#d7ebda;color:#173c24}
+.fsj-occurrence-day[data-kind="holiday"]{background:#fff0b7;color:#483803}
+.fsj-occurrence-day[data-kind="vacation"]{background:#dbeaff;color:#183b63}
 </style>
 <style id="fsjResponsiveViewportDefault">
 /* DEFAULT: densidade adaptativa por plataforma; não interfere na versão Celular. */
