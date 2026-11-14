@@ -598,6 +598,26 @@ async function fsjCompartilharWeb(modo){
  #gestor #tarefasEmExecucao #fsjArquivoFiltros label{display:block!important;min-width:0!important;width:100%!important;font-size:13px;line-height:1.3}
  #gestor #tarefasEmExecucao #fsjArquivoFiltros select{display:block!important;min-width:0!important;max-width:100%!important;width:100%!important;margin-top:4px!important;padding:8px 24px 8px 6px!important;font-size:13px!important}
 }
+</style><style id="fsj-demandas-mobile-fix-20261114">
+@media(max-width:700px){
+ /* Somente Demandas Individuais do Proprietário: preservar o paginador próprio. */
+ #demandas .fsj-page-navigation{display:none!important}
+ #demandas .fsj-page-viewport{overflow-y:auto!important;overflow-x:hidden!important}
+ #demandas{padding:9px!important}
+ #demandas h2{font-size:clamp(19px,5vw,24px)!important;line-height:1.15!important;margin:3px 0 6px!important}
+ #demandas .fsj-task-legend{font-size:11px!important;line-height:1.3!important;margin:2px 0 7px!important}
+ #demandas .demandas-filtros{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;align-items:end!important;margin:5px 0!important}
+ #demandas .demandas-filtros>div{min-width:0!important;max-width:none!important;width:auto!important;flex:auto!important}
+ #demandas .demandas-filtros>div:first-child{grid-column:1/-1}
+ #demandas .demandas-filtros label{font-size:12px!important;margin:2px 0!important}
+ #demandas .demandas-filtros select,#demandas .demandas-filtros input{width:100%!important;min-width:0!important;min-height:38px!important;padding:5px 7px!important;font-size:13px!important}
+ #demandas .demandas-filtros>button{min-width:0!important;min-height:36px!important;font-size:12px!important;padding:5px!important;margin:0!important}
+ #demandas .demandas-filtros #demandaContagem{grid-column:1/-1}
+ #demandas .fsj-mobile-task-actions{display:flex!important;gap:5px!important;flex-wrap:wrap!important;margin-top:5px!important}
+ #demandas .fsj-mobile-task-actions button{min-height:34px!important;padding:5px 8px!important}
+ #demandas .fsj-page-flow{row-gap:5px!important}
+ #demandas #demandaEscolha{margin:7px 0!important}
+}
 </style></head><body class="fsj-booting">
 <header><img class="fsj-logo" src="fsj-logotipo.webp" alt="Fazenda São José — Sistema de Gestão"><div class="header-info"><div id="ownerAccount">Proprietário: Urbano</div><div id="ultimaAtualizacao">Verificando versão e dados atuais...</div><div>Armazenagem central</div></div><div class="fsj-ambiente-acoes" style="display:flex;align-items:center;gap:7px;margin-left:auto;flex-shrink:0"><label for="fsjFotoUsuarioArquivo" id="fsjFotoUsuarioBotao" title="Inserir ou alterar foto sincronizada do usuário" aria-label="Inserir foto do usuário" style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:44px;height:44px;border:2px solid #a8d2df;border-radius:50%;background:#fff;overflow:hidden;cursor:pointer;margin:0"><img id="fsjFotoUsuarioImagem" alt="Foto do usuário" style="width:100%;height:100%;object-fit:cover;display:none"><span id="fsjFotoUsuarioIcone" aria-hidden="true" style="font-size:22px">👤</span></label><input id="fsjFotoUsuarioArquivo" type="file" accept="image/*" style="display:none" aria-label="Escolher foto do usuário"><button type="button" class="danger" onclick="sairGestor()" style="flex-shrink:0;font-weight:700;min-height:44px" aria-label="Sair e desligar MarIA">Sair</button></div></header>
 <nav class="topnav"><div class="inner"><button class="active" onclick="navTo('dashboard',this)">Início</button><button onclick="navTo('cadPessoas',this)">Pessoas</button><button onclick="navTo('folgasGestor',this)">Folgas e feriados</button><button onclick="navTo('cadGrupos',this)">Grupos</button><button onclick="navTo('novaTarefa',this)">Tarefas</button><button onclick="navTo('demandas',this)">Demandas</button><button onclick="navTo('whatsapp',this)">WhatsApp</button><button type="button" onclick="abrirVideosReserva(this)">Vídeos e chamadas</button><button onclick="navTo('relatorios',this)">Relatórios</button><button onclick="navTo('seguranca',this)">Armazenagem</button></div></nav>
