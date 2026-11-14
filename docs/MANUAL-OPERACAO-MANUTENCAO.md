@@ -1,5 +1,11 @@
 # Assistente FSJ — Manual de operação e manutenção
 
+### Tela inicial mais compacta no Celular do Proprietário — 13/11/2026
+
+Build `20261113-inicio-proprietario-compacto-01`. O atalho superior de **Diagnóstico** deixa de ser criado no Celular. O comando da linha de **Avisos de devolução** e o acesso pelo menu conservam a validação do Proprietário. O ajuste reduz a margem acima do painel e o espaço em torno dos avisos e dos indicadores. O escopo é a tela inicial móvel do painel web.
+
+O teste do contrato de atualização e a simulação da criação do atalho em Celular e Desktop passaram. A confirmação visual no Galaxy depende da publicação no GitHub Pages. Consulte [Layout Celular do Proprietário](../celular/layouts/proprietario/README.md) para a recuperação.
+
 ## Critérios permanentes de acesso — 30/10/2026
 
 Consultar a decisão [Destinatário e perfil da sessão](decisoes/acesso-destinatario-sessao.md). O link individual determina o perfil destinatário; o Proprietário pode conferi-lo com as restrições daquele usuário. Em seu próprio link, destinatário e perfil coincidem como Proprietário, mediante identidade titular validada. Usuários comuns não podem obter titularidade por link encaminhado, URL, token isolado, estado local ou sessão salva. A autorização deve ser validada no servidor.
