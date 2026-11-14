@@ -143,7 +143,7 @@
   state.viewport.scrollTop=0;
  }
  function reveal(state,target){
-  if(!state.stride||!target.getClientRects().length)return;
+  if(state.root.classList.contains('fsj-owner-open-tasks')||!state.stride||!target.getClientRects().length)return;
   const box=target.getBoundingClientRect(),base=state.viewport.getBoundingClientRect();
   const x=box.left-base.left+state.viewport.scrollLeft;
   turn(state,Math.floor((x+1)/state.stride));
@@ -156,6 +156,10 @@
   if(manager&&typeof window.fsjPlaceBrisa==='function')window.fsjPlaceBrisa();
   for(const state of states.values()){
    if(reset)state.index=0;
+   // A lista Em aberto do Proprietário tem seu próprio rodapé e suas próprias páginas.
+   const ownPager=state.root.classList.contains('fsj-owner-open-tasks');
+   if(ownPager)state.footer.remove();
+   else if(!state.footer.parentElement)state.viewport.after(state.footer);
    if(!mobile.matches){state.root.style.removeProperty('height');state.viewport.scrollLeft=0;if(state.answer){state.answerAnchor?.after(state.answer);state.answer.hidden=!window.fsjTaskAnswerVisible?.();}continue;}
    // Botões SIM/NÃO fixos no rodapé móvel, visíveis em todas as páginas da tarefa.
     if(state.answer&&state.answer.parentElement!==state.footer)state.footer.prepend(state.answer);
@@ -165,6 +169,7 @@
    const top=Math.max(0,state.root.getBoundingClientRect().top-(visual?.offsetTop||0));
    const available=Math.max(96,(visual?.height||innerHeight)-top-8);
    state.root.style.height=available+'px';
+   if(ownPager)continue;
    // A Brisa fica junto ao seletor Ir para; o rodapé contém apenas navegação.
    if(manager&&typeof window.fsjPlaceBrisa==='function')window.fsjPlaceBrisa();
 

@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261113-tarefas-abertas-proprietario-01">
+<meta name="fsj-build" content="20261113-tarefas-abertas-proprietario-02">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -683,7 +683,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261113-tarefas-abertas-proprietario-01';
+const FSJ_BUILD='20261113-tarefas-abertas-proprietario-02';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -2338,7 +2338,7 @@ document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
 </script><script src="./calendar-records.js?v=20261105-relatorio-mensal-11"></script><script src="./weekly-off-manager.js?v=20261108-perfil-central-04"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
-<script src="./mobile-pages.js?v=20261112-execution-mobile-v7"></script>
+<script src="./mobile-pages.js?v=20261113-tarefas-abertas-proprietario-02"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>
 <script src="./mobile-menu.js?v=20261020-brisa-menu-02"></script>
 <script src="./app-maintenance.js?v=20261021-reparo-auto-1"></script><script src="./celular/duvidas.min.js?v=20261101-navegacao-sem-rolagem-47"></script><script src="./videos-sso.js?v=20261026-pagina-rapida-02"></script><script src="./tv-fsj-portal.js?v=20261113-proprietario-hi-link-01"></script><script src="./completion-review.js?v=20261021-1"></script>
@@ -2554,7 +2554,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 #gestor #tarefasEmExecucao #fsjExecucaoLista [hidden]{display:none!important}
 </style>
 <style id="fsjOpenTasksMobileLayout">
-#tarefasPorSituacao.fsj-owner-open-tasks .fsj-page-navigation,
+#gestor #tarefasPorSituacao.fsj-owner-open-tasks>.fsj-page-navigation,
 #tarefasPorSituacao.fsj-owner-open-tasks .fsj-task-pagination,
 #fsjOpenTasksPager[hidden]{display:none!important}
 #tarefasPorSituacao.fsj-owner-open-tasks .fsj-page-viewport{overflow-x:hidden!important;overflow-y:auto!important}

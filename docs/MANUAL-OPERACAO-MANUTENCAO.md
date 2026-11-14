@@ -10,7 +10,7 @@ O teste do contrato de atualização e a simulação da criação do atalho em C
 
 Build `20261113-tarefas-abertas-proprietario-01`. No painel web do Proprietário, o contador **Em aberto** abre uma lista com duas tarefas por página e uma única barra de navegação. A sequência mantém as tarefas individuais seguidas das coletivas e respeita o filtro de responsável. Trocar o filtro volta à primeira página. Uma consulta vazia mostra 1 / 1 com as setas desativadas. O detalhe de cada tarefa continua acessível pelo seu botão.
 
-O contrato de atualização e a simulação da navegação, dos filtros, dos detalhes e do escopo de plataforma passaram. A conferência visual no Galaxy segue pendente. O ajuste é entregue pelo GitHub Pages. A recuperação e o escopo estão registrados em [Layout Celular do Proprietário](../celular/layouts/proprietario/README.md).
+O teste no Galaxy confirmou as duas tarefas por página e revelou que o rodapé geral ainda aparecia. No build `20261113-tarefas-abertas-proprietario-02`, o paginador geral retira seu rodapé da tela **Em aberto**, conserva a altura do painel e recoloca o rodapé nas demais situações. A simulação de layout verificou a retirada, a troca de situação e a preservação do único rodapé de tarefas. A conferência da correção no Galaxy segue pendente. O ajuste é entregue pelo GitHub Pages. A recuperação e o escopo estão registrados em [Layout Celular do Proprietário](../celular/layouts/proprietario/README.md).
 
 ## Critérios permanentes de acesso — 30/10/2026
 
