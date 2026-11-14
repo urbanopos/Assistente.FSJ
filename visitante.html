@@ -12,5 +12,27 @@
 #demoHome .demo-menu>:first-child{min-height:64px}
 #demoHome footer{margin-top:auto}
 @media(max-width:430px){#demoHome header{padding:9px 10px;gap:8px}#demoHome header strong{font-size:17px}#demoHome header small{font-size:12px}#demoHome .demo-menu .fsj-supervisor-action{font-size:14px}}
+</style><style>
+/* Simulador visitante: densidade vertical compacta, sem afetar o sistema real. */
+#demoHome main#demoContent{padding:8px 12px 10px;line-height:1.22}
+#demoHome #demoContent{display:block}
+#demoHome #demoContent h1{font-size:17px;margin:0 0 3px;line-height:1.2}
+#demoHome #demoContent p{font-size:13px;line-height:1.25;margin:2px 0 4px}
+#demoHome #demoContent strong{display:block;font-size:13px;line-height:1.25;margin:3px 0 1px}
+#demoHome .demo-menu{gap:4px}
+#demoHome .demo-menu .fsj-supervisor-action{min-height:42px;padding:6px 8px;margin:0;font-size:13px;line-height:1.15}
+#demoHome .demo-menu>:first-child{min-height:44px}
+#demoHome .fsj-supervisor-action{min-height:40px;padding:6px 9px;margin-top:4px;font-size:13px}
+#demoHome .demo-calendar{gap:2px}
+#demoHome .demo-calendar button{min-height:30px;padding:2px}
+#demoHome .demo-tv{min-height:85px;padding:8px}
+#demoHome label{margin-bottom:3px}
+#demoHome textarea{margin:3px 0 6px;padding:7px}
+#demoHome select{padding:6px}
+#demoHome header{padding:7px 10px}
+#demoHome footer{padding:4px 10px}
+#demoHome .fsj-supervisor-version{padding:2px 8px}
+.demo-banner{padding:4px 7px;font-size:11px}
+#demoHome #demoContent .fsj-supervisor-item{padding:5px 0}
 </style><script src="./visitante/simulador.min.js?v=20261114-visitante-simulador-33" defer></script><script src="./compartilhado/supervisao.min.js?v=20261031-relatorio-proprietario-31" defer></script><script src="./supervisao/interface.min.js?v=20261114-visitante-simulador-33" defer></script></head>
 <body><div class="demo-banner" role="note"><strong>VISITANTE · SIMULADOR</strong> — Pessoas e tarefas fictícias. Ações somente nesta demonstração.</div><section id="demoHome" class="fsj-supervisor-app"><header><button id="demoHomeButton" aria-label="Menu principal">⌂ Início</button><div><strong>Fazenda São José</strong><small>Marina Costa · visitante fictícia</small></div><button id="demoReset">Reiniciar</button></header><main id="demoContent" aria-live="polite"></main><p id="demoStatus" role="status"></p><footer><button id="demoPrevious" aria-label="Página anterior">←</button><span id="demoPage">1 / 1</span><button id="demoNext" aria-label="Próxima página">→</button></footer><div class="fsj-supervisor-version">FSJ · Simulador visitante 0.1.0</div></section><section id="demoSupervision" hidden><div class="fsj-supervisor-app"><header><a id="fsjSupervisorHome" class="fsj-supervisor-home" aria-label="Menu principal" href="./inicio-usuario.html"><span aria-hidden="true">⌂</span>Início</a><div><strong>Fazenda São José</strong><small id="fsjSupervisorIdentity">Supervisão</small></div><span id="fsjSupervisorAvatar" aria-label="Foto indisponível; identificação do usuário">S</span></header><main id="fsjSupervisorContent" aria-live="polite"><h1>Supervisão</h1><p>Validando acesso…</p></main><div id="fsjSupervisorStatus" role="status" aria-live="polite"></div><footer><button id="fsjSupervisorPrevious" aria-label="Página anterior" disabled>←</button><span id="fsjSupervisorPage">1 / 1</span><button id="fsjSupervisorNext" aria-label="Próxima página" disabled>→</button></footer><div class="fsj-supervisor-version">© 2026 UPCJr · Supervisão simulada 0.1.0</div></div></section></body></html>
