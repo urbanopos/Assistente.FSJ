@@ -4,7 +4,7 @@
   'use strict';
   const css=document.createElement('style');
   css.textContent=`
-  @media(max-width:700px){
+  @media(max-width:900px){
     #cadPessoas.fsj-pessoas-mobile{max-width:100%;margin-inline:auto;padding:12px!important}
     #cadPessoas.fsj-pessoas-mobile>h2{text-align:center;font-size:1.35rem;margin:4px 0 10px}
     #cadPessoas .fsj-pessoas-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0 12px}
@@ -27,7 +27,7 @@
   }`;
   document.head.appendChild(css);
   function init(){
-    if(!window.matchMedia('(max-width:700px)').matches)return;
+    if(!window.matchMedia('(max-width:900px)').matches)return;
     const host=document.getElementById('cadPessoas');
     if(!host||host.dataset.fsjTabsReady)return;
     const basic=document.getElementById('personBasicHome');
@@ -68,4 +68,6 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
   else init();
+  window.addEventListener('pageshow',init);
+  document.addEventListener('fsj:entry-validated',init);
 })();
