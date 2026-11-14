@@ -68,6 +68,32 @@
   let expanded = true;
   let signature;
   const pages = new Map();
+  const diagnosticView = document.createElement('section');
+  diagnosticView.id = 'fsjOwnerEmbeddedDiagnostic';
+  diagnosticView.hidden = true;
+  diagnosticView.style.cssText = 'width:100%;min-width:0;box-sizing:border-box;padding:8px';
+  const diagnosticFrame = document.createElement('iframe');
+  diagnosticFrame.title = 'Diagnóstico — Fazenda São José';
+  diagnosticFrame.style.cssText = 'display:block;width:100%;height:calc(100dvh - 120px);min-height:520px;border:0;border-radius:10px;background:#fff';
+  diagnosticView.append(diagnosticFrame);
+  panel.append(diagnosticView);
+  function closeDiagnostic() {
+    if (diagnosticView.hidden) return;
+    diagnosticView.hidden = true;
+    diagnosticFrame.removeAttribute('src');
+  }
+  function openDiagnostic() {
+    if (window.fsjOwnerVerified !== true) return;
+    try { sessionStorage.setItem('fsj_diagnostico_acesso', String(Date.now())); } catch {}
+    for (const child of panel.children) {
+      if (child !== diagnosticView) {
+        child.hidden = true;
+        child.classList.add('hidden');
+      }
+    }
+    diagnosticView.hidden = false;
+    diagnosticFrame.src = './diagnostico-navegacao.html?v=20261102-02';
+  }
 
   const sidebar = document.createElement('nav');
   sidebar.id = 'fsjOwnerSidebar';
@@ -147,7 +173,16 @@
       const button = createButton(textContent, '▸', () => {
         const option = [...menu.options].find(option => option.value === value);
         if (!eligible() || !useSidebar || !option || option.hidden || option.disabled || menu.disabled) return;
-        window.fsjSimpleSelectGo(value);
+        if (value === '__diagnostico') {
+          openDiagnostic();
+        } else {
+          closeDiagnostic();
+          if (value === 'videosChamadas' && typeof window.abrirVideosReserva === 'function') {
+            window.abrirVideosReserva(button);
+          } else {
+            window.fsjSimpleSelectGo(value);
+          }
+        }
         sync();
       });
       pages.set(value, button);
@@ -168,7 +203,7 @@
     renderOptions(options);
     const page = typeof currentPage === 'undefined' ? menu.value : currentPage;
     const aliases = { fichaPessoa: 'cadPessoas', demandasGrupos: 'demandas', tarefasPorSituacao: 'demandas' };
-    const current = aliases[page] || page;
+    const current = diagnosticView.hidden ? (aliases[page] || page) : '__diagnostico';
     for (const option of options) {
       const button = pages.get(option.value);
       button.disabled = menu.disabled || option.disabled;
