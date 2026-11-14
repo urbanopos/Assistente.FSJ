@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261113-inicio-proprietario-compacto-01">
+<meta name="fsj-build" content="20261113-tarefas-abertas-proprietario-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -683,7 +683,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261113-inicio-proprietario-compacto-01';
+const FSJ_BUILD='20261113-tarefas-abertas-proprietario-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1728,7 +1728,13 @@ function fsjRenderTarefasPorSituacao(){
  const box=document.getElementById('fsjResumoSituacaoLista'),title=document.getElementById('fsjResumoSituacaoTitulo');
  const filter=document.getElementById('fsjResumoPessoaFiltro'),count=document.getElementById('fsjResumoSituacaoContagem');
  if(!box||!title||!filter||!count)return;
+ const screen=document.getElementById('tarefasPorSituacao');
  const status=window.fsjFiltroResumoSituacao||'Em aberto';
+ const paginate=status==='Em aberto'&&window.FSJ_PLATFORM?.platform==='celular'&&window.fsjOwnerVerified===true;
+ screen.classList.toggle('fsj-owner-open-tasks',paginate);
+ let pager=document.getElementById('fsjOpenTasksPager');
+ if(pager)pager.hidden=true;
+ screen.querySelectorAll('[data-fsj-resumo-pager]').forEach(bar=>bar.remove());
  const labels={'Em aberto':'Em aberto','Concluída':'Concluídas','Pendente':'Pendentes','Aguardando gestão':'Perguntas'};
  title.textContent='Tarefas — '+(labels[status]||status);box.replaceChildren();
  if(window.fsjOwnerVerified!==true||!fsjFonteOperacionalConfirmada){
@@ -1746,19 +1752,60 @@ function fsjRenderTarefasPorSituacao(){
  const allTasks=(S.tasks||[]).filter(t=>t.status===status);
  const selected=allTasks.filter(t=>!filter.value||(t.personIds||[]).some(id=>String(id)===filter.value)||(t.groupId&&((S.groups||[]).find(g=>String(g.id)===String(t.groupId))?.members||[]).some(id=>String(id)===filter.value))).sort(fsjCompareTaskPriority);
  count.textContent=selected.length+' tarefa(s) exibida(s) de '+allTasks.length+' nesta situação'+(filter.value?' · Pessoa selecionada':' · Todas as pessoas')+'.';
- const sections=[['Tarefas individuais',selected.filter(t=>!t.groupId)],['Tarefas de grupo',selected.filter(t=>!!t.groupId)]];
- for(const [name,items] of sections){
-  const section=document.createElement('section'),heading=document.createElement('h3');heading.textContent=name+' ('+items.length+')';section.append(heading);
+ const individual=selected.filter(t=>!t.groupId),groups=selected.filter(t=>!!t.groupId);
+ function renderSection(name,items,total){
+  const section=document.createElement('section'),heading=document.createElement('h3');heading.textContent=name+' ('+total+')';section.append(heading);
   if(!items.length){const p=document.createElement('p');p.className='muted';p.textContent='Nenhuma tarefa nesta situação para o filtro selecionado.';section.append(p);}
   for(const t of items){
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:10px;margin:8px 0';
-   const button=document.createElement('button');button.type='button';button.className='fsj-task-number';button.textContent=(t.code||'Tarefa')+' — '+(t.text||'');
+   const button=document.createElement('button');button.type='button';button.className='fsj-task-number';
+   const label=(t.code||'Tarefa')+' — '+(t.text||'');
+   if(paginate){const name=document.createElement('span');name.textContent=label;button.append(name);}else button.textContent=label;
    button.addEventListener('click',()=>fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency));
    const detail=document.createElement('p');detail.className='muted';detail.textContent='Responsáveis: '+names(t)+' • Situação: '+(labels[status]||status);
    article.append(button,detail);section.append(article);
   }
   box.append(section);
  }
+ if(!paginate){
+  renderSection('Tarefas individuais',individual,individual.length);
+  renderSection('Tarefas de grupo',groups,groups.length);
+  return;
+ }
+ if(!pager){
+  pager=document.createElement('nav');pager.id='fsjOpenTasksPager';pager.setAttribute('aria-label','Páginas de tarefas em aberto');
+  for(const [symbol,label] of [['←','Página anterior'],['→','Próxima página']]){
+   const button=document.createElement('button');button.type='button';button.textContent=symbol;button.setAttribute('aria-label',label);pager.append(button);
+  }
+  const indicator=document.createElement('span');indicator.setAttribute('aria-live','polite');pager.lastElementChild.before(indicator);
+ }
+ // O paginador fica fora da área que o paginador genérico usa como viewport.
+ if(pager.parentElement!==screen)screen.append(pager);
+ const [previous,indicator,next]=pager.children;
+ const pageSize=2;
+ const ordered=individual.concat(groups);
+ const totalPages=Math.max(1,Math.ceil(ordered.length/pageSize));
+ let page=pager.dataset.person===filter.value?Number(pager.dataset.page||0):0;
+ page=Math.min(page,totalPages-1);
+ pager.dataset.person=filter.value;
+ function showPage(){
+  const items=ordered.slice(page*pageSize,(page+1)*pageSize);
+  const personal=items.filter(t=>!t.groupId),collective=items.filter(t=>!!t.groupId);
+  box.replaceChildren();
+  if(personal.length)renderSection('Tarefas individuais',personal,individual.length);
+  if(collective.length)renderSection('Tarefas de grupo',collective,groups.length);
+  if(!items.length)box.textContent='Nenhuma tarefa em aberto para o filtro selecionado.';
+  pager.dataset.page=String(page);
+  indicator.textContent=(page+1)+' / '+totalPages;
+  previous.disabled=page===0;
+  next.disabled=page>=totalPages-1;
+  const viewport=box.closest('.fsj-page-viewport');
+  if(viewport)viewport.scrollTop=0;
+ }
+ previous.onclick=()=>{if(page>0){page--;showPage();}};
+ next.onclick=()=>{if(page<totalPages-1){page++;showPage();}};
+ pager.hidden=false;
+ showPage();
 }
 
 
@@ -2506,6 +2553,23 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 #gestor:has(#tarefasEmExecucao:not(.hidden)) .fsj-task-pagination {display:none!important}
 #gestor #tarefasEmExecucao #fsjExecucaoLista [hidden]{display:none!important}
 </style>
+<style id="fsjOpenTasksMobileLayout">
+#tarefasPorSituacao.fsj-owner-open-tasks .fsj-page-navigation,
+#tarefasPorSituacao.fsj-owner-open-tasks .fsj-task-pagination,
+#fsjOpenTasksPager[hidden]{display:none!important}
+#tarefasPorSituacao.fsj-owner-open-tasks .fsj-page-viewport{overflow-x:hidden!important;overflow-y:auto!important}
+#tarefasPorSituacao.fsj-owner-open-tasks .fsj-page-flow{columns:auto!important;height:auto!important;width:100%!important}
+#tarefasPorSituacao.fsj-owner-open-tasks #fsjResumoSituacaoContagem{margin:6px 0}
+#tarefasPorSituacao.fsj-owner-open-tasks #fsjResumoSituacaoLista h3{margin:6px 0;font-size:1rem}
+#tarefasPorSituacao.fsj-owner-open-tasks #fsjResumoSituacaoLista article{margin:5px 0!important;padding:6px!important}
+#tarefasPorSituacao.fsj-owner-open-tasks #fsjResumoSituacaoLista article button{width:100%;min-height:44px;text-align:left;white-space:normal;overflow-wrap:anywhere}
+#tarefasPorSituacao.fsj-owner-open-tasks #fsjResumoSituacaoLista article button span,
+#tarefasPorSituacao.fsj-owner-open-tasks #fsjResumoSituacaoLista article p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+#tarefasPorSituacao.fsj-owner-open-tasks #fsjResumoSituacaoLista article p{margin:4px 0 0;font-size:.82rem;overflow-wrap:anywhere}
+#tarefasPorSituacao.fsj-owner-open-tasks #fsjOpenTasksPager{display:grid;flex:none;grid-template-columns:52px 1fr 52px;align-items:center;text-align:center;gap:6px;padding:6px 0 max(4px,env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+#fsjOpenTasksPager button{min-height:44px;background:#175b40;color:#fff;border:0;font-size:22px}
+#fsjOpenTasksPager button:disabled{opacity:.45}
+</style>
 <style id="fsjResponsiveViewportDefault">
 /* DEFAULT: densidade adaptativa por plataforma; não interfere na versão Celular. */
 @media (min-width:701px){
@@ -2553,7 +2617,9 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
  function refresh(){
   if(!document.getElementById('gestor')||document.getElementById('gestor').classList.contains('hidden'))return;
   document.querySelectorAll('#gestor #taskRows,#gestor #fsjPessoaGruposRows,#gestor #demandaGrupoRows,#gestor #listaSupervisaoConteudo tbody,#gestor #report tbody,#gestor #employeeTasks tbody').forEach(apply);
-  document.querySelectorAll('#gestor #fsjResumoSituacaoLista section').forEach(section=>{const items=[...section.children].filter(x=>x.tagName==='ARTICLE');if(items.length)apply(section);});
+  if(!document.getElementById('tarefasPorSituacao')?.classList.contains('fsj-owner-open-tasks')){
+   document.querySelectorAll('#gestor #fsjResumoSituacaoLista section').forEach(section=>{apply(section);const bar=states.get(section)?.bar;if(bar)bar.dataset.fsjResumoPager='';});
+  }
  }
  let scheduled=false;
  const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh();});};

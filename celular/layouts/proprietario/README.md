@@ -7,3 +7,9 @@ Pasta oficial criada. O Index real ainda precisa ser migrado e validado; o arqui
 O redirecionamento abre o painel operacional em [index.html](../../../index.html). A versão `20261113-inicio-proprietario-compacto-01` remove o atalho verde de **Diagnóstico** acima dos indicadores no Celular. O botão da linha de **Avisos de devolução** usa a mesma validação da sessão do Proprietário. A compactação aplica-se ao painel inicial, incluindo o espaço antes dos indicadores. Desktop, dados e permissões conservam o fluxo existente.
 
 Entrega pelo GitHub Pages, com atualização ao abrir ou retomar a sessão. O contrato de atualização e a simulação do atalho no Celular e Desktop passaram. A conferência visual no Galaxy fica pendente. Para restaurar a versão anterior, reverta o commit deste ajuste no repositório e aguarde o GitHub Pages servir a revisão.
+
+## Tarefas em aberto
+
+No build `20261113-tarefas-abertas-proprietario-01`, a lista aberta pelo contador **Em aberto** no Celular do Proprietário mostra duas tarefas por página, com setas e numeração em um único rodapé. As tarefas individuais precedem as de grupo. A contagem total continua refletindo o filtro de responsável. O título longo é resumido na lista, e o texto completo continua disponível ao abrir a tarefa. A mudança se aplica ao painel web e é entregue pela atualização habitual do GitHub Pages.
+
+Os testes locais simularam páginas cheias, a última página, filtro vazio e abertura de detalhes. A conferência no Galaxy segue pendente. Para recuperar o comportamento anterior, reverta o commit deste ajuste e aguarde o GitHub Pages servir a revisão.
