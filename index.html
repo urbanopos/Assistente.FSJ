@@ -1235,7 +1235,7 @@ async function fsjConsultarGruposNaPessoas(){
 }
 function fsjDetalharGrupoNaPessoas(){
  const id=document.getElementById('fsjGrupoPessoaSelect')?.value,grupo=fsjGruposPessoasConfirmados?.find(g=>String(g.id)===String(id));
- const detalhes=document.getElementById('fsjGrupoPessoaDetalhes');detalhes.hidden=!grupo;
+ const detalhes=document.getElementById('fsjGrupoPessoaDetalhes');detalhes.hidden=!grupo;const aviso=document.getElementById('fsjGrupoPessoaStatus');if(aviso)aviso.textContent=grupo?'Grupo ativo. Exclusão operacional disponível, com preservação das tarefas históricas.':'Selecione um grupo para consultar ou excluir.';
  if(grupo)document.getElementById('fsjGrupoPessoaIntegrantes').textContent='Integrantes registrados: '+(grupo.members.map(id=>S.people.find(p=>String(p.id)===String(id))?.name||'Pessoa não carregada ('+id+')').join(', ')||'Nenhum integrante');
 }
 async function fsjEditarGrupoNaPessoas(){
