@@ -95,6 +95,41 @@
     diagnosticFrame.src = './diagnostico-navegacao.html?v=20261102-02';
   }
 
+  const maintenanceView = document.createElement('section');
+  maintenanceView.id = 'fsjOwnerEmbeddedMaintenance';
+  maintenanceView.hidden = true;
+  maintenanceView.style.cssText = 'width:100%;min-width:0;box-sizing:border-box;padding:8px';
+  const maintenanceNotice = document.createElement('p');
+  maintenanceNotice.textContent = 'Painel de manutenção da máquina virtual. Se a rede ou o servidor impedir a incorporação, use o acesso externo abaixo.';
+  const maintenanceLink = document.createElement('a');
+  maintenanceLink.href = 'https://10.203.77.1:9443/';
+  maintenanceLink.target = '_blank';
+  maintenanceLink.rel = 'noopener noreferrer';
+  maintenanceLink.textContent = 'Abrir painel de manutenção em aba separada (alternativa)';
+  const maintenanceFrame = document.createElement('iframe');
+  maintenanceFrame.title = 'Painel de manutenção — Fazenda São José';
+  maintenanceFrame.referrerPolicy = 'no-referrer';
+  maintenanceFrame.style.cssText = 'display:block;width:100%;height:calc(100dvh - 160px);min-height:520px;border:0;border-radius:10px;background:#fff;margin-top:12px';
+  maintenanceView.append(maintenanceNotice, maintenanceLink, maintenanceFrame);
+  panel.append(maintenanceView);
+  function closeMaintenance() {
+    if (maintenanceView.hidden) return;
+    maintenanceView.hidden = true;
+    maintenanceFrame.removeAttribute('src');
+  }
+  function openMaintenance() {
+    if (window.fsjOwnerVerified !== true) return;
+    closeDiagnostic();
+    for (const child of panel.children) {
+      if (child !== maintenanceView) {
+        child.hidden = true;
+        child.classList.add('hidden');
+      }
+    }
+    maintenanceView.hidden = false;
+    maintenanceFrame.src = maintenanceLink.href;
+  }
+
   const sidebar = document.createElement('nav');
   sidebar.id = 'fsjOwnerSidebar';
   sidebar.hidden = true;
@@ -174,9 +209,13 @@
         const option = [...menu.options].find(option => option.value === value);
         if (!eligible() || !useSidebar || !option || option.hidden || option.disabled || menu.disabled) return;
         if (value === '__diagnostico') {
+          closeMaintenance();
           openDiagnostic();
+        } else if (value === '__manutencao') {
+          openMaintenance();
         } else {
           closeDiagnostic();
+          closeMaintenance();
           if (value === 'videosChamadas' && typeof window.abrirVideosReserva === 'function') {
             window.abrirVideosReserva(button);
           } else {
@@ -203,7 +242,7 @@
     renderOptions(options);
     const page = typeof currentPage === 'undefined' ? menu.value : currentPage;
     const aliases = { fichaPessoa: 'cadPessoas', demandasGrupos: 'demandas', tarefasPorSituacao: 'demandas' };
-    const current = diagnosticView.hidden ? (aliases[page] || page) : '__diagnostico';
+    const current = !maintenanceView.hidden ? '__manutencao' : (!diagnosticView.hidden ? '__diagnostico' : (aliases[page] || page));
     for (const option of options) {
       const button = pages.get(option.value);
       button.disabled = menu.disabled || option.disabled;
