@@ -27,6 +27,7 @@
   }`;
   document.head.appendChild(css);
   function init(){
+    if(!window.matchMedia('(max-width:700px)').matches)return;
     const host=document.getElementById('cadPessoas');
     if(!host||host.dataset.fsjTabsReady)return;
     const basic=document.getElementById('personBasicHome');
