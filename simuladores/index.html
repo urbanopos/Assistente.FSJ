@@ -796,7 +796,8 @@ function paginate(which){const holder=$(which==='ex'?'executor':'proprietario'),
 }
 
 let fsjApplyingRemoteData=false;
-const FSJ_DEMO_STORAGE_KEY='fsj_sim_executor_proprietario_limpo_v1_20261107';
+const FSJ_VISITOR_MODE=new URLSearchParams(location.search).get('origem')==='visitante';
+const FSJ_DEMO_STORAGE_KEY=FSJ_VISITOR_MODE?'fsj_sim_visitante_descartavel_v2':'fsj_sim_executor_proprietario_limpo_v1_20261107';
 const FSJ_SIM_SNAPSHOTS_KEY='fsj_sim_backup_historico_v1_20261107';
 let fsjAllowEmptyReset=false,fsjRecoveryFeedback='';
 function fsjValidPayload(data){return !!data&&Array.isArray(data.people)&&Array.isArray(data.jobs)&&Array.isArray(data.groups)}
@@ -942,5 +943,5 @@ function render(){syncExecutorSelector();renderEx();renderOwner();fsjCheckSimula
  );
  demoPersonSequence=4;demoTaskSequence=5;state.ex.personId='p_demo_1';
 }
-restoreSimulatorSession();fsjSeedFirstVisit();render();
+if(FSJ_VISITOR_MODE){localStorage.removeItem(FSJ_DEMO_STORAGE_KEY);fsjSeedFirstVisit();}else{restoreSimulatorSession();fsjSeedFirstVisit();}render();
 </script></body></html>
