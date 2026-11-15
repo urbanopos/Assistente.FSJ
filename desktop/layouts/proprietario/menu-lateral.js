@@ -345,6 +345,10 @@
           }
         }
       }
+      // Ao retornar de módulos externos, navTo pode remover a classe hidden
+      // sem limpar o atributo HTML hidden deixado pelo painel incorporado antigo.
+      const destination = mode === 'grupos' ? groupsPage : peoplePage;
+      if (destination && !destination.classList.contains('hidden')) destination.hidden = false;
       updatePeopleTabs();
     }
     function updatePeopleTabs() {
