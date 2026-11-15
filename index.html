@@ -1369,6 +1369,20 @@ async function fsjConcluirEdicaoProprietario(){
  if(!id||window.fsjOwnerVerified!==true)return alert('A conclusão manual é exclusiva do Proprietário na edição de uma tarefa.');
  const tarefa=S.tasks.find(t=>t.id===id);
  if(!tarefa)return alert('Tarefa não encontrada.');
+ // Sempre consultar o estado real no Supabase antes de registrar conclusão.
+ // A cópia local pode estar desatualizada após arquivamento por outra tela.
+ let estadoCentral;
+ try{
+  const registros=await api('/rest/v1/tarefas?id=eq.'+encodeURIComponent(id)+'&select=id,situacao');
+  estadoCentral=Array.isArray(registros)?registros[0]:null;
+  if(!estadoCentral)throw new Error('Tarefa não encontrada na Armazenagem');
+ }catch(e){return alert('Não foi possível validar a situação atual da tarefa. Nenhuma conclusão foi registrada: '+e.message);}
+ tarefa.status=estadoCentral.situacao;
+ if(['Concluída','Arquivado','Arquivada'].includes(estadoCentral.situacao)){
+  const arquivada=['Arquivado','Arquivada'].includes(estadoCentral.situacao);
+  alert(arquivada?'Esta tarefa já está arquivada no Supabase. Não é permitido concluir ou arquivar novamente.':'Esta tarefa já está concluída no Supabase. Para arquivá-la, use o botão Arquivar em Tarefas em Execução.');
+  return;
+ }
  const motivo=prompt('Justificativa da conclusão não registrada pelo executor (obrigatória):');
  if(motivo===null)return;
  if(motivo.trim().length<5)return alert('Informe uma justificativa com pelo menos cinco caracteres.');
@@ -1395,7 +1409,7 @@ async function fsjConcluirEdicaoProprietario(){
  finally{if(btn)btn.disabled=false;}
 }
 function fsjCancelarEdicaoTarefa(){const voltar=window.fsjOrigemEdicaoTarefa||'tarefasEmExecucao';const contexto=window.fsjContextoEdicaoTarefa;clearTaskForm();window.fsjOrigemEdicaoTarefa=null;navTo(voltar);if(voltar==='tarefasEmExecucao'&&contexto){const p=document.getElementById('fsjArquivoPessoa'),g=document.getElementById('fsjArquivoGrupo'),box=document.getElementById('fsjExecucaoLista');if(p)p.value=contexto.pessoa;if(g)g.value=contexto.grupo;if(box){box.dataset.fsjFilterKey=contexto.pessoa+'|'+contexto.grupo;box.dataset.fsjPageIndex=String(contexto.pagina);}fsjRenderTarefasEmExecucao();}window.fsjContextoEdicaoTarefa=null;}
-function editTask(id){window.fsjOrigemEdicaoTarefa=currentPage||'tarefasEmExecucao';if(currentPage==='tarefasEmExecucao'){const box=document.getElementById('fsjExecucaoLista');window.fsjContextoEdicaoTarefa={pessoa:document.getElementById('fsjArquivoPessoa')?.value||'',grupo:document.getElementById('fsjArquivoGrupo')?.value||'',pagina:Number(box?.dataset.fsjPageIndex||0)};}let t=S.tasks.find(x=>x.id===id);if(!t)return;taskEditId.value=t.id;taskText.value=t.text;taskFrequency.value=t.frequency||(t.daily?'diaria':'pontual');taskPriority.value=t.priority||'normal';taskSupervision.checked=!!t.supervision;taskTimed.checked=!!t.timedMinutes;taskTimedMinutes.value=t.timedMinutes||60;taskTimedOptions.hidden=!taskTimed.checked;execType.value=t.groupId?'group':'individual';renderTargets();if(t.groupId){let z=document.querySelector('.tg[value="'+t.groupId+'"]');if(z)z.checked=true}else document.querySelectorAll('.tm').forEach(x=>x.checked=ids(t).includes(x.value));fsjTargetSelectionSync();taskSaveBtn.textContent='Salvar alteração';navTo('novaTarefa');const concluir=document.getElementById('fsjConcluirEdicaoBtn');if(concluir)concluir.hidden=false;taskEditId.value=t.id;taskSaveBtn.textContent='Salvar alteração';taskText.value=t.text;}
+function editTask(id){window.fsjOrigemEdicaoTarefa=currentPage||'tarefasEmExecucao';if(currentPage==='tarefasEmExecucao'){const box=document.getElementById('fsjExecucaoLista');window.fsjContextoEdicaoTarefa={pessoa:document.getElementById('fsjArquivoPessoa')?.value||'',grupo:document.getElementById('fsjArquivoGrupo')?.value||'',pagina:Number(box?.dataset.fsjPageIndex||0)};}let t=S.tasks.find(x=>x.id===id);if(!t)return;taskEditId.value=t.id;taskText.value=t.text;taskFrequency.value=t.frequency||(t.daily?'diaria':'pontual');taskPriority.value=t.priority||'normal';taskSupervision.checked=!!t.supervision;taskTimed.checked=!!t.timedMinutes;taskTimedMinutes.value=t.timedMinutes||60;taskTimedOptions.hidden=!taskTimed.checked;execType.value=t.groupId?'group':'individual';renderTargets();if(t.groupId){let z=document.querySelector('.tg[value="'+t.groupId+'"]');if(z)z.checked=true}else document.querySelectorAll('.tm').forEach(x=>x.checked=ids(t).includes(x.value));fsjTargetSelectionSync();taskSaveBtn.textContent='Salvar alteração';navTo('novaTarefa');const concluir=document.getElementById('fsjConcluirEdicaoBtn');if(concluir)concluir.hidden=['Concluída','Arquivado','Arquivada'].includes(t.status);taskEditId.value=t.id;taskSaveBtn.textContent='Salvar alteração';taskText.value=t.text;}
 async function delTask(id){if(!confirm('Excluir esta tarefa?'))return;try{await api('/rest/v1/tarefas?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}});S.tasks=S.tasks.filter(x=>x.id!==id);save();render()}catch(e){alert('Não foi possível excluir na Armazenagem: '+e.message)}}
 function act(id,a){let t=S.tasks.find(x=>x.id===id);if(!t||t.status==='Concluída')return alert('Esta tarefa já foi concluída.');if(a==='done'){t.status='Concluída';t.completedBy=employee.value;t.response='Concluída'}if(a==='why'){let z=prompt('Justificativa:');if(z===null)return;t.status='Pendente';t.response=z}if(a==='ask'){let z=prompt('Pergunta à gestão:');if(z===null)return;t.status='Aguardando gestão';t.question=z}save();render();employeeView()}
 function attach(id,el){let f=el.files&&el.files[0];if(!f)return;let t=S.tasks.find(x=>x.id===id);t.attachments=t.attachments||[];t.attachments.push({name:f.name,type:f.type,size:f.size});save();employeeView()}
