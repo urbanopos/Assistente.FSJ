@@ -12,6 +12,21 @@
 
   const style = document.createElement('style');
   style.textContent = `
+    /* Campos de identificação com altura uniforme, apenas no Desktop do Proprietário. */
+    body.fsj-owner-sidebar-active #personBasicFields .person-fields {
+      align-items: end;
+    }
+    body.fsj-owner-sidebar-active #personBasicFields .person-fields > div {
+      min-width: 0;
+    }
+    body.fsj-owner-sidebar-active #personBasicFields .person-fields input,
+    body.fsj-owner-sidebar-active #personBasicFields .person-fields select {
+      box-sizing: border-box;
+      width: 100%;
+      height: 42px;
+      min-height: 42px;
+      padding-block: 8px;
+    }
     #fsjOwnerSidebar[hidden], #fsjOwnerSidebarRestore[hidden],
     body.fsj-owner-sidebar-active > :is(.topnav, #fsjSimpleBar, #fsjModoRestaurar) {
       display: none !important;
