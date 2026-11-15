@@ -26,7 +26,8 @@ const indicador = document.createElement('strong');
 const proxima = document.createElement('button');
 proxima.type='button'; proxima.textContent='Próxima →';
 nav.append(anterior,indicador,proxima);
-ficha.querySelector('.fsj-ficha-cabecalho')?.after(nav);
+// Navegação ao final da ficha, abaixo dos campos e ações existentes.
+ficha.append(nav);
 let pagina = 1;
 function exibir(numero) {
   pagina=numero;
