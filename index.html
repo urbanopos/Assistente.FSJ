@@ -1334,7 +1334,7 @@ function renderTargets(){
  const selecionadosAntes=[...targetBox.querySelectorAll('.tm:checked')].map(x=>x.value);
  const grupoAntes=targetBox.querySelector('.tg:checked')?.value||'';
  if(execType.value==='group'){
- targetBox.innerHTML='<label>Responsável pela tarefa — grupo existente</label><div class="checks">'+(S.groups.some(g=>g.ativo!==false)?S.groups.filter(g=>g.ativo!==false).map(g=>'<label><input class="tg" type="radio" name="taskGroup" value="'+g.id+'"> <b>'+esc(g.name)+'</b> — '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+'</label>').join(''):'<span class="muted">Nenhum grupo cadastrado.</span>')+'</div>';if(grupoAntes){const radio=[...targetBox.querySelectorAll('.tg')].find(x=>x.value===grupoAntes);if(radio)radio.checked=true;}if(window.FSJ_PLATFORM?.platform==='desktop'&&window.fsjOwnerVerified===true){const editar=document.createElement('button');editar.type='button';editar.textContent='Editar integrantes do grupo';editar.style.cssText='display:block;margin:10px 0';editar.addEventListener('click',fsjEditarIntegrantesDaTarefa);targetBox.append(editar);}return;
+ targetBox.innerHTML='<label>Responsável pela tarefa — grupo existente</label><div class="checks">'+(S.groups.some(g=>g.ativo!==false)?S.groups.filter(g=>g.ativo!==false).map(g=>'<label><input class="tg" type="radio" name="taskGroup" value="'+g.id+'"> <b>'+esc(g.name)+'</b> — '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+'</label>').join(''):'<span class="muted">Nenhum grupo cadastrado.</span>')+'</div>';if(grupoAntes){const radio=[...targetBox.querySelectorAll('.tg')].find(x=>x.value===grupoAntes);if(radio)radio.checked=true;}if(window.fsjOwnerVerified===true){const editar=document.createElement('button');editar.type='button';editar.textContent='Editar integrantes do grupo';editar.style.cssText='display:block;margin:10px 0';editar.addEventListener('click',fsjEditarIntegrantesDaTarefa);targetBox.append(editar);}return;
  }
  targetBox.replaceChildren();const label=document.createElement('label');label.htmlFor='taskPersonPicker';label.textContent='Selecione responsáveis';
  const select=document.createElement('select');select.id='taskPersonPicker';const hidden=document.createElement('div');hidden.hidden=true;
@@ -1347,7 +1347,7 @@ function renderTargets(){
 
 /* Desktop Proprietário: a composição pertence ao cadastro do grupo, não à tarefa. */
 function fsjEditarIntegrantesDaTarefa(){
- if(window.FSJ_PLATFORM?.platform!=='desktop'||window.fsjOwnerVerified!==true)return;
+ if(window.fsjOwnerVerified!==true)return;
  const id=document.querySelector('#targetBox .tg:checked')?.value;
  if(!id)return alert('Selecione um grupo ativo antes de editar seus integrantes.');
  const grupo=S.groups.find(g=>String(g.id)===String(id)&&g.ativo!==false);
