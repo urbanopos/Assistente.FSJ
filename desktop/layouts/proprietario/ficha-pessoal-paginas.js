@@ -4,6 +4,7 @@ if (window.FSJ_PLATFORM?.platform !== 'desktop') return;
 const ficha = document.getElementById('fichaPessoa');
 const settings = document.getElementById('personSettings');
 const fichaHeader = ficha?.querySelector('.fsj-ficha-cabecalho');
+const settingsTitle = document.getElementById('personSettingsTitle');
 if (!ficha || !settings || document.getElementById('fsjFichaPaginas')) return;
 const fieldsets = [...settings.children].filter(x => x.tagName === 'FIELDSET');
 const supervisor = fieldsets.find(x => x.querySelector('#pSupervisor'));
@@ -24,6 +25,10 @@ function exibir(numero) {
   pagina=numero;
   // O cabeçalho com identificação, resumo e ações pertence só à página cadastral.
   if (fichaHeader) fichaHeader.hidden = numero!==1;
+  if (settingsTitle) {
+    if (numero===1) settingsTitle.textContent='Cadastro e supervisão de demandas';
+    else settingsTitle.textContent='Jornada de trabalho, férias e folgas';
+  }
   supervisor.hidden = numero!==1;
   for (const el of fieldsets) if (el!==supervisor) el.hidden=numero!==2;
   // Ações de salvar/cancelar existentes permanecem acessíveis nas duas páginas.
