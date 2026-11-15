@@ -1863,7 +1863,9 @@ function fsjRenderTarefasPorSituacao(){
    const frequency=typeof fsjFrequency==='function'?fsjFrequency(t):(t.frequency||(t.daily?'diaria':'pontual'));
    const suffix=({pontual:'P',diaria:'D',semanal:'S',mensal:'M',trimestral:'T',semestral:'SM',anual:'A'})[String(frequency||'').toLowerCase()]||'';
    const code=String(t.code||'Tarefa').trim();
-   const completeCode=suffix&&!new RegExp('\\\\s'+suffix+'
+   const hasSuffix=/\\s(?:P|D|S|M|T|SM|A)\\s*$/i.test(code);
+   const completeCode=suffix&&!hasSuffix?code+' '+suffix:code;
+   const label=completeCode+' — '+(t.text||'');
    if(paginate){const name=document.createElement('span');name.textContent=label;button.append(name);}else button.textContent=label;
    const entry=byTask.get(t.id);
    const meta=entry?'Concluída por '+entry.executorName+(entry.completedAt?' · '+fsjDataHora(entry.completedAt):''):'Responsáveis: '+names(t);
