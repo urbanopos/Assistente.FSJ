@@ -90,7 +90,7 @@ function init(){
  const vmOrigin=fsjTVMobile?new URL('https://168.196.84.147/').origin:new URL(frame.src).origin;
  let currentSection='inicio';
  function sendSection(section){
-  if(frame.contentWindow&&frame.dataset.ssoReady==='1')frame.contentWindow.postMessage({type:'fsj-tv-navigate',section},vmOrigin);
+  if(frame.contentWindow&&frame.dataset.ssoReady==='1')frame.contentWindow.postMessage({type:'fsj-tv-navigate',section,platform:fsjTVMobile?'mobile':'desktop'},vmOrigin);
  }
  frame.addEventListener('load',()=>{if(frame.dataset.ssoReady==='1'&&currentSection!=='inicio')sendSection(currentSection)});
  window.addEventListener('message',event=>{if(event.source!==frame.contentWindow||event.origin!==vmOrigin)return;if(event.data?.type==='fsj-sso-ok'&&currentSection!=='inicio')sendSection(currentSection)});
