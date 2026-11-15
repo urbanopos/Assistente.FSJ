@@ -3122,8 +3122,8 @@ function records(){
   return category==='grupo'?group:category==='pontuais'?!group&&frequency==='pontual':!group&&frequency!=='pontual';
  });
  return filtered.sort((a,b)=>{
-  const na=Number((a.code||'').match(/Tar-(\\d+)/i)?.[1]||Infinity);
-  const nb=Number((b.code||'').match(/Tar-(\\d+)/i)?.[1]||Infinity);
+  const na=Number((a.code||'').match(/Tar-([0-9]+)/i)?.[1]||Infinity);
+  const nb=Number((b.code||'').match(/Tar-([0-9]+)/i)?.[1]||Infinity);
   if(na!==nb)return na-nb;
   return String(a.created||a.createdAt||a.created||a.id).localeCompare(String(b.created||b.createdAt||b.created||b.id));
  });
