@@ -298,7 +298,14 @@
         window.navTo?.('cadGrupos');
       } else {
         window.navTo?.('cadPessoas');
-        if (mode === 'cadastro') window.clearPerson?.();
+        if (mode === 'cadastro') {
+          window.clearPerson?.();
+          // Novo cadastro começa sem opções previamente autorizadas.
+          // Não modifica registros existentes nem o comportamento da edição.
+          for (const checkbox of peoplePage.querySelectorAll('#personBasicFields input[type="checkbox"]')) {
+            checkbox.checked = false;
+          }
+        }
       }
       updatePeopleTabs();
     }
