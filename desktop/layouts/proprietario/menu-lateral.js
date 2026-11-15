@@ -394,59 +394,6 @@
     window.fsjOwnerPeopleGo = choosePeopleMode;
   }
 
-  // Ficha pessoal em duas páginas, preservando todos os campos e eventos originais.
-  const ficha = document.getElementById('fichaPessoa');
-  const settings = document.getElementById('personSettings');
-  if (ficha && settings && !document.getElementById('fsjFichaPaginacao')) {
-    const fields = [...settings.children];
-    const supervision = fields.find(el => el.tagName === 'FIELDSET' && el.querySelector('#pSupervisor'));
-    const jornada = fields.find(el => el.tagName === 'FIELDSET' && el.querySelector('#pRegimeJornada'));
-    if (supervision && jornada) {
-      const page1 = document.createElement('div');
-      const page2 = document.createElement('div');
-      page1.id = 'fsjFichaPaginaCadastro';
-      page2.id = 'fsjFichaPaginaJornada';
-      settings.insertBefore(page1, supervision);
-      settings.insertBefore(page2, jornada);
-      page1.appendChild(supervision);
-      for (const node of [...settings.children]) {
-        if (node === page1 || node === page2 || node.id === 'personSettingsTitle') continue;
-        page2.appendChild(node);
-      }
-      // Coloca a supervisão junto aos dados pessoais, na primeira página.
-      const head = ficha.querySelector('.fsj-ficha-cabecalho');
-      if (head) head.appendChild(page1);
-      const nav = document.createElement('div');
-      nav.id = 'fsjFichaPaginacao';
-      nav.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0;flex-wrap:wrap';
-      const prev = document.createElement('button');
-      prev.type = 'button'; prev.textContent = '← Anterior';
-      const label = document.createElement('strong');
-      const next = document.createElement('button');
-      next.type = 'button'; next.textContent = 'Próxima →';
-      let current = 1;
-      const show = n => {
-        current = n;
-        const visible = !ficha.classList.contains('hidden') && !ficha.hidden;
-        page1.hidden = n !== 1;
-        page2.hidden = n !== 2;
-        // O contêiner de configurações original permanece para compatibilidade.
-        if (n === 2) settings.hidden = false;
-        label.textContent = n === 1 ? '1/2 — Dados cadastrais e supervisão' : '2/2 — Jornada, férias e calendário';
-        prev.disabled = n === 1; next.disabled = n === 2;
-        if (visible) ficha.scrollIntoView({block:'start',behavior:'instant'});
-      };
-      prev.addEventListener('click', () => show(1));
-      next.addEventListener('click', () => show(2));
-      nav.append(prev,label,next);
-      ficha.insertBefore(nav, settings);
-      show(1);
-      // Reinicia na ficha cadastral quando uma pessoa é selecionada.
-      const personSelect = document.getElementById('personSelect');
-      personSelect?.addEventListener('change', () => show(1));
-    }
-  }
-
   const positionSidebar = () => {
     sidebar.style.setProperty('--fsj-sidebar-top', `${header.getBoundingClientRect().height}px`);
   };
