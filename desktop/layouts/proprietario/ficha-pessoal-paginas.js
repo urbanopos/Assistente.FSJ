@@ -42,6 +42,35 @@ style.textContent += `
     box-sizing: border-box !important;
   }
 `;
+
+// Uniformidade de altura no quadro Jornada de trabalho (página 2).
+style.textContent += `
+  #fichaPessoa #personSettings fieldset:has(#pRegimeJornada) > .row {
+    align-items: end !important;
+  }
+  #fichaPessoa #personSettings fieldset:has(#pRegimeJornada) > .row > div {
+    min-width: 0;
+  }
+  #fichaPessoa #personSettings #pRegimeJornada,
+  #fichaPessoa #personSettings #pJornadaVigencia,
+  #fichaPessoa #personSettings #pworkstart,
+  #fichaPessoa #personSettings #plunchstart,
+  #fichaPessoa #personSettings #plunchreturn,
+  #fichaPessoa #personSettings #pworkfinish {
+    height: 42px !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    width: 100%;
+  }
+  #fichaPessoa #personSettings fieldset:has(#pRegimeJornada) > .row > div > label {
+    display:block;
+    min-height:20px;
+    line-height:20px;
+    margin-bottom:5px;
+  }
+`;
 document.head.append(style);
 const nav = document.createElement('div');
 nav.id = 'fsjFichaPaginas';
