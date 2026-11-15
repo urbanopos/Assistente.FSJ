@@ -31,7 +31,8 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
  dialog.querySelector('.fsj-completed-review')?.remove();
  // Reutilizar o mesmo diálogo sem acumular barras de ações de aberturas anteriores.
  dialog.querySelectorAll('.fsj-owner-pontual-actions').forEach(el=>el.remove());
- if(renderActions)history.before(renderActions());
+ // A barra pertence ao conteúdo renovado em cada abertura, não aos irmãos persistentes.
+ if(renderActions)history.append(renderActions());
  if(!dialog.open)dialog.showModal();
  if(!loadDetails)return;
  history.textContent='Consultando registros da tarefa…';
@@ -39,6 +40,7 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
   const details=await loadDetails();if(request!==fsjTaskDetailRequest||!dialog.open)return;
   if(details.description!==undefined)document.getElementById('fsj-task-detail-description').textContent=details.description;
   history.replaceChildren();
+  if(renderActions)history.append(renderActions());
   for(const section of details.sections){const heading=document.createElement('h3');heading.textContent=section.title;history.append(heading);for(const entry of section.entries){const block=document.createElement('div');block.className='fsj-detail-entry';const text=document.createElement('p');text.textContent=entry.text;block.append(text);for(const action of entry.actions||[]){const button=document.createElement('button');button.type='button';button.textContent=action.label;button.addEventListener('click',async()=>{button.disabled=true;try{await action.run();}catch{const error=document.createElement('p');error.textContent='Não foi possível abrir o registro. Tente novamente.';block.append(error);}finally{button.disabled=false;}});block.append(button);}history.append(block);}}
  }catch{
   if(request!==fsjTaskDetailRequest||!dialog.open)return;history.textContent='Não foi possível consultar os registros. Nenhuma informação de execução pode ser confirmada agora.';const retry=document.createElement('button');retry.type='button';retry.textContent='Tentar novamente';retry.onclick=()=>fsjOpenTaskDetails(code,description,context,loadDetails,frequency,renderActions);history.append(retry);
