@@ -354,7 +354,7 @@
       const refresh = document.getElementById('refreshPeopleBtn');
       if (refresh) refresh.style.display = 'none';
       const embeddedGroups = document.getElementById('fsjGruposNaPessoas');
-      if (embeddedGroups) embeddedGroups.style.display = 'none';
+      if (embeddedGroups) embeddedGroups.style.display = peopleMode === 'grupos' ? '' : 'none';
       const title = peoplePage.querySelector('h2');
       if (title) title.textContent = peopleMode === 'edicao' ? 'Edição de pessoas' : 'Cadastro central de pessoas';
     }
