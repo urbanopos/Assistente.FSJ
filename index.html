@@ -1856,7 +1856,7 @@ function fsjRenderTarefasPorSituacao(){
   if(!items.length){const p=document.createElement('p');p.className='muted';p.textContent='Nenhuma tarefa nesta situação para o filtro selecionado.';section.append(p);}
   for(const t of items){
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:10px;margin:8px 0';
-   const button=document.createElement('button');button.type='button';button.className='fsj-task-number';
+   const button=document.createElement('button');button.type='button';button.className='fsj-task-number '+fsjTaskClass(t.priority||t.prioridade,t.status);
    const label=(t.code||'Tarefa')+' — '+(t.text||'');
    if(paginate){const name=document.createElement('span');name.textContent=label;button.append(name);}else button.textContent=label;
    const entry=byTask.get(t.id);
