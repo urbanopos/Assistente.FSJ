@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261115-execucao-categorias-desktop-01">
+<meta name="fsj-build" content="20261115-execucao-categorias-desktop-02">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -704,7 +704,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261115-execucao-categorias-desktop-01';
+const FSJ_BUILD='20261115-execucao-categorias-desktop-02';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1998,7 +1998,7 @@ function fsjRestaurarFiltroExecucao(contexto){
  if(lista){
   const desktop=window.FSJ_PLATFORM?.platform==='desktop';
   if(desktop)lista.dataset.fsjCategory=contexto.categoria;
-  lista.dataset.fsjFilterKey=desktop?[contexto.pessoa,contexto.grupo,contexto.categoria].join('|'):contexto.pessoa+'|'+contexto.grupo;
+  lista.dataset.fsjFilterKey=desktop?[contexto.pessoa,contexto.categoria].join('|'):contexto.pessoa+'|'+contexto.grupo;
   lista.dataset.fsjPageIndex=String(contexto.pagina);
  }
  fsjRenderTarefasEmExecucao();
@@ -2013,7 +2013,9 @@ function fsjRenderTarefasEmExecucao(){
  let filters=page.querySelector('#fsjArquivoFiltros');
  if(!filters){
   filters=document.createElement('div');filters.id='fsjArquivoFiltros';filters.style.cssText='display:flex;flex-wrap:wrap;gap:12px;margin:12px 0';
-  for(const [id,title] of [['fsjArquivoPessoa','Executor Individual'],['fsjArquivoGrupo','Grupo Executor']]){
+  const selectors=[['fsjArquivoPessoa',desktop?'Executor Individual ou Supervisor':'Executor Individual']];
+  if(!desktop)selectors.push(['fsjArquivoGrupo','Grupo Executor']);
+  for(const [id,title] of selectors){
    const label=document.createElement('label');label.textContent=title+' ';const select=document.createElement('select');select.id=id;select.style.cssText='max-width:100%;min-width:160px';select.addEventListener('change',()=>{if(select.value){const other=document.getElementById(id==='fsjArquivoPessoa'?'fsjArquivoGrupo':'fsjArquivoPessoa');if(other)other.value='';}fsjRenderTarefasEmExecucao();});label.append(select);filters.append(label);
   }
   box.before(filters);
@@ -2054,7 +2056,6 @@ function fsjRenderTarefasEmExecucao(){
  const supervisorOptions=people.filter(p=>p.active!==false&&supervisors.has(String(p.id)))
   .map(p=>[String(p.id),p.nick||p.name||String(p.id)])
   .map(([id,name])=>['supervisor:'+id,name+' (Supervisão)']);
- if(desktop)psel.labels[0].firstChild.textContent='Executor Individual ou Supervisor ';
  setOptions(psel,[['','Todas as pessoas'],...peopleOptions,...supervisorOptions]);
  const supervisor=psel.value.startsWith('supervisor:')?supervisors.get(psel.value.slice('supervisor:'.length)):null;
  const supervisedGroups=new Set((supervisor?.grupos||[]).map(String));
@@ -2066,7 +2067,7 @@ function fsjRenderTarefasEmExecucao(){
  const groupsById=new Map(groups.map(g=>[String(g.id),g]));
  const category=desktop?box.dataset.fsjCategory||'':'';
  const taskCategory=t=>t.groupId?'grupo':fsjTarefaPeriodica(t)?'periodicas':'pontuais';
- setOptions(gsel,[['','Todos os grupos'],...(S.groups||[]).filter(g=>g.ativo!==false).map(g=>[String(g.id),g.name||String(g.id)])]);
+ if(gsel)setOptions(gsel,[['','Todos os grupos'],...groups.filter(g=>g.ativo!==false).map(g=>[String(g.id),g.name||String(g.id)])]);
 
  const active=(Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[]).filter(e=>e.estado==='em_andamento'&&e.iniciado_em&&!e.concluido_em);
  const activeMap=new Map(active.map(e=>[String(e.tarefa_id),e]));
@@ -2087,7 +2088,7 @@ function fsjRenderTarefasEmExecucao(){
    const groupMember=desktop&&groupMembers.some(id=>String(id)===psel.value);
    if(!(assigned&&(desktop||!t.groupId))&&!groupMember)return false;
   }
-  if(gsel.value&&groupId!==gsel.value)return false;
+  if(gsel?.value&&groupId!==gsel.value)return false;
   return true;
  }).sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),'pt-BR',{numeric:true}));
  if(!tasks.length){box.dataset.fsjPageIndex='0';box.textContent='Nenhuma tarefa encontrada para os filtros selecionados.';const pager=document.getElementById('fsjExecucaoPaginador');if(pager){pager.replaceChildren();pager.hidden=true;}return;}
@@ -2114,7 +2115,7 @@ function fsjRenderTarefasEmExecucao(){
  const cards=[...box.querySelectorAll('section > article')];
  const perPage=2; // Duas tarefas por página no Desktop, sem rolagem vertical
  const pages=Math.max(1,Math.ceil(cards.length/perPage));
- const filterKey=desktop?[psel.value,gsel.value,category].join('|'):psel.value+'|'+gsel.value;
+ const filterKey=desktop?[psel.value,category].join('|'):psel.value+'|'+(gsel?.value||'');
  const priorKey=box.dataset.fsjFilterKey;
  let pageIndex=priorKey===filterKey?Number(box.dataset.fsjPageIndex||0):0;
  pageIndex=Math.max(0,Math.min(pageIndex,pages-1));
