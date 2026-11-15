@@ -172,15 +172,15 @@
   }
   function openMaintenance() {
     if (window.fsjOwnerVerified !== true) return;
-    closeDiagnostic();
-    for (const child of panel.children) {
-      if (child !== maintenanceView) {
-        child.hidden = true;
-        child.classList.add('hidden');
-      }
+    // Painel externo não permite incorporação confiável: abrir em aba própria.
+    // Não ocultar as telas do aplicativo nem carregar iframe cinza.
+    closeMaintenance();
+    const tab = window.open(maintenanceLink.href, '_blank', 'noopener,noreferrer');
+    if (!tab) {
+      // Alternativa clicável se o navegador bloquear a nova aba.
+      maintenanceView.hidden = false;
+      maintenanceFrame.removeAttribute('src');
     }
-    maintenanceView.hidden = false;
-    maintenanceFrame.src = maintenanceLink.href;
   }
 
   // Ponte única para todos os acessos (menu lateral, seletor e atalhos).
