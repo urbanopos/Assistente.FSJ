@@ -3088,6 +3088,79 @@ if (window.FSJ_PLATFORM?.platform === 'desktop') {
 }
 </script>
 <script src="./desktop/layouts/proprietario/ficha-pessoal-paginas.js?v=20261115-09" defer></script>
+
+<!-- FSJ 2026-11-15 | Desktop Proprietário: navegação de Minhas Tarefas isolada -->
+<style id="fsj-owner-tasks-tabs-style">
+@media (min-width:701px){
+#demandas.fsj-owner-tasks-tabs-on > :not(#fsjOwnerTasksTabs){display:none!important}
+#demandas #fsjOwnerTasksTabs{display:block!important}
+#fsjOwnerTasksTabs .fsj-owner-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+#fsjOwnerTasksTabs .fsj-owner-tabs button{border:1px solid #8cb69b;background:#eaf4ed;color:#14532d;font-weight:700;border-radius:9px;padding:14px 8px;cursor:pointer}
+#fsjOwnerTasksTabs .fsj-owner-tabs button[aria-selected="true"]{background:#166534;color:#fff;border-color:#166534}
+#fsjOwnerTasksTabs .fsj-owner-task-row{padding:12px;border:1px solid #cbdacf;border-radius:8px;margin:7px 0;background:#fff}
+#fsjOwnerTasksTabs .fsj-owner-task-row button{border:0;background:transparent;color:#14532d;text-align:left;font-weight:700;text-decoration:underline;cursor:pointer}
+#fsjOwnerTasksTabs .fsj-owner-task-meta{color:#526c5c;font-size:12px;margin:4px 0 0}
+#fsjOwnerTasksTabs .fsj-owner-task-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+#fsjOwnerTasksTabs .fsj-owner-task-tools button{padding:7px 12px;border:1px solid #a3c1ae;border-radius:7px;background:#f4faf5;cursor:pointer}
+}
+</style>
+<script id="fsj-owner-tasks-tabs-script">
+(function(){
+'use strict';
+if(window.FSJ_PLATFORM?.platform!=='desktop')return;
+const section=document.getElementById('demandas');if(!section)return;
+const panel=document.createElement('div');panel.id='fsjOwnerTasksTabs';
+panel.innerHTML='<h2>Minhas Tarefas</h2><div class="fsj-owner-tabs" role="tablist" aria-label="Categorias de tarefas"><button type="button" role="tab" data-fsj-owner-category="periodicas" aria-selected="true">Tarefas Periódicas</button><button type="button" role="tab" data-fsj-owner-category="pontuais" aria-selected="false">Tarefas Pontuais</button><button type="button" role="tab" data-fsj-owner-category="grupo" aria-selected="false">Tarefas de Grupo</button></div><div class="fsj-owner-task-tools"><strong id="fsjOwnerTaskCategoryTitle">Tarefas Periódicas</strong><span><button type="button" id="fsjOwnerTaskRefresh">Atualizar</button> <button type="button" id="fsjOwnerTaskClassic">Consultar filtros e relatórios anteriores</button></span></div><div id="fsjOwnerTaskRows" aria-live="polite"></div><div class="fsj-owner-task-tools"><button type="button" id="fsjOwnerTaskPrev">◀ Anterior</button><span id="fsjOwnerTaskPage"></span><button type="button" id="fsjOwnerTaskNext">Próxima ▶</button></div>';
+section.prepend(panel);
+section.classList.add('fsj-owner-tasks-tabs-on');
+let category='periodicas',page=0;
+const labels={periodicas:'Tarefas Periódicas',pontuais:'Tarefas Pontuais',grupo:'Tarefas de Grupo'};
+function records(){
+ const all=(typeof S!=='undefined'&&Array.isArray(S.tasks))?S.tasks:[];
+ const filtered=all.filter(t=>{
+  const group=!!t.groupId,frequency=typeof fsjFrequency==='function'?fsjFrequency(t):(t.frequency||'pontual');
+  return category==='grupo'?group:category==='pontuais'?!group&&frequency==='pontual':!group&&frequency!=='pontual';
+ });
+ return filtered.sort((a,b)=>String(a.createdAt||a.created||a.id).localeCompare(String(b.createdAt||b.created||b.id)));
+}
+function render(){
+ panel.querySelectorAll('[data-fsj-owner-category]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.fsjOwnerCategory===category)));
+ document.getElementById('fsjOwnerTaskCategoryTitle').textContent=labels[category];
+ const list=records(),size=8,pages=Math.max(1,Math.ceil(list.length/size));page=Math.max(0,Math.min(page,pages-1));
+ const host=document.getElementById('fsjOwnerTaskRows');host.replaceChildren();
+ if(!list.length){const p=document.createElement('p');p.textContent='Nenhuma tarefa encontrada nesta categoria nos registros carregados.';host.append(p);}
+ list.slice(page*size,(page+1)*size).forEach(t=>{
+  const item=document.createElement('div');item.className='fsj-owner-task-row';
+  const link=document.createElement('button');link.type='button';link.dataset.fsjTaskId=String(t.id);
+  link.textContent=(t.code||'Tarefa sem código')+' — '+(t.text||'Sem descrição');
+  const info=document.createElement('div');info.className='fsj-owner-task-meta';
+  const frequency=typeof fsjFrequencyLabel==='function'?fsjFrequencyLabel(t):(t.frequency||'Pontual');
+  const archived=t.centralStatus==='Arquivado'||t.centralStatus==='Arquivada';
+  const status=category==='pontuais'?(archived?'Arquivado':(t.status||'Em aberto')):'';
+  info.textContent=(category==='grupo'?'Grupo · ':'')+frequency+(status?' · '+status:'')+(t.groupId?' · Identificador do grupo: '+t.groupId:'');
+  item.append(link,info);host.append(item);
+ });
+ document.getElementById('fsjOwnerTaskPage').textContent=(page+1)+' / '+pages+' · '+list.length+' tarefas';
+ document.getElementById('fsjOwnerTaskPrev').disabled=page===0;
+ document.getElementById('fsjOwnerTaskNext').disabled=page>=pages-1;
+}
+panel.querySelectorAll('[data-fsj-owner-category]').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.fsjOwnerCategory;page=0;render()}));
+document.getElementById('fsjOwnerTaskRefresh').onclick=render;
+document.getElementById('fsjOwnerTaskPrev').onclick=()=>{page--;render()};
+document.getElementById('fsjOwnerTaskNext').onclick=()=>{page++;render()};
+document.getElementById('fsjOwnerTaskClassic').onclick=()=>{
+ section.classList.remove('fsj-owner-tasks-tabs-on');
+ panel.style.display='none';
+ const back=document.createElement('button');back.type='button';back.textContent='← Voltar aos três botões de Minhas Tarefas';back.id='fsjOwnerTasksBack';back.style.marginBottom='12px';
+ back.onclick=()=>{section.classList.add('fsj-owner-tasks-tabs-on');panel.style.display='';back.remove();render()};
+ section.prepend(back);
+};
+document.addEventListener('fsj:entry-validated',render);
+document.addEventListener('fsj:fonte-operacional',render);
+document.addEventListener('click',e=>{if(e.target.closest('[data-section="demandas"],[data-target="demandas"]'))render()});
+render();
+})();
+</script>
 </body></html>
 
 
