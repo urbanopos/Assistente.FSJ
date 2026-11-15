@@ -9,11 +9,14 @@ function show(mode='vm'){
  panel.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><h2 id="fsjMaintenanceTitle"></h2><button type="button" aria-label="Fechar" data-close>×</button></div><p role="status" data-message></p><div data-actions style="display:grid;gap:12px"></div>';
  document.body.append(panel);panel.querySelector('[data-close]').onclick=()=>panel.close();
  }
- const vm=mode==='vm';panel.querySelector('h2').textContent=vm?'Assistente FSJ.VM — vídeos e chamadas':'Assistente FSJ.Web';
- panel.querySelector('[data-message]').textContent=vm?'Escolha o acesso. Se a internet pública falhar e você estiver na rede da fazenda, tente a rede local. O servidor precisa estar ligado.':'A atualização é automática. Use o reparo se alguma tela não estiver funcionando.';
+ const maintenance=mode==='painel';const vm=mode==='vm'||maintenance;panel.querySelector('h2').textContent=maintenance?'Painel de Manutenção — acesso protegido':vm?'Assistente FSJ.VM — vídeos e chamadas':'Assistente FSJ.Web';
+ panel.querySelector('[data-message]').textContent=maintenance?'O painel exige autenticação própria. O endereço privado só funciona conectado à VPN da fazenda. O endereço público do painel ainda não foi confirmado; não será substituído pelo endereço da TV.':vm?'Escolha o acesso. Se a internet pública falhar e você estiver na rede da fazenda, tente a rede local. O servidor precisa estar ligado.':'A atualização é automática. Use o reparo se alguma tela não estiver funcionando.';
  const actions=panel.querySelector('[data-actions]');actions.replaceChildren();
  function link(label,url){const a=document.createElement('a');a.textContent=label;a.href=url;a.target=url.startsWith('https://168.196.84.147/')||url.startsWith('https://192.168.1.114:8443/')?'FSJ_VIDEOS_CHAMADAS':'FSJ_MANUTENCAO';a.style.cssText='display:block;padding:12px;background:#176341;color:white;border-radius:8px;text-decoration:none';actions.append(a);}
- if(vm){
+ if(maintenance){
+ link('Abrir página de senha pela VPN','https://10.203.77.1:9443/');
+ const note=document.createElement('p');note.textContent='Fora da VPN, este endereço não abre. A TV pública na porta 9443 não é uma confirmação de acesso ao Painel de Manutenção. Nenhuma autenticação foi desativada.';actions.append(note);
+ }else if(vm){
  link('Abrir pela internet pública','https://168.196.84.147/');
  link('Abrir pela rede local da fazenda','https://192.168.1.114:8443/');
  link('Atualizar aplicativo existente','./instalar-fsj-vm.html?manutencao=1');
