@@ -866,3 +866,9 @@ Commit `a420938a7b7aee62dc081b6a13ede7bf1603be92` (GitHub, publicação web suje
 - Backup prévio: branch `backup/desktop-tv-antes-layout-20261114` (base `e734f6b43036c729ccca16975489586335f74e4a`).
 - Validação pendente: abrir TV FSJ no Desktop do Proprietário, verificar ordem dos elementos, assistir vídeo cadastrado e conferir os quatro comandos; comparar com o celular, que deve permanecer inalterado.
 - Recuperação: comparar com o backup e reverter exclusivamente a mudança de layout caso haja regressão; preservar alterações posteriores não relacionadas.
+
+## 15/11/2026 — Categorias em Tarefas em Execução no Desktop do Proprietário
+
+Build `20261115-execucao-categorias-desktop-01`. Em **Tarefas em Execução**, selecionar a pessoa em **Executor Individual ou Supervisor** ou selecionar um **Grupo Executor**. A entrada com sufixo **(Supervisão)** reúne as tarefas próprias e as relacionadas às pessoas e aos grupos cadastrados para a supervisão. Abaixo dos seletores, **Tarefas Periódicas** e **Tarefas Pontuais** filtram as tarefas individuais, e **Tarefas de Grupo** reúne as tarefas coletivas de qualquer periodicidade. As categorias preservam a seleção e mantêm a ordenação por código oficial. Clicar novamente na categoria ativa volta à lista geral da seleção. A consulta usa os dados já carregados pelo painel autenticado do Proprietário.
+
+Validação local com dados fictícios: filtros de executor, supervisão e grupo, categoria, ordenação, paginação, abertura de tarefa, retorno à seleção, titularidade e ausência dos novos botões no Celular. O contrato de atualização automática passou. A validação da sessão real do Proprietário fica pendente. A versão web é aplicada ao abrir ou retomar quando seguro. Recuperação pelo histórico Git, revertendo o commit deste build. Consulte [o módulo Desktop do Proprietário](../desktop/layouts/proprietario/README.md#tarefas-em-execução).

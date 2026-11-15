@@ -11,3 +11,9 @@ A entrada carrega o adaptador apenas quando a plataforma é Desktop. A barra dep
 **Recolher menu** compacta a barra. **Usar menu anterior** recupera no próprio navegador a navegação anteriormente escolhida. **Ativar menu lateral** volta ao novo visual. A troca preserva a tela aberta e os controles existentes. Para restaurar a publicação, reverta apenas o commit deste build.
 
 Validação local: contrato de atualização automática e simulação dos 14 destinos, titularidade, entrada de emergência, destaque, recolhimento, retorno ao menu anterior e isolamento Celular. A conferência visual e de navegação com sessão real fica para o Dell.
+
+## Tarefas em Execução
+
+No build `20261115-execucao-categorias-desktop-01`, a lista do Proprietário oferece **Tarefas Periódicas**, **Tarefas Pontuais** e **Tarefas de Grupo** abaixo dos seletores. Para consultar a atribuição de supervisão, escolha a entrada com sufixo **(Supervisão)**. Para consultar apenas as atribuições como executor, escolha o nome sem o sufixo. A categoria de grupo inclui tarefas coletivas pontuais e periódicas. O filtro de categoria conserva a seleção de pessoa ou grupo e a listagem inicia na primeira página quando o filtro muda. Ao voltar da edição, a seleção e a página anteriores são recuperadas quando disponíveis.
+
+O teste local em DOM usou dados fictícios e exercitou as seleções, a ordem dos códigos, as duas tarefas por página, a abertura de detalhes e a restauração dos filtros. O contrato de atualização automática foi executado com sucesso. A conferência com uma sessão real do Proprietário fica pendente. A atualização web segue o mecanismo existente ao abrir ou retomar o uso. Para recuperação, reverta o commit deste build pelo histórico Git.
