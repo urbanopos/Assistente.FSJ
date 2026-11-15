@@ -73,7 +73,7 @@ function init(){
   actions.style.display='grid';actions.style.flex='0 0 auto';
   actions.style.visibility='visible';
   actions.removeAttribute('hidden');
-  style.textContent+=\`
+  style.textContent+=`
   @media(min-width:851px){
    #fsjTvPortal.fsj-tv-desktop-layout #fsjTvPortalContent{margin:0 0 8px}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library{margin:10px 0 14px}
@@ -85,7 +85,7 @@ function init(){
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-brand p{margin:2px!important}
    #fsjTvPortal.fsj-tv-desktop-layout #fsjTvPortalInfo{display:none!important}
   }
-  \`;
+  `;
  }
  const vmOrigin=new URL(fsjTVMobile?'https://168.196.84.147/':(window.FSJ_VIDEO_VM_URL||'https://192.168.1.114/')).origin;
  let currentSection='inicio';
