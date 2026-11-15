@@ -29,6 +29,13 @@
     #cadPessoas.fsj-pessoas-mobile #personBasicFields input,#cadPessoas.fsj-pessoas-mobile #personBasicFields select{min-width:0!important}
     #cadPessoas.fsj-pessoas-mobile .fsj-pessoas-rodape{position:relative;z-index:1}
     #cadPessoas.fsj-pessoas-mobile #fsjOwnerAccessInPeople>button{width:100%}
+    #cadPessoas.fsj-pessoas-mobile #personBasicHome{max-width:620px;margin-inline:auto}
+    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields{grid-template-columns:minmax(0,1fr)!important;gap:5px!important}
+    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields>div{grid-column:1/-1!important}
+    #cadPessoas.fsj-pessoas-mobile #personBasicFields .person-fields input{min-height:40px!important;padding:7px 10px!important}
+    #cadPessoas.fsj-pessoas-mobile #personBasicFields label{font-size:.93rem!important}
+    #cadPessoas.fsj-pessoas-mobile .fsj-pessoas-salvar{display:flex;justify-content:center;margin:8px auto 4px;max-width:620px}
+    #cadPessoas.fsj-pessoas-mobile .fsj-pessoas-salvar button{background:#205e45;color:white;min-height:42px;width:min(100%,320px);border-radius:9px}
   }`;
   document.head.appendChild(css);
   function init(){
@@ -64,7 +71,18 @@
     back.addEventListener('click',()=>show(Math.max(0,Number(host.dataset.fsjTab||0)-1)));
     next.addEventListener('click',()=>show(Math.min(2,Number(host.dataset.fsjTab||0)+1)));
     host.querySelector('h2')?.after(tabs);host.appendChild(foot);
-    function show(i){\n      host.scrollIntoView({block:'start',behavior:'instant'});
+    /* Aciona o salvamento oficial da ficha, sem duplicar persistência. */
+    const salvarArea=document.createElement('div');salvarArea.className='fsj-pessoas-salvar';
+    const salvarBtn=document.createElement('button');salvarBtn.type='button';salvarBtn.textContent='Salvar alterações';
+    salvarBtn.addEventListener('click',()=>{
+      const original=document.getElementById('savePersonTopBtn');
+      if(original)original.click();
+      else if(typeof window.savePerson==='function')window.savePerson();
+      else alert('Não foi possível localizar a função de salvar. Nenhuma alteração foi gravada.');
+    });
+    salvarArea.appendChild(salvarBtn);basic.appendChild(salvarArea);
+    function show(i){
+      host.scrollIntoView({block:'start',behavior:'instant'});
       host.dataset.fsjTab=String(i);
       buttons.forEach((b,j)=>b.setAttribute('aria-selected',String(j===i)));
       count.textContent=(i+1)+' / 3 — '+['Cadastro','Pessoas','Grupos'][i];
