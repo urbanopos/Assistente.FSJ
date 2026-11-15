@@ -25,3 +25,5 @@ No build `20261115-execucao-categorias-desktop-02`, **Tarefas de Grupo** passa a
 Build `20261115-minhas-tarefas-proprietario-01`. Abra **Minhas Tarefas** e selecione **Tarefas Periódicas**, **Tarefas Pontuais** ou **Tarefas de Grupo**. O painel usa o cadastro autenticado do titular. Mostra suas atribuições individuais e as coletivas dos grupos dos quais faz parte, em ordem crescente de código. O botão **Atualizar** consulta os registros atuais. Ações e permissões existentes do Proprietário continuam disponíveis nos itens da lista.
 
 O filtro foi verificado localmente com registros fictícios e o contrato de atualização automática passou. A validação autenticada no Desktop segue pendente. A atualização web é aplicada ao abrir ou retomar quando seguro. Para recuperação, reverta o commit deste build.
+
+O build `20261115-minhas-tarefas-pontuais-02` aplica a nomenclatura oficial aos links de **Minhas Tarefas → Tarefas Pontuais**, com sete dígitos e a letra **P** após o número (`Tar - 0000025 P`). A descrição permanece completa. A mudança é de exibição, com teste local da lista e do contrato de atualização. Para recuperação, reverta o commit deste build.
