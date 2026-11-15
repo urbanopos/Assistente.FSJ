@@ -218,10 +218,13 @@
     const home = options.find(option => option.value === 'dashboard');
     const ordered = home ? [home, ...options.filter(option => option !== home)] : options;
     for (const { value, textContent } of ordered) {
-      const button = createButton(textContent, '▸', () => {
+      const button = createButton(value === 'cadPessoas' ? 'Pessoas e Grupos' : textContent, '▸', () => {
         const option = [...menu.options].find(option => option.value === value);
         if (!eligible() || !useSidebar || !option || option.hidden || option.disabled || menu.disabled) return;
-        if (value === '__diagnostico') {
+        if (value === 'cadPessoas' && window.fsjOwnerPeopleGo) {
+          closeDiagnostic(); closeMaintenance();
+          window.fsjOwnerPeopleGo('cadastro');
+        } else if (value === '__diagnostico') {
           closeMaintenance();
           openDiagnostic();
         } else if (value === '__manutencao') {
@@ -247,7 +250,7 @@
   }
 
   function sync() {
-    const options = [...menu.options].filter(option => !option.hidden && option.value !== '__diagnostico');
+    const options = [...menu.options].filter(option => !option.hidden && option.value !== '__diagnostico' && option.value !== 'cadGrupos');
     const available = eligible() && options.some(option => option.value === 'dashboard');
     const active = available && useSidebar;
     sidebar.hidden = !active;
@@ -266,6 +269,57 @@
       if (option.value === current) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
     }
+  }
+
+  // Navegação agrupada do Proprietário: reutiliza os formulários originais.
+  let peopleMode = 'cadastro';
+  const peoplePage = document.getElementById('cadPessoas');
+  const groupsPage = document.getElementById('cadGrupos');
+  if (peoplePage && groupsPage) {
+    const tabs = [];
+    function choosePeopleMode(mode) {
+      peopleMode = mode;
+      if (mode === 'grupos') {
+        window.navTo?.('cadGrupos');
+      } else {
+        window.navTo?.('cadPessoas');
+        if (mode === 'cadastro') window.clearPerson?.();
+      }
+      updatePeopleTabs();
+    }
+    function updatePeopleTabs() {
+      for (const {button, mode} of tabs) {
+        button.setAttribute('aria-pressed', String(mode === peopleMode));
+        button.style.background = mode === peopleMode ? '#176341' : '#e5f2f7';
+        button.style.color = mode === peopleMode ? '#fff' : '#123c50';
+      }
+      const select = document.getElementById('personSelect');
+      const selectContainer = select?.parentElement;
+      if (selectContainer) selectContainer.style.display = peopleMode === 'edicao' ? '' : 'none';
+      const refresh = document.getElementById('refreshPeopleBtn');
+      if (refresh) refresh.style.display = 'none';
+      const embeddedGroups = document.getElementById('fsjGruposNaPessoas');
+      if (embeddedGroups) embeddedGroups.style.display = 'none';
+      const title = peoplePage.querySelector('h2');
+      if (title) title.textContent = peopleMode === 'edicao' ? 'Edição de pessoas' : 'Cadastro central de pessoas';
+    }
+    for (const host of [peoplePage, groupsPage]) {
+      const bar = document.createElement('div');
+      bar.className = 'fsj-people-tabs';
+      bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px';
+      for (const [mode, label] of [['cadastro','Cadastro'],['edicao','Edição'],['grupos','Grupos']]) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.style.cssText = 'border:1px solid #a9cbd7;border-radius:8px;padding:10px 18px;font-weight:700';
+        button.addEventListener('click', () => choosePeopleMode(mode));
+        bar.append(button);
+        tabs.push({button,mode});
+      }
+      host.prepend(bar);
+    }
+    updatePeopleTabs();
+    window.fsjOwnerPeopleGo = choosePeopleMode;
   }
 
   const positionSidebar = () => {
