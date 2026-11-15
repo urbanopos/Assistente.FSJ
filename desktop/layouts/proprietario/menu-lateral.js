@@ -12,6 +12,11 @@
 
   const style = document.createElement('style');
   style.textContent = `
+    /* Lista antiga de grupos: sempre oculta no desktop proprietário,
+       inclusive após renderizações que alteram o estilo inline. */
+    body.fsj-owner-sidebar-active #cadGrupos > #groups {
+      display: none !important;
+    }
     /* Ajuste fino de espaçamento do Cadastro/Edição de Pessoas no desktop. */
     body.fsj-owner-sidebar-active #cadPessoas #fsjOwnerAccessInPeople {
       margin-bottom: 4px !important;
