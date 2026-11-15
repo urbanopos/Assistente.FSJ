@@ -57,10 +57,15 @@ function init(){
   const actions=wrap.querySelector('.fsj-tv-actions');
   const menu=document.createElement('div');menu.className='fsj-tv-desktop-library';
   const watch=document.createElement('button');watch.type='button';watch.dataset.tv='biblioteca';
-  watch.textContent='Assistir vídeo da biblioteca';menu.append(watch);
+  watch.textContent='Escolha o vídeo da biblioteca';menu.append(watch);
   actions.before(content);content.after(menu);
   // Os quatro controles administrativos permanecem visíveis abaixo do quadro e da biblioteca.
   wrap.classList.add('fsj-tv-desktop-layout');
+  // Desktop: eliminar faixa branca e títulos redundantes sem alterar a VM nem o celular.
+  card.style.padding='0';card.style.background='transparent';card.style.border='0';
+  const desktopBrand=wrap.querySelector('.fsj-tv-brand');if(desktopBrand)desktopBrand.hidden=true;
+  if(legacy)legacy.remove();
+  const intro=access?.querySelector(':scope > p');if(intro)intro.hidden=true;
   // Manter os comandos visíveis no primeiro quadro, inclusive em janelas estreitas.
   // Não depender da rolagem abaixo de um iframe alto.
   wrap.style.display='flex';wrap.style.flexDirection='column';
@@ -70,12 +75,12 @@ function init(){
   actions.removeAttribute('hidden');
   style.textContent+=\`
   @media(min-width:851px){
-   #fsjTvPortal.fsj-tv-desktop-layout #fsjTvPortalContent{margin:8px 0 10px}
+   #fsjTvPortal.fsj-tv-desktop-layout #fsjTvPortalContent{margin:0 0 8px}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library{margin:10px 0 14px}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library button{width:100%;border:1px solid #ffffff55;background:#205d45;color:#fff;border-radius:10px;padding:12px;font-weight:700;cursor:pointer}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;position:relative!important;visibility:visible!important}
    #fsjTvPortal.fsj-tv-desktop-layout #fsjVideoFrame{height:clamp(220px,38dvh,360px)!important;min-height:220px!important}
-   #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-brand{padding:3px 0!important}
+   #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-brand{display:none!important}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-leaf{font-size:26px!important}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-brand p{margin:2px!important}
    #fsjTvPortal.fsj-tv-desktop-layout #fsjTvPortalInfo{display:none!important}
