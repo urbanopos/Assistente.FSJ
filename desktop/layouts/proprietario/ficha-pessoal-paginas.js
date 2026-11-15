@@ -82,6 +82,13 @@ style.textContent += `
     margin-top: 0 !important;
   }
 `;
+// Mesmo acabamento arredondado nos dois campos superiores da jornada.
+style.textContent += `
+  #fichaPessoa #personSettings #pRegimeJornada,
+  #fichaPessoa #personSettings #pJornadaVigencia {
+    border-radius: 9px !important;
+  }
+`;
 document.head.append(style);
 const nav = document.createElement('div');
 nav.id = 'fsjFichaPaginas';
