@@ -79,7 +79,7 @@ function init(){
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library{margin:10px 0 14px}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library button{width:100%;border:1px solid #ffffff55;background:#205d45;color:#fff;border-radius:10px;padding:12px;font-weight:700;cursor:pointer}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;position:relative!important;visibility:visible!important}
-   #fsjTvPortal.fsj-tv-desktop-layout #fsjVideoFrame{height:clamp(360px,55dvh,520px)!important;min-height:360px!important}
+   #fsjTvPortal.fsj-tv-desktop-layout #fsjVideoFrame{height:clamp(410px,61dvh,580px)!important;min-height:410px!important}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-brand{display:none!important}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-leaf{font-size:26px!important}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-brand p{margin:2px!important}
