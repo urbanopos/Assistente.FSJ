@@ -331,10 +331,10 @@
         window.navTo?.('cadGrupos');
       } else {
         window.navTo?.('cadPessoas');
-        if (mode === 'cadastro') {
+        if (mode === 'cadastro' || mode === 'edicao') {
+          // Nenhuma pessoa está selecionada ao entrar: não herdar marcações
+          // de um cadastro anterior. A seleção em Edição carrega os dados reais.
           window.clearPerson?.();
-          // Novo cadastro começa sem opções previamente autorizadas.
-          // Não modifica registros existentes nem o comportamento da edição.
           for (const checkbox of peoplePage.querySelectorAll('#personBasicFields input[type="checkbox"]')) {
             checkbox.checked = false;
           }
