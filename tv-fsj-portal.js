@@ -87,7 +87,7 @@ function init(){
   }
   `;
  }
- const vmOrigin=new URL(fsjTVMobile?'https://168.196.84.147/':(window.FSJ_VIDEO_VM_URL||'https://192.168.1.114/')).origin;
+ const vmOrigin=fsjTVMobile?new URL('https://168.196.84.147/').origin:new URL(frame.src).origin;
  let currentSection='inicio';
  function sendSection(section){
   if(frame.contentWindow&&frame.dataset.ssoReady==='1')frame.contentWindow.postMessage({type:'fsj-tv-navigate',section},vmOrigin);
