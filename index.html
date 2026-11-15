@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261115-kpi-filtros-proprietario-celular-teste-01">
+<meta name="fsj-build" content="20261115-kpi-filtros-proprietario-celular-teste-02">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -1792,11 +1792,13 @@ function fsjRenderTarefasPorSituacao(){
  if(!box||!title||!filter||!count)return;
  const screen=document.getElementById('tarefasPorSituacao');
  const status=window.fsjFiltroResumoSituacao||'Em aberto';
- const mobileOwner=window.FSJ_PLATFORM?.platform==='celular'&&window.fsjOwnerVerified===true;
+ const mobileOwner=(window.FSJ_PLATFORM?.platform==='celular'||window.matchMedia('(max-width:700px)').matches)&&window.fsjOwnerVerified===true;
  const tabs=document.getElementById('fsjResumoTiposMobile');
+ // Exibir a navegação assim que a tela de consulta for aberta, sem depender da confirmação assíncrona do banco.
+ const celularVisual=window.FSJ_PLATFORM?.platform==='celular'||window.matchMedia('(max-width:700px)').matches;
  if(tabs){
-  tabs.hidden=!mobileOwner;
-  if(mobileOwner){
+  tabs.hidden=!celularVisual;
+  if(celularVisual){
    if(!window.fsjResumoTipoSelecionado)window.fsjResumoTipoSelecionado='periodicas';
    tabs.querySelectorAll('button').forEach(b=>{
     b.classList.toggle('ativo',b.dataset.tipo===window.fsjResumoTipoSelecionado);
