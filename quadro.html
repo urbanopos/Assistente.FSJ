@@ -41,6 +41,11 @@ function fsjCalendarioConsulta(t){
  }
  wrap.append(controls,calendar);draw();return wrap;
 }
+/* Isolamento de plataforma: os filtros pertencem somente ao INDEX celular. */
+function fsjMinhasTarefasCelular(){
+ const mobile=window.matchMedia('(max-width:700px)').matches;
+ return mobile&&document.body.classList.contains('fsj-index-execucao')&&fsjFiltro==='aberto';
+}
 let fsjCategoriaMinhasTarefas="periodicas";
 function fsjCategoriaDaTarefa(t){
  if(t.grupo_id)return "grupo";
@@ -58,7 +63,7 @@ function fsjFiltrosMinhasTarefas(target){
  target.append(nav);
 }
 function fsjRenderOpenTasks(tasks){
- const target=document.getElementById('tasks');target.replaceChildren();if(fsjFiltro==='nao_cumpridas'){const filters=document.createElement('div');filters.style.cssText='display:flex;gap:8px;align-items:center;margin:10px 0';const label=document.createElement('label');label.textContent='Mês/Ano: ';const month=document.createElement('input');month.type='month';month.value=fsjMesFiltro;month.onchange=()=>{fsjMesFiltro=month.value;load()};label.append(month);filters.append(label);target.append(filters)}if(document.body.classList.contains('fsj-index-execucao')&&fsjFiltro==='aberto')fsjFiltrosMinhasTarefas(target);
+ const target=document.getElementById('tasks');target.replaceChildren();if(fsjFiltro==='nao_cumpridas'){const filters=document.createElement('div');filters.style.cssText='display:flex;gap:8px;align-items:center;margin:10px 0';const label=document.createElement('label');label.textContent='Mês/Ano: ';const month=document.createElement('input');month.type='month';month.value=fsjMesFiltro;month.onchange=()=>{fsjMesFiltro=month.value;load()};label.append(month);filters.append(label);target.append(filters)}if(fsjMinhasTarefasCelular())fsjFiltrosMinhasTarefas(target);else if(document.body.classList.contains('fsj-index-execucao')){const heading=document.createElement('h2');heading.textContent='TAREFAS INDIVIDUAIS';heading.style.cssText='font-size:18px;margin:14px 0 10px;font-weight:800';target.append(heading);}
  const visible=(Array.isArray(tasks)?tasks:[]).filter(t=>{
   // Tarefas coletivas pertencentes ao executor também aparecem após as individuais.
   const archive=document.getElementById('boardSituation').value==='Arquivado';
@@ -69,9 +74,9 @@ function fsjRenderOpenTasks(tasks){
   if(t.fsj_nao_cumprida===true)return false;
   if(periodic)return true;
   return (document.body.classList.contains('fsj-index-execucao')?fsjEstado(t)!=='concluida':fsjEstado(t)===fsjFiltro)&&!t.respondido&&!t.respondido_em&&!t.concluida&&!t.concluida_em;
- }).filter(t=>!(document.body.classList.contains('fsj-index-execucao')&&fsjFiltro==='aberto')||fsjCategoriaDaTarefa(t)===fsjCategoriaMinhasTarefas).sort(fsjCompareTaskPriority);
+ }).filter(t=>!fsjMinhasTarefasCelular()||fsjCategoriaDaTarefa(t)===fsjCategoriaMinhasTarefas).sort(fsjCompareTaskPriority);
  if(!visible.length){const empty=document.createElement('p');empty.className='empty';empty.textContent=fsjFiltro==='perguntas'?'Os registros de perguntas ainda não estão disponíveis neste quadro.':'Nenhuma tarefa nesta situação.';target.append(empty);return;}
- const groupMap=new Map();for(const task of visible.filter(t=>!!t.grupo_id)){const id=String(task.grupo_id);if(!groupMap.has(id))groupMap.set(id,{title:'Grupo: '+(task.grupo_nome||'Não identificado'),items:[]});groupMap.get(id).items.push(task);}const sections=[{title:document.body.classList.contains('fsj-index-execucao')?'':'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},...groupMap.values().map(g=>({...g,title:document.body.classList.contains('fsj-index-execucao')&&fsjFiltro==='aberto'?'':('TAREFAS DE GRUPO — '+g.title)}))];
+ const groupMap=new Map();for(const task of visible.filter(t=>!!t.grupo_id)){const id=String(task.grupo_id);if(!groupMap.has(id))groupMap.set(id,{title:'Grupo: '+(task.grupo_nome||'Não identificado'),items:[]});groupMap.get(id).items.push(task);}const sections=[{title:document.body.classList.contains('fsj-index-execucao')?'':'Tarefas individuais',items:visible.filter(t=>!t.grupo_id)},...groupMap.values().map(g=>({...g,title:fsjMinhasTarefasCelular()?'':('TAREFAS DE GRUPO — '+g.title)}))];
  for(const section of sections){
   if(!section.items.length)continue;
   if(section.title){const heading=document.createElement('h2');heading.textContent=section.title;heading.style.cssText='font-size:17px;margin:18px 0 10px';target.append(heading);}
