@@ -71,6 +71,17 @@ style.textContent += `
     margin-bottom:5px;
   }
 `;
+
+// Ajuste fino do espaçamento vertical entre Jornada e Férias na página 2.
+style.textContent += `
+  #fichaPessoa #personSettings > fieldset:has(#pRegimeJornada) {
+    margin-top: 2px !important;
+    margin-bottom: 20px !important;
+  }
+  #fichaPessoa #personSettings > fieldset:has(#pVacationStart) {
+    margin-top: 0 !important;
+  }
+`;
 document.head.append(style);
 const nav = document.createElement('div');
 nav.id = 'fsjFichaPaginas';
