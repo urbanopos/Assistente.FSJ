@@ -10,6 +10,13 @@ const fieldsets = [...settings.children].filter(x => x.tagName === 'FIELDSET');
 const supervisor = fieldsets.find(x => x.querySelector('#pSupervisor'));
 const jornada = fieldsets.find(x => x.querySelector('#pRegimeJornada'));
 if (!supervisor || !jornada) return;
+const style=document.createElement('style');
+style.textContent=`
+  body.fsj-owner-sidebar-active #fichaPessoa .fsj-ficha-cabecalho[hidden],
+  #fichaPessoa .fsj-ficha-cabecalho[hidden],
+  #fichaPessoa #personSettings > fieldset[hidden] { display:none !important; }
+`;
+document.head.append(style);
 const nav = document.createElement('div');
 nav.id = 'fsjFichaPaginas';
 nav.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0;padding:10px;border:1px solid #c8d8d8;border-radius:9px';
