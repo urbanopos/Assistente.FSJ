@@ -59,14 +59,14 @@ function init(){
   const watch=document.createElement('button');watch.type='button';watch.dataset.tv='biblioteca';
   watch.textContent='Assistir vídeo da biblioteca';menu.append(watch);
   actions.before(content);content.after(menu);
-  actions.hidden=true; // Desktop: retirar o menu redundante de quatro opções.
+  // Os quatro controles administrativos permanecem visíveis abaixo do quadro e da biblioteca.
   wrap.classList.add('fsj-tv-desktop-layout');
   style.textContent+=\`
   @media(min-width:851px){
    #fsjTvPortal.fsj-tv-desktop-layout #fsjTvPortalContent{margin:8px 0 10px}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library{margin:10px 0 14px}
    #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library button{width:100%;border:1px solid #ffffff55;background:#205d45;color:#fff;border-radius:10px;padding:12px;font-weight:700;cursor:pointer}
-   #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-actions{display:none!important}
+   #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
    #fsjTvPortal.fsj-tv-desktop-layout #fsjTvPortalInfo{display:none!important}
   }
   \`;
