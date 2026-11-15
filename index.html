@@ -1595,7 +1595,8 @@ async function fsjCondicoesEmergencia(pid,name){
  if((p.folgas_datas||[]).includes(day))reasons.push((p.folgas_motivos?.[day]||'Folga registrada no calendário')+' em '+date+'.');
  for(const d of decisions)if(d.folga_compensatoria===day)reasons.push('Folga compensatória em '+date+', referente ao feriado de '+d.dia.split('-').reverse().join('/')+'.');
  if(p.ferias_inicio&&p.ferias_fim&&day>=p.ferias_inicio&&day<=p.ferias_fim)reasons.push('Férias de '+p.ferias_inicio.split('-').reverse().join('/')+' a '+p.ferias_fim.split('-').reverse().join('/')+'.');
- if(holidays.length&&!decisions.some(d=>d.dia===day&&d.receber===true))reasons.push('Feriado em '+date+': '+holidays.map(h=>h.nome).join(', ')+'. Recebimento não autorizado para esta data.');
+ const compensadoNoCalendario=Object.entries(p.folgas_motivos||{}).some(([data,motivo])=>data!==day&&(p.folgas_datas||[]).includes(data)&&/folga compensat[oó]ria/i.test(String(motivo))&&String(motivo).includes('feriado compensado: '+day));
+ if(holidays.length&&!compensadoNoCalendario&&!decisions.some(d=>d.dia===day&&d.receber===true))reasons.push('Feriado em '+date+': '+holidays.map(h=>h.nome).join(', ')+'. Recebimento não autorizado para esta data.');
  if(p.ativo===false)reasons.push('Cadastro inativo.');
  if(p.receber_tarefas_whatsapp!==true)reasons.push('Recebimento de tarefas desmarcado no cadastro.');
  const nome=p.identificacao||p.nome||name,folga=reasons.some(reason=>/folga|feriado|férias/i.test(reason));
