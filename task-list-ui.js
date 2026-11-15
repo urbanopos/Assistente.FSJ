@@ -31,10 +31,9 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
  dialog.querySelector('.fsj-completed-review')?.remove();
  // Reutilizar o mesmo diálogo sem acumular barras de ações de aberturas anteriores.
  dialog.querySelectorAll('.fsj-owner-pontual-actions').forEach(el=>el.remove());
- // A barra pertence ao conteúdo renovado em cada abertura, não aos irmãos persistentes.
- if(renderActions)history.append(renderActions());
+ // Exibir ações apenas uma vez: após a consulta, ou imediatamente se não houver consulta.
  if(!dialog.open)dialog.showModal();
- if(!loadDetails)return;
+ if(!loadDetails){if(renderActions)history.replaceChildren(renderActions());return;}
  history.textContent='Consultando registros da tarefa…';
  try{
   const details=await loadDetails();if(request!==fsjTaskDetailRequest||!dialog.open)return;
