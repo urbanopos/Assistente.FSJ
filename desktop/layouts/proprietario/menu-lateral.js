@@ -373,6 +373,11 @@
       }
       host.prepend(bar);
     }
+    // A lista legada continua no DOM para preservar rotinas de edição,
+    // mas não é exibida: a consulta centralizada fica abaixo.
+    const legacyGroupList = document.getElementById('groups');
+    if (legacyGroupList) legacyGroupList.style.display = 'none';
+
     // Reaproveita a consulta/edição/exclusão já implementada para grupos,
     // colocando-a na aba Grupos, sem duplicar formulários nem operações.
     const groupLookup = document.getElementById('fsjGruposNaPessoas');
