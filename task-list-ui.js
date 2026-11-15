@@ -24,6 +24,14 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
   title.id='fsj-task-detail-title';meta.id='fsj-task-detail-meta';text.id='fsj-task-detail-description';back.type='button';back.className='fsj-nav-arrow';back.textContent='←';back.setAttribute('aria-label','Voltar à lista de tarefas');back.addEventListener('click',()=>dialog.close());
   const history=document.createElement('div');history.id='fsj-task-detail-history';content.append(title,meta,text,history);footer.append(back);dialog.append(header,content,footer);document.body.append(dialog);
  }
+ // Garantia de unicidade mesmo quando outras rotinas atualizam a ficha.
+ if(!dialog.fsjActionsObserver){
+  dialog.fsjActionsObserver=new MutationObserver(()=>{
+   const bars=[...dialog.querySelectorAll('.fsj-owner-pontual-actions')];
+   bars.slice(1).forEach(bar=>bar.remove());
+  });
+  dialog.fsjActionsObserver.observe(dialog,{childList:true,subtree:true});
+ }
  document.getElementById('fsj-task-detail-title').textContent=fsjTaskNumber(code,frequency);
  document.getElementById('fsj-task-detail-meta').textContent=context;
  document.getElementById('fsj-task-detail-description').textContent=description||'Sem descrição registrada.';
