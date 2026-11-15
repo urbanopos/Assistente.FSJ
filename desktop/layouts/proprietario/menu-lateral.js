@@ -12,6 +12,39 @@
 
   const style = document.createElement('style');
   style.textContent = `
+    /* Ajuste fino de espaçamento do Cadastro/Edição de Pessoas no desktop. */
+    body.fsj-owner-sidebar-active #cadPessoas #fsjOwnerAccessInPeople {
+      margin-bottom: 4px !important;
+    }
+    body.fsj-owner-sidebar-active #cadPessoas #personBasicHome {
+      margin-top: 0 !important;
+    }
+    body.fsj-owner-sidebar-active #cadPessoas #personBasicFields .person-fields {
+      margin-top: 0 !important;
+      margin-bottom: 14px !important;
+      gap: 10px;
+    }
+    body.fsj-owner-sidebar-active #cadPessoas #personBasicFields > .checks {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: 18px;
+      row-gap: 9px;
+      margin-top: 12px;
+    }
+    body.fsj-owner-sidebar-active #cadPessoas #personBasicFields > .checks > label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      white-space: normal;
+    }
+    body.fsj-owner-sidebar-active #cadPessoas #personBasicFields > .checks > .muted {
+      flex-basis: 100%;
+      margin: 0;
+      padding-left: 0;
+      line-height: 1.45;
+    }
     /* Campos de identificação com altura uniforme, apenas no Desktop do Proprietário. */
     body.fsj-owner-sidebar-active #personBasicFields .person-fields {
       align-items: end;
