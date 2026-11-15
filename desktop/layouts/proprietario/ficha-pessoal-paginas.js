@@ -37,5 +37,9 @@ document.addEventListener('click',event=>{
     exibir(1);
   }
 },true);
+new MutationObserver(() => {
+  const basic=document.getElementById('personBasicFields');
+  if (basic && !ficha.contains(basic)) basic.style.display='';
+}).observe(document.getElementById('cadPessoas'),{childList:true,subtree:true});
 exibir(1);
 })();
