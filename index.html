@@ -1260,6 +1260,7 @@ async function fsjExcluirGrupoNaPessoas(){
   if(!Array.isArray(atualizados)||atualizados.length!==1)throw Error('O Supabase não confirmou a exclusão operacional.');
   S.groups=S.groups.map(g=>String(g.id)===String(id)?{...g,ativo:false}:g);
   await fsjConsultarGruposNaPessoas();render();
+  if(window.fsjOwnerVerified===true&&window.FSJ_PLATFORM?.platform==='desktop')fsjRenderTarefasEmExecucao();
   status.textContent='Grupo excluído das operações. Tarefas e histórico preservados.';
  }catch(e){status.textContent='Exclusão não realizada: '+e.message;}
 }
@@ -1308,6 +1309,7 @@ function clearGroup(){gid.value=gname.value='';document.querySelectorAll('.gm').
   const alterados=await api('/rest/v1/grupos?id=eq.'+encodeURIComponent(id)+'&ativo=eq.true',{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({ativo:false,excluido_em:new Date().toISOString()})});
   if(!Array.isArray(alterados)||alterados.length!==1)throw Error('Exclusão não confirmada na Armazenagem.');
   grupo.ativo=false;render();await fsjConsultarGruposNaPessoas();
+  if(window.fsjOwnerVerified===true&&window.FSJ_PLATFORM?.platform==='desktop')fsjRenderTarefasEmExecucao();
  }catch(e){alert('Não foi possível excluir o grupo: '+e.message);}
 }
 function fsjTargetSelectionSync(){
@@ -1332,7 +1334,7 @@ function renderTargets(){
  const selecionadosAntes=[...targetBox.querySelectorAll('.tm:checked')].map(x=>x.value);
  const grupoAntes=targetBox.querySelector('.tg:checked')?.value||'';
  if(execType.value==='group'){
- targetBox.innerHTML='<label>Responsável pela tarefa — grupo existente</label><div class="checks">'+(S.groups.some(g=>g.ativo!==false)?S.groups.filter(g=>g.ativo!==false).map(g=>'<label><input class="tg" type="radio" name="taskGroup" value="'+g.id+'"> <b>'+esc(g.name)+'</b> — '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+'</label>').join(''):'<span class="muted">Nenhum grupo cadastrado.</span>')+'</div>';if(grupoAntes){const radio=[...targetBox.querySelectorAll('.tg')].find(x=>x.value===grupoAntes);if(radio)radio.checked=true;}return;
+ targetBox.innerHTML='<label>Responsável pela tarefa — grupo existente</label><div class="checks">'+(S.groups.some(g=>g.ativo!==false)?S.groups.filter(g=>g.ativo!==false).map(g=>'<label><input class="tg" type="radio" name="taskGroup" value="'+g.id+'"> <b>'+esc(g.name)+'</b> — '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+'</label>').join(''):'<span class="muted">Nenhum grupo cadastrado.</span>')+'</div>';if(grupoAntes){const radio=[...targetBox.querySelectorAll('.tg')].find(x=>x.value===grupoAntes);if(radio)radio.checked=true;}if(window.FSJ_PLATFORM?.platform==='desktop'&&window.fsjOwnerVerified===true){const editar=document.createElement('button');editar.type='button';editar.textContent='Editar integrantes do grupo';editar.style.cssText='display:block;margin:10px 0';editar.addEventListener('click',fsjEditarIntegrantesDaTarefa);targetBox.append(editar);}return;
  }
  targetBox.replaceChildren();const label=document.createElement('label');label.htmlFor='taskPersonPicker';label.textContent='Selecione responsáveis';
  const select=document.createElement('select');select.id='taskPersonPicker';const hidden=document.createElement('div');hidden.hidden=true;
@@ -1343,6 +1345,16 @@ function renderTargets(){
  select.onchange=()=>{const input=[...hidden.querySelectorAll('.tm')].find(x=>x.value===select.value);if(input)input.checked=true;fsjTargetSelectionSync();guardarRascunhoTarefa();};fsjTargetSelectionSync();
 }
 
+/* Desktop Proprietário: a composição pertence ao cadastro do grupo, não à tarefa. */
+function fsjEditarIntegrantesDaTarefa(){
+ if(window.FSJ_PLATFORM?.platform!=='desktop'||window.fsjOwnerVerified!==true)return;
+ const id=document.querySelector('#targetBox .tg:checked')?.value;
+ if(!id)return alert('Selecione um grupo ativo antes de editar seus integrantes.');
+ const grupo=S.groups.find(g=>String(g.id)===String(id)&&g.ativo!==false);
+ if(!grupo)return alert('Grupo inativo ou não encontrado. Atualize os cadastros.');
+ guardarRascunhoTarefa();
+ editGroup(grupo.id);
+}
 function fsjFrequency(t){return t.frequency||(t.daily?'diaria':'pontual')}
 function fsjFrequencyLabel(t){return ({pontual:'Pontual',diaria:'Diária',semanal:'Semanal',mensal:'Mensal',trimestral:'Trimestral',semestral:'Semestral',anual:'Anual'})[fsjFrequency(t)]||'Pontual'}
 const TASK_DRAFT_KEY='fsj_rascunho_tarefa_v1';
@@ -1981,7 +1993,7 @@ function fsjRenderTarefasEmExecucao(){
  const psel=document.getElementById('fsjArquivoPessoa'),gsel=document.getElementById('fsjArquivoGrupo');
  const setOptions=(sel,values)=>{const prev=sel.value;sel.replaceChildren(...values.map(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;return o;}));sel.value=values.some(([v])=>v===prev)?prev:'';};
  setOptions(psel,[['','Todas as pessoas'],...(S.people||[]).map(p=>[String(p.id),p.nick||p.name||String(p.id)])]);
- setOptions(gsel,[['','Todos os grupos'],...(S.groups||[]).map(g=>[String(g.id),g.name||String(g.id)])]);
+ setOptions(gsel,[['','Todos os grupos'],...(S.groups||[]).filter(g=>g.ativo!==false).map(g=>[String(g.id),g.name||String(g.id)])]);
 
  const active=(Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[]).filter(e=>e.estado==='em_andamento'&&e.iniciado_em&&!e.concluido_em);
  const activeMap=new Map(active.map(e=>[String(e.tarefa_id),e]));
