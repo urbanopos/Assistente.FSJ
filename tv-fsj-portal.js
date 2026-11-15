@@ -51,6 +51,24 @@ function init(){
  const info=wrap.querySelector('#fsjTvPortalInfo');
  const fsjTVMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||navigator.userAgentData?.mobile===true;
  // Somente celular: a origem das mensagens SSO acompanha o endpoint público; Desktop permanece igual.
+ // Desktop Proprietário: quadro primeiro, opção única de biblioteca, ações administrativas abaixo.
+ // A apresentação e os controles do celular permanecem intactos.
+ if(!fsjTVMobile){
+  const actions=wrap.querySelector('.fsj-tv-actions');
+  const menu=document.createElement('div');menu.className='fsj-tv-desktop-library';
+  const watch=document.createElement('button');watch.type='button';watch.dataset.tv='biblioteca';
+  watch.textContent='Assistir vídeo da biblioteca';menu.append(watch);
+  actions.before(content);content.after(menu);
+  wrap.classList.add('fsj-tv-desktop-layout');
+  style.textContent+=\`
+  @media(min-width:851px){
+   #fsjTvPortal.fsj-tv-desktop-layout #fsjTvPortalContent{margin:8px 0 10px}
+   #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library{margin:10px 0 14px}
+   #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-desktop-library button{width:100%;border:1px solid #ffffff55;background:#205d45;color:#fff;border-radius:10px;padding:12px;font-weight:700;cursor:pointer}
+   #fsjTvPortal.fsj-tv-desktop-layout .fsj-tv-actions{grid-template-columns:repeat(4,minmax(0,1fr))}
+  }
+  \`;
+ }
  const vmOrigin=new URL(fsjTVMobile?'https://168.196.84.147/':(window.FSJ_VIDEO_VM_URL||'https://192.168.1.114/')).origin;
  let currentSection='inicio';
  function sendSection(section){
