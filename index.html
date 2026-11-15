@@ -3123,7 +3123,12 @@ function records(){
   const group=!!t.groupId,frequency=typeof fsjFrequency==='function'?fsjFrequency(t):(t.frequency||'pontual');
   return category==='grupo'?group:category==='pontuais'?!group&&frequency==='pontual':!group&&frequency!=='pontual';
  });
- return filtered.sort((a,b)=>String(proposedNumbers[a.id]?.created||a.createdAt||a.created||a.id).localeCompare(String(proposedNumbers[b.id]?.created||b.createdAt||b.created||b.id)));
+ return filtered.sort((a,b)=>{
+  const na=Number((proposedNumbers[a.id]?.code||'').match(/Tar-(\\d+)/i)?.[1]||Infinity);
+  const nb=Number((proposedNumbers[b.id]?.code||'').match(/Tar-(\\d+)/i)?.[1]||Infinity);
+  if(na!==nb)return na-nb;
+  return String(proposedNumbers[a.id]?.created||a.createdAt||a.created||a.id).localeCompare(String(proposedNumbers[b.id]?.created||b.createdAt||b.created||b.id));
+ });
 }
 function render(){
  panel.querySelectorAll('[data-fsj-owner-category]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.fsjOwnerCategory===category)));
