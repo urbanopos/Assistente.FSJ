@@ -1954,6 +1954,17 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
  prev.onclick=()=>{cursor=new Date(cursor.getFullYear(),cursor.getMonth()-1,1);draw()};
  next.onclick=()=>{cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1);draw()};draw();
 }
+function fsjAcoesPontuaisProprietario(t){
+ const actions=document.createElement('div');
+ actions.className='fsj-owner-pontual-actions';
+ if(window.fsjOwnerVerified!==true||fsjTarefaPeriodica(t))return actions;
+ actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin:12px 0';
+ const add=(label,run)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',()=>{if(window.fsjOwnerVerified!==true)return;document.getElementById('fsj-task-detail')?.close();run();});actions.append(b);};
+ add('Editar',()=>editTask(t.id));
+ add('Concluir',()=>editTask(t.id));
+ add('Excluir',()=>delTask(t.id));
+ return actions;
+}
 function fsjRenderTarefasEmExecucao(){
  const box=document.getElementById('fsjExecucaoLista');if(!box)return;
  box.replaceChildren();
@@ -1987,7 +1998,7 @@ function fsjRenderTarefasEmExecucao(){
   for(const t of items){
    const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status),e=activeMap.get(String(t.id));
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:12px;margin:10px 0';
-   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+(fsjFrequency(t)==='pontual'?' P':' '+({diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'E',anual:'A'}[fsjFrequency(t)]||''))+' — '+(t.text||'Sem descrição')+' — '+fsjFrequencyLabel(t);task.addEventListener('click',()=>{if(fsjFrequency(t)!=='pontual'){if(window.matchMedia('(max-width:700px)').matches)fsjSelecionarExecutorCalendarioCelular(t);else fsjCalendarioExecucaoDesktop(t);}else{fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);}});article.append(task);
+   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';task.textContent=(t.code||'Tarefa')+(fsjFrequency(t)==='pontual'?' P':' '+({diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'E',anual:'A'}[fsjFrequency(t)]||''))+' — '+(t.text||'Sem descrição')+' — '+fsjFrequencyLabel(t);task.addEventListener('click',()=>{if(fsjFrequency(t)!=='pontual'){if(window.matchMedia('(max-width:700px)').matches)fsjSelecionarExecutorCalendarioCelular(t);else fsjCalendarioExecucaoDesktop(t);}else{fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency,()=>fsjAcoesPontuaisProprietario(t));}});article.append(task);
    if(archived){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
    const group=(S.groups||[]).find(g=>String(g.id)===String(t.groupId));
    const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Responsável',names(t)],['Registro',t.created?fsjDataHora(t.created):'Data/hora não disponível'],['Periodicidade',t.frequency||'pontual'],['Situação',archived?'Arquivada':(e?'Em execução':t.status||'Em aberto')]];
@@ -2057,14 +2068,14 @@ document.addEventListener('click',event=>{
   const d=new Date();fsjCalendarioSomenteLeitura(t,pid,d.getFullYear(),d.getMonth());
  }else{
   event.preventDefault();event.stopImmediatePropagation();
-  fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);
+  fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency,()=>fsjAcoesPontuaisProprietario(t));
  }
 },true);
 function mostrarDemandasSituacao(situacao){document.getElementById('demandaSituacao').value=situacao;renderDemandas()}
 function fsjOpenEmployeeTask(t,button){
  // Proprietário: tarefas periódicas abrem calendário; nenhuma consulta emite token de gestor.
  if(fsjTarefaPeriodica(t)){const d=new Date();const pid=t.groupId?null:(document.getElementById('demandaFuncionario')?.value||null);fsjCalendarioSomenteLeitura(t,pid,d.getFullYear(),d.getMonth());return;}
- fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency);
+ fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency,()=>fsjAcoesPontuaisProprietario(t));
 }
 
 function fsjPosicionarAcoesMobile(rows){
