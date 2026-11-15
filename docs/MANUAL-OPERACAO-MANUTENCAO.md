@@ -856,3 +856,13 @@ Commit `f9a72f9e59059e69dc1df0215ad3bd8dbd842bfc`: botão da moldura de calendá
 ## Correção do calendário periódico no celular — 12/11/2026
 
 Commit `a420938a7b7aee62dc081b6a13ede7bf1603be92` (GitHub, publicação web sujeita à propagação do Pages). No `responder.html`, o bloqueio visual por estado `readonly/checking` foi retirado somente dos botões de dias do calendário. Permanecem bloqueados dias futuros, indisponíveis, concluídos, visitantes e datas anteriores à tolerância sem autorização do Proprietário. O servidor `resposta-tarefa` continua sendo a autoridade para validar o token, a data e a autorização, recusando duplicidade. A seta de próximo mês agora consulta o mês solicitado antes de exibir as marcações. Nenhuma mudança no Desktop ou na função Supabase foi feita. Teste operacional ainda pendente no link do executor/supervisor; confirmar hoje, ontem, atraso, duplicidade e mês seguinte. O commit anterior permite recuperação via histórico do GitHub.
+
+
+### TV FSJ — Desktop Proprietário (14/11/2026)
+
+- Solicitação aprovada: manter o cabeçalho Fazenda São José; colocar o quadro de vídeo logo abaixo; apresentar o comando único **Assistir vídeo da biblioteca** em seguida; deslocar os quatro botões já existentes para baixo, sem mudar suas ações.
+- Escopo: apenas apresentação Desktop do Proprietário. Não modificar layout celular, autenticação SSO, biblioteca, permissões, TV do Executor ou serviço da VM.
+- Publicação: commit `74b4d881ca92a8b844a8bcfe63f89abf86eb54bc`, arquivo `tv-fsj-portal.js`.
+- Backup prévio: branch `backup/desktop-tv-antes-layout-20261114` (base `e734f6b43036c729ccca16975489586335f74e4a`).
+- Validação pendente: abrir TV FSJ no Desktop do Proprietário, verificar ordem dos elementos, assistir vídeo cadastrado e conferir os quatro comandos; comparar com o celular, que deve permanecer inalterado.
+- Recuperação: comparar com o backup e reverter exclusivamente a mudança de layout caso haja regressão; preservar alterações posteriores não relacionadas.
