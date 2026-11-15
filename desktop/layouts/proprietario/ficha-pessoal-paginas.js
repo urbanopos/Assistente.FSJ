@@ -16,6 +16,32 @@ style.textContent=`
   #fichaPessoa .fsj-ficha-cabecalho[hidden],
   #fichaPessoa #personSettings > fieldset[hidden] { display:none !important; }
 `;
+
+// Uniformidade visual exclusiva da ficha cadastral do Proprietário no Desktop.
+style.textContent += `
+  #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields > div {
+    align-self: end !important;
+  }
+  #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields > div > label {
+    display: block;
+    min-height: 20px;
+    line-height: 20px;
+    margin-bottom: 5px;
+  }
+  #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields input:not([type="hidden"]):not([type="checkbox"]),
+  #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields select {
+    height: 42px !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    vertical-align: middle;
+  }
+  #fichaPessoa.fsj-ficha-editando #personBasicFields .person-fields button {
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+  }
+`;
 document.head.append(style);
 const nav = document.createElement('div');
 nav.id = 'fsjFichaPaginas';
