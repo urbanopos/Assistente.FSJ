@@ -19,3 +19,9 @@ No build `20261115-execucao-categorias-desktop-01`, a lista do Proprietário ofe
 O teste local em DOM usou dados fictícios e exercitou as seleções, a ordem dos códigos, as duas tarefas por página, a abertura de detalhes e a restauração dos filtros. O contrato de atualização automática foi executado com sucesso. A conferência com uma sessão real do Proprietário fica pendente. A atualização web segue o mecanismo existente ao abrir ou retomar o uso. Para recuperação, reverta o commit deste build pelo histórico Git.
 
 No build `20261115-execucao-categorias-desktop-02`, **Tarefas de Grupo** passa a ser o acesso às tarefas coletivas no Desktop. O seletor **Grupo Executor** do build 01 foi retirado. Use **Todas as pessoas** para ver as tarefas coletivas de todos os grupos, ou selecione um executor ou supervisor para consultar suas atribuições. O teste local confirmou a ausência do seletor no Desktop, a listagem coletiva com e sem pessoa selecionada e a presença e o funcionamento do seletor no Celular. O contrato de atualização automática passou. Para recuperação, reverta o commit deste build.
+
+## Minhas Tarefas
+
+Build `20261115-minhas-tarefas-proprietario-01`. Abra **Minhas Tarefas** e selecione **Tarefas Periódicas**, **Tarefas Pontuais** ou **Tarefas de Grupo**. O painel usa o cadastro autenticado do titular. Mostra suas atribuições individuais e as coletivas dos grupos dos quais faz parte, em ordem crescente de código. O botão **Atualizar** consulta os registros atuais. Ações e permissões existentes do Proprietário continuam disponíveis nos itens da lista.
+
+O filtro foi verificado localmente com registros fictícios e o contrato de atualização automática passou. A validação autenticada no Desktop segue pendente. A atualização web é aplicada ao abrir ou retomar quando seguro. Para recuperação, reverta o commit deste build.
