@@ -29,6 +29,8 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
  document.getElementById('fsj-task-detail-description').textContent=description||'Sem descrição registrada.';
  const history=document.getElementById('fsj-task-detail-history');history.replaceChildren();
  dialog.querySelector('.fsj-completed-review')?.remove();
+ // Reutilizar o mesmo diálogo sem acumular barras de ações de aberturas anteriores.
+ dialog.querySelectorAll('.fsj-owner-pontual-actions').forEach(el=>el.remove());
  if(renderActions)history.before(renderActions());
  if(!dialog.open)dialog.showModal();
  if(!loadDetails)return;
