@@ -373,6 +373,13 @@
       }
       host.prepend(bar);
     }
+    // Reaproveita a consulta/edição/exclusão já implementada para grupos,
+    // colocando-a na aba Grupos, sem duplicar formulários nem operações.
+    const groupLookup = document.getElementById('fsjGruposNaPessoas');
+    if (groupLookup) {
+      groupsPage.appendChild(groupLookup);
+      groupLookup.style.display = '';
+    }
     updatePeopleTabs();
     window.fsjOwnerPeopleGo = choosePeopleMode;
   }
