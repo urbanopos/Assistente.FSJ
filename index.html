@@ -3312,6 +3312,40 @@ document.addEventListener('click',e=>{if(e.target.closest('[data-section="demand
 render();
 })();
 </script>
+<!-- FSJ 2026-11-16: somente posicao dos dois botoes na pagina inicial do Proprietario celular -->
+<style>
+@media(max-width:700px){
+ #dashboard #fsjHomeTasksPairMobile{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:100%;grid-column:1/-1}
+ #dashboard #fsjHomeTasksPairMobile>button{width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;grid-column:auto!important;box-sizing:border-box}
+}
+</style>
+<script>
+(function(){
+ const mq=window.matchMedia('(max-width:700px)');
+ let originalParent=null,originalNext=null,originalCard=null,originalCardDisplay='';
+ function adjust(){
+  const running=document.getElementById('fsjHomeRunningTasksButton');
+  const overdue=document.getElementById('fsjTarefasNaoCumpridas');
+  if(!running||!overdue)return;
+  if(!originalParent){originalParent=overdue.parentNode;originalNext=overdue.nextSibling;originalCard=originalParent;originalCardDisplay=originalCard.style.display;}
+  let pair=document.getElementById('fsjHomeTasksPairMobile');
+  if(mq.matches){
+   if(!pair){pair=document.createElement('div');pair.id='fsjHomeTasksPairMobile';running.parentNode.insertBefore(pair,running);}
+   pair.appendChild(running);
+   pair.appendChild(overdue);
+   originalCard.style.display='none';
+  }else if(pair){
+   pair.parentNode.insertBefore(running,pair);
+   if(originalNext&&originalNext.parentNode===originalParent)originalParent.insertBefore(overdue,originalNext);
+   else originalParent.appendChild(overdue);
+   originalCard.style.display=originalCardDisplay;
+   pair.remove();
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',adjust,{once:true});else adjust();
+ if(mq.addEventListener)mq.addEventListener('change',adjust);else mq.addListener(adjust);
+})();
+</script>
 </body></html>
 
 
