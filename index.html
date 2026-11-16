@@ -1962,9 +1962,16 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
  const close=document.createElement('button');close.textContent='Fechar';close.onclick=()=>overlay.remove();top.append(title,close);panel.append(top);
  const who=document.createElement('p');const selectedPerson=(S.people||[]).find(p=>String(p.id)===String(pessoaId));who.textContent='Responsável: '+(selectedPerson?(selectedPerson.nick||selectedPerson.name):names(t))+' • Consulta do Proprietário';panel.append(who);
  const nav=document.createElement('div');nav.style.cssText='display:flex;align-items:center;gap:14px;margin:12px 0';
- const prev=document.createElement('button'),next=document.createElement('button'),month=document.createElement('strong');prev.textContent='←';next.textContent='→';nav.append(prev,month,next);panel.append(nav);
- const status=document.createElement('p');status.setAttribute('role','status');panel.append(status);
- const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';panel.append(grid);
+ const prev=document.createElement('button'),next=document.createElement('button'),month=document.createElement('strong');prev.textContent='←';next.textContent='→';
+ const status=document.createElement('p');status.setAttribute('role','status');
+ const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';
+ const mobileCalendar=(window.FSJ_PLATFORM?.platform==='celular'||window.matchMedia('(max-width:700px)').matches)&&!!pessoaId;
+ if(mobileCalendar){
+  const monthHeading=document.createElement('div');monthHeading.style.cssText='text-align:center;margin:8px 0 12px';monthHeading.append(month);panel.append(monthHeading);
+  panel.append(grid);nav.append(prev,next);nav.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 0 6px';panel.append(nav);panel.append(status);
+ }else{
+  nav.append(prev,month,next);panel.append(nav);panel.append(status);panel.append(grid);
+ }
  let cursor=mesInicial?new Date(mesInicial+'-01T12:00:00'):new Date();cursor=new Date(cursor.getFullYear(),cursor.getMonth(),1);
  const today=fsjDia(new Date()),start=String(t.created||'').slice(0,10);
  const freq=fsjFrequency(t);
@@ -3395,9 +3402,16 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
  const close=document.createElement('button');close.textContent='Fechar';close.onclick=()=>overlay.remove();top.append(title,close);panel.append(top);
  const who=document.createElement('p');const selectedPerson=(S.people||[]).find(p=>String(p.id)===String(pessoaId));who.textContent='Responsável: '+(selectedPerson?(selectedPerson.nick||selectedPerson.name):names(t))+' • Consulta do Proprietário';panel.append(who);
  const nav=document.createElement('div');nav.style.cssText='display:flex;align-items:center;gap:14px;margin:12px 0';
- const prev=document.createElement('button'),next=document.createElement('button'),month=document.createElement('strong');prev.textContent='←';next.textContent='→';nav.append(prev,month,next);panel.append(nav);
- const status=document.createElement('p');status.setAttribute('role','status');panel.append(status);
- const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';panel.append(grid);
+ const prev=document.createElement('button'),next=document.createElement('button'),month=document.createElement('strong');prev.textContent='←';next.textContent='→';
+ const status=document.createElement('p');status.setAttribute('role','status');
+ const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';
+ const mobileCalendar=(window.FSJ_PLATFORM?.platform==='celular'||window.matchMedia('(max-width:700px)').matches)&&!!pessoaId;
+ if(mobileCalendar){
+  const monthHeading=document.createElement('div');monthHeading.style.cssText='text-align:center;margin:8px 0 12px';monthHeading.append(month);panel.append(monthHeading);
+  panel.append(grid);nav.append(prev,next);nav.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 0 6px';panel.append(nav);panel.append(status);
+ }else{
+  nav.append(prev,month,next);panel.append(nav);panel.append(status);panel.append(grid);
+ }
  let cursor=mesInicial?new Date(mesInicial+'-01T12:00:00'):new Date();cursor=new Date(cursor.getFullYear(),cursor.getMonth(),1);
  const today=fsjDia(new Date()),start=String(t.created||'').slice(0,10);
  const freq=fsjFrequency(t);
