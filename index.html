@@ -1869,7 +1869,7 @@ function fsjRenderTarefasPorSituacao(){
    if(paginate){const name=document.createElement('span');name.textContent=label;button.append(name);}else button.textContent=label;
    const entry=byTask.get(t.id);
    const meta=entry?'Concluída por '+entry.executorName+(entry.completedAt?' · '+fsjDataHora(entry.completedAt):''):'Responsáveis: '+names(t);
-   button.addEventListener('click',()=>{if(mobileOwner&&tipo==='periodicas'&&isPeriodic(t)){fsjSelecionarExecutorCalendarioCelular(t);return;}fsjOpenTaskDetails(t.code,t.text,meta,()=>fsjLoadTaskDetails(t.id),t.frequency,entry?()=>window.FSJOwnerCompleted.review(entry,{
+   button.addEventListener('click',()=>{if(mobileOwner&&tipo==='periodicas'&&isPeriodic(t)){const pessoaSelecionada=document.getElementById('fsjResumoPessoaFiltro')?.value;if(!pessoaSelecionada){window.alert('Selecione primeiro o executor ou supervisor no campo acima das três categorias.');return;}const vinculados=(t.personIds||[]).some(id=>String(id)===String(pessoaSelecionada))||(t.groupId&&((S.groups||[]).find(g=>String(g.id)===String(t.groupId))?.members||[]).some(id=>String(id)===String(pessoaSelecionada)));if(!vinculados){window.alert('A pessoa selecionada não está vinculada a esta tarefa.');return;}fsjCalendarioExecucaoDesktop(t,undefined,pessoaSelecionada);return;}fsjOpenTaskDetails(t.code,t.text,meta,()=>fsjLoadTaskDetails(t.id),t.frequency,entry?()=>window.FSJOwnerCompleted.review(entry,{
     api,refresh:async()=>{await fsjAtualizarRetornos(true);fsjRenderTarefasPorSituacao();},
     authorized:()=>window.fsjOwnerVerified===true&&!window.fsjExited
    }):undefined);});
@@ -3302,7 +3302,7 @@ render();
    if(paginate){const name=document.createElement('span');name.textContent=label;button.append(name);}else button.textContent=label;
    const entry=byTask.get(t.id);
    const meta=entry?'Concluída por '+entry.executorName+(entry.completedAt?' · '+fsjDataHora(entry.completedAt):''):'Responsáveis: '+names(t);
-   button.addEventListener('click',()=>{if(mobileOwner&&tipo==='periodicas'&&isPeriodic(t)){fsjSelecionarExecutorCalendarioCelular(t);return;}fsjOpenTaskDetails(t.code,t.text,meta,()=>fsjLoadTaskDetails(t.id),t.frequency,entry?()=>window.FSJOwnerCompleted.review(entry,{
+   button.addEventListener('click',()=>{if(mobileOwner&&tipo==='periodicas'&&isPeriodic(t)){const pessoaSelecionada=document.getElementById('fsjResumoPessoaFiltro')?.value;if(!pessoaSelecionada){window.alert('Selecione primeiro o executor ou supervisor no campo acima das três categorias.');return;}const vinculados=(t.personIds||[]).some(id=>String(id)===String(pessoaSelecionada))||(t.groupId&&((S.groups||[]).find(g=>String(g.id)===String(t.groupId))?.members||[]).some(id=>String(id)===String(pessoaSelecionada)));if(!vinculados){window.alert('A pessoa selecionada não está vinculada a esta tarefa.');return;}fsjCalendarioExecucaoDesktop(t,undefined,pessoaSelecionada);return;}fsjOpenTaskDetails(t.code,t.text,meta,()=>fsjLoadTaskDetails(t.id),t.frequency,entry?()=>window.FSJOwnerCompleted.review(entry,{
     api,refresh:async()=>{await fsjAtualizarRetornos(true);fsjRenderTarefasPorSituacao();},
     authorized:()=>window.fsjOwnerVerified===true&&!window.fsjExited
    }):undefined);});
