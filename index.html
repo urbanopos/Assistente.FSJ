@@ -1967,8 +1967,15 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';
  const mobileCalendar=(window.FSJ_PLATFORM?.platform==='celular'||window.matchMedia('(max-width:700px)').matches)&&!!pessoaId;
  if(mobileCalendar){
-  const monthHeading=document.createElement('div');monthHeading.style.cssText='text-align:center;margin:8px 0 12px';monthHeading.append(month);panel.append(monthHeading);
-  panel.append(grid);nav.append(prev,next);nav.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 0 6px';panel.append(nav);panel.append(status);
+  // No celular, a grade dos dias deve vir imediatamente após o responsável.
+  // Mês, setas e legenda ficam abaixo, sem modificar o calendário Desktop.
+  panel.append(grid);
+  nav.append(prev,month,next);
+  nav.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 6px';
+  month.style.cssText='text-align:center;flex:1';
+  panel.append(nav);
+  status.style.cssText='font-size:0.85em;line-height:1.35;margin:6px 0 0';
+  panel.append(status);
  }else{
   nav.append(prev,month,next);panel.append(nav);panel.append(status);panel.append(grid);
  }
@@ -3407,8 +3414,15 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';
  const mobileCalendar=(window.FSJ_PLATFORM?.platform==='celular'||window.matchMedia('(max-width:700px)').matches)&&!!pessoaId;
  if(mobileCalendar){
-  const monthHeading=document.createElement('div');monthHeading.style.cssText='text-align:center;margin:8px 0 12px';monthHeading.append(month);panel.append(monthHeading);
-  panel.append(grid);nav.append(prev,next);nav.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 0 6px';panel.append(nav);panel.append(status);
+  // No celular, a grade dos dias deve vir imediatamente após o responsável.
+  // Mês, setas e legenda ficam abaixo, sem modificar o calendário Desktop.
+  panel.append(grid);
+  nav.append(prev,month,next);
+  nav.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 6px';
+  month.style.cssText='text-align:center;flex:1';
+  panel.append(nav);
+  status.style.cssText='font-size:0.85em;line-height:1.35;margin:6px 0 0';
+  panel.append(status);
  }else{
   nav.append(prev,month,next);panel.append(nav);panel.append(status);panel.append(grid);
  }
