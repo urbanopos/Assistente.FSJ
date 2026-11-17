@@ -287,6 +287,8 @@
           closeMaintenance();
           if (value === 'videosChamadas' && typeof window.abrirVideosReserva === 'function') {
             window.abrirVideosReserva(button);
+          } else if (value === 'tarefasEmExecucao' && typeof window.navTo === 'function') {
+            window.navTo(value, button);
           } else if (value === 'relatorios') {
             // O botão REAL do menu lateral deve sempre reabrir a consulta inicial.
             // Não depender da navegação genérica nem do estado da aba atual.

@@ -18,7 +18,9 @@ Atualizado em 17/11/2026. Este arquivo descreve **somente a solução atual**. P
 - Filtros: Tarefas Periódicas, Tarefas Pontuais e Tarefas de Grupo. Não ressuscitar o antigo seletor independente Grupo Executor.
 - Seleção de pessoa distingue suas atribuições como executor e, quando aplicável, supervisão. Grupo inclui tarefas coletivas.
 - Duas tarefas por página; conservar filtros e contexto quando retornar da edição, quando disponível.
-- No build `20261117-execucao-desktop-alinhamento-02`, alinhar os botões das três categorias à base dos seletores **Executor Individual ou Supervisor** e **Situação da tarefa**, na mesma linha quando houver espaço. Permitir quebra de linha em janelas estreitas.
+- No build `20261117-execucao-desktop-status-rodape-01`, alinhar os botões das três categorias à base dos seletores **Executor Individual ou Supervisor** e **Situação da tarefa**, na mesma linha quando houver espaço. Permitir quebra de linha em janelas estreitas.
+- Ao abrir a tela ou acionar novamente o item do menu lateral, aplicar **Em aberto** na página 1. Ao voltar da edição, restaurar a situação e a página da consulta anterior.
+- Usar as classes comuns do sistema nos links de tarefa. Preto em aberto, azul em andamento, amarelo pendente, verde-escuro concluída, vermelho prioritária, vermelho pulsante urgente e roxo arquivada.
 - Agrupar as setas e o indicador de página no centro do painel, com uma seta de cada lado e distância do avatar da MarIA. A consulta vazia oculta o paginador.
 
 ## Minhas Tarefas

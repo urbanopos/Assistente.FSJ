@@ -1,10 +1,12 @@
 # Assistente FSJ — Manual de operação e manutenção
 
-### Filtros e paginação de Tarefas em Execução no Desktop do Proprietário — 17/11/2026
+### Tarefas em Execução no Desktop do Proprietário — 17/11/2026
 
-Build `20261117-execucao-desktop-alinhamento-02`. Em **Tarefas em Execução**, os botões **Tarefas Periódicas**, **Tarefas Pontuais** e **Tarefas de Grupo** ficam ao lado dos seletores de executor ou supervisor e de situação, com a base dos controles alinhada. Se a janela ficar estreita, os controles passam para outra linha dentro do painel. O rodapé agrupa a seta anterior, o número da página e a seta seguinte no centro do painel, fora da área do avatar da MarIA.
+Build `20261117-execucao-desktop-status-rodape-01`. Ao abrir a tela ou clicar novamente em **Tarefas em Execução** no menu lateral, a consulta inicia em **Em aberto**, na página 1. O filtro de situação permite consultar os demais estados. Ao voltar da edição, a consulta recupera a situação, o responsável, a categoria e a página anteriores.
 
-A simulação com dados fictícios verificou as três categorias, a troca de página, a consulta vazia e os seletores do Celular. O contrato de atualização automática passou. A conferência visual na sessão do Proprietário fica a cargo do teste após atualização do GitHub Pages. O commit deste build é o ponto de reversão. Consulte [Layout Desktop do Proprietário](../desktop/layouts/proprietario/README.md).
+Os botões de categoria ficam alinhados aos seletores quando houver espaço. A navegação de duas tarefas por página fica agrupada no centro do rodapé, com uma seta de cada lado da numeração. Os links de tarefa usam as classes de cor do sistema conforme situação e prioridade.
+
+A simulação com dados fictícios verificou os filtros, as classes de cor, o clique do menu lateral, a paginação, o retorno da edição e o fluxo do Celular. O contrato de atualização automática passou. Conferir o alinhamento na sessão do Proprietário após a publicação no GitHub Pages. O commit deste ajuste é o ponto de reversão. Consulte [Layout Desktop do Proprietário](../desktop/layouts/proprietario/README.md).
 
 ### Menu lateral do Proprietário no Desktop — 14/11/2026
 
