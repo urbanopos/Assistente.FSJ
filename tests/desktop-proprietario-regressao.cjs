@@ -117,6 +117,14 @@ test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rod
     assert.equal(await links.last().evaluate(node => getComputedStyle(node).animationName), 'none');
     assert.equal(await links.last().evaluate(node => getComputedStyle(node).backgroundColor), 'rgb(107, 33, 168)');
 
+    for (const name of ['Tarefas Periódicas', 'Tarefas Pontuais', 'Tarefas de Grupo']) {
+      await status.selectOption('');
+      const category = page.getByRole('button', { name, exact: true });
+      await category.click();
+      assert.equal(await status.inputValue(), 'Em aberto');
+      assert.equal(await category.getAttribute('aria-pressed'), 'true');
+    }
+
     await open.click();
     assert.equal(await status.inputValue(), 'Em aberto');
     assert.equal(await periodic.getAttribute('aria-pressed'), 'true');

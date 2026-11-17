@@ -21,7 +21,7 @@ Atualizado em 17/11/2026. Este arquivo descreve **somente a solução atual**. P
 - No build `20261117-execucao-desktop-numero-decrescente-01`, alinhar os botões das três categorias à base dos seletores **Executor Individual ou Supervisor** e **Situação da tarefa**, na mesma linha quando houver espaço. Permitir quebra de linha em janelas estreitas.
 - À esquerda do seletor de executor ou supervisor, o campo **Número da tarefa** localiza a tarefa pelo número, inclusive em outras situações ou categorias. As sugestões de número aparecem em ordem decrescente. O campo usa o estilo e alinhamento dos demais seletores da linha e dispensa ditado de voz. O link abre a consulta. A edição segue as ações disponíveis para a situação encontrada.
 - O link roxo e o campo Situação identificam a tarefa arquivada.
-- Ao abrir a tela ou acionar novamente o item do menu lateral, selecionar **Tarefas Periódicas** com situação **Em aberto**, na página 1. Ao voltar da edição, restaurar a situação e a página da consulta anterior.
+- Ao abrir a tela ou acionar novamente o item do menu lateral, selecionar **Tarefas Periódicas** com situação **Em aberto**, na página 1. Cada clique em uma categoria volta à situação **Em aberto** e à página 1. Ao voltar da edição, restaurar a situação e a página da consulta anterior.
 - Usar as classes comuns do sistema nos links de tarefa. Preto em aberto, azul em andamento, amarelo pendente, verde-escuro concluída, vermelho prioritária, vermelho pulsante urgente e roxo arquivada.
 - Agrupar as setas e o indicador de página no centro do painel, com uma seta de cada lado e distância do avatar da MarIA. A consulta vazia oculta o paginador.
 
