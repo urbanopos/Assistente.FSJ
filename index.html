@@ -2209,6 +2209,13 @@ function fsjRenderTarefasEmExecucao(){
    statusLabel.append(sel);filters.append(statusLabel);
   }
  }
+ // Desktop Proprietário: filtros de pessoa, situação e categorias na mesma linha.
+ if(desktop){
+  const categoryBar=document.getElementById('fsjExecucaoCategorias');
+  if(categoryBar&&categoryBar.parentElement!==filters)filters.append(categoryBar);
+  filters.style.cssText='display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;margin:12px 0';
+  if(categoryBar)categoryBar.style.cssText='display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 1px';
+ }
  const psel=document.getElementById('fsjArquivoPessoa'),gsel=document.getElementById('fsjArquivoGrupo');
  const setOptions=(sel,values)=>{const prev=sel.value;sel.replaceChildren(...values.map(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;return o;}));sel.value=values.some(([v])=>v===prev)?prev:'';};
  const people=S.people||[];
@@ -2290,7 +2297,9 @@ function fsjRenderTarefasEmExecucao(){
  let pager=document.getElementById('fsjExecucaoPaginador');
  if(!pager){pager=document.createElement('nav');pager.id='fsjExecucaoPaginador';pager.setAttribute('aria-label','Navegação das tarefas em execução');box.after(pager);}else if(pager.previousElementSibling!==box){box.after(pager);}
  box.querySelectorAll('.fsj-task-pagination').forEach(el=>el.remove());
- pager.style.cssText='display:flex;align-items:center;justify-content:center;gap:16px;padding:10px;position:sticky;bottom:4px;background:#f3fafb;border:1px solid #cbded6;border-radius:10px;z-index:6';
+ pager.style.cssText=desktop
+  ? 'display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:16px!important;width:max-content!important;max-width:calc(100% - 32px)!important;min-width:0!important;margin:8px auto 14px!important;padding:7px 16px!important;position:relative!important;inset:auto!important;background:#f3fafb;border:1px solid #cbded6;border-radius:10px;z-index:1'
+  : 'display:flex;align-items:center;justify-content:center;gap:16px;padding:10px;position:sticky;bottom:4px;background:#f3fafb;border:1px solid #cbded6;border-radius:10px;z-index:6';
  const back=document.createElement('button'),forward=document.createElement('button'),counter=document.createElement('strong');
  back.type=forward.type='button';back.textContent='←';forward.textContent='→';
  for(const button of [back,forward])button.style.cssText='min-width:48px;min-height:44px;background:#175b40;color:white;border:0;border-radius:9px;font-size:22px';
