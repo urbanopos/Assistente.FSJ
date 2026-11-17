@@ -276,7 +276,7 @@
         if (!eligible() || !useSidebar || !option || option.hidden || option.disabled || menu.disabled) return;
         if (value === 'cadPessoas' && window.fsjOwnerPeopleGo) {
           closeDiagnostic(); closeMaintenance();
-          window.fsjOwnerPeopleGo('cadastro');
+          window.fsjOwnerPeopleGo('edicao');
         } else if (value === '__diagnostico') {
           closeMaintenance();
           openDiagnostic();
@@ -348,7 +348,7 @@
   }
 
   // Navegação agrupada do Proprietário: reutiliza os formulários originais.
-  let peopleMode = 'cadastro';
+  let peopleMode = 'edicao';
   const peoplePage = document.getElementById('cadPessoas');
   const groupsPage = document.getElementById('cadGrupos');
   if (peoplePage && groupsPage) {
@@ -394,7 +394,7 @@
       const bar = document.createElement('div');
       bar.className = 'fsj-people-tabs';
       bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px';
-      for (const [mode, label] of [['cadastro','Cadastro'],['edicao','Edição'],['grupos','Grupos']]) {
+      for (const [mode, label] of [['edicao','Edição'],['grupos','Grupos'],['cadastro','Cadastro']]) {
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = label;
