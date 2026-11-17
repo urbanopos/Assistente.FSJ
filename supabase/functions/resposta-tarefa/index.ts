@@ -179,6 +179,7 @@ Deno.serve(async req=>{
    const days=[];
    for(let day=start;day<end;day=daysAfter(day,1)){
     if(day<created||(span&&day>deadline)||(archivedOn&&day>archivedOn)||hidden)continue;
+    if(span&&day===created){days.push({dia:day,situacao:'registro'});continue;}
     if(span&&onTime) days.push({dia:day,situacao:'cumprida'});
     else if(!span&&validDays.has(day)) days.push({dia:day,situacao:'cumprida'});
     else if(task.situacao!=='Arquivado'||(archivedOn&&(!span||archivedOn>=deadline))){

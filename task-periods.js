@@ -15,7 +15,7 @@
   return start&&length?{start,end:offset(start,length),length}:null;
  }
  function state(period,day,today,{archived=false,archivedOn='',completed=false}={}) {
-  if(!period||day<period.start||day>period.end||(archivedOn&&day>archivedOn))return '';
+  if(!period||day<=period.start||day>period.end||(archivedOn&&day>archivedOn))return '';
   if(completed)return 'done';
   if(archived&&(!archivedOn||archivedOn<period.end))return '';
   return today<=period.end?'active':'late';

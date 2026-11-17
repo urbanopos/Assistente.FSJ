@@ -48,3 +48,21 @@ test('consulta não altera situação nem arquiva',()=>{
  report(b,schedules(b,'2026-11'),'','2026-11-09');
  assert.equal(JSON.stringify(b),before);
 });
+
+test('diária fica em atraso em D+1 e o registro nesse dia regulariza a ocorrência',()=>{
+ const b=base('diaria'),p=schedules(b,'2026-11');
+ assert.equal(report(b,p,'','2026-11-01').entries.length,0);
+ assert.equal(report(b,p,'','2026-11-02').entries[0].overdue[0].to,'2026-11-01');
+ b.returns.push({tarefa_id:'t1',pessoa_id:'p1',tipo:'sim',dia_previsto:'2026-11-01',criado_em:'2026-11-02T15:00:00Z'});
+ assert.equal(report(b,p,'','2026-11-02').entries.length,0);
+});
+test('no calendário semanal, D0 fica separado dos sete dias que mudam de cor',()=>{
+ const window={};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../task-periods.js'),'utf8'),{window,Intl,Date});
+ const helper=window.FSJTaskPeriods, period=helper.bounds('semanal','2026-11-01');
+ const days=Array.from({length:8},(_,i)=>helper.offset(period.start,i));
+ assert.equal(helper.state(period,days[0],'2026-11-09'),'');
+ assert.equal(days.filter(day=>helper.state(period,day,'2026-11-08')==='active').length,7);
+ assert.equal(days.filter(day=>helper.state(period,day,'2026-11-09')==='late').length,7);
+ assert.equal(days.filter(day=>helper.state(period,day,'2026-11-09',{completed:true})==='done').length,7);
+});

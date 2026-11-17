@@ -341,8 +341,9 @@ test('calendário pinta todos os dias do período semanal e respeita o arquivame
     await late.first().waitFor();
     assert.equal(await late.count(),7);
     await show('2026-11-08','2026-10');
-    await late.first().waitFor();
-    assert.equal(await late.count(),1);
+    await page.getByRole('status').filter({hasText:'Verde: período no prazo'}).waitFor();
+    assert.equal(await late.count(),0);
+    assert.ok(await page.getByText('REGISTRO',{exact:true}).isVisible());
     await show('2026-11-08','2026-11','Arquivado','2026-11-03T12:00:00Z');
     await page.getByRole('status').filter({hasText:'Verde: período no prazo'}).waitFor();
     assert.equal(await late.count(),0);

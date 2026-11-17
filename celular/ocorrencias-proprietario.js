@@ -114,7 +114,7 @@
     const firstWork=Math.max(start,days(recife(task.criada_em)));
     while(lastWork>=firstWork&&!members.some(person=>workingDay(person,lastWork)))lastWork--;
     if (lastWork<firstWork) continue;
-     const from=iso(start), to=iso(end), tolerance=iso(end);
+     const from=iso(start), to=iso(end), tolerance=iso(end+(task.periodicidade==='diaria'?1:0));
      const permitted=new Set(members.map(person=>person.id));
      const completions=answers.filter(row=>(task.periodicidade!=='diaria'||groupTask||permitted.has(row.person))&&row.day>=from&&row.day<=to&&row.done>=from);
      // Conclusão central legada de tarefa com um único período.
@@ -197,14 +197,14 @@
    monthTitle.textContent=formatMonth.format(new Date(first*dayMs));
    const markers=new Map();
    for(const occurrence of item.overdue){
-    for(let mark=days(occurrence.from);mark<=days(occurrence.to);mark++)markers.set(iso(mark),occurrence);
+    for(let mark=days(occurrence.from)+(item.task.periodicidade==='diaria'?0:1);mark<=days(occurrence.to);mark++)markers.set(iso(mark),occurrence);
    }
    for(const day of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'])grid.append(el('strong',day));
    for(let empty=0;empty<dow(first);empty++)grid.append(el('span'));
    for(let day=first;day<=last;day++){
     const value=iso(day), off=result.calendar(person,day), occurrence=markers.get(value);
     const missed=markers.has(value);
-    const text=occurrence?'Período '+date(occurrence.from)+' a '+date(occurrence.to)+' · vencimento em '+date(occurrence.tolerance)
+    const text=occurrence?'Período '+date(item.task.periodicidade==='diaria'?occurrence.from:iso(days(occurrence.from)+1))+' a '+date(occurrence.to)+(item.task.periodicidade==='diaria'?' · regularização até ':' · vencimento em ')+date(occurrence.tolerance)
      +(occurrence.regularized?' · conclusão registrada fora do prazo':' · sem conclusão no prazo'):'';
     const reason=[off.label,text].filter(Boolean).join(' · ')||'Sem ocorrência em atraso neste dia';
     const button=el('button',value.slice(-2),'fsj-occurrence-day');
