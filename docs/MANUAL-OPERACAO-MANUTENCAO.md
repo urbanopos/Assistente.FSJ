@@ -1,5 +1,22 @@
 # Assistente FSJ — Manual de operação e manutenção
 
+## Decisão vigente — prazos por período (17/11/2026)
+
+Esta regra substitui os meses/anos civis da descrição histórica de periodicidade. O dia do registro em America/Recife é D (dia zero). **Até o vencimento, inclusive, todos os dias do período vigente aparecem verdes. Se não houver conclusão válida até o vencimento, no dia seguinte todos os dias daquele período passam a vermelho.** O dia previsto ainda pode receber uma marca de conclusão verde quando houver registro válido.
+
+| Frequência | Último dia em vigência | Primeiro dia em atraso |
+| --- | --- | --- |
+| Semanal | D+7 | D+8 |
+| Quinzenal | D+14 | D+15 |
+| Mensal | D+30 | D+31 |
+| Trimestral | D+90 | D+91 |
+| Semestral | D+180 | D+181 |
+| Anual | D+365 | D+366 |
+
+A diária mantém sua contagem e tolerância própria. O calendário e o relatório de tarefas não cumpridas do Proprietário (Desktop e Celular) devem ter o mesmo critério. O vencimento não arquiva tarefa automaticamente. **Somente o Proprietário pode decidir arquivar**, mediante autenticação e auditoria; Supervisor, Gestor e Executor não podem arquivar. Uma nova ocorrência só pode nascer após o vencimento da anterior e quando o fluxo de conclusão/arquivamento permitir; ela conta novo período desde o próprio registro.
+
+Implementação: os calendários do painel usam index.html e celular/ocorrencias-proprietario.js. A geração de ocorrências e seu cálculo no banco foram atualizados pelas migrações fsj_periodos_fixos_contagem_dia_registro e fsj_nova_ocorrencia_conta_do_proprio_registro. A exclusividade de arquivamento está protegida por fsj_arquivamento_exclusivo_proprietario e fsj_arquivamento_decisao_na_mesma_transacao. Não executar envios nem gravar respostas em testes; preservar históricos e versões. Publicação não equivale a conferência na sessão real.
+
 ### Ficha resumida da tarefa no Desktop e no Celular — 17/11/2026
 
 Build `20261117-ficha-historico-aberto-01`. O painel do Proprietário abre a ficha pelo código da tarefa. A apresentação inicial mostra a descrição integral, os botões já disponíveis, a situação atual abaixo deles e as pausas da execução quando registradas. A situação aparece imediatamente com o valor da lista e é atualizada após a consulta da ficha. Em falha no histórico, o valor da lista continua visível com aviso de consulta. Para uma tarefa diária, o resumo considera a ocorrência do dia. **Histórico e registros** fica aberto por padrão, pode ser recolhido e mostra responsáveis, situação, data do registro e conclusão. **Editar** abre o formulário existente.
