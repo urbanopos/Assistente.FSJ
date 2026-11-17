@@ -2123,7 +2123,7 @@ function fsjRenderTarefasEmExecucao(){
  box.replaceChildren();
  if(window.fsjOwnerVerified!==true){box.textContent='Consulta exclusiva do Proprietário autenticado.';return;}
  const page=document.getElementById('tarefasEmExecucao');
- const desktop=window.FSJ_PLATFORM?.platform==='desktop';
+ const desktop=window.FSJ_PLATFORM?.platform==='desktop'||window.matchMedia('(min-width:701px)').matches;
  const categories=[['periodicas','Tarefas Periódicas'],['pontuais','Tarefas Pontuais'],['grupo','Tarefas de Grupo']];
  let filters=page.querySelector('#fsjArquivoFiltros');
  if(!filters){
@@ -2265,7 +2265,7 @@ function fsjRenderTarefasEmExecucao(){
  }
  back.addEventListener('click',()=>{if(pageIndex>0){pageIndex--;showPage();}});
  forward.addEventListener('click',()=>{if(pageIndex<pages-1){pageIndex++;showPage();page.scrollIntoView({block:'start',behavior:'auto'});}});
- pager.replaceChildren(back,counter,forward);pager.hidden=pages<=1;
+ pager.replaceChildren(back,counter,forward);pager.hidden=false;
  showPage();
 }
 async function fsjArquivarTarefaProprietario(t){
@@ -3020,6 +3020,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoPaginador{display:flex!important;visibility:visible!important;position:relative!important;bottom:auto!important;flex:0 0 auto!important;min-height:54px!important;margin-top:auto!important;z-index:10!important}
  #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoPaginador[hidden]{display:none!important}
  #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoLista{min-height:0!important;flex:1 1 auto!important;overflow:hidden!important}
+}
+</style>
+<style id="fsjExecucaoDesktopFiltrosLinhaFix">
+@media(min-width:701px){
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjArquivoFiltros{display:grid!important;grid-template-columns:minmax(220px,380px) minmax(190px,260px)!important;align-items:end!important;justify-content:start!important;column-gap:16px!important;row-gap:4px!important;width:100%!important}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjArquivoFiltros>label{display:flex!important;flex-direction:column!important;align-items:stretch!important;width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjArquivoFiltros select{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoPaginador{display:flex!important;width:100%!important;min-height:52px!important;flex-shrink:0!important;justify-content:space-between!important;align-items:center!important}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoLista{overflow:hidden!important;min-height:0!important}
 }
 </style>
 <style id="fsjExecucaoDesktopPaginationFix">
