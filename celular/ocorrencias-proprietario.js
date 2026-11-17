@@ -5,7 +5,7 @@
  const formatMonth = new Intl.DateTimeFormat('pt-BR', {month:'long', year:'numeric', timeZone:'UTC'});
  const labels = {diaria:'Diária', semanal:'Semanal', quinzenal:'Quinzenal', mensal:'Mensal',
   trimestral:'Trimestral', semestral:'Semestral', anual:'Anual'};
- const monthSteps = {mensal:1, trimestral:3, semestral:6, anual:12};
+ const periodDays = {semanal:7, quinzenal:14, mensal:30, trimestral:90, semestral:180, anual:365};
  const days = value => Date.parse(value + 'T12:00:00Z') / dayMs - 0.5;
  const iso = value => new Date(value * dayMs).toISOString().slice(0,10);
  const recife = value => value && Number.isFinite(Date.parse(value)) ? formatDay.format(new Date(value)) : '';
@@ -16,11 +16,7 @@
   return [days(month+'-01'), Date.UTC(y,m,1)/dayMs-1];
  }
  function advance(reference, frequency, index) {
-  if (frequency === 'semanal' || frequency === 'quinzenal') return days(reference) + index * (frequency==='semanal'?7:14);
-  const [year,month,day] = reference.split('-').map(Number);
-  const step = month-1 + monthSteps[frequency]*index;
-  const last = new Date(Date.UTC(year,step+1,0)).getUTCDate();
-  return Date.UTC(year,step,Math.min(day,last))/dayMs;
+  return days(reference) + index * periodDays[frequency];
  }
  function indexBy(rows,key) {
   const result = new Map();
@@ -59,7 +55,7 @@
     // A central cria um registro por período nas frequências acima de diária.
     const index = task.repeticao_indice||0;
     const start = advance(reference,frequency,index);
-    const end = (task.proxima_repeticao ? days(task.proxima_repeticao) : advance(reference,frequency,index+1))-1;
+    const end = advance(reference,frequency,index+1); // D+7/D+30 ainda está no prazo; atraso somente no dia seguinte.
     if (end>=first&&end<=last&&end>=start&&(!closed||end<=days(closed))) periods = [[start,end]];
    }
    if (periods.length) schedules.push({task,periods,responsibles,group:groups.get(task.grupo_id)||'Grupo'});
@@ -101,7 +97,7 @@
   return indexBy(rows.filter(row=>row.day&&row.done),row=>row.task);
  }
  function report(base, planned, personId, today) {
-  const calendar = calendarSources(base), records = completionRecords(base), cutoff=days(today)-2;
+  const calendar = calendarSources(base), records = completionRecords(base), cutoff=days(today)-1;
   const revised = new Set(base.returns.filter(row=>row.cancelado_por_revisao||row.tipo==='sim_devolvido').map(row=>row.tarefa_id));
   const result = [];
   for (const entry of planned) {
@@ -113,13 +109,13 @@
    for (const members of eligible) {
     const overdue=[];
     for (const [start,end] of periods) {
-     if (end>cutoff) continue;
+     if (end>(task.periodicidade==='diaria'?days(today)-2:cutoff)) continue;
     const workingDay=(person,day)=>!calendar(person,day).off&&(!person.criado_em||iso(day)>=recife(person.criado_em));
     let lastWork=end;
     const firstWork=Math.max(start,days(recife(task.criada_em)));
     while(lastWork>=firstWork&&!members.some(person=>workingDay(person,lastWork)))lastWork--;
     if (lastWork<firstWork) continue;
-     const from=iso(start), to=iso(end), tolerance=iso(end+1);
+     const from=iso(start), to=iso(end), tolerance=iso(end);
      const permitted=new Set(members.map(person=>person.id));
      const completions=answers.filter(row=>(groupTask||permitted.has(row.person))&&row.day>=from&&row.day<=to&&row.done>=from);
      // Conclusão central legada de tarefa com um único período.
@@ -193,35 +189,30 @@
   monthPicker.setAttribute('aria-label','Mês do calendário');
   const grid=el('div','','fsj-occurrence-grid');
   const detail=el('p','Toque em um dia para ver seu registro.');detail.setAttribute('aria-live','polite');
-  const legend=el('p','Vermelho: fora do prazo. Verde claro: folga. Amarelo: feriado. Azul claro: férias.');
+  const legend=el('p','Vermelho: todos os dias do período vencido e não concluído. Verde claro: folga. Amarelo: feriado. Azul claro: férias.');
   function draw(){
    grid.replaceChildren();
    const person=item.members.find(member=>member.id===filter.value);
    const displayMonth=monthPicker.value||month;
    const [first,last]=monthBounds(displayMonth);
    monthTitle.textContent=formatMonth.format(new Date(first*dayMs));
-   const misses=new Map(item.overdue.map(row=>[row.to,row]));
    const markers=new Map();
    for(const occurrence of item.overdue){
-    let mark=days(occurrence.lastWork);
-    const earliest=Math.max(days(occurrence.from),days(recife(item.task.criada_em)),
-     person.criado_em?days(recife(person.criado_em)):first);
-    while(mark>=earliest&&result.calendar(person,mark).off)mark--;
-    if(mark>=earliest)markers.set(iso(mark),occurrence);
+    for(let mark=days(occurrence.from);mark<=days(occurrence.to);mark++)markers.set(iso(mark),occurrence);
    }
    for(const day of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'])grid.append(el('strong',day));
    for(let empty=0;empty<dow(first);empty++)grid.append(el('span'));
    for(let day=first;day<=last;day++){
-    const value=iso(day), off=result.calendar(person,day), occurrence=markers.get(value)||misses.get(value);
+    const value=iso(day), off=result.calendar(person,day), occurrence=markers.get(value);
     const missed=markers.has(value);
-    const text=occurrence?'Período '+date(occurrence.from)+' a '+date(occurrence.to)+' · tolerância até '+date(occurrence.tolerance)
+    const text=occurrence?'Período '+date(occurrence.from)+' a '+date(occurrence.to)+' · vencimento em '+date(occurrence.tolerance)
      +(occurrence.regularized?' · conclusão registrada fora do prazo':' · sem conclusão no prazo'):'';
     const reason=[off.label,text].filter(Boolean).join(' · ')||'Sem ocorrência em atraso neste dia';
     const button=el('button',value.slice(-2),'fsj-occurrence-day');
     button.type='button';button.dataset.kind=missed?'late':off.kind;
     button.setAttribute('aria-label',date(value)+' · '+reason);
     button.title=reason;button.onclick=()=>{detail.textContent=date(value)+' · '+reason;};
-    if(off.label)button.append(el('small',off.label.split(' · ')[0]));
+    if(off.label&&!missed)button.append(el('small',off.label.split(' · ')[0]));
     grid.append(button);
    }
   }
