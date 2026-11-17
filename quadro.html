@@ -44,7 +44,7 @@ function fsjCalendarioConsulta(t){
 /* Isolamento de plataforma: os filtros pertencem somente ao INDEX celular. */
 function fsjMinhasTarefasCelular(){
  const mobile=window.matchMedia('(max-width:700px)').matches;
- return mobile&&document.body.classList.contains('fsj-index-execucao')&&fsjFiltro==='aberto';
+ return mobile&&document.body.classList.contains('fsj-index-execucao')&&['aberto','nao_cumpridas'].includes(fsjFiltro);
 }
 let fsjCategoriaMinhasTarefas="periodicas";
 function fsjCategoriaDaTarefa(t){
