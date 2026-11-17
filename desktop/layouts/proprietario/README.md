@@ -27,6 +27,10 @@ Atualizado em 17/11/2026. Este arquivo descreve **somente a solução atual**. P
 
 - Teste automatizado: `node --test tests/desktop-proprietario-regressao.cjs`, com Playwright e Chromium. Exercita o menu lateral, as cores e a posição do rodapé a partir dos arquivos operacionais.
 
+## Ficha da tarefa
+
+O código abre a ficha com descrição integral, situação atual e ações existentes. As pausas aparecem quando registradas. **Histórico e registros** reúne os detalhes de execução e os registros vinculados. **Editar** continua usando o formulário operacional.
+
 ## Minhas Tarefas
 - Três categorias: Periódicas, Pontuais e Grupo. Usar atribuições reais do titular.
 - Códigos pontuais exibem a letra `P` e numeração padronizada. Atualizar consulta sem alterar os registros.

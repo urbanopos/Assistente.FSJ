@@ -31,6 +31,10 @@ O teste também verifica a ordem decrescente das sugestões e a busca direta por
 
 O teste carrega também o adaptador compartilhado de voz. O campo **Número da tarefa** usa `data-fsj-sem-voz` para evitar que esse adaptador adicione o botão e altere o alinhamento. A regressão confere a mesma altura, borda e espaçamento interno do seletor de executor, além de verificar o ditado em um campo comum.
 
+## Ficha da tarefa no Desktop e no Celular
+
+A ficha apresenta descrição, situação atual, ações existentes e pausas registradas. O teste no navegador verifica as duas larguras, a ausência da seção de pausas quando vazia, a abertura do histórico sob demanda e o acionamento de **Editar**.
+
 ## Incidente relacionado: calendário e conclusões periódicas
 
 O calendário de consulta do Proprietário Desktop foi validado visualmente com código de cores. **Não equivale à validação de gravação** dos botões dia do celular Executor/Supervisor.

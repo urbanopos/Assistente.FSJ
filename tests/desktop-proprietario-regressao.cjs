@@ -199,3 +199,77 @@ test('Celular conserva seus seletores de executor e grupo', async () => {
     await browser.close();
   }
 });
+
+test('ficha da tarefa mostra situação, ações e pausas no Desktop e no Celular', async () => {
+  const browser = await chromium.launch();
+  try {
+    for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 800 }]) {
+      const page = await browser.newPage({ viewport });
+      await page.route('**/*', route => route.abort());
+      await page.setContent('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">');
+      await page.evaluate(() => {
+        const day = '2026-11-17';
+        Object.assign(window, {
+          withPause: true,
+          person: () => ({ name: 'Pessoa fictícia' }),
+          fsjDia: () => day,
+          fsjDataHora: value => value.toISOString(),
+          fsjIntervaloHoras: () => '',
+          api(path) {
+            if (path.startsWith('/rest/v1/tarefas?')) {
+              return [{ descricao: 'Descrição integral da tarefa', situacao: 'Em aberto' }];
+            }
+            if (!window.withPause) return [];
+            if (path.startsWith('/rest/v1/execucoes_tarefa?')) {
+              return [{ pessoa_id: '1', dia: day, estado: 'suspensa', suspenso_em: day + 'T13:00:00Z' }];
+            }
+            if (path.startsWith('/rest/v1/execucoes_historico?')) {
+              return [
+                { pessoa_id: '1', dia: day, acao: 'suspender', criado_em: day + 'T13:00:00Z' },
+                { pessoa_id: '1', dia: day, acao: 'suspender', criado_em: day + 'T11:00:00Z' }
+              ];
+            }
+            return [];
+          },
+          editTask(id) { window.editada = id; },
+          delTask(id) { window.excluida = id; },
+          windowOwnerActions() {
+            return window.fsjAcoesPontuaisProprietario({ id: 'ficticia', frequency: 'pontual' });
+          },
+          fsjOwnerVerified: true,
+          fsjTarefaPeriodica: () => false
+        });
+      });
+      const ownerActions = sourceBetween('function fsjAcoesPontuaisProprietario(t){', '\nfunction fsjRestaurarFiltroExecucao(');
+      await page.addScriptTag({ path: path.join(root, 'task-list-ui.js') });
+      await page.addScriptTag({ path: path.join(root, 'task-detail-manager.js') });
+      await page.addScriptTag({ content: ownerActions });
+      const open = () => page.evaluate(() => window.fsjOpenTaskDetails(
+        'Tar-000015', 'Descrição inicial', 'Responsável fictício',
+        () => window.fsjLoadTaskDetails('ficticia'), 'pontual', window.windowOwnerActions
+      ));
+      await open();
+      const dialog = page.locator('#fsj-task-detail');
+      const status = dialog.locator('#fsj-task-detail-current-status');
+      assert.equal(await dialog.locator('#fsj-task-detail-description').textContent(), 'Descrição integral da tarefa');
+      assert.equal(await status.textContent(), 'Situação: Suspensa');
+      assert.equal(await dialog.locator('#fsj-task-detail-history > ul li').count(), 2);
+      assert.equal(await dialog.getByText('Execução — histórico', { exact: true }).isVisible(), false);
+      await dialog.getByText('Histórico e registros', { exact: true }).click();
+      assert.equal(await dialog.getByText('Execução — histórico', { exact: true }).isVisible(), true);
+      for (const label of ['Editar', 'Concluir', 'Excluir']) {
+        assert.equal(await dialog.getByRole('button', { name: label, exact: true }).count(), 1);
+      }
+      await dialog.getByRole('button', { name: 'Editar', exact: true }).click();
+      assert.equal(await page.evaluate(() => window.editada), 'ficticia');
+      await page.evaluate(() => { window.withPause = false; });
+      await open();
+      assert.equal(await status.textContent(), 'Situação: Em aberto');
+      assert.equal(await dialog.getByText('Pausas', { exact: true }).count(), 0);
+      assert.equal(await dialog.locator('#fsj-task-detail-history > details').evaluate(el => el.open), false);
+      await page.close();
+    }
+  } finally {
+    await browser.close();
+  }
+});

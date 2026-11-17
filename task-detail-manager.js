@@ -20,7 +20,16 @@ async function fsjLoadTaskDetails(id){
  const current=answers.filter(r=>!r.cancelado_por_revisao&&(!t.diaria||(r.dia_previsto||fsjDia(r.criado_em))===day)),done=current.find(r=>r.tipo==='sim'),negative=current.find(r=>r.tipo==='nao');
  const completed=!!done||(!t.diaria&&t.situacao==='Concluída')||(t.diaria&&t.situacao==='Concluída'&&t.concluida_em&&fsjDia(t.concluida_em)===day);
  const relevantExecutions=executions.filter(e=>!t.diaria||e.dia===day);
- const situation=completed?'Concluída':negative?'Não concluída — justificativa registrada':relevantExecutions.some(e=>e.estado==='em_andamento')?'Em andamento':relevantExecutions.some(e=>e.estado==='suspensa')?'Suspensa':'Sem confirmação de conclusão';
+ const storedStatus=t.diaria&&(t.situacao==='Concluída'||(t.situacao==='Pendente'&&t.reaberta_em&&t.reaberta_dia!==day))?'Em aberto':t.situacao||'Em aberto';
+ const situation=['Arquivado','Arquivada'].includes(t.situacao)?'Arquivada':completed?'Concluída':negative?'Não concluída — justificativa registrada':relevantExecutions.some(e=>e.estado==='em_andamento')?'Em andamento':relevantExecutions.some(e=>e.estado==='suspensa')?'Suspensa':storedStatus;
+ const pauses=events.filter(e=>e.acao==='suspender'&&(!t.diaria||(e.dia||fsjDia(e.criado_em))===day))
+  .map(e=>({person:e.pessoa_id,day:e.dia||fsjDia(e.criado_em),at:e.criado_em}));
+ for(const e of relevantExecutions){
+  if(e.suspenso_em&&!pauses.some(p=>p.person===e.pessoa_id&&p.day===e.dia)){
+   pauses.push({person:e.pessoa_id,day:e.dia,at:e.suspenso_em});
+  }
+ }
+ pauses.sort((a,b)=>new Date(b.at)-new Date(a.at));
  const summary=['Situação'+(t.diaria?' de hoje':'')+': '+situation,'Registro: '+stamp(t.criada_em),'Conclusão: '+(completed?'SIM — '+fsjDetailPerson(done?.pessoa_id||t.concluida_por)+' • '+stamp(done?.criado_em||t.concluida_em):negative?'NÃO — '+fsjDetailPerson(negative.pessoa_id)+' • '+stamp(negative.criado_em):'Ainda não informada')];
  if(!current.length&&!completed)summary.push('Sem confirmação registrada para esta tarefa. Aguardando resposta do responsável.');
  if(t.reaberta_em)summary.push('Última revisão do Proprietário: '+stamp(t.reaberta_em)+' — '+t.reabertura_motivo);
@@ -36,6 +45,9 @@ async function fsjLoadTaskDetails(id){
  const questions=answers.filter(r=>r.tipo==='pergunta');if(questions.length)sections.push({title:'Perguntas à administração',entries:questions.map(r=>({text:fsjDetailPerson(r.pessoa_id)+' • '+stamp(r.criado_em)+'\n'+r.conteudo+'\nPergunta registrada; não indica, por si só, tarefa automática.'}))});
  const revisions=await api('/rest/v1/conclusoes_revisoes?tarefa_id=eq.'+filter+'&select=dia_previsto,motivo,criado_em&order=criado_em.desc');
  if(revisions.length)sections.push({title:'Cancelamentos de conclusão pelo Proprietário',entries:revisions.map(r=>({text:(r.dia_previsto?'Dia previsto: '+r.dia_previsto+' • ':'')+stamp(r.criado_em)+'\nMotivo: '+r.motivo}))});
- return {description:t.descricao,sections};
+ return {description:t.descricao,sections,overview:{
+  status:situation,
+  pauses:pauses.map(p=>fsjDetailPerson(p.person)+' • '+stamp(p.at))
+ }};
 }
 

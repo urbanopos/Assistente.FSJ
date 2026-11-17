@@ -8,6 +8,10 @@ O redirecionamento abre o painel operacional em [index.html](../../../index.html
 
 Entrega pelo GitHub Pages, com atualização ao abrir ou retomar a sessão. O contrato de atualização e a simulação do atalho no Celular e Desktop passaram. A conferência visual no Galaxy fica pendente. Para restaurar a versão anterior, reverta o commit deste ajuste no repositório e aguarde o GitHub Pages servir a revisão.
 
+## Ficha da tarefa
+
+O código abre a ficha com descrição integral, situação atual e ações existentes. As pausas aparecem quando registradas. **Histórico e registros** reúne os detalhes de execução e os registros vinculados. **Editar** continua usando o formulário operacional.
+
 ## Tarefas em aberto
 
 No build `20261113-tarefas-abertas-proprietario-01`, a lista aberta pelo contador **Em aberto** no Celular do Proprietário mostra duas tarefas por página, com setas e numeração em um único rodapé. As tarefas individuais precedem as de grupo. A contagem total continua refletindo o filtro de responsável. O título longo é resumido na lista, e o texto completo continua disponível ao abrir a tarefa. A mudança se aplica ao painel web e é entregue pela atualização habitual do GitHub Pages.
