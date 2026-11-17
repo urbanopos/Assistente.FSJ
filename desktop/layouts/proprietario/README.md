@@ -23,6 +23,8 @@ Atualizado em 17/11/2026. Este arquivo descreve **somente a solução atual**. P
 - Usar as classes comuns do sistema nos links de tarefa. Preto em aberto, azul em andamento, amarelo pendente, verde-escuro concluída, vermelho prioritária, vermelho pulsante urgente e roxo arquivada.
 - Agrupar as setas e o indicador de página no centro do painel, com uma seta de cada lado e distância do avatar da MarIA. A consulta vazia oculta o paginador.
 
+- Teste automatizado: `node --test tests/desktop-proprietario-regressao.cjs`, com Playwright e Chromium. Exercita o menu lateral, as cores e a posição do rodapé a partir dos arquivos operacionais.
+
 ## Minhas Tarefas
 - Três categorias: Periódicas, Pontuais e Grupo. Usar atribuições reais do titular.
 - Códigos pontuais exibem a letra `P` e numeração padronizada. Atualizar consulta sem alterar os registros.

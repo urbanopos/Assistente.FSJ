@@ -1,0 +1,162 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { test } = require('node:test');
+const { chromium } = require('playwright');
+
+const root = path.join(__dirname, '..');
+const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const menu = fs.readFileSync(path.join(root, 'desktop/layouts/proprietario/menu-lateral.js'), 'utf8');
+const styles = Array.from(index.matchAll(/<style(?:\s[^>]*)?>[\s\S]*?<\/style>/g), match => match[0]).join('\n');
+const executionPanel = index.match(/<div id="tarefasEmExecucao"[\s\S]*?<\/div><\/div>/)[0];
+const pageMarkup = `<!doctype html><html lang="pt-BR"><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles}</head><body>
+  <header></header><main><div id="gestor"><div id="dashboard"></div>${executionPanel}</div></main>
+  <select id="fsjSimpleSelect">
+    <option value="dashboard">Início</option>
+    <option value="tarefasEmExecucao">Tarefas em Execução</option>
+  </select>
+  <button id="brisaFab" class="brisa-fab" type="button">MarIA</button>
+</body></html>`;
+
+function sourceBetween(start, end) {
+  const from = index.indexOf(start);
+  const to = index.indexOf(end, from + start.length);
+  assert.ok(from >= 0 && to > from, start);
+  return index.slice(from, to);
+}
+
+const application = [
+  sourceBetween('function navTo(id,b,record=true){', 'function fsjLimparSelecoesAoSair('),
+  sourceBetween('function fsjTaskClass(', '\n'),
+  sourceBetween('function fsjRestaurarFiltroExecucao(', '\nfunction fsjRenderTarefasEmExecucao('),
+  sourceBetween('function fsjRenderTarefasEmExecucao(){', '\n}\n') + '\n}'
+].join('\n');
+
+const statuses = [
+  ['Em aberto', 'normal', 'rgb(0, 0, 0)'],
+  ['Em aberto', 'prioritaria', 'rgb(185, 28, 28)'],
+  ['Em aberto', 'urgente', 'rgb(185, 28, 28)'],
+  ['Pendente', 'normal', 'rgb(181, 138, 0)'],
+  ['Concluída', 'normal', 'rgb(20, 83, 45)'],
+  ['Em aberto', 'normal', 'rgb(21, 101, 192)'],
+  ['Arquivado', 'urgente', 'rgb(255, 255, 255)']
+];
+
+async function openFixture(page, desktop) {
+  await page.route('**/*', route => route.abort());
+  await page.setContent(pageMarkup);
+  await page.evaluate(({ desktop, statuses }) => {
+    Object.assign(window, {
+      FSJ_PLATFORM: { platform: desktop ? 'desktop' : 'celular' },
+      fsjOwnerVerified: true,
+      fsjPainelPronto: true,
+      fsjFonteOperacionalConfirmada: true,
+      fsjNavSequence: 0,
+      currentPage: 'dashboard',
+      fsjTemposExecucoes: [{ tarefa_id: '6', estado: 'em_andamento', iniciado_em: 'agora' }],
+      ids: task => task.personIds,
+      names: () => 'Pessoa fictícia',
+      fsjFrequency: task => task.frequency,
+      fsjFrequencyLabel: () => 'Pontual',
+      fsjTarefaPeriodica: () => false,
+      fsjDataHora: () => 'hoje',
+      fsjSimpleSelectGo: id => window.navTo(id),
+      fsjNavToShow(id) {
+        window.currentPage = id;
+        document.querySelectorAll('#gestor > div').forEach(view => {
+          view.classList.toggle('hidden', view.id !== id);
+        });
+        if (id === 'tarefasEmExecucao') window.fsjRenderTarefasEmExecucao();
+      },
+      S: {
+        people: [{ id: '1', name: 'Pessoa fictícia' }],
+        groups: [],
+        tasks: statuses.map(([status, priority], i) => ({
+          id: String(i + 1), code: 'Tar-' + (i + 1),
+          text: 'Tarefa fictícia ' + (i + 1), frequency: 'pontual', status, priority, personIds: ['1']
+        }))
+      }
+    });
+    // O painel pode receber display inline durante a navegação. O rodapé continua no lugar.
+    document.getElementById('tarefasEmExecucao').style.display = 'block';
+  }, { desktop, statuses });
+  await page.addScriptTag({ content: application });
+  await page.addScriptTag({ content: menu });
+}
+
+test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rodapé', async () => {
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1914, height: 912 } });
+    await openFixture(page, true);
+    const sidebar = page.locator('#fsjOwnerSidebar');
+    const open = sidebar.getByRole('button', { name: 'Tarefas em Execução' });
+    const status = page.locator('#fsjExecucaoStatus');
+    const pager = page.locator('#fsjExecucaoPaginador');
+    const count = pager.locator('strong');
+    await open.click();
+    assert.equal(await status.inputValue(), 'Em aberto');
+    assert.equal(await count.textContent(), '1 / 2');
+    await status.selectOption('');
+    assert.equal(await count.textContent(), '1 / 4');
+    await pager.getByRole('button', { name: '→' }).click();
+    assert.equal(await count.textContent(), '2 / 4');
+
+    const links = page.locator('#fsjExecucaoLista .fsj-task-number');
+    const colors = await links.evaluateAll(nodes => nodes.map(node => getComputedStyle(node).color));
+    assert.deepEqual(colors, statuses.map(([, , color]) => color));
+    assert.equal(await links.nth(2).evaluate(node => getComputedStyle(node).animationName), 'fsjUrgentPulse');
+    assert.equal(await links.last().evaluate(node => getComputedStyle(node).animationName), 'none');
+    assert.equal(await links.last().evaluate(node => getComputedStyle(node).backgroundColor), 'rgb(107, 33, 168)');
+
+    await open.click();
+    assert.equal(await status.inputValue(), 'Em aberto');
+    assert.equal(await count.textContent(), '1 / 2');
+    await status.selectOption('');
+    await sidebar.getByRole('button', { name: 'Início' }).click();
+    await open.click();
+    assert.equal(await status.inputValue(), 'Em aberto');
+
+    for (const viewport of [{ width: 1914, height: 912 }, { width: 1280, height: 720 }]) {
+      await page.setViewportSize(viewport);
+      const controls = await page.locator('#fsjArquivoFiltros select, #fsjExecucaoCategorias button').evaluateAll(nodes =>
+        nodes.map(node => node.getBoundingClientRect().bottom));
+      assert.equal(controls.length, 5);
+      assert.ok(Math.max(...controls) - Math.min(...controls) < 2, 'Filtros e categorias devem ficar na mesma linha');
+      const panel = await page.locator('#tarefasEmExecucao').boundingBox();
+      const avatar = await page.locator('#brisaFab').boundingBox();
+      const footer = await pager.boundingBox();
+      const back = await pager.getByRole('button', { name: '←' }).boundingBox();
+      const indicator = await count.boundingBox();
+      const next = await pager.getByRole('button', { name: '→' }).boundingBox();
+      assert.ok(Math.abs(panel.x + panel.width / 2 - footer.x - footer.width / 2) < 2, 'Paginador deve ficar centralizado');
+      const bottomGap = panel.y + panel.height - footer.y - footer.height;
+      assert.ok(bottomGap >= 0 && bottomGap < 35, 'Paginador deve ficar no rodapé');
+      assert.ok(back.x + back.width < indicator.x && indicator.x + indicator.width < next.x);
+      assert.ok(Math.abs(back.y - next.y) < 2 && next.x + next.width < avatar.x);
+    }
+    await status.evaluate(select => {
+      [...select.options].find(option => option.value === 'Pendente').value = 'Sem resultados';
+      select.value = 'Sem resultados';
+      select.dispatchEvent(new Event('change'));
+    });
+    assert.equal(await pager.isVisible(), false);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('Celular conserva seus seletores de executor e grupo', async () => {
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 393, height: 800 }, isMobile: true });
+    await openFixture(page, false);
+    await page.evaluate(() => window.navTo('tarefasEmExecucao'));
+    assert.equal(await page.locator('#fsjArquivoPessoa').count(), 1);
+    assert.equal(await page.locator('#fsjArquivoGrupo').count(), 1);
+    assert.equal(await page.locator('#fsjExecucaoStatus').count(), 0);
+    assert.equal(await page.locator('.fsj-owner-execution-desktop').count(), 0);
+  } finally {
+    await browser.close();
+  }
+});

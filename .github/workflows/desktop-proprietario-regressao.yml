@@ -1,0 +1,22 @@
+name: Regressão Desktop Proprietário
+on:
+  push:
+    branches: [main]
+    paths: [index.html, desktop/layouts/proprietario/**, tests/desktop-proprietario-regressao.cjs, .github/workflows/desktop-proprietario-regressao.yml]
+  pull_request:
+    paths: [index.html, desktop/layouts/proprietario/**, tests/desktop-proprietario-regressao.cjs, .github/workflows/desktop-proprietario-regressao.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  executar-regressao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - run: node --test tests/desktop-proprietario-regressao.cjs

@@ -1,6 +1,7 @@
 # Regras permanentes do Assistente FSJ
 
-Antes de modificar ou publicar, leia docs/decisoes/atualizacao-automatica.md.
+Antes de modificar ou publicar, leia docs/decisoes/atualizacao-automatica.md e consulte o registro vigente de prevenção de regressões em docs/registro-melhorias-prevencao-regressoes-20261117.md.
+Para mudanças no Desktop do Proprietário, confira o contrato em desktop/layouts/proprietario/README.md. Se a mudança atingir Tarefas em Execução ou seu menu, execute `node --test tests/desktop-proprietario-regressao.cjs` com Playwright e Chromium. O teste com dados fictícios cobre o clique real do menu, as classes de cor e a posição do rodapé no navegador.
 
 ## Decisao do proprietario: atualizacao automatica
 
