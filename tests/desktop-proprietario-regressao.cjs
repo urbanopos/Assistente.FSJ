@@ -301,3 +301,106 @@ test('ficha da tarefa mostra situação, ações e pausas no Desktop e no Celula
     await browser.close();
   }
 });
+
+test('calendário pinta todos os dias do período semanal e respeita o arquivamento', async () => {
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<!doctype html><body></body>');
+    await page.addScriptTag({ path: path.join(root, 'task-periods.js') });
+    await page.addScriptTag({ content: sourceBetween('async function fsjCalendarioExecucaoDesktop(', '\nfunction fsjAcoesPontuaisProprietario(') });
+    await page.evaluate(() => Object.assign(window, {
+      today: '2026-11-07',
+      fsjDia: () => window.today,
+      fsjOwnerVerified: true,
+      S: { people: [] },
+      fsjTemposExecucoes: [],
+      fsjFrequency: t => t.frequency,
+      fsjFrequencyLabel: t => t.frequency,
+      names: () => 'Responsável fictício',
+      api: async () => []
+    }));
+    const dates = await page.evaluate(() => {
+      const periods = window.FSJTaskPeriods;
+      return ['semanal','quinzenal','mensal','trimestral','semestral','anual']
+        .map(frequency => periods.bounds(frequency,'2026-01-01').end);
+    });
+    assert.deepEqual(dates,['2026-01-08','2026-01-15','2026-01-31','2026-04-01','2026-06-30','2027-01-01']);
+    const show = (today,month,status='Em aberto',archivedAt) => page.evaluate(async ({today,month,status,archivedAt}) => {
+      window.today=today;
+      await window.fsjCalendarioExecucaoDesktop({
+        id:'period-test',created:'2026-10-31T12:00:00Z',frequency:'semanal',status,archivedAt
+      },month,undefined,true);
+    },{today,month,status,archivedAt});
+    const active=page.locator('[data-competencia="active"]'),late=page.locator('[data-competencia="late"]');
+    await show('2026-11-07','2026-11');
+    await active.first().waitFor();
+    assert.equal(await active.count(),7);
+    assert.equal(await late.count(),0);
+    await show('2026-11-08','2026-11');
+    await late.first().waitFor();
+    assert.equal(await late.count(),7);
+    await show('2026-11-08','2026-10');
+    await late.first().waitFor();
+    assert.equal(await late.count(),1);
+    await show('2026-11-08','2026-11','Arquivado','2026-11-03T12:00:00Z');
+    await page.getByRole('status').filter({hasText:'Verde: período no prazo'}).waitFor();
+    assert.equal(await late.count(),0);
+    await page.evaluate(()=>{window.api=async()=>[{tipo:'sim',dia_previsto:'2026-10-31',criado_em:'2026-11-03T12:00:00Z'}];});
+    await show('2026-11-08','2026-11');
+    const done=page.locator('[data-competencia="done"]');
+    await done.first().waitFor();
+    assert.equal(await done.count(),7);
+    assert.equal(await late.count(),0);
+    const showLong=month=>page.evaluate(month=>window.fsjCalendarioExecucaoDesktop({
+      id:'long-period',created:'2026-10-31T12:00:00Z',frequency:'trimestral',status:'Em aberto'
+    },month,undefined,true),month);
+    await showLong('2026-11');
+    await done.first().waitFor();
+    assert.equal(await done.count(),30);
+    await showLong('2026-12');
+    await page.getByRole('status').filter({hasText:'Sem ocorrência neste mês'}).waitFor();
+    assert.equal(await done.count(),0);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('botão-dia do executor envia uma conclusão e colore todos os dias retornados', async () => {
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({viewport:{width:393,height:800}});
+    await page.setContent('<div id="detail"></div><p id="message"></p>');
+    const responder=fs.readFileSync(path.join(root,'responder.html'),'utf8');
+    const from=responder.indexOf('function fsjCalendarioExecutor(');
+    const to=responder.indexOf('\nasync function load()',from);
+    assert.ok(from>=0&&to>from);
+    await page.addScriptTag({content:`
+      const detail=document.getElementById('detail'),status=document.getElementById('message'), token='teste', endpoint='https://example.invalid';
+      const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date());
+      const first=today.slice(0,8)+'01';
+      const days=[...new Set([first,today,first.slice(0,8)+'02'])];
+      let completed=false;
+      window.writes=0;
+      window.confirm=()=>true;
+      window.fetch=async () => {
+        completed=true;
+        window.writes++;
+        return {ok:true,json:async()=>({ok:true})};
+      };
+      const post=async()=>({
+        periodo:{fim:today,registrado:completed},
+        dias:days.map(dia=>({dia,situacao:completed?'cumprida':'prevista'}))
+      });
+      `+responder.slice(from,to)+`\nfsjCalendarioExecutor({periodicidade:'semanal'});`});
+    const eligible=page.locator('#fsjCalendarioExecutor button[data-situacao="prevista"]:enabled');
+    await eligible.first().click();
+    const done=page.locator('#fsjCalendarioExecutor button[data-situacao="cumprida"]');
+    await done.first().waitFor();
+    assert.ok(await done.count()>=2);
+    assert.equal(await done.count(),await done.locator('xpath=self::button[@disabled]').count());
+    assert.equal(await page.evaluate(()=>window.writes),1);
+  } finally {
+    await browser.close();
+  }
+});

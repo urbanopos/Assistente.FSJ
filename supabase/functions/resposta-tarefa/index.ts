@@ -129,35 +129,65 @@ Deno.serve(async req=>{
   const links=await db('links_resposta?token=eq.'+token+'&select=*');
   const link=links?.[0];
   if(!link||!(await db('rpc/fsj_link_resposta_vigente',{method:'POST',body:JSON.stringify({p_token:token})})))return respond({erro:'Link expirado ou inválido'},404);
-  const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,exige_supervisao,reaberta_dia,reaberta_em,reabertura_motivo,prioridade,diaria,codigo_tarefa,periodicidade'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo,tipo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
+  const [tasks,people,assign]=await Promise.all([db('tarefas?id=eq.'+encodeURIComponent(link.tarefa_id)+'&select=id,descricao,situacao,exige_supervisao,reaberta_dia,reaberta_em,reabertura_motivo,prioridade,diaria,codigo_tarefa,periodicidade,criada_em,grupo_id,concluida_em'),db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=identificacao,nome,ativo,tipo'),db('tarefa_responsaveis?tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=tarefa_id')]);
   if(!tasks?.length||!people?.length||!people[0].ativo||!assign?.length)return respond({erro:'Tarefa indisponível'},404);
-  if(!ownerTokenAccess&&(tasks[0].situacao==='Arquivado'||(tasks[0].situacao==='Concluída'&&!tasks[0].diaria)))return respond({erro:'Tarefa não disponível para este perfil'},403);
+  if(!ownerTokenAccess&&(tasks[0].situacao==='Arquivado'||(tasks[0].situacao==='Concluída'&&!tasks[0].diaria&&(tasks[0].periodicidade==='pontual'||!['calendar','calendar-complete','detail'].includes(data.action)))))return respond({erro:'Tarefa não disponível para este perfil'},403);
   // Calendário periódico: registros por ocorrência, com autorização especial do titular.
   const visitante=!ownerTokenAccess&&String(people[0].tipo||'').trim().toLowerCase()==='visitante';
   const periodic=['diaria','semanal','quinzenal','mensal','trimestral','semestral','anual'].includes(String(tasks[0].periodicidade||'').toLowerCase());
   const todayLocal=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date());
-  const yesterdayLocal=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date(Date.now()-86400000));
-  const calendarMonth=String(data.mes||todayLocal.slice(0,7));
+  const month=String(data.mes||todayLocal.slice(0,7));
   if(['calendar','calendar-complete'].includes(data.action)){
    if(!periodic)return respond({erro:'Tarefa não periódica'},400);
+   const task=tasks[0];
    if(data.action==='calendar-complete'){
     const day=String(data.dia||'');
     if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!Number.isFinite(Date.parse(day+'T12:00:00Z'))||new Date(day+'T12:00:00Z').toISOString().slice(0,10)!==day||day>todayLocal)return respond({erro:'Data inválida ou futura'},400);
-    if(!owner&&day!==todayLocal&&day!==yesterdayLocal)return respond({erro:'Somente o Proprietário pode regularizar dias anteriores à tolerância'},403);
     if(visitante)return respond({erro:'Perfil de consulta não pode concluir tarefas'},403);
-    if(tasks[0].situacao==='Arquivado')return respond({erro:'Tarefa arquivada'},403);
-    const existing=await db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia_previsto=eq.'+day+'&tipo=eq.sim&select=id');
-    if(existing.length)return respond({erro:'Dia já concluído',ja_concluida:true},409);
-    const inserted=await db('retornos?select=id,dia_previsto',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({tarefa_id:link.tarefa_id,pessoa_id:link.pessoa_id,dia_previsto:day,origem:owner?'regularizacao_proprietario':'calendario_executor',tipo:'sim',conteudo:owner?'Regularizado pelo Proprietário; atraso preservado.':'Concluído pelo calendário periódico.'})});
-    return respond({ok:true,registro:inserted[0],atrasada:day<yesterdayLocal,regularizada_pelo_proprietario:owner,indisponiveis:offs});
+    try {
+     return respond(await db('rpc/fsj_concluir_calendario_periodico',{method:'POST',body:JSON.stringify({
+      p_tarefa:link.tarefa_id,p_pessoa:link.pessoa_id,p_dia:day,p_proprietario:owner
+     })}));
+    } catch(error) {
+     return respond({erro:(error as Error).message},409);
+    }
    }
-   if(!/^\d{4}-\d{2}$/.test(calendarMonth))return respond({erro:'Mês inválido'},400);
-   const start=calendarMonth+'-01',end=new Date(Date.UTC(Number(calendarMonth.slice(0,4)),Number(calendarMonth.slice(5,7)),1)).toISOString().slice(0,10);
-   const records=await db('retornos?cancelado_por_revisao=is.null&tarefa_id=eq.'+encodeURIComponent(link.tarefa_id)+'&dia_previsto=gte.'+start+'&dia_previsto=lt.'+end+'&select=dia_previsto,tipo,origem');
-   const personCalendar=await db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=folgas_datas,folgas_motivos,ferias_inicio,ferias_fim');
-   const pc=personCalendar[0]||{};const offs=(pc.folgas_datas||[]).filter((d:string)=>d>=start&&d<end).map((d:string)=>({dia:d,motivo:String(pc.folgas_motivos?.[d]||'Folga')}));
-   if(pc.ferias_inicio&&pc.ferias_fim){for(let d=new Date(Math.max(Date.parse(start+'T12:00:00Z'),Date.parse(pc.ferias_inicio+'T12:00:00Z')));d.getTime()<=Date.parse(pc.ferias_fim+'T12:00:00Z')&&d.toISOString().slice(0,10)<end;d.setUTCDate(d.getUTCDate()+1)){const day=d.toISOString().slice(0,10);if(!offs.some((x:any)=>x.dia===day))offs.push({dia:day,motivo:'Férias'});}}
-   return respond({mes:calendarMonth,dias:records.filter((x:any)=>x.tipo==='sim').map((x:any)=>({dia:x.dia_previsto,situacao:'cumprida'})),proprietario:owner});
+   if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return respond({erro:'Mês inválido'},400);
+   const start=month+'-01',end=new Date(Date.UTC(Number(month.slice(0,4)),Number(month.slice(5,7)),1)).toISOString().slice(0,10);
+   const format=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'});
+   const localDate=(value:string)=>value?format.format(new Date(value)):'';
+   const daysAfter=(value:string,days:number)=>new Date(Date.parse(value+'T12:00:00Z')+days*86400000).toISOString().slice(0,10);
+   const created=localDate(task.criada_em);
+   const span=({semanal:7,quinzenal:14,mensal:30,trimestral:90,semestral:180,anual:365} as Record<string,number>)[task.periodicidade]||0;
+   const deadline=span?daysAfter(created,span):'';
+   let archivedOn='';
+   if(task.situacao==='Arquivado'){
+    const audit=await db('tarefas_arquivamentos?tarefa_id=eq.'+encodeURIComponent(task.id)+'&order=aprovado_em.asc&limit=1&select=aprovado_em');
+    archivedOn=localDate(audit[0]?.aprovado_em);
+   }
+   const from=span?created:start,limit=span?daysAfter(deadline,1):end;
+   const personFilter=!span&&!task.grupo_id?'&pessoa_id=eq.'+encodeURIComponent(link.pessoa_id):'';
+   const records=await db('retornos?tarefa_id=eq.'+encodeURIComponent(task.id)+personFilter
+    +'&or=(and(dia_previsto.gte.'+from+',dia_previsto.lt.'+limit+'),and(dia_previsto.is.null,criado_em.gte.'+from+'T03:00:00Z,criado_em.lt.'+limit+'T03:00:00Z))'
+    +'&tipo=in.(sim,sim_devolvido)&select=dia_previsto,tipo,criado_em,cancelado_por_revisao&order=criado_em.asc,id.asc&limit=1000');
+   const valid=records.filter((row:any)=>row.tipo==='sim'&&!row.cancelado_por_revisao);
+   const validDays=new Set(valid.map((row:any)=>row.dia_previsto||localDate(row.criado_em)));
+   const completion=span?(valid.map((row:any)=>localDate(row.criado_em)).find((d:string)=>d>=created&&d<=deadline)
+    ||(!records.some((row:any)=>row.cancelado_por_revisao||row.tipo==='sim_devolvido')?localDate(task.concluida_em):'')):'';
+   const onTime=!!completion&&completion>=created&&completion<=deadline;
+   const hidden=span>30&&onTime&&month>completion.slice(0,7);
+   const days=[];
+   for(let day=start;day<end;day=daysAfter(day,1)){
+    if(day<created||(span&&day>deadline)||(archivedOn&&day>archivedOn)||hidden)continue;
+    if(span&&onTime) days.push({dia:day,situacao:'cumprida'});
+    else if(!span&&validDays.has(day)) days.push({dia:day,situacao:'cumprida'});
+    else if(task.situacao!=='Arquivado'||(archivedOn&&(!span||archivedOn>=deadline))){
+     const overdue=span?todayLocal>deadline:day<todayLocal;
+     days.push({dia:day,situacao:overdue?'nao_cumprida':'prevista'});
+    }
+   }
+   return respond({mes:month,dias:days,proprietario:owner,periodo:span?{inicio:created,fim:deadline,
+    concluido:onTime,registrado:valid.length>0,oculto:hidden}:null});
   }
   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()).slice(0,7)+'-01',p_pessoa:link.pessoa_id})});
   const calendarPerson=await db('pessoas?id=eq.'+encodeURIComponent(link.pessoa_id)+'&select=folgas_datas,folgas_motivos,ferias_inicio,ferias_fim');

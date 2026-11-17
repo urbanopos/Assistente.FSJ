@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261117-ficha-historico-aberto-01">
+<meta name="fsj-build" content="20261117-conclusao-por-periodo-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -722,7 +722,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261117-ficha-historico-aberto-01';
+const FSJ_BUILD='20261117-conclusao-por-periodo-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -1803,7 +1803,7 @@ function monthly(){
  const statusSelecionado=document.getElementById('fsjReportStatus')?.value??'Em aberto';
  const statusDaTarefa=t=>{const central=String(t.centralStatus||'').toLowerCase(),local=String(t.status||'').toLowerCase();if(central.includes('arquivad')||local.includes('arquivad'))return 'Arquivado';if(local.includes('conclu')||central.includes('conclu'))return 'Concluída';if(local.includes('andamento')||local.includes('execu'))return 'Em andamento';if(local.includes('penden')||local.includes('aguard'))return 'Pendente';return 'Em aberto';};
  const periodic=t=>String(fsjFrequency(t)).toLowerCase()!=='pontual';
- const xs=S.tasks.filter(t=>(!statusSelecionado||statusDaTarefa(t)===statusSelecionado)&&(periodic(t)?(t.created||'').slice(0,7)<=ym:(t.created||'').slice(0,7)===ym)&&(!selected||ids(t).some(id=>String(id)===selected)||(t.groupId&&((S.groups||[]).find(g=>String(g.id)===String(t.groupId))?.members||[]).some(id=>String(id)===selected)))&&(fsjReportType==='grupo'?!!t.groupId:fsjReportType==='periodicas'?!t.groupId&&periodic(t):!t.groupId&&!periodic(t)));
+ const xs=S.tasks.filter(t=>(!statusSelecionado||statusDaTarefa(t)===statusSelecionado)&&(periodic(t)?(t.created||'').slice(0,7)<=ym:(t.created||'').slice(0,7)===ym)&&(!selected||ids(t).some(id=>String(id)===selected)||(t.groupId&&((S.groups||[]).find(g=>String(g.id)===String(t.groupId))?.members||[]).some(id=>String(id)===selected)))&&(!t.periodCompletedOn||ym<=t.periodCompletedOn.slice(0,7))&&(fsjReportType==='grupo'?!!t.groupId:fsjReportType==='periodicas'?!t.groupId&&periodic(t):!t.groupId&&!periodic(t)));
  const cols=fsjReportType==='periodicas'?5:8;
  const rows=xs.map(t=>{
   const common='<td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+esc(fsjFrequencyLabel(t))+'</td>';
@@ -2095,19 +2095,41 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
   nav.append(prev,month,next);panel.append(nav);panel.append(status);panel.append(grid);
  }
  let cursor=mesInicial?new Date(mesInicial+'-01T12:00:00'):new Date();cursor=new Date(cursor.getFullYear(),cursor.getMonth(),1);
- const today=fsjDia(new Date()),start=String(t.created||'').slice(0,10);
  const freq=fsjFrequency(t);
- const periodLength=({semanal:7,quinzenal:14,mensal:30,trimestral:90,semestral:180,anual:365})[freq]||0;
- const dayNumber=value=>Math.floor(Date.parse(value+'T12:00:00Z')/86400000);
- const periodEnd=periodLength&&start?new Date((dayNumber(start)+periodLength)*86400000).toISOString().slice(0,10):'';
- function expected(day){return !!start&&day>=start&&(freq==='diaria'||(periodLength&&day<=periodEnd));}
+ const today=fsjDia(new Date()),start=FSJTaskPeriods.date(t.created);
+ const period=FSJTaskPeriods.bounds(freq,t.created);
+ const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status);
+ let archivedOn=FSJTaskPeriods.date(t.archivedAt);
+ if(archived&&!archivedOn){
+  try{
+   const audit=await api('/rest/v1/rpc/fsj_consultar_auditoria_proprietario',{method:'POST',body:'{}'});
+   archivedOn=FSJTaskPeriods.date((audit?.arquivamentos||[]).filter(row=>row.tarefa_id===t.id).map(row=>row.em).sort()[0]);
+  }catch{/* A ausência do registro de arquivo impede marcar novos atrasos. */}
+ }
+ let drawSequence=0;
  async function draw(){
+  const request=++drawSequence;
   const y=cursor.getFullYear(),m=cursor.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0');month.textContent=cursor.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});grid.replaceChildren();status.textContent='Consultando conclusões registradas…';
   for(const w of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']){const e=document.createElement('b');e.textContent=w;e.style.textAlign='center';grid.append(e)}
   for(let k=0;k<new Date(y,m,1).getDay();k++)grid.append(document.createElement('span'));
   try{
    const end=new Date(Date.UTC(y,m+1,1)).toISOString().slice(0,10);
-   const rows=await api('/rest/v1/retornos?select=dia_previsto,tipo,cancelado_por_revisao&tarefa_id=eq.'+encodeURIComponent(t.id)+'&dia_previsto=gte.'+(freq==='diaria'?prefix+'-01':start)+'&dia_previsto=lt.'+end+'&tipo=eq.sim&cancelado_por_revisao=is.null'+(pessoaId?'&pessoa_id=eq.'+encodeURIComponent(pessoaId):'')+'&limit=1000');
+   const taskFilter='&tarefa_id=eq.'+encodeURIComponent(t.id)+(pessoaId&&!period&&!t.groupId?'&pessoa_id=eq.'+encodeURIComponent(pessoaId):'');
+   const monthStart=prefix+'-01';
+   const intersects=period&&period.start<end&&period.end>=monthStart;
+   const from=intersects?period.start:monthStart,to=intersects?period.end:FSJTaskPeriods.offset(end,-1);
+   const rows=period&&!intersects?[]:await api('/rest/v1/retornos?select=dia_previsto,pessoa_id,criado_em,tipo,cancelado_por_revisao'+taskFilter+
+    (period?'&or=(and(dia_previsto.gte.'+from+',dia_previsto.lte.'+to+'),and(dia_previsto.is.null,criado_em.gte.'+from+'T03:00:00Z,criado_em.lt.'+FSJTaskPeriods.offset(to,1)+'T03:00:00Z))&tipo=in.(sim,sim_devolvido)':
+    '&dia_previsto=gte.'+from+'&dia_previsto=lte.'+to+'&tipo=eq.sim&cancelado_por_revisao=is.null')+'&limit=1000');
+   const isTimely=day=>day&&day>=from&&day<=to&&(!archivedOn||day<=archivedOn);
+   const validReturns=rows.filter(row=>row.tipo==='sim'&&!row.cancelado_por_revisao);
+   const revised=rows.some(row=>row.cancelado_por_revisao||row.tipo==='sim_devolvido');
+   const completion=intersects&&(
+    validReturns.map(row=>FSJTaskPeriods.date(row.criado_em)).filter(isTimely).sort()[0]||
+    (!revised&&isTimely(FSJTaskPeriods.date(t.completedAt))?FSJTaskPeriods.date(t.completedAt):'')
+   );
+   const periodDone=Boolean(completion);
+   const hiddenMonth=period?.length>30&&periodDone&&prefix>completion.slice(0,7);
    const personLocal=(S.people||[]).find(p=>String(p.id)===String(pessoaId))||{};
    let official={};let holidays=[];
    if(pessoaId){
@@ -2123,14 +2145,26 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
    official.ferias_inicio=official.ferias_inicio||personLocal.vacationStart;
    official.ferias_fim=official.ferias_fim||personLocal.vacationEnd;
    const offReason=date=>{if(!pessoaId)return '';if(offDates.has(date))return String(reasons[date]||'Folga');if(official.ferias_inicio&&official.ferias_fim&&date>=official.ferias_inicio&&date<=official.ferias_fim)return 'Férias';if(holidayReasons.has(date))return 'Feriado — '+holidayReasons.get(date);return ''};
-   if(!overlay.isConnected)return;
-   const done=new Set(rows.map(x=>x.dia_previsto).filter(Boolean));const periodDone=periodLength&&[...done].some(d=>d>=start&&d<=periodEnd);status.textContent='Verde: '+(periodLength?'PERÍODO EM VIGÊNCIA ou CONCLUÍDO':'CONCLUÍDA')+' • Vermelho: NÃO CONCLUÍDA (período vencido) • Verde claro: folga • Amarelo: feriado • Azul claro: férias • Cinza: sem vencimento ou futuro'+(pessoaId&&!somenteConsulta?' • Toque em um dia pendente para registrar a conclusão como Proprietário.':'');
+   if(!overlay.isConnected||request!==drawSequence)return;
+   const done=new Set(validReturns.map(x=>x.dia_previsto).filter(Boolean));
+   status.textContent=(period?'Verde: período no prazo • Verde-escuro: concluído • Vermelho: período vencido sem conclusão no prazo • Cinza: fora do período':
+    'Verde: CONCLUÍDA • Vermelho: NÃO CONCLUÍDA (prazo vencido) • Verde claro: folga • Amarelo: feriado • Azul claro: férias • Cinza: sem vencimento ou futuro')
+    +(pessoaId&&!somenteConsulta&&!archived?' • Toque em um dia habilitado para registrar a conclusão como Proprietário.':'');
+   if(hiddenMonth){status.textContent='Período concluído em '+completion.split('-').reverse().join('/')+'. Sem ocorrência neste mês.';return;}
    for(let day=1;day<=new Date(y,m+1,0).getDate();day++){
-    const date=prefix+'-'+String(day).padStart(2,'0'),inPeriod=!!periodLength&&expected(date),completed=periodLength?(inPeriod&&periodDone):done.has(date),reason=offReason(date),holiday=holidayReasons.has(date)||/^Feriado/i.test(reason),vacation=/^Férias/i.test(reason),overdue=inPeriod?!periodDone&&today>periodEnd:expected(date)&&date<today&&!completed&&!reason,active=inPeriod&&!overdue;
-    const cell=document.createElement('div');cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+(overdue?'#b91c1c':completed||active?'#167044':reason?(vacation?'#c9dcfa':holiday?'#f9e3a9':'#bde7c9'):'#edf0ed')+';color:'+(completed||active||overdue?'white':'#34483b');
-    if(pessoaId&&!somenteConsulta&&expected(date)&&!completed&&!reason&&date<=today&&!periodLength){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
+    const date=prefix+'-'+String(day).padStart(2,'0');
+    const interval=FSJTaskPeriods.state(period,date,today,{archived,archivedOn,completed:periodDone});
+    const eligibleDaily=freq==='diaria'&&!!start&&date>=start&&(!archived||(archivedOn&&date<=archivedOn));
+    const completed=period?interval==='done':done.has(date);
+    const reason=offReason(date),holiday=holidayReasons.has(date)||/^Feriado/i.test(reason),vacation=/^Férias/i.test(reason);
+    const overdue=period?interval==='late':eligibleDaily&&date<today&&!completed&&!reason;
+    const color=completed?'#167044':overdue?'#b91c1c':interval==='active'?'#bde7c9':!period&&reason?(vacation?'#c9dcfa':holiday?'#f9e3a9':'#bde7c9'):'#edf0ed';
+    const cell=document.createElement('div');
+    cell.dataset.competencia=interval||(completed?'done':overdue?'late':'');
+    cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+color+';color:'+(completed||overdue?'white':'#34483b');
+    if(pessoaId&&!somenteConsulta&&!archived&&(period?!!interval&&!validReturns.length:eligibleDaily)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
 
-    const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=overdue?'NÃO CONCLUÍDA':completed?'CONCLUÍDA':active?'EM VIGÊNCIA':reason;if(reason)cell.title=date+' — '+reason;cell.append(n,label);grid.append(cell);
+    const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=completed?'CONCLUÍDA':overdue?'NÃO CONCLUÍDA':interval==='active'?'NO PRAZO':(!period?reason:'');if(reason)cell.title=date+' — '+reason;cell.append(n,label);grid.append(cell);
    }
   }catch(err){status.textContent='Não foi possível consultar os registros: '+err.message;}
  }
@@ -2428,6 +2462,7 @@ function fsjSituacaoDemanda(t,responsavel){
  return 'Ver Calendário';
 }
 function fsjCalendarioSomenteLeitura(t,pid,ano,mes){
+ if(FSJTaskPeriods.bounds(fsjFrequency(t),t.created))return fsjCalendarioExecucaoDesktop(t,ano+'-'+String(mes+1).padStart(2,'0'),pid||undefined,true);
  const old=document.getElementById('fsjCalendarioTarefaModal');if(old)old.remove();
  const overlay=document.createElement('div');overlay.id='fsjCalendarioTarefaModal';
  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
@@ -2605,9 +2640,23 @@ async function fsjAtualizarRetornos(updateView=true){
     if(window.fsjExited)return;
     const central=new Map(tasks.map(t=>[t.id,t]));
     const day=fsjDia(new Date());
+    const archivedDates=new Map();
+    for(const audit of auditoria?.arquivamentos||[]){
+     if(audit.em&&(!archivedDates.has(audit.tarefa_id)||audit.em<archivedDates.get(audit.tarefa_id)))archivedDates.set(audit.tarefa_id,audit.em);
+    }
     S.tasks=tasks.map(row=>{
       const t=S.tasks.find(x=>x.id===row.id)||{id:row.id,response:'',question:'',attachments:[]};
       const edits=(auditoria?.edicoes||[]).filter(e=>e.tarefa_id===row.id).sort((a,b)=>String(b.em).localeCompare(String(a.em)));t.lastEditAt=edits[0]?.em||null;t.lastEditBy=edits[0]?.por||null;
+      if(auditoria)t.archivedAt=archivedDates.get(row.id)||null;
+      const period=FSJTaskPeriods.bounds(row.periodicidade,row.criada_em);
+      if(period?.length>30){
+       const timely=value=>value&&value>=period.start&&value<=period.end;
+       const taskAnswers=answers.filter(answer=>answer.tarefa_id===row.id);
+       const valid=taskAnswers.filter(answer=>answer.tipo==='sim'&&!answer.cancelado_por_revisao);
+       const revised=taskAnswers.some(answer=>answer.cancelado_por_revisao||answer.tipo==='sim_devolvido');
+       t.periodCompletedOn=valid.map(answer=>FSJTaskPeriods.date(answer.criado_em)).filter(timely).sort()[0]||
+        (!revised&&timely(FSJTaskPeriods.date(row.concluida_em))?FSJTaskPeriods.date(row.concluida_em):'');
+      }else t.periodCompletedOn='';
       t.code=row.codigo_tarefa;t.text=row.descricao;t.personIds=responsaveis.filter(x=>x.tarefa_id===row.id).map(x=>x.pessoa_id);t.groupId=row.grupo_id||'';t.daily=!!row.diaria;t.frequency=row.periodicidade||(row.diaria?'diaria':'pontual');t.created=row.criada_em;
       let status=row.situacao;if(t.daily&&row.reaberta_em&&row.reaberta_dia!==day&&status==='Pendente')status='Em aberto';
       if(t.daily&&status==='Concluída'&&row.concluida_em&&fsjDia(row.concluida_em)!==day)status='Em aberto';
@@ -2751,7 +2800,8 @@ document.addEventListener('focusout',()=>setTimeout(fsjApplyUpdate,0));
 setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
 </script><script src="./calendar-records.js?v=20261105-relatorio-mensal-11"></script><script src="./weekly-off-manager.js?v=20261108-perfil-central-04"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
-<script src="./celular/ocorrencias-proprietario.js?v=20261113-ocorrencias-periodicas-proprietario-01"></script>
+<script src="./task-periods.js?v=20261117-conclusao-por-periodo-01"></script>
+<script src="./celular/ocorrencias-proprietario.js?v=20261117-conclusao-por-periodo-01"></script>
 <script src="./celular/conclusoes-proprietario.js?v=20261113-concluidas-proprietario-01"></script>
 <script src="./mobile-pages.js?v=20261113-ocorrencias-periodicas-proprietario-01"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>

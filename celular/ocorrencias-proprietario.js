@@ -53,9 +53,8 @@
     for(let day=start;day<=end;day++) periods.push([day,day]);
    } else {
     // A central cria um registro por período nas frequências acima de diária.
-    const index = task.repeticao_indice||0;
-    const start = advance(reference,frequency,index);
-    const end = advance(reference,frequency,index+1); // D+7/D+30 ainda está no prazo; atraso somente no dia seguinte.
+    const start = advance(created,frequency,0);
+    const end = advance(created,frequency,1); // D+7/D+30 ainda está no prazo; atraso somente no dia seguinte.
     if (end>=first&&end<=last&&end>=start&&(!closed||end<=days(closed))) periods = [[start,end]];
    }
    if (periods.length) schedules.push({task,periods,responsibles,group:groups.get(task.grupo_id)||'Grupo'});
@@ -109,7 +108,7 @@
    for (const members of eligible) {
     const overdue=[];
     for (const [start,end] of periods) {
-     if (end>(task.periodicidade==='diaria'?days(today)-2:cutoff)) continue;
+     if(end>cutoff)continue;
     const workingDay=(person,day)=>!calendar(person,day).off&&(!person.criado_em||iso(day)>=recife(person.criado_em));
     let lastWork=end;
     const firstWork=Math.max(start,days(recife(task.criada_em)));
@@ -117,11 +116,11 @@
     if (lastWork<firstWork) continue;
      const from=iso(start), to=iso(end), tolerance=iso(end);
      const permitted=new Set(members.map(person=>person.id));
-     const completions=answers.filter(row=>(groupTask||permitted.has(row.person))&&row.day>=from&&row.day<=to&&row.done>=from);
+     const completions=answers.filter(row=>(task.periodicidade!=='diaria'||groupTask||permitted.has(row.person))&&row.day>=from&&row.day<=to&&row.done>=from);
      // Conclusão central legada de tarefa com um único período.
      if(task.periodicidade!=='diaria'&&task.concluida_em&&!revised.has(task.id)){
       const done=recife(task.concluida_em);
-      if(done>=from&&(groupTask||permitted.has(task.concluida_por)||(!task.concluida_por&&members.length===1)))completions.push({done});
+      if(done>=from)completions.push({done});
      }
      if (!completions.some(row=>row.done<=tolerance)) overdue.push({from,to,tolerance,lastWork:iso(lastWork),regularized:completions.some(row=>row.done>tolerance)});
     }
