@@ -2018,8 +2018,8 @@ function fsjSelecionarExecutorCalendarioCelular(t){
 
 /* FSJ 2026-11-12 — calendário de consulta exclusivo do Proprietário Desktop,
    na aba Tarefas em Execução. Não grava nem modifica registros. */
-async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
- if(window.fsjOwnerVerified!==true||(!pessoaId&&window.matchMedia('(max-width:700px)').matches))return;
+async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsulta=false){
+ if(window.fsjOwnerVerified!==true||(!pessoaId&&!somenteConsulta&&window.matchMedia('(max-width:700px)').matches))return;
  const anterior=document.getElementById('fsjCalendarioExecucaoDesktop');if(anterior)anterior.remove();
  const overlay=document.createElement('div');overlay.id='fsjCalendarioExecucaoDesktop';
  overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#0008;display:flex;align-items:center;justify-content:center;padding:18px';
@@ -2079,11 +2079,11 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId){
    official.ferias_fim=official.ferias_fim||personLocal.vacationEnd;
    const offReason=date=>{if(!pessoaId)return '';if(offDates.has(date))return String(reasons[date]||'Folga');if(official.ferias_inicio&&official.ferias_fim&&date>=official.ferias_inicio&&date<=official.ferias_fim)return 'Férias';if(holidayReasons.has(date))return 'Feriado — '+holidayReasons.get(date);return ''};
    if(!overlay.isConnected)return;
-   const done=new Set(rows.map(x=>x.dia_previsto).filter(Boolean));status.textContent='Verde: CONCLUÍDA • Vermelho: NÃO CONCLUÍDA (prazo vencido) • Verde claro: folga • Amarelo: feriado • Azul claro: férias • Cinza: sem vencimento ou futuro'+(pessoaId?' • Toque em um dia pendente para registrar a conclusão como Proprietário.':'');
+   const done=new Set(rows.map(x=>x.dia_previsto).filter(Boolean));status.textContent='Verde: CONCLUÍDA • Vermelho: NÃO CONCLUÍDA (prazo vencido) • Verde claro: folga • Amarelo: feriado • Azul claro: férias • Cinza: sem vencimento ou futuro'+(pessoaId&&!somenteConsulta?' • Toque em um dia pendente para registrar a conclusão como Proprietário.':'');
    for(let day=1;day<=new Date(y,m+1,0).getDate();day++){
     const date=prefix+'-'+String(day).padStart(2,'0'),completed=done.has(date),reason=offReason(date),holiday=holidayReasons.has(date)||/^Feriado/i.test(reason),vacation=/^Férias/i.test(reason),overdue=expected(date)&&date<today&&!completed&&!reason;
     const cell=document.createElement('div');cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+(completed?'#167044':reason?(vacation?'#c9dcfa':holiday?'#f9e3a9':'#bde7c9'):overdue?'#b91c1c':'#edf0ed')+';color:'+(completed||overdue?'white':'#34483b');
-    if(pessoaId&&expected(date)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
+    if(pessoaId&&!somenteConsulta&&expected(date)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
 
     const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=completed?'CONCLUÍDA':reason|| (overdue?'NÃO CONCLUÍDA':'');if(reason)cell.title=date+' — '+reason;cell.append(n,label);grid.append(cell);
    }
@@ -2294,6 +2294,12 @@ document.addEventListener('click',event=>{
  if(periodic){
   event.preventDefault();event.stopImmediatePropagation();
   const isGroup=!!t.groupId||!!button.closest('#demandaGrupoRows,#fsjPessoaGruposRows');
+  if(button.closest('#report')&&window.fsjOwnerVerified===true){
+   const selectedMonth=document.getElementById('month')?.value||FSJDaily.month();
+   const selectedPerson=document.getElementById('fsjReportPerson')?.value||'';
+   fsjCalendarioExecucaoDesktop(t,selectedMonth,selectedPerson||undefined,true);
+   return;
+  }
   const pid=isGroup?null:button.closest('#fsjOwnerTasksTabs')
    ?fsjProprietario?.pessoa_id
    :(document.getElementById('demandaFuncionario')?.value||null);
