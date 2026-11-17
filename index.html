@@ -809,6 +809,10 @@ function navTo(id,b,record=true){
  // Exibir alerta quando a tela estiver sustentada por dados não confirmados na base.
  if(!fsjFonteOperacionalConfirmada)document.dispatchEvent(new CustomEvent('fsj:fonte-operacional'));
  const seq=++fsjNavSequence;
+ // Toda entrada explícita pelo menu lateral reinicia a paginação da seção.
+ if(window.fsjOwnerVerified===true&&window.FSJ_PLATFORM?.platform==='desktop'&&b){
+  document.dispatchEvent(new CustomEvent('fsj:owner-menu-first-page',{detail:{section:id}}));
+ }
  const notice=document.getElementById('fsjPageFreshness');
  if(notice){notice.hidden=true;notice.classList.add('hidden');}
  // O acionamento explícito de Relatórios no menu sempre inicia uma nova consulta.
@@ -3641,6 +3645,12 @@ function render(){
  document.getElementById('fsjOwnerTaskPrev').disabled=page===0;
  document.getElementById('fsjOwnerTaskNext').disabled=page>=pages-1;
 }
+document.addEventListener('fsj:owner-menu-first-page',event=>{
+ if(event.detail?.section!=='demandas')return;
+ category='periodicas';page=0;statusFilter='abertas';
+ const selector=document.getElementById('fsjOwnerTaskStatus');if(selector)selector.value='abertas';
+ render();
+});
 panel.querySelectorAll('[data-fsj-owner-category]').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.fsjOwnerCategory;page=0;render()}));
 document.getElementById('fsjOwnerTaskStatus').addEventListener('change',event=>{statusFilter=event.target.value;page=0;render()});
 document.getElementById('fsjOwnerTaskRefresh').onclick=async event=>{
