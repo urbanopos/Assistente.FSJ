@@ -176,9 +176,14 @@ Deno.serve(async req=>{
     ||(!records.some((row:any)=>row.cancelado_por_revisao||row.tipo==='sim_devolvido')?localDate(task.concluida_em):'')):'';
    const onTime=!!completion&&completion>=created&&completion<=deadline;
    const hidden=span>30&&onTime&&month>completion.slice(0,7);
+   const indisponiveis=await db('rpc/fsj_dias_dispensa_tarefa',{method:'POST',body:JSON.stringify({
+    p_pessoa:link.pessoa_id,p_inicio:start,p_fim:daysAfter(end,-1)
+   })});
+   const offDays=new Set(indisponiveis.map((row:any)=>row.dia));
    const days=[];
    for(let day=start;day<end;day=daysAfter(day,1)){
     if(day<created||(span&&day>deadline)||(archivedOn&&day>archivedOn)||hidden)continue;
+    if(offDays.has(day)&&!(span?onTime:validDays.has(day))){days.push({dia:day,situacao:'dispensada'});continue;}
     if(span&&day===created){days.push({dia:day,situacao:'registro'});continue;}
     if(span&&onTime) days.push({dia:day,situacao:'cumprida'});
     else if(!span&&validDays.has(day)) days.push({dia:day,situacao:'cumprida'});
@@ -187,7 +192,7 @@ Deno.serve(async req=>{
      days.push({dia:day,situacao:overdue?'nao_cumprida':'prevista'});
     }
    }
-   return respond({mes:month,dias:days,proprietario:owner,periodo:span?{inicio:created,fim:deadline,
+   return respond({mes:month,dias:days,indisponiveis,proprietario:owner,periodo:span?{inicio:created,fim:deadline,
     concluido:onTime,registrado:valid.length>0,oculto:hidden}:null});
   }
   const progress=await db('rpc/fsj_progresso_diario',{method:'POST',body:JSON.stringify({p_tarefas:[link.tarefa_id],p_mes:new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'}).format(new Date()).slice(0,7)+'-01',p_pessoa:link.pessoa_id})});

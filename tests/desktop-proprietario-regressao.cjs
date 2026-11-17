@@ -318,7 +318,7 @@ test('calendário pinta todos os dias do período semanal e respeita o arquivame
       fsjFrequency: t => t.frequency,
       fsjFrequencyLabel: t => t.frequency,
       names: () => 'Responsável fictício',
-      api: async () => []
+      api: async path => path.includes('/functions/')?{indisponiveis:[]}:[]
     }));
     const dates = await page.evaluate(() => {
       const periods = window.FSJTaskPeriods;
@@ -329,7 +329,7 @@ test('calendário pinta todos os dias do período semanal e respeita o arquivame
     const show = (today,month,status='Em aberto',archivedAt) => page.evaluate(async ({today,month,status,archivedAt}) => {
       window.today=today;
       await window.fsjCalendarioExecucaoDesktop({
-        id:'period-test',created:'2026-10-31T12:00:00Z',frequency:'semanal',status,archivedAt
+        id:'period-test',created:'2026-10-31T12:00:00Z',frequency:'semanal',personIds:['pessoa-teste'],status,archivedAt
       },month,undefined,true);
     },{today,month,status,archivedAt});
     const active=page.locator('[data-competencia="active"]'),late=page.locator('[data-competencia="late"]');
@@ -347,14 +347,14 @@ test('calendário pinta todos os dias do período semanal e respeita o arquivame
     await show('2026-11-08','2026-11','Arquivado','2026-11-03T12:00:00Z');
     await page.getByRole('status').filter({hasText:'Verde: período no prazo'}).waitFor();
     assert.equal(await late.count(),0);
-    await page.evaluate(()=>{window.api=async()=>[{tipo:'sim',dia_previsto:'2026-10-31',criado_em:'2026-11-03T12:00:00Z'}];});
+    await page.evaluate(()=>{window.api=async path=>path.includes('/functions/')?{indisponiveis:[]}: [{tipo:'sim',dia_previsto:'2026-10-31',criado_em:'2026-11-03T12:00:00Z'}];});
     await show('2026-11-08','2026-11');
     const done=page.locator('[data-competencia="done"]');
     await done.first().waitFor();
     assert.equal(await done.count(),7);
     assert.equal(await late.count(),0);
     const showLong=month=>page.evaluate(month=>window.fsjCalendarioExecucaoDesktop({
-      id:'long-period',created:'2026-10-31T12:00:00Z',frequency:'trimestral',status:'Em aberto'
+      id:'long-period',created:'2026-10-31T12:00:00Z',frequency:'trimestral',personIds:['pessoa-teste'],status:'Em aberto'
     },month,undefined,true),month);
     await showLong('2026-11');
     await done.first().waitFor();
@@ -362,6 +362,28 @@ test('calendário pinta todos os dias do período semanal e respeita o arquivame
     await showLong('2026-12');
     await page.getByRole('status').filter({hasText:'Sem ocorrência neste mês'}).waitFor();
     assert.equal(await done.count(),0);
+    await page.evaluate(() => {
+      window.today='2026-11-17';
+      window.api=async (path, opts) => {
+        if(!path.includes('/functions/'))return [];
+        window.calendarPerson=JSON.parse(opts.body).pessoa_id;
+        return {indisponiveis:[
+         {dia:'2026-11-01',tipo:'leave',motivo:'Folga semanal'},
+         {dia:'2026-11-15',tipo:'holiday',motivo:'Feriado — Proclamação da República'},
+         {dia:'2026-11-16',tipo:'vacation',motivo:'Férias'}
+        ]};
+      };
+      return window.fsjCalendarioExecucaoDesktop({
+        id:'daily-test',created:'2026-11-01',frequency:'diaria',status:'Em aberto',personIds:['pessoa-teste']
+      },'2026-11','pessoa-teste');
+    });
+    for(const kind of ['leave','holiday','vacation']){
+      const day=page.locator('[data-competencia="'+kind+'"]');
+      await day.waitFor();
+      assert.equal(await day.getAttribute('role'),null);
+    }
+    assert.equal(await page.evaluate(() => window.calendarPerson),'pessoa-teste');
+    assert.equal(await late.count(),13);
   } finally {
     await browser.close();
   }

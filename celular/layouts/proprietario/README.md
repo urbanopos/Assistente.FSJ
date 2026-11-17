@@ -53,3 +53,7 @@ Implementação: os calendários do painel usam index.html e celular/ocorrencias
 ## Conclusão pelo calendário
 
 Na tarefa diária, concluir o botão do dia marca apenas aquela ocorrência. O dia fica vermelho em D+1 se estiver sem conclusão. O executor ou supervisor ainda pode registrar durante D+1. A regularização posterior é exclusiva do Proprietário. Nas demais frequências, o registro é D0. O período pintado começa em D+1, com a conclusão já permitida em D0. Uma conclusão no prazo pinta em verde-escuro todos os dias da vigência. O verde-claro indica vigência aberta. Sem conclusão no prazo, o intervalo fica vermelho após o vencimento. Prazos acima de 30 dias exibem a ocorrência até o mês da conclusão e retomam a exibição com a próxima ocorrência, após o fim do ciclo. O arquivamento continua reservado à decisão do Proprietário.
+
+## Folgas e feriados nos calendários de tarefas
+
+Os calendários de consulta e de registro de tarefas usam as dispensas do calendário individual oficial antes de classificar atrasos. O botão-dia da tarefa em **Tarefas em Execução** leva a pessoa selecionada ao calendário. Folgas, férias e feriados gozados têm marcação própria e bloqueiam a conclusão naquele dia. O feriado trabalhado por autorização ou compensação é elegível, e a data da folga compensatória fica dispensada. Em consulta consolidada, o dia só é dispensado quando todos os responsáveis estão dispensados.

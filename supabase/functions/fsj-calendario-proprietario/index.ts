@@ -23,7 +23,10 @@ Deno.serve(async(req)=>{
    if(people.length!==1)return reply({erro:'Pessoa não encontrada'},404);
    const end=new Date(Date.UTC(Number(month.slice(0,4)),Number(month.slice(5,7)),0)).getUTCDate();
    const holidays=await db('feriados_fsj?dia=gte.'+month+'-01&dia=lte.'+month+'-'+end+'&select=dia,nome');
-   return reply({ok:true,folgas_datas:people[0].folgas_datas||[],folgas_motivos:people[0].folgas_motivos||{},ferias_inicio:people[0].ferias_inicio,ferias_fim:people[0].ferias_fim,feriados:holidays});
+   const indisponiveis=await db('rpc/fsj_dias_dispensa_tarefa',{method:'POST',body:JSON.stringify({
+    p_pessoa:person,p_inicio:month+'-01',p_fim:month+'-'+String(end).padStart(2,'0')
+   })});
+   return reply({ok:true,folgas_datas:people[0].folgas_datas||[],folgas_motivos:people[0].folgas_motivos||{},ferias_inicio:people[0].ferias_inicio,ferias_fim:people[0].ferias_fim,feriados:holidays,indisponiveis});
   }
   if(!/^[a-zA-Z0-9_-]{5,80}$/.test(task)||!/^[a-zA-Z0-9_-]{5,80}$/.test(person)||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)||!Number.isFinite(Date.parse(day+'T12:00:00Z'))||new Date(day+'T12:00:00Z').toISOString().slice(0,10)!==day)return reply({erro:'Dados inválidos'},400);
   const result=await db('rpc/fsj_concluir_calendario_periodico',{method:'POST',body:JSON.stringify({

@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261117-conclusao-por-periodo-02">
+<meta name="fsj-build" content="20261117-calendarios-folgas-oficiais-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -722,7 +722,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261117-conclusao-por-periodo-02';
+const FSJ_BUILD='20261117-calendarios-folgas-oficiais-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -2130,21 +2130,23 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
    );
    const periodDone=Boolean(completion);
    const hiddenMonth=period?.length>30&&periodDone&&prefix>completion.slice(0,7);
-   const personLocal=(S.people||[]).find(p=>String(p.id)===String(pessoaId))||{};
-   let official={};let holidays=[];
-   if(pessoaId){
-    const jwt=localStorage.getItem('fsj_access_token')||'';
-    if(jwt){
-     const res=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({action:'consultar-folgas',pessoa_id:pessoaId,mes:prefix})});
-     const data=await res.json();if(!res.ok)throw Error('Folgas e feriados: '+(data.erro||res.status));official=data;holidays=data.feriados||[];
-    }else{throw Error('Sessão do Proprietário necessária para consultar folgas e feriados');}
-   }
-   const offDates=new Set([...(personLocal.datesOff||[]),...(official.folgas_datas||[])]);
-   const reasons={...(personLocal.dayOffReasons||{}),...(official.folgas_motivos||{})};
-   const holidayReasons=new Map(holidays.filter(h=>h.dia).map(h=>[h.dia,String(h.nome||'Feriado')]));
-   official.ferias_inicio=official.ferias_inicio||personLocal.vacationStart;
-   official.ferias_fim=official.ferias_fim||personLocal.vacationEnd;
-   const offReason=date=>{if(!pessoaId)return '';if(offDates.has(date))return String(reasons[date]||'Folga');if(official.ferias_inicio&&official.ferias_fim&&date>=official.ferias_inicio&&date<=official.ferias_fim)return 'Férias';if(holidayReasons.has(date))return 'Feriado — '+holidayReasons.get(date);return ''};
+   // Sem filtro individual, uma data só fica dispensada se não houver responsável previsto.
+   const assigned=[...(t.personIds||[]),...(t.groupId?(S.groups||[]).find(g=>String(g.id)===String(t.groupId))?.members||[]:[])];
+   const people=pessoaId?[pessoaId]:[...new Set(assigned.map(String))];
+   const absences=await Promise.all(people.map(async pessoa=>{
+    const data=await api('/functions/v1/fsj-calendario-proprietario',{method:'POST',body:JSON.stringify({
+     action:'consultar-folgas',pessoa_id:pessoa,mes:prefix
+    })});
+    if(!Array.isArray(data?.indisponiveis))throw Error('Calendário oficial de folgas e feriados indisponível');
+    return new Map(data.indisponiveis.map(row=>[row.dia,row]));
+   }));
+   const absenceOn=date=>{
+    if(!absences.length)return null;
+    const marks=absences.map(person=>person.get(date));
+    if(marks.some(mark=>!mark))return null;
+    const kinds=new Set(marks.map(mark=>mark.tipo));
+    return {tipo:kinds.size===1?marks[0].tipo:'leave',motivo:[...new Set(marks.map(mark=>mark.motivo))].join(' · ')};
+   };
    if(!overlay.isConnected||request!==drawSequence)return;
    const done=new Set(validReturns.map(x=>x.dia_previsto).filter(Boolean));
    status.textContent=(period?'Verde: período no prazo • Verde-escuro: concluído • Vermelho: período vencido sem conclusão no prazo • Cinza: fora do período':
@@ -2156,15 +2158,16 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
     const interval=FSJTaskPeriods.state(period,date,today,{archived,archivedOn,completed:periodDone});
     const eligibleDaily=freq==='diaria'&&!!start&&date>=start&&(!archived||(archivedOn&&date<=archivedOn));
     const completed=period?interval==='done':done.has(date);
-    const reason=offReason(date),holiday=holidayReasons.has(date)||/^Feriado/i.test(reason),vacation=/^Férias/i.test(reason);
-    const overdue=period?interval==='late':eligibleDaily&&date<today&&!completed&&!reason;
-    const color=completed?'#167044':overdue?'#b91c1c':interval==='active'?'#bde7c9':!period&&reason?(vacation?'#c9dcfa':holiday?'#f9e3a9':'#bde7c9'):'#edf0ed';
+    const absence=absenceOn(date),reason=absence?.motivo||'';
+    const overdue=absences.length>0&&!reason&&(period?interval==='late':eligibleDaily&&date<today&&!completed);
+    const color=completed?'#167044':reason?({vacation:'#c9dcfa',holiday:'#f9e3a9',leave:'#bde7c9'}[absence.tipo]||'#bde7c9'):
+     overdue?'#b91c1c':interval==='active'?'#def4e4':'#edf0ed';
     const cell=document.createElement('div');
-    cell.dataset.competencia=interval||(completed?'done':overdue?'late':'');
+    cell.dataset.competencia=completed?'done':absence?absence.tipo:overdue?'late':interval==='active'?'active':'';
     cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+color+';color:'+(completed||overdue?'white':'#34483b');
     if(pessoaId&&!somenteConsulta&&!archived&&(period?(!!interval||date===period.start)&&!hiddenMonth&&!validReturns.length&&!periodDone:eligibleDaily)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
 
-    const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=completed?'CONCLUÍDA':overdue?'NÃO CONCLUÍDA':interval==='active'?'NO PRAZO':period&&date===period.start?'REGISTRO':(!period?reason:'');if(reason)cell.title=date+' — '+reason;cell.append(n,label);grid.append(cell);
+    const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=completed?'CONCLUÍDA'+(reason?' · '+reason:''):reason|| (overdue?'NÃO CONCLUÍDA':interval==='active'?'NO PRAZO':period&&date===period.start?'REGISTRO':'');if(reason)cell.title=date+' — '+reason;cell.append(n,label);grid.append(cell);
    }
   }catch(err){status.textContent='Não foi possível consultar os registros: '+err.message;}
  }
@@ -2355,7 +2358,11 @@ function fsjRenderTarefasEmExecucao(){
   for(const t of items){
    const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status),e=activeMap.get(String(t.id));
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:12px;margin:10px 0';
-   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';if(desktopOwner)task.classList.add(...fsjTaskClass(t.priority||t.prioridade,archived?'Arquivado':t.status,Boolean(e)).split(' '));task.textContent=(t.code||'Tarefa')+(fsjFrequency(t)==='pontual'?' P':' '+({diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'E',anual:'A'}[fsjFrequency(t)]||''))+' — '+(t.text||'Sem descrição')+' — '+fsjFrequencyLabel(t);task.addEventListener('click',()=>{if(fsjFrequency(t)!=='pontual'){if(window.matchMedia('(max-width:700px)').matches)fsjSelecionarExecutorCalendarioCelular(t);else fsjCalendarioExecucaoDesktop(t);}else{fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id,{summaryOnly:true}),t.frequency,()=>fsjAcoesPontuaisProprietario(t),archived?'Arquivada':e?'Em andamento':t.status);}});article.append(task);
+   const task=document.createElement('button');task.type='button';task.className='fsj-task-number';if(desktopOwner)task.classList.add(...fsjTaskClass(t.priority||t.prioridade,archived?'Arquivado':t.status,Boolean(e)).split(' '));task.textContent=(t.code||'Tarefa')+(fsjFrequency(t)==='pontual'?' P':' '+({diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'E',anual:'A'}[fsjFrequency(t)]||''))+' — '+(t.text||'Sem descrição')+' — '+fsjFrequencyLabel(t);task.addEventListener('click',()=>{if(fsjFrequency(t)!=='pontual'){const p=psel.value;
+    const member=(t.personIds||[]).some(id=>String(id)===p)||(t.groupId&&(groupsById.get(String(t.groupId))?.members||[]).some(id=>String(id)===p));
+    if(p&&member)fsjCalendarioExecucaoDesktop(t,undefined,p);
+    else if(window.matchMedia('(max-width:700px)').matches)fsjSelecionarExecutorCalendarioCelular(t);
+    else fsjCalendarioExecucaoDesktop(t);}else{fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id,{summaryOnly:true}),t.frequency,()=>fsjAcoesPontuaisProprietario(t),archived?'Arquivada':e?'Em andamento':t.status);}});article.append(task);
    if(archived&&!desktopOwner){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
    const group=(S.groups||[]).find(g=>String(g.id)===String(t.groupId));
    const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Responsável',names(t)],['Registro',t.created?fsjDataHora(t.created):'Data/hora não disponível'],['Periodicidade',t.frequency||'pontual'],['Situação',archived?'Arquivada':(e?'Em execução':t.status||'Em aberto')]];
@@ -2462,37 +2469,8 @@ function fsjSituacaoDemanda(t,responsavel){
  return 'Ver Calendário';
 }
 function fsjCalendarioSomenteLeitura(t,pid,ano,mes){
- if(FSJTaskPeriods.bounds(fsjFrequency(t),t.created))return fsjCalendarioExecucaoDesktop(t,ano+'-'+String(mes+1).padStart(2,'0'),pid||undefined,true);
- const old=document.getElementById('fsjCalendarioTarefaModal');if(old)old.remove();
- const overlay=document.createElement('div');overlay.id='fsjCalendarioTarefaModal';
- overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
- const panel=document.createElement('section');panel.style.cssText='background:white;border-radius:12px;max-width:670px;width:100%;max-height:90vh;overflow:auto;padding:18px;color:#17382c';
- overlay.append(panel);
- const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;gap:12px;align-items:center';
- const heading=document.createElement('strong');heading.textContent=(t.code||'Tarefa')+' — '+(t.text||'');
- const close=document.createElement('button');close.type='button';close.textContent='Fechar';close.onclick=()=>overlay.remove();header.append(heading,close);panel.append(header);
- const subtitle=document.createElement('p');subtitle.textContent=(pid===null?'Calendário da tarefa de grupo':'Calendário da tarefa individual')+' • Somente consulta do Proprietário';panel.append(subtitle);
- const nav=document.createElement('div');nav.style.cssText='display:flex;align-items:center;gap:16px;margin:12px 0';
- const prev=document.createElement('button');prev.textContent='←';prev.onclick=()=>fsjCalendarioSomenteLeitura(t,pid,...fsjMesAdjacente(ano,mes,-1));
- const month=document.createElement('strong');month.textContent=new Date(ano,mes,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
- const next=document.createElement('button');next.textContent='→';next.onclick=()=>fsjCalendarioSomenteLeitura(t,pid,...fsjMesAdjacente(ano,mes,1));nav.append(prev,month,next);panel.append(nav);
- const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px';
- for(const d of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']){const el=document.createElement('strong');el.textContent=d;el.style.textAlign='center';grid.append(el);}
- const first=new Date(ano,mes,1).getDay();for(let n=0;n<first;n++)grid.append(document.createElement('span'));
- const total=new Date(ano,mes+1,0).getDate();const pessoa=S.people.find(p=>String(p.id)===String(pid));
- for(let dia=1;dia<=total;dia++){
-  const date=ano+'-'+String(mes+1).padStart(2,'0')+'-'+String(dia).padStart(2,'0');
-  const e=fsjTemposExecucoes.find(e=>String(e.tarefa_id)===String(t.id)&&(pid===null||String(e.pessoa_id)===String(pid))&&e.dia===date&&e.estado==='concluida');
-  const folga=pid!==null&&Array.isArray(pessoa?.folgas_datas)&&pessoa.folgas_datas.includes(date);
-  const cell=document.createElement('div');cell.style.cssText='min-height:54px;border:1px solid #aecdc0;border-radius:6px;padding:5px;text-align:center;font-size:14px;background:'+(e?'#b9dcfa':folga?'#b9dcc6':'#e0f2df')+';color:#17382c';
-  cell.textContent=String(dia);
-  const label=document.createElement('small');label.style.cssText='display:block;font-size:10px';label.textContent=e?'Concluída':folga?'Folga':'';cell.append(label);grid.append(cell);
- }
- panel.append(grid);
- const legend=document.createElement('p');legend.style.cssText='font-size:12px;margin-top:12px';legend.textContent='Azul: conclusão registrada • Verde-escuro: folga cadastrada • Verde-claro: sem conclusão registrada. Dias sem marcação não são automaticamente classificados como descumpridos.';panel.append(legend);
- overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};document.body.append(overlay);
+ return fsjCalendarioExecucaoDesktop(t,ano+'-'+String(mes+1).padStart(2,'0'),pid||undefined,true);
 }
-function fsjMesAdjacente(ano,mes,delta){const d=new Date(ano,mes+delta,1);return [d.getFullYear(),d.getMonth()];}
 function fsjFiltroSituacaoDemanda(t,valor){
  // A situação do Supabase prevalece sobre retornos e cópias locais.
  // Arquivadas nunca aparecem no fluxo operacional, salvo filtro histórico explícito.
@@ -2801,7 +2779,7 @@ setInterval(()=>{fsjApplyUpdate();fsjCheckUpdate()},60000);
 
 </script><script src="./calendar-records.js?v=20261105-relatorio-mensal-11"></script><script src="./weekly-off-manager.js?v=20261108-perfil-central-04"></script><script src="./supervisor-manager.js?v=20261026-supervisor-coluna-06"></script><script src="./proprietario.js?v=20261029-titular-15"></script>
 <script src="./task-periods.js?v=20261117-conclusao-por-periodo-02"></script>
-<script src="./celular/ocorrencias-proprietario.js?v=20261117-conclusao-por-periodo-02"></script>
+<script src="./celular/ocorrencias-proprietario.js?v=20261117-calendarios-folgas-oficiais-01"></script>
 <script src="./celular/conclusoes-proprietario.js?v=20261113-concluidas-proprietario-01"></script>
 <script src="./mobile-pages.js?v=20261113-ocorrencias-periodicas-proprietario-01"></script>
 <script src="./selection-lists.js?v=20261018-integrantes"></script>

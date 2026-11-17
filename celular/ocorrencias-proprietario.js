@@ -74,11 +74,13 @@
    const personalReason = person.folgas_motivos?.[value]||'Folga registrada';
    const isHoliday = official.has(value);
    const holiday = isHoliday ? official.get(value).join(', ') : '';
-   const worksHoliday = isHoliday && exceptions.get(key)===true;
-   if (person.folgas_datas?.includes(value)) return {label:personalReason, kind:/feriad/i.test(personalReason)?'holiday':/férias/i.test(personalReason)?'vacation':'leave',off:true};
+   const calendarCompensation=Object.entries(person.folgas_motivos||{}).some(([day,reason])=>
+    person.folgas_datas?.includes(day)&&/folga compensat[oó]ria/i.test(reason)&&String(reason).toLowerCase().includes('feriado compensado: '+value));
+   const worksHoliday = isHoliday && (exceptions.get(key)===true||calendarCompensation);
+   if (isHoliday&&!worksHoliday) return {label:'Feriado · '+holiday,kind:'holiday',off:true};
+   if (person.folgas_datas?.includes(value)&&!(worksHoliday&&/^feriado/i.test(personalReason))) return {label:personalReason, kind:/feriad/i.test(personalReason)?'holiday':/férias/i.test(personalReason)?'vacation':'leave',off:true};
    if (person.ferias_inicio&&value>=person.ferias_inicio&&value<=(person.ferias_fim||person.ferias_inicio)) return {label:'Férias',kind:'vacation',off:true};
    if (compensation.has(key)) return {label:'Folga compensatória',kind:'leave',off:true};
-   if (isHoliday&&!worksHoliday) return {label:'Feriado · '+holiday,kind:'holiday',off:true};
    if (picked===value || (!picked&&person.folgas_semanais?.includes(dow(day)))) return {label:'Folga semanal',kind:'leave',off:true};
    return {label:worksHoliday?'Feriado com trabalho previsto · '+holiday:'',kind:worksHoliday?'holiday':'normal',off:false};
   };
@@ -203,7 +205,7 @@
    for(let empty=0;empty<dow(first);empty++)grid.append(el('span'));
    for(let day=first;day<=last;day++){
     const value=iso(day), off=result.calendar(person,day), occurrence=markers.get(value);
-    const missed=markers.has(value);
+    const missed=markers.has(value)&&!off.off;
     const text=occurrence?'Período '+date(item.task.periodicidade==='diaria'?occurrence.from:iso(days(occurrence.from)+1))+' a '+date(occurrence.to)+(item.task.periodicidade==='diaria'?' · regularização até ':' · vencimento em ')+date(occurrence.tolerance)
      +(occurrence.regularized?' · conclusão registrada fora do prazo':' · sem conclusão no prazo'):'';
     const reason=[off.label,text].filter(Boolean).join(' · ')||'Sem ocorrência em atraso neste dia';
