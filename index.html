@@ -3722,4 +3722,34 @@ render();
   else posicionarSeletorEdicao();
 })();
 </script>
+<script id="fsj-desktop-pessoas-abas-ordem-20261117">
+/* Exclusivo Desktop Proprietário: ordem visual e aba inicial; sem tocar nos cadastros. */
+(function(){
+'use strict';
+if(window.FSJ_PLATFORM?.platform!=='desktop')return;
+const names=['Edição','Grupos','Cadastro'];
+function buttons(){
+ const root=document.getElementById('cadPessoas');if(!root)return null;
+ const all=[...root.querySelectorAll('button')];
+ const found=names.map(name=>all.find(b=>b.textContent.trim()===name));
+ if(found.some(b=>!b)||new Set(found.map(b=>b.parentElement)).size!==1)return null;
+ return found;
+}
+function arrange(open){
+ const found=buttons();if(!found)return false;
+ const parent=found[0].parentElement;
+ for(const b of found)parent.appendChild(b);
+ if(open&&window.fsjOwnerVerified===true&&document.getElementById('cadPessoas')&&!document.getElementById('cadPessoas').classList.contains('hidden'))found[0].click();
+ return true;
+}
+document.addEventListener('fsj:owner-menu-first-page',e=>{if(e.detail?.section==='cadPessoas')arrange(true)});
+function init(){
+ if(arrange(false))return;
+ const root=document.getElementById('cadPessoas');if(!root)return;
+ const observer=new MutationObserver(()=>{if(buttons()){observer.disconnect();arrange(false)}});
+ observer.observe(root,{childList:true,subtree:true});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
 </body></html>
