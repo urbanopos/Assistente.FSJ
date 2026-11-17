@@ -287,6 +287,27 @@
           closeMaintenance();
           if (value === 'videosChamadas' && typeof window.abrirVideosReserva === 'function') {
             window.abrirVideosReserva(button);
+          } else if (value === 'relatorios') {
+            // O botão REAL do menu lateral deve sempre reabrir a consulta inicial.
+            // Não depender da navegação genérica nem do estado da aba atual.
+            const mes = document.getElementById('month');
+            const pessoa = document.getElementById('fsjReportPerson');
+            const situacao = document.getElementById('fsjReportStatus');
+            if (mes) mes.value = typeof FSJDaily !== 'undefined' && typeof FSJDaily.month === 'function'
+              ? FSJDaily.month() : new Date().toISOString().slice(0, 7);
+            if (pessoa) pessoa.value = '';
+            if (situacao) situacao.value = 'Em aberto';
+            if (typeof fsjReportPage !== 'undefined') fsjReportPage = 0;
+            if (typeof fsjReportType !== 'undefined') fsjReportType = 'periodicas';
+            if (typeof window.navTo === 'function') window.navTo('relatorios', button);
+            else window.fsjSimpleSelectGo('relatorios');
+            const relatorios = document.getElementById('relatorios');
+            if (relatorios) {
+              relatorios.hidden = false;
+              relatorios.classList.remove('hidden');
+              relatorios.scrollIntoView({block:'start',behavior:'instant'});
+            }
+            if (typeof window.monthly === 'function') window.monthly();
           } else {
             window.fsjSimpleSelectGo(value);
           }
