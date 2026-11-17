@@ -12,7 +12,7 @@ function fsjTaskNumber(code,frequency){
  return suffix?number+' '+suffix:number;
 }
 let fsjTaskDetailRequest=0;
-async function fsjOpenTaskDetails(code,description,context='',loadDetails,frequency,renderActions){
+async function fsjOpenTaskDetails(code,description,context='',loadDetails,frequency,renderActions,initialStatus){
  const request=++fsjTaskDetailRequest;
  let dialog=document.getElementById('fsj-task-detail');
  if(!dialog){
@@ -44,23 +44,36 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
  dialog.querySelectorAll('.fsj-owner-pontual-actions').forEach(el=>el.remove());
  // Exibir ações apenas uma vez: após a consulta, ou imediatamente se não houver consulta.
  if(!dialog.open)dialog.showModal();
- if(!loadDetails){if(renderActions)history.replaceChildren(renderActions());return;}
- history.textContent='Consultando registros da tarefa…';
- try{
-  const details=await loadDetails();if(request!==fsjTaskDetailRequest||!dialog.open)return;
-  if(details.description!==undefined)document.getElementById('fsj-task-detail-description').textContent=details.description;
-  history.replaceChildren();
-  let sectionHost=history;
-  if(renderActions)history.append(renderActions());
-  if(details.overview){
+ let statusValue;
+ function showStatus(value){
+  if(!statusValue){
    dialog.setAttribute('data-fsj-detail-summary','');
    meta.hidden=true;
    const status=document.createElement('p');
    status.id='fsj-task-detail-current-status';
    const label=document.createElement('strong');
    label.textContent='Situação: ';
-   status.append(label,details.overview.status);
+   statusValue=document.createTextNode('');
+   status.append(label,statusValue);
    history.append(status);
+  }
+  statusValue.data=value==='Arquivado'?'Arquivada':value;
+ }
+ if(renderActions&&(initialStatus||!loadDetails))history.append(renderActions());
+ if(initialStatus)showStatus(initialStatus);
+ if(!loadDetails)return;
+ const notice=document.createElement('p');
+ notice.setAttribute('role','status');
+ notice.textContent='Consultando registros da tarefa…';
+ history.append(notice);
+ try{
+  const details=await loadDetails();if(request!==fsjTaskDetailRequest||!dialog.open)return;
+  if(details.description!==undefined)document.getElementById('fsj-task-detail-description').textContent=details.description;
+  notice.remove();
+  let sectionHost=history;
+  if(renderActions&&!initialStatus)history.append(renderActions());
+  if(details.overview){
+   showStatus(details.overview.status);
    const pauses=details.overview.pauses;
    if(pauses.length){
     const heading=document.createElement('h3');
@@ -87,7 +100,16 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
   }
   for(const section of details.sections){const heading=document.createElement('h3');heading.textContent=section.title;sectionHost.append(heading);for(const entry of section.entries){const block=document.createElement('div');block.className='fsj-detail-entry';const text=document.createElement('p');text.textContent=entry.text;block.append(text);for(const action of entry.actions||[]){const button=document.createElement('button');button.type='button';button.textContent=action.label;button.addEventListener('click',async()=>{button.disabled=true;try{await action.run();}catch{const error=document.createElement('p');error.textContent='Não foi possível abrir o registro. Tente novamente.';block.append(error);}finally{button.disabled=false;}});block.append(button);}sectionHost.append(block);}}
  }catch{
-  if(request!==fsjTaskDetailRequest||!dialog.open)return;history.textContent='Não foi possível consultar os registros. Nenhuma informação de execução pode ser confirmada agora.';const retry=document.createElement('button');retry.type='button';retry.textContent='Tentar novamente';retry.onclick=()=>fsjOpenTaskDetails(code,description,context,loadDetails,frequency,renderActions);history.append(retry);
+  if(request!==fsjTaskDetailRequest||!dialog.open)return;
+  notice.textContent=statusValue
+   ? 'Histórico indisponível. A situação exibida é a última carregada na lista.'
+   : 'Não foi possível consultar os registros. Nenhuma informação de execução pode ser confirmada agora.';
+  if(!notice.isConnected)history.append(notice);
+  const retry=document.createElement('button');
+  retry.type='button';
+  retry.textContent='Tentar novamente';
+  retry.onclick=()=>fsjOpenTaskDetails(code,description,context,loadDetails,frequency,renderActions,statusValue?.data||initialStatus);
+  history.append(retry);
  }
 }
 const fsjTaskListStyle=document.createElement('style');

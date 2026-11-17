@@ -272,6 +272,22 @@ test('ficha da tarefa mostra situação, ações e pausas no Desktop e no Celula
       assert.equal(await status.textContent(), 'Situação: Em aberto');
       assert.equal(await dialog.getByText('Pausas', { exact: true }).count(), 0);
       assert.equal(await dialog.locator('#fsj-task-detail-history > details').evaluate(el => el.open), false);
+      await page.evaluate(() => {
+        window.historyRequest = window.fsjOpenTaskDetails(
+          'Tar-000015', 'Descrição integral da tarefa', 'Responsável fictício',
+          () => new Promise((resolve, reject) => { window.failHistory = reject; }),
+          'pontual', window.windowOwnerActions, 'Arquivado'
+        );
+      });
+      assert.equal(await status.textContent(), 'Situação: Arquivada');
+      assert.equal(await status.evaluate(el => el.previousElementSibling.classList.contains('fsj-owner-pontual-actions')), true);
+      await page.evaluate(() => {
+        window.failHistory(new Error('Consulta indisponível'));
+        return window.historyRequest;
+      });
+      assert.equal(await status.textContent(), 'Situação: Arquivada');
+      assert.ok(await dialog.getByRole('button', { name: 'Tentar novamente' }).isVisible());
+      assert.ok(await dialog.getByRole('button', { name: 'Editar', exact: true }).isVisible());
       await page.close();
     }
   } finally {
