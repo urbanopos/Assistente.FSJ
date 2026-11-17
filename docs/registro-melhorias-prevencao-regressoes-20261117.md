@@ -29,6 +29,8 @@ O menu lateral abre a consulta em **Em aberto**, na página 1, inclusive quando 
 
 O teste também verifica a busca direta por número com filtros aplicados, a consulta de arquivadas pelo código roxo, a abertura da edição para itens editáveis e a posição do novo campo à esquerda do seletor de executor.
 
+O teste carrega também o adaptador compartilhado de voz. O campo **Número da tarefa** usa `data-fsj-sem-voz` para evitar que esse adaptador adicione o botão e altere o alinhamento. A regressão confere a mesma altura, borda e espaçamento interno do seletor de executor, além de verificar o ditado em um campo comum.
+
 ## Incidente relacionado: calendário e conclusões periódicas
 
 O calendário de consulta do Proprietário Desktop foi validado visualmente com código de cores. **Não equivale à validação de gravação** dos botões dia do celular Executor/Supervisor.

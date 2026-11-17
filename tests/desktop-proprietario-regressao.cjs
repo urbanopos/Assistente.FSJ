@@ -7,10 +7,11 @@ const { chromium } = require('playwright');
 const root = path.join(__dirname, '..');
 const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const menu = fs.readFileSync(path.join(root, 'desktop/layouts/proprietario/menu-lateral.js'), 'utf8');
+const supervision = fs.readFileSync(path.join(root, 'compartilhado/supervisao.min.js'), 'utf8');
 const styles = Array.from(index.matchAll(/<style(?:\s[^>]*)?>[\s\S]*?<\/style>/g), match => match[0]).join('\n');
 const executionPanel = index.match(/<div id="tarefasEmExecucao"[\s\S]*?<\/div><\/div>/)[0];
 const pageMarkup = `<!doctype html><html lang="pt-BR"><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles}</head><body>
-  <header></header><main><div id="gestor"><div id="dashboard"></div>${executionPanel}</div></main>
+  <header></header><main><div id="gestor"><div id="dashboard"><label>Texto de teste<input id="campoComVoz" type="text"></label></div>${executionPanel}</div></main>
   <select id="fsjSimpleSelect">
     <option value="dashboard">Início</option>
     <option value="tarefasEmExecucao">Tarefas em Execução</option>
@@ -84,6 +85,7 @@ async function openFixture(page, desktop) {
   }, { desktop, statuses });
   await page.addScriptTag({ content: application });
   await page.addScriptTag({ content: menu });
+  await page.addScriptTag({ content: supervision });
 }
 
 test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rodapé', async () => {
@@ -121,6 +123,14 @@ test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rod
 
     const number = page.getByLabel('Número da tarefa',{exact:true});
     const list = page.locator('#fsjExecucaoLista');
+    const numberLabel = page.locator('#fsjExecucaoNumeroLabel');
+    assert.equal(await numberLabel.locator('.fsj-voice-button, .fsj-voice-field').count(), 0);
+    assert.equal(await page.locator('#campoComVoz + .fsj-voice-button').count(), 1);
+    const controlStyle = node => {
+      const { height, padding, border, borderRadius } = getComputedStyle(node);
+      return { height, padding, border, borderRadius };
+    };
+    assert.deepEqual(await number.evaluate(controlStyle), await page.locator('#fsjArquivoPessoa').evaluate(controlStyle));
     const person = page.locator('#fsjArquivoPessoa');
     await person.selectOption('1');
     await page.locator('#fsjExecucaoCategorias button[value="grupo"]').click();
