@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261116-nao-cumpridas-desktop-01">
+<meta name="fsj-build" content="20261117-minhas-tarefas-desktop-filtros-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -714,7 +714,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261116-nao-cumpridas-desktop-01';
+const FSJ_BUILD='20261117-minhas-tarefas-desktop-filtros-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -3250,6 +3250,18 @@ if (window.FSJ_PLATFORM?.platform === 'desktop') {
 #fsjOwnerTasksTabs .fsj-owner-task-meta{color:#526c5c;font-size:12px;margin:4px 0 0}
 #fsjOwnerTasksTabs .fsj-owner-task-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 #fsjOwnerTasksTabs .fsj-owner-task-tools button{padding:7px 12px;border:1px solid #a3c1ae;border-radius:7px;background:#f4faf5;cursor:pointer}
+#fsjOwnerTasksTabs .fsj-owner-task-row{padding:8px 12px;margin:5px 0;min-width:0}
+#fsjOwnerTasksTabs .fsj-owner-task-row .fsj-owner-task-link{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;overflow-wrap:anywhere;max-width:100%;line-height:1.35;padding:0}
+#fsjOwnerTasksTabs .fsj-owner-task-row .fsj-owner-task-link.fsj-priority,#fsjOwnerTasksTabs .fsj-owner-task-row .fsj-owner-task-link.fsj-urgent{color:#b91c1c}
+#fsjOwnerTasksTabs .fsj-owner-task-row .fsj-owner-task-link.fsj-task-running{color:#1765b3}
+#fsjOwnerTasksTabs .fsj-owner-task-row .fsj-owner-task-link.fsj-task-pending{color:#946200}
+#fsjOwnerTasksTabs .fsj-owner-task-row .fsj-owner-task-link.fsj-task-completed{color:#166534}
+#fsjOwnerTasksTabs .fsj-owner-task-row .fsj-owner-task-link.fsj-task-archived{color:#64748b}
+#fsjOwnerTasksTabs .fsj-owner-task-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+#fsjOwnerTasksTabs .fsj-owner-task-filter label{font-weight:700}
+#fsjOwnerTasksTabs .fsj-owner-task-filter select{min-width:190px;min-height:36px;padding:5px 8px}
+#fsjOwnerTasksTabs .fsj-owner-task-tools:last-child{position:sticky;bottom:0;background:#fff;padding:8px 0;z-index:1}
+#fsjOwnerTasksTabs .fsj-owner-task-row .fsj-owner-task-tools{position:static;padding:0;background:transparent}
 }
 </style>
 <script id="fsj-owner-tasks-tabs-script">
@@ -3258,10 +3270,10 @@ if (window.FSJ_PLATFORM?.platform === 'desktop') {
 if(window.FSJ_PLATFORM?.platform!=='desktop')return;
 const section=document.getElementById('demandas');if(!section)return;
 const panel=document.createElement('div');panel.id='fsjOwnerTasksTabs';
-panel.innerHTML='<h2>Minhas Tarefas</h2><div class="fsj-owner-tabs" role="tablist" aria-label="Categorias de tarefas"><button type="button" role="tab" data-fsj-owner-category="periodicas" aria-selected="true">Tarefas Periódicas</button><button type="button" role="tab" data-fsj-owner-category="pontuais" aria-selected="false">Tarefas Pontuais</button><button type="button" role="tab" data-fsj-owner-category="grupo" aria-selected="false">Tarefas de Grupo</button></div><div class="fsj-owner-task-tools"><strong id="fsjOwnerTaskCategoryTitle">Tarefas Periódicas</strong><span><button type="button" id="fsjOwnerTaskRefresh">Atualizar</button></span></div><div id="fsjOwnerTaskRows" aria-live="polite"></div><div class="fsj-owner-task-tools"><button type="button" id="fsjOwnerTaskPrev">◀ Anterior</button><span id="fsjOwnerTaskPage"></span><button type="button" id="fsjOwnerTaskNext">Próxima ▶</button></div>';
+panel.innerHTML='<h2>Minhas Tarefas</h2><div class="fsj-owner-tabs" role="tablist" aria-label="Categorias de tarefas"><button type="button" role="tab" data-fsj-owner-category="periodicas" aria-selected="true">Tarefas Periódicas</button><button type="button" role="tab" data-fsj-owner-category="pontuais" aria-selected="false">Tarefas Pontuais</button><button type="button" role="tab" data-fsj-owner-category="grupo" aria-selected="false">Tarefas de Grupo</button></div><div class="fsj-owner-task-tools"><strong id="fsjOwnerTaskCategoryTitle">Tarefas Periódicas</strong><span><button type="button" id="fsjOwnerTaskRefresh">Atualizar</button></span></div><div class="fsj-owner-task-filter"><label for="fsjOwnerTaskStatus">Situação</label><select id="fsjOwnerTaskStatus"><option value="abertas">Em aberto (padrão)</option><option value="andamento">Em execução</option><option value="pendentes">Aguardando gestor</option><option value="suspensas">Suspensas</option><option value="concluidas">Concluídas</option><option value="arquivadas">Arquivadas</option><option value="todas">Todas</option></select></div><div id="fsjOwnerTaskRows" aria-live="polite"></div><div class="fsj-owner-task-tools"><button type="button" id="fsjOwnerTaskPrev">◀ Anterior</button><span id="fsjOwnerTaskPage"></span><button type="button" id="fsjOwnerTaskNext">Próxima ▶</button></div>';
 section.prepend(panel);
 section.classList.add('fsj-owner-tasks-tabs-on');
-let category='periodicas',page=0;
+let category='periodicas',page=0,statusFilter='abertas';
 const labels={periodicas:'Tarefas Periódicas',pontuais:'Tarefas Pontuais',grupo:'Tarefas de Grupo'};
 function ownerId(){
  if(window.fsjOwnerVerified!==true||window.fsjExited||!fsjFonteOperacionalConfirmada)return '';
@@ -3275,7 +3287,22 @@ function records(id){
   if(category==='grupo'||!ids(t).some(personId=>String(personId)===id))return false;
   return category===(fsjTarefaPeriodica(t)?'periodicas':'pontuais');
  });
- return filtered.sort((a,b)=>{
+ const matchesStatus=t=>{
+  const archived=['arquivado','arquivada'].includes(String(t.centralStatus||'').toLowerCase())||['arquivado','arquivada'].includes(String(t.status||'').toLowerCase());
+  const status=String(t.status||'').toLowerCase();
+  const running=(Array.isArray(fsjExecucoes)&&fsjExecucoes.some(e=>String(e.tarefa_id)===String(t.id)&&e.estado==='em_andamento'))||['em andamento','em execução','em execucao'].includes(status);
+  const pending=['pendente','aguardando gestor','aguardando gestão','aguardando gestao'].includes(status);
+  const suspended=['suspensa','suspenso'].includes(status)||(Array.isArray(fsjExecucoes)&&fsjExecucoes.some(e=>String(e.tarefa_id)===String(t.id)&&e.estado==='suspensa'));
+  const completed=['concluída','concluida','concluído','concluido'].includes(status);
+  if(statusFilter==='todas')return true;
+  if(statusFilter==='arquivadas')return archived;
+  if(statusFilter==='concluidas')return !archived&&completed;
+  if(statusFilter==='andamento')return !archived&&!completed&&running;
+  if(statusFilter==='pendentes')return !archived&&!completed&&pending;
+  if(statusFilter==='suspensas')return !archived&&!completed&&suspended;
+  return !archived&&!completed&&!running&&!pending&&!suspended;
+ };
+ return filtered.filter(matchesStatus).sort((a,b)=>{
   const na=Number((a.code||'').match(/Tar-([0-9]+)/i)?.[1]||Infinity);
   const nb=Number((b.code||'').match(/Tar-([0-9]+)/i)?.[1]||Infinity);
   if(na!==nb)return na-nb;
@@ -3286,7 +3313,7 @@ function render(){
  panel.querySelectorAll('[data-fsj-owner-category]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.fsjOwnerCategory===category)));
  document.getElementById('fsjOwnerTaskCategoryTitle').textContent=labels[category];
  const id=ownerId();
- const list=records(id),size=8,pages=Math.max(1,Math.ceil(list.length/size));page=Math.max(0,Math.min(page,pages-1));
+ const list=records(id),size=3,pages=Math.max(1,Math.ceil(list.length/size));page=Math.max(0,Math.min(page,pages-1));
  const host=document.getElementById('fsjOwnerTaskRows');host.replaceChildren();
  if(!list.length){const p=document.createElement('p');p.textContent=id?'Você não tem tarefas nesta categoria.':'Aguardando a confirmação do cadastro e dos dados do Proprietário.';host.append(p);}
  list.slice(page*size,(page+1)*size).forEach(t=>{
@@ -3294,6 +3321,10 @@ function render(){
   const link=document.createElement('button');link.type='button';link.dataset.fsjTaskId=String(t.id);
   const code=category==='pontuais'&&t.code?fsjTaskNumber(t.code,'pontual'):(t.code||'Tarefa sem código');
   link.textContent=code+' — '+(t.text||'Sem descrição');
+  const archivedColor=['arquivado','arquivada'].includes(String(t.centralStatus||'').toLowerCase());
+  const runningColor=Array.isArray(fsjExecucoes)&&fsjExecucoes.some(e=>String(e.tarefa_id)===String(t.id)&&e.estado==='em_andamento');
+  link.className='fsj-owner-task-link '+fsjTaskClass(t.priority||t.prioridade,archivedColor?'Arquivado':t.status,runningColor);
+  link.title=link.textContent;
   const info=document.createElement('div');info.className='fsj-owner-task-meta';
   const frequency=typeof fsjFrequencyLabel==='function'?fsjFrequencyLabel(t):(t.frequency||'Pontual');
   const archived=t.centralStatus==='Arquivado'||t.centralStatus==='Arquivada';
@@ -3311,6 +3342,7 @@ function render(){
  document.getElementById('fsjOwnerTaskNext').disabled=page>=pages-1;
 }
 panel.querySelectorAll('[data-fsj-owner-category]').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.fsjOwnerCategory;page=0;render()}));
+document.getElementById('fsjOwnerTaskStatus').addEventListener('change',event=>{statusFilter=event.target.value;page=0;render()});
 document.getElementById('fsjOwnerTaskRefresh').onclick=async event=>{
  const button=event.currentTarget;
  button.disabled=true;
