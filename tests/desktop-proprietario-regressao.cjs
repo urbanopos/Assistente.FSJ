@@ -253,6 +253,11 @@ test('ficha da tarefa mostra situação, ações e pausas no Desktop e no Celula
       const status = dialog.locator('#fsj-task-detail-current-status');
       assert.equal(await dialog.locator('#fsj-task-detail-description').textContent(), 'Descrição integral da tarefa');
       assert.equal(await status.textContent(), 'Situação: Suspensa');
+      const actions = dialog.locator('.fsj-owner-pontual-actions');
+      assert.equal(await status.evaluate(el => el.previousElementSibling.classList.contains('fsj-owner-pontual-actions')), true);
+      const actionsBounds = await actions.boundingBox();
+      const statusBounds = await status.boundingBox();
+      assert.ok(statusBounds.y >= actionsBounds.y + actionsBounds.height);
       assert.equal(await dialog.locator('#fsj-task-detail-history > ul li').count(), 2);
       assert.equal(await dialog.getByText('Execução — histórico', { exact: true }).isVisible(), false);
       await dialog.getByText('Histórico e registros', { exact: true }).click();

@@ -10,7 +10,7 @@ Entrega pelo GitHub Pages, com atualização ao abrir ou retomar a sessão. O co
 
 ## Ficha da tarefa
 
-O código abre a ficha com descrição integral, situação atual e ações existentes. As pausas aparecem quando registradas. **Histórico e registros** reúne os detalhes de execução e os registros vinculados. **Editar** continua usando o formulário operacional.
+O código abre a ficha com descrição integral, ações existentes e situação atual abaixo dos botões. As pausas aparecem quando registradas. **Histórico e registros** reúne os detalhes de execução e os registros vinculados. **Editar** continua usando o formulário operacional.
 
 ## Tarefas em aberto
 

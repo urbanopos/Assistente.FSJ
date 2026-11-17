@@ -51,6 +51,7 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
   if(details.description!==undefined)document.getElementById('fsj-task-detail-description').textContent=details.description;
   history.replaceChildren();
   let sectionHost=history;
+  if(renderActions)history.append(renderActions());
   if(details.overview){
    dialog.setAttribute('data-fsj-detail-summary','');
    meta.hidden=true;
@@ -60,9 +61,6 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
    label.textContent='Situação: ';
    status.append(label,details.overview.status);
    history.append(status);
-  }
-  if(renderActions)history.append(renderActions());
-  if(details.overview){
    const pauses=details.overview.pauses;
    if(pauses.length){
     const heading=document.createElement('h3');

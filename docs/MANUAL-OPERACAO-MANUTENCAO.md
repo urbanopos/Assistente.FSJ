@@ -2,7 +2,7 @@
 
 ### Ficha resumida da tarefa no Desktop e no Celular — 17/11/2026
 
-Build `20261117-ficha-tarefa-resumida-01`. O painel do Proprietário abre a ficha pelo código da tarefa. A apresentação inicial mostra a descrição integral, a situação atual, os botões já disponíveis e as pausas da execução quando registradas. Para uma tarefa diária, o resumo considera a ocorrência do dia. **Histórico e registros** abre os detalhes de execução, respostas, justificativas, anexos e demais registros. **Editar** abre o formulário existente.
+Build `20261117-ficha-tarefa-situacao-abaixo-01`. O painel do Proprietário abre a ficha pelo código da tarefa. A apresentação inicial mostra a descrição integral, os botões já disponíveis, a situação atual abaixo deles e as pausas da execução quando registradas. Para uma tarefa diária, o resumo considera a ocorrência do dia. **Histórico e registros** abre os detalhes de execução, respostas, justificativas, anexos e demais registros. **Editar** abre o formulário existente.
 
 A atualização chega pelo GitHub Pages ao abrir ou retomar a sessão. O commit deste ajuste é o ponto de reversão. Os testes locais verificaram a consulta, a exibição condicional de pausas e a preservação de anexos e registros vinculados.
 
