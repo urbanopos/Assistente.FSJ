@@ -1,29 +1,37 @@
-# Layout Desktop — Proprietário
+# Desktop — Proprietário | Contrato vigente
 
-Pendente de consolidação do Index Desktop autenticado a partir da interface existente. Não remover o código legado antes da homologação.
+Atualizado em 17/11/2026. Este arquivo descreve **somente a solução atual**. Propostas, versões intermediárias e protótipos rejeitados não são instruções para implantação.
 
-## Menu lateral do Proprietário
+## Fonte de verdade e isolamento
+- Entrada operacional: `index.html`. Adaptador do menu lateral: `desktop/layouts/proprietario/menu-lateral.js`.
+- O menu lateral só se ativa no Desktop, após confirmação do perfil Proprietário. Não alterar layouts Celular/VM nem permissões de outros perfis.
+- O histórico Git guarda as versões antigas; **não restaurar arquivos antigos isolados** sobre a aplicação atual.
+- Manter a integridade dos dados Supabase, permissões, calendários, cores, numeração, filtros e tarefas.
 
-O build `20261114-menu-lateral-desktop-01` aplica a barra azul do protótipo [Desktop Lateral](../../../desktop-lateral/) ao painel operacional da entrada normal. **Início** fica no alto. Os outros rótulos e destinos vêm do Menu Principal da aplicação. A barra usa o comando de navegação já existente e destaca a tela ativa.
-
-A entrada carrega o adaptador apenas quando a plataforma é Desktop. A barra depende da titularidade verificada e do painel pronto. A entrada direta de emergência, o Celular e os demais perfis continuam com o fluxo original. O adaptador usa os controles do painel existente e consulta apenas o seletor de navegação já carregado.
-
-**Recolher menu** compacta a barra. **Usar menu anterior** recupera no próprio navegador a navegação anteriormente escolhida. **Ativar menu lateral** volta ao novo visual. A troca preserva a tela aberta e os controles existentes. Para restaurar a publicação, reverta apenas o commit deste build.
-
-Validação local: contrato de atualização automática e simulação dos 14 destinos, titularidade, entrada de emergência, destaque, recolhimento, retorno ao menu anterior e isolamento Celular. A conferência visual e de navegação com sessão real fica para o Dell.
+## Menu lateral
+- **Início** no alto; demais opções vêm do Menu Principal. Há opção de recolher e expandir.
+- O clique real nos botões do menu lateral é tratado no adaptador `menu-lateral.js`; não presumir que mudar apenas `navTo` no `index.html` é suficiente.
+- **Relatórios:** cada clique no item do menu, inclusive quando já está aberto, deve reiniciar para página 1, mês atual, todas as pessoas, situação Em aberto e Tarefas Periódicas; renderizar a consulta atualizada.
+- Correção específica publicada em `c5ff9048a3fed4a236856e30df861b4876143395`, **ainda aguardando validação funcional do Proprietário**. Não registrar como validada antes do teste.
 
 ## Tarefas em Execução
-
-No build `20261115-execucao-categorias-desktop-01`, a lista do Proprietário oferece **Tarefas Periódicas**, **Tarefas Pontuais** e **Tarefas de Grupo** abaixo dos seletores. Para consultar a atribuição de supervisão, escolha a entrada com sufixo **(Supervisão)**. Para consultar apenas as atribuições como executor, escolha o nome sem o sufixo. A categoria de grupo inclui tarefas coletivas pontuais e periódicas. O filtro de categoria conserva a seleção de pessoa ou grupo e a listagem inicia na primeira página quando o filtro muda. Ao voltar da edição, a seleção e a página anteriores são recuperadas quando disponíveis.
-
-O teste local em DOM usou dados fictícios e exercitou as seleções, a ordem dos códigos, as duas tarefas por página, a abertura de detalhes e a restauração dos filtros. O contrato de atualização automática foi executado com sucesso. A conferência com uma sessão real do Proprietário fica pendente. A atualização web segue o mecanismo existente ao abrir ou retomar o uso. Para recuperação, reverta o commit deste build pelo histórico Git.
-
-No build `20261115-execucao-categorias-desktop-02`, **Tarefas de Grupo** passa a ser o acesso às tarefas coletivas no Desktop. O seletor **Grupo Executor** do build 01 foi retirado. Use **Todas as pessoas** para ver as tarefas coletivas de todos os grupos, ou selecione um executor ou supervisor para consultar suas atribuições. O teste local confirmou a ausência do seletor no Desktop, a listagem coletiva com e sem pessoa selecionada e a presença e o funcionamento do seletor no Celular. O contrato de atualização automática passou. Para recuperação, reverta o commit deste build.
+- Filtros: Tarefas Periódicas, Tarefas Pontuais e Tarefas de Grupo. Não ressuscitar o antigo seletor independente Grupo Executor.
+- Seleção de pessoa distingue suas atribuições como executor e, quando aplicável, supervisão. Grupo inclui tarefas coletivas.
+- Duas tarefas por página; conservar filtros e contexto quando retornar da edição, quando disponível.
 
 ## Minhas Tarefas
+- Três categorias: Periódicas, Pontuais e Grupo. Usar atribuições reais do titular.
+- Códigos pontuais exibem a letra `P` e numeração padronizada. Atualizar consulta sem alterar os registros.
 
-Build `20261115-minhas-tarefas-proprietario-01`. Abra **Minhas Tarefas** e selecione **Tarefas Periódicas**, **Tarefas Pontuais** ou **Tarefas de Grupo**. O painel usa o cadastro autenticado do titular. Mostra suas atribuições individuais e as coletivas dos grupos dos quais faz parte, em ordem crescente de código. O botão **Atualizar** consulta os registros atuais. Ações e permissões existentes do Proprietário continuam disponíveis nos itens da lista.
+## Relatórios e calendários
+- Relatório mensal tem filtros de mês, pessoa, situação e categoria. Não confundir a consulta Desktop com a gravação de conclusões pelos botões dia do Celular.
+- Calendário de execução do Desktop foi validado visualmente; gravação e sincronização do Celular ainda requerem teste em aparelho real.
 
-O filtro foi verificado localmente com registros fictícios e o contrato de atualização automática passou. A validação autenticada no Desktop segue pendente. A atualização web é aplicada ao abrir ou retomar quando seguro. Para recuperação, reverta o commit deste build.
+## Critérios de manutenção
+1. Identificar o componente real que recebe o clique, arquivo de origem e dependências antes do patch.
+2. Fazer alteração mínima, exclusivamente no Desktop Proprietário quando este for o escopo.
+3. Testar menu com aba aberta, filtros aplicados, página avançada e retorno à primeira página.
+4. Preservar ponto de reversão via Git e não copiar protótipos ou backups antigos para produção.
+5. Distinguir **publicado** de **validado pelo Proprietário**.
 
-O build `20261115-minhas-tarefas-pontuais-02` aplica a nomenclatura oficial aos links de **Minhas Tarefas → Tarefas Pontuais**, com sete dígitos e a letra **P** após o número (`Tar - 0000025 P`). A descrição permanece completa. A mudança é de exibição, com teste local da lista e do contrato de atualização. Para recuperação, reverta o commit deste build.
+Referências técnicas: `docs/CORRECOES_CONSOLIDADAS_REGRESSAO_2026-11-15.md` e `docs/registro-melhorias-prevencao-regressoes-20261117.md`.
