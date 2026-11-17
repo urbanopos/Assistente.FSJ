@@ -4,7 +4,7 @@
 
 Build `20261117-ficha-historico-aberto-01`. O painel do Proprietário abre a ficha pelo código da tarefa. A apresentação inicial mostra a descrição integral, os botões já disponíveis, a situação atual abaixo deles e as pausas da execução quando registradas. A situação aparece imediatamente com o valor da lista e é atualizada após a consulta da ficha. Em falha no histórico, o valor da lista continua visível com aviso de consulta. Para uma tarefa diária, o resumo considera a ocorrência do dia. **Histórico e registros** fica aberto por padrão, pode ser recolhido e mostra responsáveis, situação, data do registro e conclusão. **Editar** abre o formulário existente.
 
-A atualização chega pelo GitHub Pages ao abrir ou retomar a sessão. O commit deste ajuste é o ponto de reversão. Os testes locais verificaram a consulta, a exibição condicional de pausas e a preservação de anexos e registros vinculados.
+Aprovado por Urbano em 17/11/2026, para Desktop e Celular. Versão aprovada: `20261117-ficha-historico-aberto-01`, commit `a4f9e54`. O padrão vale em todas as abas do painel operacional que abriam a ficha anterior, incluindo Tarefas em Execução, consultas por situação, Minhas Tarefas e demandas individuais ou de grupo. Quando a aba abre calendário de ocorrências, o calendário conserva o fluxo próprio. O teste no Chromium passou com telas de Desktop e Celular. A atualização chega pelo GitHub Pages ao abrir ou retomar a sessão.
 
 ### Tarefas em Execução no Desktop do Proprietário — 17/11/2026
 

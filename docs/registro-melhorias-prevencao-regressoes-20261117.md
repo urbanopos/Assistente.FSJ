@@ -33,6 +33,8 @@ O teste carrega também o adaptador compartilhado de voz. O campo **Número da t
 
 ## Ficha da tarefa no Desktop e no Celular
 
+Aprovado por Urbano em 17/11/2026, para Desktop e Celular. Versão aprovada: `20261117-ficha-historico-aberto-01`, commit `a4f9e54`. O padrão vale em todas as abas do painel operacional que abriam a ficha anterior, incluindo Tarefas em Execução, consultas por situação, Minhas Tarefas e demandas individuais ou de grupo. Quando a aba abre calendário de ocorrências, o calendário conserva o fluxo próprio.
+
 A ficha apresenta a descrição, as ações existentes, a situação logo abaixo dos botões e as pausas registradas. O teste no navegador verifica as duas larguras, a posição da situação abaixo das ações, a ausência da seção de pausas quando vazia, o histórico aberto por padrão com responsáveis, situação, registro e conclusão, e a possibilidade de recolhê-lo e o acionamento de **Editar**. O teste também simula uma consulta pendente e uma falha de histórico. A situação da lista continua abaixo dos botões nessas duas condições.
 
 ## Incidente relacionado: calendário e conclusões periódicas

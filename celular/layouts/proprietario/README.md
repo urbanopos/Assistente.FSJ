@@ -10,6 +10,8 @@ Entrega pelo GitHub Pages, com atualização ao abrir ou retomar a sessão. O co
 
 ## Ficha da tarefa
 
+Aprovado por Urbano em 17/11/2026, para Desktop e Celular. Versão aprovada: `20261117-ficha-historico-aberto-01`, commit `a4f9e54`. O padrão vale em todas as abas do painel operacional que abriam a ficha anterior, incluindo Tarefas em Execução, consultas por situação, Minhas Tarefas e demandas individuais ou de grupo. Quando a aba abre calendário de ocorrências, o calendário conserva o fluxo próprio.
+
 O código abre a ficha com descrição integral, ações existentes e situação atual abaixo dos botões. A situação aparece ao abrir a ficha com o valor da lista e é atualizada após a consulta. As pausas aparecem quando registradas. **Histórico e registros** abre por padrão, pode ser recolhido e mostra responsáveis, situação, data do registro e conclusão. **Editar** continua usando o formulário operacional.
 
 ## Tarefas em aberto
