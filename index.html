@@ -2160,6 +2160,16 @@ function fsjRenderTarefasEmExecucao(){
    button.setAttribute('aria-pressed',String(button.value===box.dataset.fsjCategory));
   }
  }
+ if(desktop){
+  let statusLabel=document.getElementById('fsjExecucaoStatusLabel');
+  if(!statusLabel){
+   statusLabel=document.createElement('label');statusLabel.id='fsjExecucaoStatusLabel';statusLabel.textContent='Situação da tarefa ';
+   const sel=document.createElement('select');sel.id='fsjExecucaoStatus';
+   [['Em aberto','Em aberto (padrão)'],['Em andamento','Em andamento'],['Pendente','Pendente'],['Concluída','Concluída'],['Arquivado','Arquivadas'],['','Todas as situações']].forEach(([value,label])=>sel.add(new Option(label,value)));
+   sel.addEventListener('change',()=>fsjRenderTarefasEmExecucao());
+   statusLabel.append(sel);filters.append(statusLabel);
+  }
+ }
  const psel=document.getElementById('fsjArquivoPessoa'),gsel=document.getElementById('fsjArquivoGrupo');
  const setOptions=(sel,values)=>{const prev=sel.value;sel.replaceChildren(...values.map(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;return o;}));sel.value=values.some(([v])=>v===prev)?prev:'';};
  const people=S.people||[];
@@ -2188,7 +2198,10 @@ function fsjRenderTarefasEmExecucao(){
  const activeMap=new Map(active.map(e=>[String(e.tarefa_id),e]));
  const tasks=(S.tasks||[]).filter(t=>{
   const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status);
-  if(archived)return false;
+  const statusFiltro=desktop?document.getElementById('fsjExecucaoStatus')?.value??'Em aberto':'';
+  const situacao=archived?'Arquivado':(activeMap.has(String(t.id))?'Em andamento':String(t.status||'Em aberto'));
+  if(desktop&&statusFiltro&&situacao!==statusFiltro)return false;
+  if(!desktop&&archived)return false;
   if(category&&taskCategory(t)!==category)return false;
   const groupId=String(t.groupId||'');
   const groupMembers=groupsById.get(groupId)?.members||[];
@@ -2230,7 +2243,7 @@ function fsjRenderTarefasEmExecucao(){
  const cards=[...box.querySelectorAll('section > article')];
  const perPage=2; // Duas tarefas por página no Desktop, sem rolagem vertical
  const pages=Math.max(1,Math.ceil(cards.length/perPage));
- const filterKey=desktop?[psel.value,category].join('|'):psel.value+'|'+(gsel?.value||'');
+ const filterKey=desktop?[psel.value,category,document.getElementById('fsjExecucaoStatus')?.value??'Em aberto'].join('|'):psel.value+'|'+(gsel?.value||'');
  const priorKey=box.dataset.fsjFilterKey;
  let pageIndex=priorKey===filterKey?Number(box.dataset.fsjPageIndex||0):0;
  pageIndex=Math.max(0,Math.min(pageIndex,pages-1));
@@ -2997,6 +3010,16 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoLista section article{margin:6px 0!important;padding:8px!important}
  #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoLista section article p{margin:3px 0!important}
  #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoPaginador{position:static!important;flex-shrink:0;margin:4px 0!important}
+}
+</style>
+<style id="fsjExecucaoDesktopStatusPagerFix">
+@media(min-width:701px){
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjArquivoFiltros{flex-shrink:0;margin:5px 0!important;align-items:end}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoStatusLabel{display:flex;flex-direction:column;gap:4px}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoStatus{min-width:190px}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoPaginador{display:flex!important;visibility:visible!important;position:relative!important;bottom:auto!important;flex:0 0 auto!important;min-height:54px!important;margin-top:auto!important;z-index:10!important}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoPaginador[hidden]{display:none!important}
+ #gestor #tarefasEmExecucao:not(.hidden) #fsjExecucaoLista{min-height:0!important;flex:1 1 auto!important;overflow:hidden!important}
 }
 </style>
 <style id="fsjExecucaoDesktopPaginationFix">
