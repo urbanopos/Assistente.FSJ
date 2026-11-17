@@ -3723,32 +3723,44 @@ render();
 })();
 </script>
 <script id="fsj-desktop-pessoas-abas-ordem-20261117">
-/* Exclusivo Desktop Proprietário: ordem visual e aba inicial; sem tocar nos cadastros. */
+/* Desktop Proprietário: abas Edição, Grupos, Cadastro. Não altera dados. */
 (function(){
 'use strict';
-if(window.FSJ_PLATFORM?.platform!=='desktop')return;
-const names=['Edição','Grupos','Cadastro'];
-function buttons(){
- const root=document.getElementById('cadPessoas');if(!root)return null;
- const all=[...root.querySelectorAll('button')];
- const found=names.map(name=>all.find(b=>b.textContent.trim()===name));
- if(found.some(b=>!b)||new Set(found.map(b=>b.parentElement)).size!==1)return null;
+const section=()=>document.getElementById('cadPessoas');
+const isDesktop=()=>window.FSJ_PLATFORM?.platform!=='celular'&&window.matchMedia('(min-width:901px)').matches;
+function findTabs(){
+ const root=section();if(!root||!isDesktop())return null;
+ const buttons=[...root.querySelectorAll('button')];
+ const aliases=[['Edição','Edicao','Pessoas'],['Grupos'],['Cadastro']];
+ const found=aliases.map(group=>buttons.find(b=>group.some(label=>b.textContent.trim().replace(/^\\d+\\.\\s*/,'').toLocaleLowerCase('pt-BR')===label.toLocaleLowerCase('pt-BR'))));
+ if(found.some(b=>!b)||new Set(found).size!==3||new Set(found.map(b=>b.parentElement)).size!==1)return null;
  return found;
 }
-function arrange(open){
- const found=buttons();if(!found)return false;
+let pending=false;
+function arrange(open=false){
+ const found=findTabs();if(!found)return false;
  const parent=found[0].parentElement;
- for(const b of found)parent.appendChild(b);
- if(open&&window.fsjOwnerVerified===true&&document.getElementById('cadPessoas')&&!document.getElementById('cadPessoas').classList.contains('hidden'))found[0].click();
+ const desired=found.map(b=>b.textContent.trim()).join('|');
+ if([...parent.children].filter(x=>found.includes(x)).map(x=>x.textContent.trim()).join('|')!==desired){
+  const anchor=found.reduce((a,b)=>a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING?a:b);
+  for(const b of found)parent.appendChild(b);
+ }
+ if(open&&window.fsjOwnerVerified===true)found[0].click();
  return true;
 }
-document.addEventListener('fsj:owner-menu-first-page',e=>{if(e.detail?.section==='cadPessoas')arrange(true)});
+function queue(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;arrange(false)})}
 function init(){
- if(arrange(false))return;
- const root=document.getElementById('cadPessoas');if(!root)return;
- const observer=new MutationObserver(()=>{if(buttons()){observer.disconnect();arrange(false)}});
- observer.observe(root,{childList:true,subtree:true});
+ const root=section();if(!root||!isDesktop())return;
+ arrange(false);
+ new MutationObserver(queue).observe(root,{childList:true,subtree:true});
 }
+document.addEventListener('fsj:owner-menu-first-page',e=>{if(e.detail?.section==='cadPessoas')requestAnimationFrame(()=>arrange(true))});
+document.addEventListener('click',e=>{
+ if(!isDesktop()||window.fsjOwnerVerified!==true)return;
+ const el=e.target.closest?.('button,a');if(!el)return;
+ const action=el.getAttribute('onclick')||'';
+ if(/navTo\\(['"]cadPessoas['"]/.test(action))requestAnimationFrame(()=>arrange(true));
+},true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
