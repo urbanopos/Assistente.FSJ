@@ -75,7 +75,7 @@ async function openFixture(page, desktop) {
         people: [{ id: '1', name: 'Pessoa fictícia' }],
         groups: [],
         tasks: statuses.map(([status, priority], i) => ({
-          id: String(i + 1), code: 'Tar-' + (i + 1),
+          id: String(i + 1), code: 'Tar-' + (i === 6 ? 17 : i + 1),
           text: 'Tarefa fictícia ' + (i + 1), frequency: 'pontual', status, priority, personIds: ['1']
         }))
       }
@@ -135,13 +135,14 @@ test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rod
     await person.selectOption('1');
     await page.locator('#fsjExecucaoCategorias button[value="grupo"]').click();
     assert.equal(await number.locator('xpath=..').evaluate(el => el.nextElementSibling.querySelector('select').id), 'fsjArquivoPessoa');
-    assert.equal(await page.locator('#fsjExecucaoNumeros option[value="Tar-7"]').count(), 1);
-    await number.fill('0007');
+    const suggestions = await page.locator('#fsjExecucaoNumeros option').evaluateAll(options => options.map(option => option.value));
+    assert.deepEqual(suggestions, ['Tar-17', 'Tar-6', 'Tar-5', 'Tar-4', 'Tar-3', 'Tar-2', 'Tar-1']);
+    await number.fill('0017');
     assert.equal(await list.locator('article').count(), 1);
     assert.ok(await list.locator('.fsj-task-archived').isVisible());
     assert.equal(await list.getByText('ARQUIVADA', { exact: true }).count(), 0);
     await list.locator('.fsj-task-number').click();
-    assert.equal(await page.evaluate(() => window.consultada), 'Tar-7');
+    assert.equal(await page.evaluate(() => window.consultada), 'Tar-17');
     assert.equal(await list.getByRole('button', { name: 'Editar' }).count(), 0);
     await number.fill('Tar-000002 P');
     assert.equal(await list.locator('article').count(), 1);
