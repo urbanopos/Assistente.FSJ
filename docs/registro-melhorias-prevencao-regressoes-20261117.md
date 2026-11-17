@@ -27,6 +27,8 @@ Atualização: 17/11/2026. Complemento técnico ao Manual_Assistente_FSJ_Web_VM_
 
 O menu lateral abre a consulta em **Em aberto**, na página 1, inclusive quando o item já está ativo. O retorno de uma edição recupera a consulta anterior. Os links seguem as cores vigentes por situação e prioridade. O rodapé agrupa as duas setas e o indicador no centro do painel. O teste `tests/desktop-proprietario-regressao.cjs` abre a tela com dados fictícios, aciona o menu lateral e confere as cores, a geometria e o isolamento do Celular. O GitHub Actions executa o teste quando a entrada operacional ou o layout Desktop do Proprietário é alterado. A confirmação na sessão do Proprietário é registrada após o teste de uso.
 
+O teste também verifica a busca direta por número com filtros aplicados, a consulta de arquivadas pelo código roxo, a abertura da edição para itens editáveis e a posição do novo campo à esquerda do seletor de executor.
+
 ## Incidente relacionado: calendário e conclusões periódicas
 
 O calendário de consulta do Proprietário Desktop foi validado visualmente com código de cores. **Não equivale à validação de gravação** dos botões dia do celular Executor/Supervisor.

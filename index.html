@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261117-execucao-desktop-status-rodape-01">
+<meta name="fsj-build" content="20261117-execucao-desktop-busca-numero-01">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -722,7 +722,7 @@ async function copiarLinkReserva(){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponivel');await navigator.clipboard.writeText(link);status.textContent='Link copiado. Cole na mensagem que desejar enviar.';}
  catch{status.replaceChildren(document.createTextNode('Copie este link: '));const input=document.createElement('input');input.value=link;input.readOnly=true;input.setAttribute('aria-label','Link do Assistente FSJ.VM');status.append(input);input.focus();input.select();}
 }
-const FSJ_BUILD='20261117-execucao-desktop-status-rodape-01';
+const FSJ_BUILD='20261117-execucao-desktop-busca-numero-01';
 const fsjDataHora=x=>new Date(x).toLocaleString('pt-BR',{timeZone:'America/Recife',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const fsjAbertoEm=new Date();
 ultimaAtualizacao.textContent='Verificando atualização…';
@@ -826,6 +826,8 @@ function navTo(id,b,record=true){
  if(id==='tarefasEmExecucao'&&window.fsjOwnerVerified===true&&window.FSJ_PLATFORM?.platform==='desktop'&&(id!==currentPage||b)){
   const status=document.getElementById('fsjExecucaoStatus');
   const list=document.getElementById('fsjExecucaoLista');
+  const numero=document.getElementById('fsjExecucaoNumero');
+  if(numero)numero.value='';
   if(status)status.value='Em aberto';
   if(list)list.dataset.fsjPageIndex='0';
  }
@@ -1456,7 +1458,7 @@ async function fsjConcluirEdicaoProprietario(){
  finally{if(btn)btn.disabled=false;}
 }
 function fsjCancelarEdicaoTarefa(){const voltar=window.fsjOrigemEdicaoTarefa||'tarefasEmExecucao';const contexto=window.fsjContextoEdicaoTarefa;clearTaskForm();window.fsjOrigemEdicaoTarefa=null;navTo(voltar);if(voltar==='tarefasEmExecucao')fsjRestaurarFiltroExecucao(contexto);window.fsjContextoEdicaoTarefa=null;}
-function editTask(id){window.fsjOrigemEdicaoTarefa=currentPage||'tarefasEmExecucao';if(currentPage==='tarefasEmExecucao'){const box=document.getElementById('fsjExecucaoLista');window.fsjContextoEdicaoTarefa={pessoa:document.getElementById('fsjArquivoPessoa')?.value||'',grupo:document.getElementById('fsjArquivoGrupo')?.value||'',categoria:box?.dataset.fsjCategory||'',situacao:document.getElementById('fsjExecucaoStatus')?.value??'Em aberto',filtro:box?.dataset.fsjFilterKey||'',pagina:Number(box?.dataset.fsjPageIndex||0)};}let t=S.tasks.find(x=>x.id===id);if(!t)return;taskEditId.value=t.id;taskText.value=t.text;taskFrequency.value=t.frequency||(t.daily?'diaria':'pontual');taskPriority.value=t.priority||'normal';taskSupervision.checked=!!t.supervision;taskTimed.checked=!!t.timedMinutes;taskTimedMinutes.value=t.timedMinutes||60;taskTimedOptions.hidden=!taskTimed.checked;execType.value=t.groupId?'group':'individual';renderTargets();if(t.groupId){let z=document.querySelector('.tg[value="'+t.groupId+'"]');if(z)z.checked=true}else document.querySelectorAll('.tm').forEach(x=>x.checked=ids(t).includes(x.value));fsjTargetSelectionSync();taskSaveBtn.textContent='Salvar alteração';navTo('novaTarefa');const concluir=document.getElementById('fsjConcluirEdicaoBtn');if(concluir)concluir.hidden=['Concluída','Arquivado','Arquivada'].includes(t.status);taskEditId.value=t.id;taskSaveBtn.textContent='Salvar alteração';taskText.value=t.text;}
+function editTask(id){window.fsjOrigemEdicaoTarefa=currentPage||'tarefasEmExecucao';if(currentPage==='tarefasEmExecucao'){const box=document.getElementById('fsjExecucaoLista');window.fsjContextoEdicaoTarefa={pessoa:document.getElementById('fsjArquivoPessoa')?.value||'',grupo:document.getElementById('fsjArquivoGrupo')?.value||'',categoria:box?.dataset.fsjCategory||'',numero:document.getElementById('fsjExecucaoNumero')?.value||'',situacao:document.getElementById('fsjExecucaoStatus')?.value??'Em aberto',filtro:box?.dataset.fsjFilterKey||'',pagina:Number(box?.dataset.fsjPageIndex||0)};}let t=S.tasks.find(x=>x.id===id);if(!t)return;taskEditId.value=t.id;taskText.value=t.text;taskFrequency.value=t.frequency||(t.daily?'diaria':'pontual');taskPriority.value=t.priority||'normal';taskSupervision.checked=!!t.supervision;taskTimed.checked=!!t.timedMinutes;taskTimedMinutes.value=t.timedMinutes||60;taskTimedOptions.hidden=!taskTimed.checked;execType.value=t.groupId?'group':'individual';renderTargets();if(t.groupId){let z=document.querySelector('.tg[value="'+t.groupId+'"]');if(z)z.checked=true}else document.querySelectorAll('.tm').forEach(x=>x.checked=ids(t).includes(x.value));fsjTargetSelectionSync();taskSaveBtn.textContent='Salvar alteração';navTo('novaTarefa');const concluir=document.getElementById('fsjConcluirEdicaoBtn');if(concluir)concluir.hidden=['Concluída','Arquivado','Arquivada'].includes(t.status);taskEditId.value=t.id;taskSaveBtn.textContent='Salvar alteração';taskText.value=t.text;}
 async function delTask(id){if(!confirm('Excluir esta tarefa?'))return;try{await api('/rest/v1/tarefas?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}});S.tasks=S.tasks.filter(x=>x.id!==id);save();render()}catch(e){alert('Não foi possível excluir na Armazenagem: '+e.message)}}
 function act(id,a){let t=S.tasks.find(x=>x.id===id);if(!t||t.status==='Concluída')return alert('Esta tarefa já foi concluída.');if(a==='done'){t.status='Concluída';t.completedBy=employee.value;t.response='Concluída'}if(a==='why'){let z=prompt('Justificativa:');if(z===null)return;t.status='Pendente';t.response=z}if(a==='ask'){let z=prompt('Pergunta à gestão:');if(z===null)return;t.status='Aguardando gestão';t.question=z}save();render();employeeView()}
 function attach(id,el){let f=el.files&&el.files[0];if(!f)return;let t=S.tasks.find(x=>x.id===id);t.attachments=t.attachments||[];t.attachments.push({name:f.name,type:f.type,size:f.size});save();employeeView()}
@@ -2161,6 +2163,8 @@ function fsjRestaurarFiltroExecucao(contexto){
    lista.dataset.fsjCategory=contexto.categoria;
    const status=document.getElementById('fsjExecucaoStatus');
    if(status)status.value=contexto.situacao??'Em aberto';
+   const numero=document.getElementById('fsjExecucaoNumero');
+   if(numero)numero.value=contexto.numero||'';
   }
   lista.dataset.fsjFilterKey=contexto.filtro;
   lista.dataset.fsjPageIndex=String(contexto.pagina);
@@ -2181,8 +2185,24 @@ function fsjRenderTarefasEmExecucao(){
   filters=document.createElement('div');filters.id='fsjArquivoFiltros';filters.style.cssText='display:flex;flex-wrap:wrap;gap:12px;margin:12px 0';
   const selectors=[['fsjArquivoPessoa',desktop?'Executor Individual ou Supervisor':'Executor Individual']];
   if(!desktop)selectors.push(['fsjArquivoGrupo','Grupo Executor']);
+  if(desktopOwner){
+   const label=document.createElement('label');
+   label.id='fsjExecucaoNumeroLabel';
+   label.textContent='Número da tarefa';
+   const input=document.createElement('input');
+   const options=document.createElement('datalist');
+   input.type='search';
+   input.id='fsjExecucaoNumero';
+   input.placeholder='Ex.: 53';
+   input.autocomplete='off';
+   options.id='fsjExecucaoNumeros';
+   input.setAttribute('list',options.id);
+   input.addEventListener('input',fsjRenderTarefasEmExecucao);
+   label.append(input,options);
+   filters.append(label);
+  }
   for(const [id,title] of selectors){
-   const label=document.createElement('label');label.textContent=title+' ';const select=document.createElement('select');select.id=id;select.style.cssText='max-width:100%;min-width:160px';select.addEventListener('change',()=>{if(select.value){const other=document.getElementById(id==='fsjArquivoPessoa'?'fsjArquivoGrupo':'fsjArquivoPessoa');if(other)other.value='';}fsjRenderTarefasEmExecucao();});label.append(select);filters.append(label);
+   const label=document.createElement('label');label.textContent=title+' ';const select=document.createElement('select');select.id=id;select.style.cssText='max-width:100%;min-width:160px';select.addEventListener('change',()=>{if(select.value){const other=document.getElementById(id==='fsjArquivoPessoa'?'fsjArquivoGrupo':'fsjArquivoPessoa');if(other)other.value='';}const numero=document.getElementById('fsjExecucaoNumero');if(numero)numero.value='';fsjRenderTarefasEmExecucao();});label.append(select);filters.append(label);
   }
   box.before(filters);
  }
@@ -2200,6 +2220,8 @@ function fsjRenderTarefasEmExecucao(){
     button.value=value;
     button.setAttribute('aria-controls',box.id);
     button.addEventListener('click',()=>{
+     const numero=document.getElementById('fsjExecucaoNumero');
+     if(numero)numero.value='';
      box.dataset.fsjCategory=box.dataset.fsjCategory===value?'':value;
      fsjRenderTarefasEmExecucao();
     });
@@ -2217,7 +2239,11 @@ function fsjRenderTarefasEmExecucao(){
    statusLabel=document.createElement('label');statusLabel.id='fsjExecucaoStatusLabel';statusLabel.textContent='Situação da tarefa ';
    const sel=document.createElement('select');sel.id='fsjExecucaoStatus';
    [['Em aberto','Em aberto (padrão)'],['Em andamento','Em andamento'],['Pendente','Pendente'],['Concluída','Concluída'],['Arquivado','Arquivadas'],['','Todas as situações']].forEach(([value,label])=>sel.add(new Option(label,value)));
-   sel.addEventListener('change',()=>fsjRenderTarefasEmExecucao());
+   sel.addEventListener('change',()=>{
+    const numero=document.getElementById('fsjExecucaoNumero');
+    if(numero)numero.value='';
+    fsjRenderTarefasEmExecucao();
+   });
    statusLabel.append(sel);filters.append(statusLabel);
   }
  }
@@ -2245,13 +2271,26 @@ function fsjRenderTarefasEmExecucao(){
  }
  if(supervisor)supervisedPeople.add(String(supervisor.pessoa_id));
  const groupsById=new Map(groups.map(g=>[String(g.id),g]));
- const category=desktop?box.dataset.fsjCategory||'':'';
+ const numero=desktopOwner?document.getElementById('fsjExecucaoNumero'):null;
+ const busca=numero?.value.trim()||'';
+ const normalizarNumero=valor=>String(valor||'').trim().match(/^(?:tar[\s-]*)?0*(\d+)(?:\s+[a-z])?$/i)?.[1];
+ const numeroProcurado=normalizarNumero(busca);
+ if(numero){
+  const options=document.getElementById('fsjExecucaoNumeros');
+  const codes=[...new Set((S.tasks||[]).map(t=>t.code).filter(code=>normalizarNumero(code)))];
+  codes.sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+  if(codes.length!==options.options.length||codes.some((code,i)=>code!==options.options[i].value)){
+   options.replaceChildren(...codes.map(code=>new Option('',code)));
+  }
+ }
+ const category=desktop&&!busca?box.dataset.fsjCategory||'':'';
  const taskCategory=t=>t.groupId?'grupo':fsjTarefaPeriodica(t)?'periodicas':'pontuais';
  if(gsel)setOptions(gsel,[['','Todos os grupos'],...groups.filter(g=>g.ativo!==false).map(g=>[String(g.id),g.name||String(g.id)])]);
 
  const active=(Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[]).filter(e=>e.estado==='em_andamento'&&e.iniciado_em&&!e.concluido_em);
  const activeMap=new Map(active.map(e=>[String(e.tarefa_id),e]));
  const tasks=(S.tasks||[]).filter(t=>{
+  if(busca)return Boolean(numeroProcurado)&&normalizarNumero(t.code)===numeroProcurado;
   const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status);
   const statusFiltro=desktop?document.getElementById('fsjExecucaoStatus')?.value??'Em aberto':'';
   const situacao=archived?'Arquivado':(activeMap.has(String(t.id))?'Em andamento':String(t.status||'Em aberto'));
@@ -2274,7 +2313,7 @@ function fsjRenderTarefasEmExecucao(){
   if(gsel?.value&&groupId!==gsel.value)return false;
   return true;
  }).sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),'pt-BR',{numeric:true}));
- if(!tasks.length){box.dataset.fsjPageIndex='0';box.textContent='Nenhuma tarefa encontrada para os filtros selecionados.';const pager=document.getElementById('fsjExecucaoPaginador');if(pager){pager.replaceChildren();pager.hidden=true;}return;}
+ if(!tasks.length){box.dataset.fsjPageIndex='0';box.textContent=busca?'Nenhuma tarefa encontrada para esse número.':'Nenhuma tarefa encontrada para os filtros selecionados.';const pager=document.getElementById('fsjExecucaoPaginador');if(pager){pager.replaceChildren();pager.hidden=true;}return;}
  const sections=category
   ? [[categories.find(([value])=>value===category)[1],tasks]]
   : [['Tarefas individuais',tasks.filter(t=>!t.groupId)],['Tarefas de grupo',tasks.filter(t=>!!t.groupId)]];
@@ -2284,7 +2323,7 @@ function fsjRenderTarefasEmExecucao(){
    const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status),e=activeMap.get(String(t.id));
    const article=document.createElement('article');article.style.cssText='border:1px solid #cbded6;border-radius:9px;padding:12px;margin:10px 0';
    const task=document.createElement('button');task.type='button';task.className='fsj-task-number';if(desktopOwner)task.classList.add(...fsjTaskClass(t.priority||t.prioridade,archived?'Arquivado':t.status,Boolean(e)).split(' '));task.textContent=(t.code||'Tarefa')+(fsjFrequency(t)==='pontual'?' P':' '+({diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'E',anual:'A'}[fsjFrequency(t)]||''))+' — '+(t.text||'Sem descrição')+' — '+fsjFrequencyLabel(t);task.addEventListener('click',()=>{if(fsjFrequency(t)!=='pontual'){if(window.matchMedia('(max-width:700px)').matches)fsjSelecionarExecutorCalendarioCelular(t);else fsjCalendarioExecucaoDesktop(t);}else{fsjOpenTaskDetails(t.code,t.text,'Responsáveis: '+names(t),()=>fsjLoadTaskDetails(t.id),t.frequency,()=>fsjAcoesPontuaisProprietario(t));}});article.append(task);
-   if(archived){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
+   if(archived&&!desktopOwner){const tag=document.createElement('strong');tag.textContent=' ARQUIVADA';tag.style.cssText='color:#b91c1c;margin-left:10px';article.append(tag);}
    const group=(S.groups||[]).find(g=>String(g.id)===String(t.groupId));
    const fields=[['Tipo',t.groupId?'Grupo'+(group?' — '+group.name:''):'Individual'],['Responsável',names(t)],['Registro',t.created?fsjDataHora(t.created):'Data/hora não disponível'],['Periodicidade',t.frequency||'pontual'],['Situação',archived?'Arquivada':(e?'Em execução':t.status||'Em aberto')]];
    if(e)fields.push(['Início',fsjDataHora(e.iniciado_em)]);
@@ -2298,7 +2337,7 @@ function fsjRenderTarefasEmExecucao(){
  const cards=[...box.querySelectorAll('section > article')];
  const perPage=2; // Duas tarefas por página no Desktop, sem rolagem vertical
  const pages=Math.max(1,Math.ceil(cards.length/perPage));
- const filterKey=desktop?[psel.value,category,document.getElementById('fsjExecucaoStatus')?.value??'Em aberto'].join('|'):psel.value+'|'+(gsel?.value||'');
+ const filterKey=desktop?[psel.value,category,document.getElementById('fsjExecucaoStatus')?.value??'Em aberto',busca].join('|'):psel.value+'|'+(gsel?.value||'');
  const priorKey=box.dataset.fsjFilterKey;
  let pageIndex=priorKey===filterKey?Number(box.dataset.fsjPageIndex||0):0;
  pageIndex=Math.max(0,Math.min(pageIndex,pages-1));
@@ -3080,16 +3119,20 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   display:flex;
   flex-direction:column;
   gap:4px;
-  flex:1 1 220px;
+  flex:1 1 185px;
   min-width:0;
   max-width:380px;
   margin:0;
  }
  #gestor #tarefasEmExecucao.fsj-owner-execution-desktop #fsjArquivoFiltros>#fsjExecucaoStatusLabel {
-  flex-basis:185px;
+  flex-basis:155px;
   max-width:260px;
  }
- #gestor #tarefasEmExecucao.fsj-owner-execution-desktop #fsjArquivoFiltros select {
+ #gestor #tarefasEmExecucao.fsj-owner-execution-desktop #fsjArquivoFiltros>#fsjExecucaoNumeroLabel {
+  flex-basis:112px;
+  max-width:145px;
+ }
+ #gestor #tarefasEmExecucao.fsj-owner-execution-desktop #fsjArquivoFiltros :is(select,#fsjExecucaoNumero) {
   width:100%;
   min-width:0!important;
   height:38px;

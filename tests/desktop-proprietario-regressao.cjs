@@ -60,6 +60,8 @@ async function openFixture(page, desktop) {
       fsjFrequencyLabel: () => 'Pontual',
       fsjTarefaPeriodica: () => false,
       fsjDataHora: () => 'hoje',
+      fsjOpenTaskDetails: code => { window.consultada = code; },
+      editTask: id => { window.editada = id; },
       fsjSimpleSelectGo: id => window.navTo(id),
       fsjNavToShow(id) {
         window.currentPage = id;
@@ -117,11 +119,36 @@ test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rod
     await open.click();
     assert.equal(await status.inputValue(), 'Em aberto');
 
+    const number = page.getByLabel('Número da tarefa',{exact:true});
+    const list = page.locator('#fsjExecucaoLista');
+    const person = page.locator('#fsjArquivoPessoa');
+    await person.selectOption('1');
+    await page.locator('#fsjExecucaoCategorias button[value="grupo"]').click();
+    assert.equal(await number.locator('xpath=..').evaluate(el => el.nextElementSibling.querySelector('select').id), 'fsjArquivoPessoa');
+    assert.equal(await page.locator('#fsjExecucaoNumeros option[value="Tar-7"]').count(), 1);
+    await number.fill('0007');
+    assert.equal(await list.locator('article').count(), 1);
+    assert.ok(await list.locator('.fsj-task-archived').isVisible());
+    assert.equal(await list.getByText('ARQUIVADA', { exact: true }).count(), 0);
+    await list.locator('.fsj-task-number').click();
+    assert.equal(await page.evaluate(() => window.consultada), 'Tar-7');
+    assert.equal(await list.getByRole('button', { name: 'Editar' }).count(), 0);
+    await number.fill('Tar-000002 P');
+    assert.equal(await list.locator('article').count(), 1);
+    await list.getByRole('button', { name: 'Editar' }).click();
+    assert.equal(await page.evaluate(() => window.editada), '2');
+    await number.fill('9999');
+    assert.match(await list.textContent(), /Nenhuma tarefa encontrada para esse número/);
+    await open.click();
+    assert.equal(await number.inputValue(), '');
+    assert.equal(await status.inputValue(), 'Em aberto');
+    await page.locator('#fsjExecucaoCategorias button[value="grupo"]').click();
+
     for (const viewport of [{ width: 1914, height: 912 }, { width: 1280, height: 720 }]) {
       await page.setViewportSize(viewport);
-      const controls = await page.locator('#fsjArquivoFiltros select, #fsjExecucaoCategorias button').evaluateAll(nodes =>
+      const controls = await page.locator('#fsjArquivoFiltros select, #fsjExecucaoNumero, #fsjExecucaoCategorias button').evaluateAll(nodes =>
         nodes.map(node => node.getBoundingClientRect().bottom));
-      assert.equal(controls.length, 5);
+      assert.equal(controls.length, 6);
       assert.ok(Math.max(...controls) - Math.min(...controls) < 2, 'Filtros e categorias devem ficar na mesma linha');
       const panel = await page.locator('#tarefasEmExecucao').boundingBox();
       const avatar = await page.locator('#brisaFab').boundingBox();
@@ -155,6 +182,7 @@ test('Celular conserva seus seletores de executor e grupo', async () => {
     assert.equal(await page.locator('#fsjArquivoPessoa').count(), 1);
     assert.equal(await page.locator('#fsjArquivoGrupo').count(), 1);
     assert.equal(await page.locator('#fsjExecucaoStatus').count(), 0);
+    assert.equal(await page.locator('#fsjExecucaoNumero').count(), 0);
     assert.equal(await page.locator('.fsj-owner-execution-desktop').count(), 0);
   } finally {
     await browser.close();
