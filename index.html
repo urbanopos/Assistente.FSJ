@@ -3761,7 +3761,11 @@ document.addEventListener('click',e=>{
  const action=el.getAttribute('onclick')||'';
  if(/navTo\\(['"]cadPessoas['"]/.test(action))requestAnimationFrame(()=>arrange(true));
 },true);
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+document.addEventListener('fsj:entry-validated',()=>requestAnimationFrame(()=>{
+ if(isDesktop()&&window.fsjOwnerVerified===true&&section()&&!section().classList.contains('hidden'))arrange(true);
+}));
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();requestAnimationFrame(()=>{if(section()&&!section().classList.contains('hidden'))arrange(true)})},{once:true});
+else {init();requestAnimationFrame(()=>{if(section()&&!section().classList.contains('hidden'))arrange(true)})}
 })();
 </script>
 </body></html>
