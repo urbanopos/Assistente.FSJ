@@ -2,7 +2,7 @@
 
 ### Filtros e paginação de Tarefas em Execução no Desktop do Proprietário — 17/11/2026
 
-Build `20261117-execucao-desktop-alinhamento-01`. Em **Tarefas em Execução**, os botões **Tarefas Periódicas**, **Tarefas Pontuais** e **Tarefas de Grupo** ficam ao lado dos seletores de executor ou supervisor e de situação, com a base dos controles alinhada. Se a janela ficar estreita, os controles passam para outra linha dentro do painel. O rodapé agrupa a seta anterior, o número da página e a seta seguinte no centro do painel, fora da área do avatar da MarIA.
+Build `20261117-execucao-desktop-alinhamento-02`. Em **Tarefas em Execução**, os botões **Tarefas Periódicas**, **Tarefas Pontuais** e **Tarefas de Grupo** ficam ao lado dos seletores de executor ou supervisor e de situação, com a base dos controles alinhada. Se a janela ficar estreita, os controles passam para outra linha dentro do painel. O rodapé agrupa a seta anterior, o número da página e a seta seguinte no centro do painel, fora da área do avatar da MarIA.
 
 A simulação com dados fictícios verificou as três categorias, a troca de página, a consulta vazia e os seletores do Celular. O contrato de atualização automática passou. A conferência visual na sessão do Proprietário fica a cargo do teste após atualização do GitHub Pages. O commit deste build é o ponto de reversão. Consulte [Layout Desktop do Proprietário](../desktop/layouts/proprietario/README.md).
 
