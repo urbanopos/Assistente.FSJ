@@ -37,7 +37,7 @@ Aprovado por Urbano em 17/11/2026, para Desktop e Celular. Versão aprovada: `20
 
 ### Tarefas em Execução no Desktop do Proprietário — 17/11/2026
 
-Build `20261117-execucao-desktop-numero-decrescente-01`. Ao abrir a tela ou clicar novamente em **Tarefas em Execução** no menu lateral, a consulta inicia em **Em aberto**, na página 1. O filtro de situação permite consultar os demais estados. Ao voltar da edição, a consulta recupera a situação, o responsável, a categoria e a página anteriores.
+Build `20261117-execucao-desktop-numero-decrescente-01`. Ao abrir a tela ou clicar novamente em **Tarefas em Execução** no menu lateral, a consulta inicia com **Tarefas Periódicas** selecionado, situação **Em aberto**, na página 1. O filtro de situação permite consultar os demais estados. Ao voltar da edição, a consulta recupera a situação, o responsável, a categoria e a página anteriores.
 
 O campo **Número da tarefa**, à esquerda de **Executor Individual ou Supervisor**, tem o mesmo estilo e alinhamento dos seletores da linha, oferece sugestões de código em ordem decrescente e aceita o número com ou sem o prefixo `Tar-`. O campo usa pesquisa pelo teclado. A busca direta consulta todas as situações. A tarefa encontrada abre pelo código e oferece **Editar** quando a situação permite. Ao retornar da edição, a busca é recuperada. As arquivadas são identificadas pelo link roxo e pelo campo **Situação**.
 

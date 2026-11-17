@@ -59,7 +59,7 @@ async function openFixture(page, desktop) {
       names: () => 'Pessoa fictícia',
       fsjFrequency: task => task.frequency,
       fsjFrequencyLabel: () => 'Pontual',
-      fsjTarefaPeriodica: () => false,
+      fsjTarefaPeriodica: task => task.frequency !== 'pontual',
       fsjDataHora: () => 'hoje',
       fsjOpenTaskDetails: code => { window.consultada = code; },
       editTask: id => { window.editada = id; },
@@ -76,7 +76,7 @@ async function openFixture(page, desktop) {
         groups: [],
         tasks: statuses.map(([status, priority], i) => ({
           id: String(i + 1), code: 'Tar-' + (i === 6 ? 17 : i + 1),
-          text: 'Tarefa fictícia ' + (i + 1), frequency: 'pontual', status, priority, personIds: ['1']
+          text: 'Tarefa fictícia ' + (i + 1), frequency: i===0?'diaria':i===4?'semanal':'pontual', status, priority, personIds: ['1']
         }))
       }
     });
@@ -98,9 +98,13 @@ test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rod
     const status = page.locator('#fsjExecucaoStatus');
     const pager = page.locator('#fsjExecucaoPaginador');
     const count = pager.locator('strong');
+    const periodic = page.getByRole('button', { name: 'Tarefas Periódicas', exact: true });
     await open.click();
     assert.equal(await status.inputValue(), 'Em aberto');
-    assert.equal(await count.textContent(), '1 / 2');
+    assert.equal(await periodic.getAttribute('aria-pressed'), 'true');
+    assert.equal(await count.textContent(), '1 / 1');
+    assert.equal(await page.locator('#fsjExecucaoLista article').count(), 1);
+    await periodic.click();
     await status.selectOption('');
     assert.equal(await count.textContent(), '1 / 4');
     await pager.getByRole('button', { name: '→' }).click();
@@ -115,11 +119,13 @@ test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rod
 
     await open.click();
     assert.equal(await status.inputValue(), 'Em aberto');
-    assert.equal(await count.textContent(), '1 / 2');
+    assert.equal(await periodic.getAttribute('aria-pressed'), 'true');
+    assert.equal(await count.textContent(), '1 / 1');
     await status.selectOption('');
     await sidebar.getByRole('button', { name: 'Início' }).click();
     await open.click();
     assert.equal(await status.inputValue(), 'Em aberto');
+    assert.equal(await periodic.getAttribute('aria-pressed'), 'true');
 
     const number = page.getByLabel('Número da tarefa',{exact:true});
     const list = page.locator('#fsjExecucaoLista');
@@ -153,7 +159,8 @@ test('Desktop Proprietário usa o menu real, as cores vigentes e o centro do rod
     await open.click();
     assert.equal(await number.inputValue(), '');
     assert.equal(await status.inputValue(), 'Em aberto');
-    await page.locator('#fsjExecucaoCategorias button[value="grupo"]').click();
+    assert.equal(await periodic.getAttribute('aria-pressed'), 'true');
+    await periodic.click();
 
     for (const viewport of [{ width: 1914, height: 912 }, { width: 1280, height: 720 }]) {
       await page.setViewportSize(viewport);
