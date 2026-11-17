@@ -246,7 +246,7 @@ test('ficha da tarefa mostra situação, ações e pausas no Desktop e no Celula
       await page.addScriptTag({ content: ownerActions });
       const open = () => page.evaluate(() => window.fsjOpenTaskDetails(
         'Tar-000015', 'Descrição inicial', 'Responsável fictício',
-        () => window.fsjLoadTaskDetails('ficticia'), 'pontual', window.windowOwnerActions
+        () => window.fsjLoadTaskDetails('ficticia',{ summaryOnly: true }), 'pontual', window.windowOwnerActions
       ));
       await open();
       const dialog = page.locator('#fsj-task-detail');
@@ -259,9 +259,16 @@ test('ficha da tarefa mostra situação, ações e pausas no Desktop e no Celula
       const statusBounds = await status.boundingBox();
       assert.ok(statusBounds.y >= actionsBounds.y + actionsBounds.height);
       assert.equal(await dialog.locator('#fsj-task-detail-history > ul li').count(), 2);
-      assert.equal(await dialog.getByText('Execução — histórico', { exact: true }).isVisible(), false);
-      await dialog.getByText('Histórico e registros', { exact: true }).click();
-      assert.equal(await dialog.getByText('Execução — histórico', { exact: true }).isVisible(), true);
+      const executionHistory = dialog.getByText('Situação da tarefa', { exact: true });
+      assert.equal(await dialog.getByText('Execução — histórico', { exact: true }).count(), 0);
+      assert.equal(await dialog.getByText('Respostas e justificativas', { exact: true }).count(), 0);
+      assert.match(await dialog.locator('#fsj-task-detail-history > details').textContent(), /Responsável fictício.*Registro:/s);
+      const historyDisclosure = dialog.getByText('Histórico e registros', { exact: true });
+      assert.equal(await executionHistory.isVisible(), true);
+      await historyDisclosure.click();
+      assert.equal(await executionHistory.isVisible(), false);
+      await historyDisclosure.click();
+      assert.equal(await executionHistory.isVisible(), true);
       for (const label of ['Editar', 'Concluir', 'Excluir']) {
         assert.equal(await dialog.getByRole('button', { name: label, exact: true }).count(), 1);
       }
@@ -271,7 +278,7 @@ test('ficha da tarefa mostra situação, ações e pausas no Desktop e no Celula
       await open();
       assert.equal(await status.textContent(), 'Situação: Em aberto');
       assert.equal(await dialog.getByText('Pausas', { exact: true }).count(), 0);
-      assert.equal(await dialog.locator('#fsj-task-detail-history > details').evaluate(el => el.open), false);
+      assert.equal(await dialog.locator('#fsj-task-detail-history > details').evaluate(el => el.open), true);
       await page.evaluate(() => {
         window.historyRequest = window.fsjOpenTaskDetails(
           'Tar-000015', 'Descrição integral da tarefa', 'Responsável fictício',

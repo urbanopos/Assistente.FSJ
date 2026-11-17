@@ -71,6 +71,7 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
   if(details.description!==undefined)document.getElementById('fsj-task-detail-description').textContent=details.description;
   notice.remove();
   let sectionHost=history;
+  let sections=details.sections;
   if(renderActions&&!initialStatus)history.append(renderActions());
   if(details.overview){
    showStatus(details.overview.status);
@@ -87,6 +88,7 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
     history.append(heading,list);
    }
    const records=document.createElement('details');
+   records.open=true;
    const summary=document.createElement('summary');
    summary.textContent='Histórico e registros';
    records.append(summary);
@@ -97,8 +99,9 @@ async function fsjOpenTaskDetails(code,description,context='',loadDetails,freque
    }
    history.append(records);
    sectionHost=records;
+   sections=[{title:'Situação da tarefa',entries:[{text:details.overview.recordSummary}]}];
   }
-  for(const section of details.sections){const heading=document.createElement('h3');heading.textContent=section.title;sectionHost.append(heading);for(const entry of section.entries){const block=document.createElement('div');block.className='fsj-detail-entry';const text=document.createElement('p');text.textContent=entry.text;block.append(text);for(const action of entry.actions||[]){const button=document.createElement('button');button.type='button';button.textContent=action.label;button.addEventListener('click',async()=>{button.disabled=true;try{await action.run();}catch{const error=document.createElement('p');error.textContent='Não foi possível abrir o registro. Tente novamente.';block.append(error);}finally{button.disabled=false;}});block.append(button);}sectionHost.append(block);}}
+  for(const section of sections){const heading=document.createElement('h3');heading.textContent=section.title;sectionHost.append(heading);for(const entry of section.entries){const block=document.createElement('div');block.className='fsj-detail-entry';const text=document.createElement('p');text.textContent=entry.text;block.append(text);for(const action of entry.actions||[]){const button=document.createElement('button');button.type='button';button.textContent=action.label;button.addEventListener('click',async()=>{button.disabled=true;try{await action.run();}catch{const error=document.createElement('p');error.textContent='Não foi possível abrir o registro. Tente novamente.';block.append(error);}finally{button.disabled=false;}});block.append(button);}sectionHost.append(block);}}
  }catch{
   if(request!==fsjTaskDetailRequest||!dialog.open)return;
   notice.textContent=statusValue

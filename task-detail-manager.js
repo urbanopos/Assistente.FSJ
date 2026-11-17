@@ -8,7 +8,7 @@ async function fsjOpenTaskAttachment(attachment){
  if(url.origin!==new URL(ARMAZ_URL).origin||!url.pathname.startsWith('/storage/v1/object/sign/'))throw Error('Endereço inválido');
  const link=document.createElement('a');link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.click();
 }
-async function fsjLoadTaskDetails(id){
+async function fsjLoadTaskDetails(id,{summaryOnly=false}={}){
  const filter=encodeURIComponent(id),stamp=value=>value?fsjDataHora(new Date(value)):'Não registrado';
  const [tasks,answers,executions,events]=await Promise.all([
   api('/rest/v1/tarefas?id=eq.'+filter+'&select=id,descricao,codigo_tarefa,situacao,criada_em,concluida_em,concluida_por,diaria,prioridade,reaberta_em,reaberta_dia,reabertura_motivo'),
@@ -31,6 +31,12 @@ async function fsjLoadTaskDetails(id){
  }
  pauses.sort((a,b)=>new Date(b.at)-new Date(a.at));
  const summary=['Situação'+(t.diaria?' de hoje':'')+': '+situation,'Registro: '+stamp(t.criada_em),'Conclusão: '+(completed?'SIM — '+fsjDetailPerson(done?.pessoa_id||t.concluida_por)+' • '+stamp(done?.criado_em||t.concluida_em):negative?'NÃO — '+fsjDetailPerson(negative.pessoa_id)+' • '+stamp(negative.criado_em):'Ainda não informada')];
+ const overview={
+  status:situation,
+  pauses:pauses.map(p=>fsjDetailPerson(p.person)+' • '+stamp(p.at)),
+  recordSummary:summary.join('\n')
+ };
+ if(summaryOnly)return {description:t.descricao,overview};
  if(!current.length&&!completed)summary.push('Sem confirmação registrada para esta tarefa. Aguardando resposta do responsável.');
  if(t.reaberta_em)summary.push('Última revisão do Proprietário: '+stamp(t.reaberta_em)+' — '+t.reabertura_motivo);
  const sections=[{title:'Situação da tarefa',entries:[{text:summary.join('\n')}]},{title:'Execução — histórico',entries:executions.length?executions.map(e=>({text:fsjDetailPerson(e.pessoa_id)+' • '+e.dia+'\nEstado: '+({em_andamento:'Em andamento',suspensa:'Suspensa',concluida:'Concluída'}[e.estado]||e.estado)+'\nInício: '+stamp(e.iniciado_em)+(e.retomado_em&&e.retomado_em!==e.iniciado_em?'\nRetomada: '+stamp(e.retomado_em):'')+(e.suspenso_em?'\nSuspensão: '+stamp(e.suspenso_em):'')+'\nConclusão: '+stamp(e.concluido_em)+'\nR/I: '+fsjIntervaloHoras(t.criada_em,e.iniciado_em)+' • E/C: '+fsjIntervaloHoras(e.iniciado_em,e.concluido_em)+' (tempo decorrido, incluindo pausas)'})):[{text:'Nenhum início de execução registrado.'}]}];
@@ -45,9 +51,6 @@ async function fsjLoadTaskDetails(id){
  const questions=answers.filter(r=>r.tipo==='pergunta');if(questions.length)sections.push({title:'Perguntas à administração',entries:questions.map(r=>({text:fsjDetailPerson(r.pessoa_id)+' • '+stamp(r.criado_em)+'\n'+r.conteudo+'\nPergunta registrada; não indica, por si só, tarefa automática.'}))});
  const revisions=await api('/rest/v1/conclusoes_revisoes?tarefa_id=eq.'+filter+'&select=dia_previsto,motivo,criado_em&order=criado_em.desc');
  if(revisions.length)sections.push({title:'Cancelamentos de conclusão pelo Proprietário',entries:revisions.map(r=>({text:(r.dia_previsto?'Dia previsto: '+r.dia_previsto+' • ':'')+stamp(r.criado_em)+'\nMotivo: '+r.motivo}))});
- return {description:t.descricao,sections,overview:{
-  status:situation,
-  pauses:pauses.map(p=>fsjDetailPerson(p.person)+' • '+stamp(p.at))
- }};
+ return {description:t.descricao,sections,overview};
 }
 

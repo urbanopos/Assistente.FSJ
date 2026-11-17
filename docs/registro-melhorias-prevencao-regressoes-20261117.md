@@ -33,7 +33,7 @@ O teste carrega também o adaptador compartilhado de voz. O campo **Número da t
 
 ## Ficha da tarefa no Desktop e no Celular
 
-A ficha apresenta a descrição, as ações existentes, a situação logo abaixo dos botões e as pausas registradas. O teste no navegador verifica as duas larguras, a posição da situação abaixo das ações, a ausência da seção de pausas quando vazia, a abertura do histórico sob demanda e o acionamento de **Editar**. O teste também simula uma consulta pendente e uma falha de histórico. A situação da lista continua abaixo dos botões nessas duas condições.
+A ficha apresenta a descrição, as ações existentes, a situação logo abaixo dos botões e as pausas registradas. O teste no navegador verifica as duas larguras, a posição da situação abaixo das ações, a ausência da seção de pausas quando vazia, o histórico aberto por padrão com responsáveis, situação, registro e conclusão, e a possibilidade de recolhê-lo e o acionamento de **Editar**. O teste também simula uma consulta pendente e uma falha de histórico. A situação da lista continua abaixo dos botões nessas duas condições.
 
 ## Incidente relacionado: calendário e conclusões periódicas
 
