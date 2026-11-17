@@ -803,7 +803,19 @@ function navTo(id,b,record=true){
  const seq=++fsjNavSequence;
  const notice=document.getElementById('fsjPageFreshness');
  if(notice){notice.hidden=true;notice.classList.add('hidden');}
+ // O acionamento explícito de Relatórios no menu sempre inicia uma nova consulta.
+ // Navegações programáticas (sem botão) podem definir filtros próprios depois.
+ if(id==='relatorios'&&b){
+  const mes=document.getElementById('month');
+  const pessoa=document.getElementById('fsjReportPerson');
+  const situacao=document.getElementById('fsjReportStatus');
+  if(mes)mes.value=typeof FSJDaily!=='undefined'&&typeof FSJDaily.month==='function'?FSJDaily.month():new Date().toISOString().slice(0,7);
+  if(pessoa)pessoa.value='';
+  if(situacao)situacao.value='Em aberto';
+  if(typeof fsjReportPage!=='undefined')fsjReportPage=0;
+ }
  fsjNavToShow(id,b,record);
+ if(id==='relatorios'&&b&&typeof monthly==='function')monthly();
  // Atualização seletiva e não bloqueante. Nunca trocar a página após a consulta.
  if(id==='cadPessoas'&&!document.getElementById('pid').value&&typeof atualizarPessoas==='function'){
   Promise.resolve().then(()=>{if(seq===fsjNavSequence&&currentPage===id&&!document.getElementById('pid').value)return atualizarPessoas();}).catch(e=>console.warn('FSJ: atualização de pessoas',e));
