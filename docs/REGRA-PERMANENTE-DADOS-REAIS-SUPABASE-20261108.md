@@ -21,3 +21,15 @@ Aprovada pelo Proprietário em 08/11/2026. Aplica-se a todas as telas Desktop, C
 - Sempre que a tela utilizar dados não confirmados ou a consulta central falhar, mostrar **tarja vermelha de AMBIENTE NÃO VALIDADO**, sem números antigos apresentados como atuais.
 - Esta regra é padrão para qualquer novo desenvolvimento, edição de layout ou navegação, incluindo Desktop, Celular e APK. Não modificar o FSJ.VM.
 - O monitor inicial no index.html é uma proteção geral; a auditoria individual das telas e de suas fontes de dados permanece necessária para assegurar cumprimento integral.
+
+## Regra homologada — Tarefas em Execução / Desktop Proprietário — 18/11/2026
+
+**Situação da tarefa → Em Aberto (Padrão)** é um filtro de **tarefas ainda não concluídas**, e NÃO uma comparação literal com o status `Em aberto`.
+
+- Incluir tarefas não iniciadas, iniciadas, em andamento, pendentes e entregues, desde que não concluídas.
+- Excluir tarefas concluídas e arquivadas; continuam acessíveis por seus filtros próprios.
+- Ao entrar pelo menu Tarefas em Execução, manter Em Aberto como seleção padrão.
+- Preservar a seleção de executor, categoria, paginação e consultas específicas conforme seus fluxos aprovados.
+- **Implementação validada pelo Proprietário:** `index.html`, função `fsjRenderTarefasEmExecucao`, commit `479bb2edb4dedd43b7a16a99d2ef475a798fccb9`.
+- **Regra anterior revogada:** `situacao === statusFiltro` quando `statusFiltro === 'Em aberto'`. Não restaurar esse teste literal em atualizações, merges, backups ou refatorações.
+- Validação visual e funcional informada pelo Proprietário em 18/11/2026. Nenhuma alteração nos dados operacionais decorre desta consolidação documental.
