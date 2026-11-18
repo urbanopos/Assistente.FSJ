@@ -3754,8 +3754,8 @@ function init(){
  function render(){
   const output=document.getElementById('fsjReportDailyResults');output.replaceChildren();
   const day=date.value;if(!day){output.textContent='Selecione uma data.';return;}
-  const tasks=window.S?.tasks||[];
-  const runs=Array.isArray(window.fsjTemposExecucoes)?window.fsjTemposExecucoes:[];
+  const tasks=typeof S!=='undefined'?(S.tasks||[]):[];
+  const runs=typeof fsjTemposExecucoes!=='undefined'&&Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[];
   const categories=[['Em execução',[]],['Concluídas',[]],['Entregues',[]]];
   for(const task of tasks){
    const tr=runs.filter(e=>String(e.tarefa_id)===String(task.id));
@@ -3773,7 +3773,7 @@ function init(){
    const list=document.createElement('ol');for(const task of items){
     const li=document.createElement('li');li.style.margin='10px 0';
     const link=document.createElement('button');link.type='button';link.className='fsj-task-number';link.textContent=String(task.code||'Tarefa')+' — '+String(task.text||'Sem descrição');
-    link.addEventListener('click',()=>{if(typeof window.fsjLoadTaskDetails==='function')window.fsjLoadTaskDetails(task.id,{summaryOnly:true});else if(typeof window.fsjOpenTaskDetails==='function')window.fsjOpenTaskDetails(task.code,task.text,'',null,task.frequency);});
+    link.addEventListener('click',()=>{if(typeof fsjLoadTaskDetails==='function')fsjLoadTaskDetails(task.id,{summaryOnly:true});else if(typeof fsjOpenTaskDetails==='function')fsjOpenTaskDetails(task.code,task.text,'',null,task.frequency);});
     li.append(link);list.append(li);
    }output.append(list);
   }
