@@ -52,3 +52,16 @@ Regras obrigatórias para Desktop e Celular, respeitando a interface própria de
 - **Critérios anteriores revogados:** links sem ação direta ou que não abram a consulta correspondente; listagem sem responsável; abertura de calendário periódico no mês atual ignorando a data selecionada; tentativa de usar funções inexistentes de abertura. Não reutilizar esses critérios em restaurações ou refatorações.
 - **Estado da implementação:** Desktop validado pelo Proprietário. A aplicação da mesma funcionalidade ao Celular é requisito aprovado, mas requer implementação e validação separadas; esta homologação não presume que a interface móvel já esteja concluída.
 - Não excluir histórico Git ou registros operacionais; a revogação é lógica/documental, sem apagar evidências de versões anteriores.
+
+## Homologação — Registrar Tarefa sem Histórico diário — 18/11/2026
+
+**Validação expressa do Proprietário:** alteração do arquivo `index.html` no commit `892cde5bb1d73eb5f804a03229f2035e032c2f69`.
+
+- Na página **Registrar Tarefa**, nos modos Desktop e Celular, não apresentar o bloco **Histórico diário**, seu cabeçalho, seletor de usuário, botão **Atualizar histórico**, área de resultados ou aviso de rotina das 7h que integravam esse bloco.
+- A entrada em Registrar Tarefa não deve disparar o carregamento desse histórico antigo.
+- A consulta diária consolidada aprovada pertence à seção **Relatórios**, sem misturar as responsabilidades das telas.
+- **Revogados:** desenhos, instruções e fluxos anteriores que recolocavam o Histórico diário abaixo do formulário de registro. Não restaurar por merge, cópia de backup, reutilização de HTML antigo ou refatoração.
+- **Preservação obrigatória:** campos, botões, validações, cadastros, edições, registros históricos e rotinas operacionais que não dependam visualmente do bloco retirado; layouts e paginações específicos de Desktop e Celular; permissões por perfil e Armazenagem central.
+- Funções auxiliares de histórico eventualmente usadas em outros lugares **não devem ser excluídas sem auditoria de referências**. Não excluir dados, histórico Git, backups necessários à recuperação ou implementações aprovadas de outros módulos.
+- Em caso de conflito entre documentos antigos e esta homologação, prevalece o comportamento validado do aplicativo. Revisar o conflito pontualmente, sem exclusão indiscriminada.
+
