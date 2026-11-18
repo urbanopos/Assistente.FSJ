@@ -65,3 +65,17 @@ Regras obrigatórias para Desktop e Celular, respeitando a interface própria de
 - Funções auxiliares de histórico eventualmente usadas em outros lugares **não devem ser excluídas sem auditoria de referências**. Não excluir dados, histórico Git, backups necessários à recuperação ou implementações aprovadas de outros módulos.
 - Em caso de conflito entre documentos antigos e esta homologação, prevalece o comportamento validado do aplicativo. Revisar o conflito pontualmente, sem exclusão indiscriminada.
 
+
+## Regra-mestra de autorização — Pessoas e Grupos — 18/11/2026
+
+**Decisão do Proprietário:** a seção **Pessoas e Grupos** é a fonte oficial dos atributos de cada pessoa e de suas autorizações. Nenhuma rotina, tela, link, consulta ou operação pode ser habilitada sem prévia identificação do usuário e consulta à sua ficha autorizativa atual.
+
+1. Confirmar identidade autenticada, vínculo com cadastro existente e situação ativa; negar acesso por padrão em caso de falha, ausência ou inconsistência.
+2. Consultar perfil, atributos, marcações e permissões individuais em Pessoas e Grupos **antes de cada autorização**; não inferir privilégios apenas de URL, dispositivo, interface ou estado local.
+3. Distinguir Consulta, Inclusão, Edição, Exclusão e operações especiais, aplicando as autorizações efetivamente atribuídas pelo Proprietário.
+4. Validar permissões também no servidor e na Armazenagem central (incluindo leituras e escritas), para impedir contorno por requisições diretas; controles visuais são complementares, não substitutos.
+5. Revalidar quando permissões ou estado cadastral mudarem; não manter privilégios revogados em sessões antigas.
+6. Manter perfis e interfaces Desktop/Celular independentes; preservar registros e funcionalidades homologadas.
+7. Para Gestor, permitir apenas as operações sobre registros operacionais autorizadas individualmente. Não permitir administração técnica, programação, arquitetura, integrações ou mudança de permissões de terceiros. Registros arquivados não podem ser editados ou excluídos pelo Gestor; a definição de arquivamento pelo Gestor permanece pendente e não deve ser presumida.
+
+**Implantação:** esta regra documenta o requisito obrigatório. A existência da documentação não comprova implementação das verificações de autorização no servidor; exigir auditoria, testes por perfil e homologação antes de declarar a proteção operacional concluída.
