@@ -3776,8 +3776,24 @@ function init(){
     link.dataset.fsjTaskId=String(task.id);
     link.textContent=typeof fsjTaskListLabel==='function'?fsjTaskListLabel(task.code,task.text,task.frequency):String(task.code||'Tarefa')+' — '+String(task.text||'Sem descrição');
     link.title='Abrir a tarefa e seus detalhes';
-    const executor=document.createElement('span');executor.className='fsj-report-daily-executor';executor.style.marginLeft='10px';
-    executor.style.color='#334b43';executor.textContent='Executor: '+(typeof names==='function'?(names(task)||'Não informado'):'Não informado');
+    link.addEventListener('click',event=>{
+     event.preventDefault();event.stopImmediatePropagation();
+     const periodic=typeof fsjTarefaPeriodica==='function'&&fsjTarefaPeriodica(task);
+     if(periodic){
+      const selectedDate=date.value||new Date().toISOString().slice(0,10);
+      const year=Number(selectedDate.slice(0,4)),month=Number(selectedDate.slice(5,7))-1;
+      const responsible=typeof ids==='function'?ids(task):[];
+      const pid=task.groupId?null:(responsible[0]||null);
+      if(typeof fsjCalendarioExecucaoDesktop==='function')fsjCalendarioExecucaoDesktop(task,selectedDate.slice(0,7),pid||undefined,true);
+      else if(typeof fsjCalendarioSomenteLeitura==='function')fsjCalendarioSomenteLeitura(task,pid,year,month);
+     }else if(typeof fsjOpenTaskDetails==='function'){
+      fsjOpenTaskDetails(task.code,task.text,'Responsáveis: '+(typeof names==='function'?names(task):''),()=>fsjLoadTaskDetails(task.id,{summaryOnly:true}),task.frequency,()=>fsjAcoesPontuaisProprietario(task),task.status);
+     }
+    },true);
+    const executor=document.createElement('span');executor.className='fsj-report-daily-executor';
+    executor.style.cssText='display:inline-block;margin-left:12px;font-size:13px;font-weight:600;color:#234b3e';
+    const responsibleNames=typeof names==='function'?names(task):'';
+    executor.textContent='Responsável'+(responsibleNames.includes(' + ')?'is':'')+': '+(responsibleNames||'Não informado');
     li.append(link,executor);list.append(li);
    }output.append(list);
   }
