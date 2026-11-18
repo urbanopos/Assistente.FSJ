@@ -97,3 +97,13 @@ Regras obrigatórias para Desktop e Celular, respeitando a interface própria de
 **Retificação posterior do Proprietário (prevalece sobre a regra de dupla identificação acima):** pessoas cadastradas com tipo **Funcionário** ficam **fora da exigência conjunta de telefone e e-mail**. Não exigir e-mail para habilitar o acesso do Funcionário; manter o mecanismo de identificação/autenticação já estabelecido para esse perfil, sujeito a validação de segurança. A dispensa não autoriza acesso sem identificação válida, cadastro ativo ou permissões pertinentes.
 
 A regra de telefone **E** e-mail permanece para os demais perfis. Em qualquer divergência entre as seções anteriores e esta exceção, **esta exceção prevalece**. Não aplicar mudanças disruptivas à autenticação em produção sem auditar fluxos, registros e mecanismos de segurança.
+
+## Homologação e preservação Desktop/Celular — 18/11/2026
+
+O Proprietário validou a apresentação do painel complementar do tipo Gestor (colunas Consulta e Edição) e determinou preservar as condições operacionais atuais de **Desktop** e **Celular**, com seus layouts próprios.
+
+- **Marco imutável de recuperação do código:** commit `06dd874744ab7fe5cea03d2a9bfc3dce8bcc5ef4`, branch `backup/desktop-celular-validados-2026-11-18-gestor`.
+- Não misturar layouts Desktop e Celular nem substituir arquivos de um pelo outro; não alterar módulos, rotinas, paginação, filtros, calendários ou dados fora do escopo de cada intervenção.
+- Alterações posteriores exigem preservação do estado aprovado, teste por perfil e plataforma, e nova validação do Proprietário antes de descartar a versão anterior.
+- A validação informada pelo Proprietário refere-se ao **painel do Gestor**; não implica homologação de controle de acesso efetivo no servidor, que ainda exige implementação e testes específicos.
+- O backup GitHub protege **código e arquivos versionados**, não constitui backup dos registros Supabase, da VM ou de segredos/configurações externas. Não afirmar proteção integral desses componentes sem cópias independentes verificadas.
