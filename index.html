@@ -2340,15 +2340,18 @@ function fsjRenderTarefasEmExecucao(){
   const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status);
   const statusFiltro=desktop?document.getElementById('fsjExecucaoStatus')?.value??'Em aberto':'';
   const situacao=archived?'Arquivado':(activeMap.has(String(t.id))?'Em andamento':String(t.status||'Em aberto'));
+  // Regra única para Desktop e Celular: tarefa concluída/arquivada não é Em Aberto.
+  // Verificar o status gravado antes do indicador transitório de execução.
+  const statusGravado=String(t.centralStatus||t.status||'Em aberto').trim().toLocaleLowerCase('pt-BR');
+  const concluidaOuArquivada=archived||['concluída','concluida','concluídas','concluidas','arquivado','arquivada','arquivadas'].includes(statusGravado);
   if(desktop&&statusFiltro){
    if(statusFiltro==='Em aberto'){
     // Padrão: todas as tarefas ainda não concluídas, inclusive iniciadas,
     // em andamento, pendentes e entregues. Exclui concluídas e arquivadas.
-    const finalizada=['concluída','concluida','concluídas','concluidas','arquivado','arquivada','arquivadas'].includes(String(situacao||'').trim().toLocaleLowerCase('pt-BR'));
-    if(finalizada||archived)return false;
+    if(concluidaOuArquivada)return false;
    }else if(situacao!==statusFiltro)return false;
   }
-  if(!desktop&&archived)return false;
+  if(!desktop&&concluidaOuArquivada)return false;
   if(category&&taskCategory(t)!==category)return false;
   const groupId=String(t.groupId||'');
   const groupMembers=groupsById.get(groupId)?.members||[];
