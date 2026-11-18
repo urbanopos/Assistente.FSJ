@@ -33,3 +33,7 @@ Aprovada pelo Proprietário em 08/11/2026. Aplica-se a todas as telas Desktop, C
 - **Implementação validada pelo Proprietário:** `index.html`, função `fsjRenderTarefasEmExecucao`, commit `479bb2edb4dedd43b7a16a99d2ef475a798fccb9`.
 - **Regra anterior revogada:** `situacao === statusFiltro` quando `statusFiltro === 'Em aberto'`. Não restaurar esse teste literal em atualizações, merges, backups ou refatorações.
 - Validação visual e funcional informada pelo Proprietário em 18/11/2026. Nenhuma alteração nos dados operacionais decorre desta consolidação documental.
+
+## Extensão homologada — Desktop e Celular — 18/11/2026
+
+A semântica **Em Aberto (Padrão)** aplica-se aos dois modos, sem unificação dos layouts: incluir tarefas ainda não concluídas (não iniciadas, iniciadas, em andamento, pendentes e entregues), excluir concluídas e arquivadas. Os controles, calendários, permissões, filtros e paginações específicos de Desktop e Celular permanecem independentes. Implementação em `index.html`, `fsjRenderTarefasEmExecucao`, commit `c9dca603a803a73cf826fbe5fef89572fd8537d4`. Não restaurar o filtro móvel antigo que excluía apenas arquivadas.
