@@ -1,4 +1,5 @@
 import wwebjs from 'whatsapp-web.js';
+import qrcode from 'qrcode-terminal';
 import {mkdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
 export async function connect(interactive=false) {
@@ -11,7 +12,7 @@ export async function connect(interactive=false) {
     timer=setTimeout(()=>reject(Error('WhatsApp não ficou pronto em 90 segundos.')),90000);
     client.once('ready',()=>{clearTimeout(timer);resolveReady();});
     client.once('auth_failure',()=>{clearTimeout(timer);reject(Error('Vínculo WhatsApp expirou. Execute npm run link novamente.'));});
-    client.once('qr',()=>{if(interactive)console.log('Escaneie o QR na janela aberta: WhatsApp → Aparelhos conectados.');else{clearTimeout(timer);reject(Error('WhatsApp ainda não vinculado. Execute npm run link no computador executor.'));}});
+    client.on('qr',qr=>{if(interactive){console.log('WhatsApp → Aparelhos conectados → Conectar aparelho. Escaneie o QR abaixo:');qrcode.generate(qr,{small:true});}else{clearTimeout(timer);reject(Error('WhatsApp ainda não vinculado. Execute o vínculo do executor emergencial.'));}});
   });
   try{await Promise.all([Promise.resolve().then(()=>client.initialize()),ready]);return client;}catch(e){await client.destroy().catch(()=>{});throw e;}finally{clearTimeout(timer);}
 }
