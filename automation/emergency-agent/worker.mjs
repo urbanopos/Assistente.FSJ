@@ -29,8 +29,12 @@ async function identity(){
  const owners=await db('fsj_titularidade?id=eq.true&select=pessoa_id');
  if(owners.length!==1)throw Error('Titularidade indisponível.');
  const people=await db('pessoas?id=eq.'+encodeURIComponent(owners[0].pessoa_id)+'&select=whatsapp');
- const actual=String(client.info?.wid?.user||'');
- if(!people[0]||normalizePhone(people[0].whatsapp)!==actual)throw Error('A sessão WhatsApp não pertence ao proprietário cadastrado.');
+ const actual=String(client.info?.wid?.user||'').replace(/\D/g,'');
+ if(!people[0])throw Error('Proprietário sem WhatsApp cadastrado.');
+ const registered=normalizePhone(people[0].whatsapp);
+ // Em números brasileiros, o identificador da própria sessão pode omitir o nono dígito.
+ const legacy=registered.replace(/^(55\d{2})9(\d{8})$/,'$1$2');
+ if(actual!==registered&&actual!==legacy)throw Error('A sessão WhatsApp não pertence ao proprietário cadastrado.');
  if(await client.getState()!=='CONNECTED')throw Error('WhatsApp desconectado.');
 }
 async function beat(connected){
