@@ -37,3 +37,18 @@ Aprovada pelo Proprietário em 08/11/2026. Aplica-se a todas as telas Desktop, C
 ## Extensão homologada — Desktop e Celular — 18/11/2026
 
 A semântica **Em Aberto (Padrão)** aplica-se aos dois modos, sem unificação dos layouts: incluir tarefas ainda não concluídas (não iniciadas, iniciadas, em andamento, pendentes e entregues), excluir concluídas e arquivadas. Os controles, calendários, permissões, filtros e paginações específicos de Desktop e Celular permanecem independentes. Implementação em `index.html`, `fsjRenderTarefasEmExecucao`, commit `c9dca603a803a73cf826fbe5fef89572fd8537d4`. Não restaurar o filtro móvel antigo que excluía apenas arquivadas.
+
+## Homologação — Relatório Diário Consolidado — 18/11/2026
+
+**Versão validada pelo Proprietário:** commit `4d5e496f16a65eebe577547b69a59a728b901358` de `index.html` (Desktop).
+
+Regras obrigatórias para Desktop e Celular, respeitando a interface própria de cada plataforma:
+- Relatório Diário Consolidado é o modo padrão ao acessar Relatórios; Relatório Mensal Consolidado continua disponível.
+- Cada ocorrência deve exibir número e descrição da tarefa e nome(s) de executor(es) ao lado.
+- O número da tarefa deve ser um link funcional que abre sua respectiva consulta.
+- Tarefas periódicas abrem calendário na competência da data selecionada; tarefas pontuais abrem detalhes.
+- Preservar as listas de Em execução, Concluídas e Entregues e seus registros datados.
+- Não alterar o layout, paginação, permissões ou navegação de uma plataforma ao implementar a outra.
+- **Critérios anteriores revogados:** links sem ação direta ou que não abram a consulta correspondente; listagem sem responsável; abertura de calendário periódico no mês atual ignorando a data selecionada; tentativa de usar funções inexistentes de abertura. Não reutilizar esses critérios em restaurações ou refatorações.
+- **Estado da implementação:** Desktop validado pelo Proprietário. A aplicação da mesma funcionalidade ao Celular é requisito aprovado, mas requer implementação e validação separadas; esta homologação não presume que a interface móvel já esteja concluída.
+- Não excluir histórico Git ou registros operacionais; a revogação é lógica/documental, sem apagar evidências de versões anteriores.
