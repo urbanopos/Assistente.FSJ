@@ -5,7 +5,7 @@ export async function connect(interactive=false) {
   const dir=process.env.FSJ_STATE_DIR;
   if(!dir)throw Error('Configure FSJ_STATE_DIR fora do checkout, em uma pasta privada persistente.');
   await mkdir(dir,{recursive:true,mode:0o700});
-  const client=new wwebjs.Client({authStrategy:new wwebjs.LocalAuth({clientId:'fsj',dataPath:resolve(dir,'auth')}),puppeteer:{headless:!interactive,executablePath:process.env.FSJ_CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox','--disable-setuid-sandbox']}});
+  const client=new wwebjs.Client({authStrategy:new wwebjs.LocalAuth({clientId:'fsj',dataPath:resolve(dir,'auth')}),puppeteer:{headless:true,executablePath:process.env.FSJ_CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox','--disable-setuid-sandbox']}});
   let timer;
   const ready=new Promise((resolveReady,reject)=>{
     timer=setTimeout(()=>reject(Error('WhatsApp não ficou pronto em 90 segundos.')),90000);
