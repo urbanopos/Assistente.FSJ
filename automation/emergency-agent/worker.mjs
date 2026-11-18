@@ -62,30 +62,22 @@ async function processJob(job){
  const number=await client.getNumberId(job.phone);
  if(!number?._serialized)throw Error('Destinatário não localizado no WhatsApp.');
  const chatId=number._serialized;
- const manual=await db('fsj_envios_manuais?pessoa_id=eq.'+encodeURIComponent(job.pessoa_id)+'&confirmado_em=not.is.null&order=confirmado_em.desc&limit=1&select=*');
- if(manual[0]&&!manual[0].whatsapp_message_id){
-  await reconcileManual({db,connect:async()=>client,row:manual[0]});
-  const fresh=await db('fsj_envios_manuais?id=eq.'+encodeURIComponent(manual[0].id)+'&select=whatsapp_message_id');
-  if(!fresh[0]?.whatsapp_message_id)throw Error('Mensagem manual anterior não identificada de forma única. Nada será apagado/enviado.');
-  manual[0].whatsapp_message_id=fresh[0].whatsapp_message_id;
- }
- const events=await db('mensagens_whatsapp?pessoa_id=eq.'+encodeURIComponent(job.pessoa_id)+'&tipo=in.(quadro_automatico,quadro_manual_identificado)&whatsapp_message_id=not.is.null&order=criado_em.desc&limit=1&select=*');
- const event=events[0];
- const previous=state.previousMessageId||(manual[0]&&(!event||Date.parse(manual[0].confirmado_em)>=Date.parse(event.criado_em))?manual[0].whatsapp_message_id:event?.whatsapp_message_id);
- if(!previous)throw Error('Mensagem anterior sem identificador real. Substituição bloqueada.');
- state.previousMessageId=previous;await persist(state);
- const record=async(type,details)=>{
-  state.eventIds ||= {};state.eventIds[type] ||= randomUUID();await persist(state);
-  await db('mensagens_whatsapp?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:state.eventIds[type],pessoa_id:job.pessoa_id,direcao:'saida',tipo:type==='substituicao_emergencial'?'quadro_manual_identificado':type,conteudo:JSON.stringify({dia:job.dia,codigo_mensagem:job.codigo,...details}),whatsapp_message_id:details.messageId||null})});
- };
- const result=await replaceEmergency({state,previousMessageId:previous,chatId,text:job.mensagem,persist,
-  revoke:async(id,chat)=>{await eligible();return revoke(client,id,chat);},
-  send:async(chat,caption)=>{
+ // O proprietário autorizou o envio mesmo se houver mensagem anterior.
+ // Nunca repetir automaticamente um job cujo resultado de transmissão seja incerto.
+ if(state.phase==='sending'||state.phase==='uncertain')throw Error('Envio incerto deste pedido: conferir a conversa antes de repetir.');
+ if(!state.messageId){
+  state.phase='sending';await persist(state);
+  try{
    await eligible();
-   const sent=await client.sendMessage(chat,media,{caption,sendMediaAsDocument:false});
-   if(!sent?.id?._serialized)throw Error('WhatsApp não confirmou o identificador da mensagem com imagem.');
-   return {messageId:sent.id._serialized,ack:sent.ack||0};
-  },record});
+   const sent=await client.sendMessage(chatId,media,{caption:job.mensagem,sendMediaAsDocument:false});
+   if(!sent?.id?._serialized)throw Error('WhatsApp não confirmou identificador da mensagem com imagem.');
+   state.messageId=sent.id._serialized;state.ack=sent.ack||0;state.phase='sent';await persist(state);
+  }catch(e){
+   state.phase='uncertain';state.lastError=String(e.message||e).slice(0,500);await persist(state);throw e;
+  }
+ }
+ const result={messageId:state.messageId,ack:state.ack};
+ await db('mensagens_whatsapp?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:job.id,pessoa_id:job.pessoa_id,direcao:'saida',tipo:'quadro_manual_identificado',conteudo:JSON.stringify({dia:job.dia,codigo_mensagem:job.codigo,status:'envio_emergencial_automatico'}),whatsapp_message_id:result.messageId})});
  await patch('fsj_emergency_jobs?id=eq.'+job.id,{estado:'enviado',whatsapp_message_id:result.messageId,finalizado_em:new Date().toISOString(),resultado:'Cabeçalho e legenda enviados em uma única mensagem pelo executor emergencial.'});
 }
 async function confirmManualJobs(){
