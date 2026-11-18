@@ -637,6 +637,20 @@ async function fsjCompartilharWeb(modo){
  #demandas #demandaEscolha{margin:7px 0!important}
 }
 </style><style id="fsj-archived-purple-style">.fsj-task-number.fsj-task-archived{background:#6b21a8!important;color:#fff!important;border:1px solid #581c87!important;animation:none!important;opacity:1!important}.fsj-task-archived.fsj-priority,.fsj-task-archived.fsj-urgent{animation:none!important;color:#fff!important}.fsj-task-number.fsj-task-archived strong{color:#fff!important}#taskRows tr:has(.fsj-task-archived),#demandaGrupoRows tr:has(.fsj-task-archived){background:#f3e8ff!important}</style>
+
+<style id="fsjOwnerMobileExecutionApproved20261118">
+@media(max-width:700px){
+ #gestor #tarefasEmExecucao #fsjArquivoFiltros{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;align-items:end}
+ #gestor #tarefasEmExecucao #fsjArquivoFiltros>label{min-width:0!important;width:100%!important}
+ #gestor #tarefasEmExecucao #fsjArquivoFiltros #fsjExecucaoStatusLabel{grid-column:1/-1;display:flex!important;flex-direction:row;align-items:center;justify-content:flex-end;gap:8px}
+ #gestor #tarefasEmExecucao #fsjArquivoFiltros #fsjExecucaoStatusLabel select{width:auto!important;min-width:145px!important}
+ #gestor #tarefasEmExecucao #fsjExecucaoCategorias{grid-column:1/-1;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0!important}
+ #gestor #tarefasEmExecucao #fsjExecucaoCategorias button{min-width:0;padding:10px 3px!important;font-size:12px;line-height:1.2;white-space:normal;min-height:48px;background:#08623f;color:white;border:1px solid #08623f}
+ #gestor #tarefasEmExecucao #fsjExecucaoCategorias button[aria-pressed="true"]{outline:3px solid #e9bd25;outline-offset:0}
+ #gestor #tarefasEmExecucao #fsjExecucaoPaginador{position:static!important;display:flex;justify-content:space-between!important;max-width:100%;gap:8px!important;margin-top:8px}
+ #gestor #tarefasEmExecucao #fsjExecucaoLista section article{max-width:100%;overflow-wrap:anywhere}
+}
+</style>
 </head><body class="fsj-booting">
 <header><img class="fsj-logo" src="fsj-logotipo.webp" alt="Fazenda São José — Sistema de Gestão"><div class="header-info"><div id="ownerAccount">Proprietário: Urbano</div><div id="ultimaAtualizacao">Verificando versão e dados atuais...</div><div>Armazenagem central</div></div><div class="fsj-ambiente-acoes" style="display:flex;align-items:center;gap:7px;margin-left:auto;flex-shrink:0"><label for="fsjFotoUsuarioArquivo" id="fsjFotoUsuarioBotao" title="Inserir ou alterar foto sincronizada do usuário" aria-label="Inserir foto do usuário" style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:44px;height:44px;border:2px solid #a8d2df;border-radius:50%;background:#fff;overflow:hidden;cursor:pointer;margin:0"><img id="fsjFotoUsuarioImagem" alt="Foto do usuário" style="width:100%;height:100%;object-fit:cover;display:none"><span id="fsjFotoUsuarioIcone" aria-hidden="true" style="font-size:22px">👤</span></label><input id="fsjFotoUsuarioArquivo" type="file" accept="image/*" style="display:none" aria-label="Escolher foto do usuário"><button type="button" class="danger" onclick="sairGestor()" style="flex-shrink:0;font-weight:700;min-height:44px" aria-label="Sair e desligar MarIA">Sair</button></div></header>
 <nav class="topnav"><div class="inner"><button class="active" onclick="navTo('dashboard',this)">Início</button><button onclick="navTo('cadPessoas',this)">Pessoas</button><button onclick="navTo('folgasGestor',this)">Folgas e feriados</button><button onclick="navTo('cadGrupos',this)">Grupos</button><button onclick="navTo('novaTarefa',this)">Tarefas</button><button onclick="navTo('demandas',this)">Demandas</button><button onclick="navTo('whatsapp',this)">WhatsApp</button><button type="button" onclick="abrirVideosReserva(this)">Vídeos e chamadas</button><button onclick="navTo('relatorios',this)">Relatórios</button><button onclick="navTo('seguranca',this)">Armazenagem</button></div></nav>
@@ -827,7 +841,7 @@ function navTo(id,b,record=true){
   if(typeof fsjReportPage!=='undefined')fsjReportPage=0;
   if(typeof fsjReportType!=='undefined')fsjReportType='periodicas';
  }
- if(id==='tarefasEmExecucao'&&window.fsjOwnerVerified===true&&window.FSJ_PLATFORM?.platform==='desktop'&&(id!==currentPage||b)){
+ if(id==='tarefasEmExecucao'&&window.fsjOwnerVerified===true&&(id!==currentPage||b)){
   const status=document.getElementById('fsjExecucaoStatus');
   const list=document.getElementById('fsjExecucaoLista');
   const numero=document.getElementById('fsjExecucaoNumero');
@@ -2225,15 +2239,15 @@ function fsjRenderTarefasEmExecucao(){
  box.replaceChildren();
  if(window.fsjOwnerVerified!==true){box.textContent='Consulta exclusiva do Proprietário autenticado.';return;}
  const page=document.getElementById('tarefasEmExecucao');
- const desktop=window.FSJ_PLATFORM?.platform==='desktop'||window.matchMedia('(min-width:701px)').matches;
- const desktopOwner=desktop&&window.FSJ_PLATFORM?.platform!=='celular';
+ const desktop=true; // Mesma logica de filtros e tarefas para o Proprietario em ambas plataformas
+ const desktopOwner=window.matchMedia('(min-width:701px)').matches&&window.FSJ_PLATFORM?.platform!=='celular';
  page.classList.toggle('fsj-owner-execution-desktop',desktopOwner);
  const categories=[['periodicas','Tarefas Periódicas'],['pontuais','Tarefas Pontuais'],['grupo','Tarefas de Grupo']];
  let filters=page.querySelector('#fsjArquivoFiltros');
  if(!filters){
   filters=document.createElement('div');filters.id='fsjArquivoFiltros';filters.style.cssText='display:flex;flex-wrap:wrap;gap:12px;margin:12px 0';
   const selectors=[['fsjArquivoPessoa',desktop?'Executor Individual ou Supervisor':'Executor Individual']];
-  if(!desktop)selectors.push(['fsjArquivoGrupo','Grupo Executor']);
+  if(!desktopOwner)selectors.push(['fsjArquivoGrupo','Grupo Executor']);
   if(desktopOwner){
    const label=document.createElement('label');
    label.id='fsjExecucaoNumeroLabel';
@@ -2404,7 +2418,7 @@ function fsjRenderTarefasEmExecucao(){
  const cards=[...box.querySelectorAll('section > article')];
  const perPage=2; // Duas tarefas por página no Desktop, sem rolagem vertical
  const pages=Math.max(1,Math.ceil(cards.length/perPage));
- const filterKey=desktop?[psel.value,category,document.getElementById('fsjExecucaoStatus')?.value??'Em aberto',busca].join('|'):psel.value+'|'+(gsel?.value||'');
+ const filterKey=[psel.value,gsel?.value||'',category,document.getElementById('fsjExecucaoStatus')?.value??'Em aberto',busca].join('|');
  const priorKey=box.dataset.fsjFilterKey;
  let pageIndex=priorKey===filterKey?Number(box.dataset.fsjPageIndex||0):0;
  pageIndex=Math.max(0,Math.min(pageIndex,pages-1));
