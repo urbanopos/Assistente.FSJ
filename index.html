@@ -3772,9 +3772,13 @@ function init(){
    if(!items.length){const p=document.createElement('p');p.textContent='Nenhum registro confirmado nesta categoria.';output.append(p);continue;}
    const list=document.createElement('ol');for(const task of items){
     const li=document.createElement('li');li.style.margin='10px 0';
-    const link=document.createElement('button');link.type='button';link.className='fsj-task-number';link.textContent=String(task.code||'Tarefa')+' — '+String(task.text||'Sem descrição');
-    link.addEventListener('click',()=>{if(typeof fsjLoadTaskDetails==='function')fsjLoadTaskDetails(task.id,{summaryOnly:true});else if(typeof fsjOpenTaskDetails==='function')fsjOpenTaskDetails(task.code,task.text,'',null,task.frequency);});
-    li.append(link);list.append(li);
+    const link=document.createElement('button');link.type='button';link.className='fsj-task-number';
+    link.dataset.fsjTaskId=String(task.id);
+    link.textContent=typeof fsjTaskListLabel==='function'?fsjTaskListLabel(task.code,task.text,task.frequency):String(task.code||'Tarefa')+' — '+String(task.text||'Sem descrição');
+    link.title='Abrir a tarefa e seus detalhes';
+    const executor=document.createElement('span');executor.className='fsj-report-daily-executor';executor.style.marginLeft='10px';
+    executor.style.color='#334b43';executor.textContent='Executor: '+(typeof names==='function'?(names(task)||'Não informado'):'Não informado');
+    li.append(link,executor);list.append(li);
    }output.append(list);
   }
   const note=document.createElement('p');note.className='muted';note.textContent='O relatório considera apenas eventos com data identificável nos registros carregados; tarefas sem histórico datado não são presumidas concluídas ou entregues.';output.append(note);
