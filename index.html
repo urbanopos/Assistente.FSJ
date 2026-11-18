@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261118-mobile-sem-menu-duplicado-v10">
+<meta name="fsj-build" content="20261118-mobile-seletor-compacto-v11">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -2378,6 +2378,7 @@ function fsjRenderTarefasEmExecucao(){
   .map(p=>[String(p.id),p.nick||p.name||String(p.id)])
   .map(([id,name])=>['supervisor:'+id,name+' (Supervisão)']);
  setOptions(psel,[['','Todas as pessoas'],...peopleOptions,...supervisorOptions]);
+ if(!desktopOwner && window.matchMedia('(max-width:700px)').matches)fsjCompactOwnerPersonSelector(psel);
  const supervisor=psel.value.startsWith('supervisor:')?supervisors.get(psel.value.slice('supervisor:'.length)):null;
  const supervisedGroups=new Set((supervisor?.grupos||[]).map(String));
  const supervisedPeople=new Set((supervisor?.pessoas||[]).map(String));
@@ -3928,4 +3929,40 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  body:has(#gestor:not(.hidden)) #fsjSimpleBar{display:none!important}
 }
 </style>
+
+<style id="fsjCompactOwnerPersonSelectorStyle20261118">
+@media(max-width:700px){
+ #tarefasEmExecucao .fsj-compact-person-original{display:none!important}
+ #tarefasEmExecucao .fsj-compact-person-trigger{width:100%;height:40px;text-align:left;background:var(--card,#fff);color:inherit;border:1px solid #999;border-radius:7px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;font:inherit}
+ .fsj-compact-person-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:14px}
+ .fsj-compact-person-panel{background:#fff;color:#222;width:min(100%,500px);max-height:min(76dvh,650px);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 30px #0004}
+ .fsj-compact-person-heading{padding:12px 16px;font-weight:700;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center}
+ .fsj-compact-person-heading button{border:0;background:transparent;font-size:24px;color:#333;min-width:38px}
+ .fsj-compact-person-options{overflow-y:auto;overscroll-behavior:contain}
+ .fsj-compact-person-option{width:100%;min-height:44px;padding:8px 16px;border:0;border-bottom:1px solid #eee;background:white;color:#222;display:flex;justify-content:space-between;align-items:center;text-align:left;font-size:16px;line-height:1.25}
+ .fsj-compact-person-option[aria-selected=true]{font-weight:700;background:#eef5ff}
+}
+</style>
+<script id="fsjCompactOwnerPersonSelector20261118">
+function fsjCompactOwnerPersonSelector(sel){
+ if(!sel||!sel.parentElement)return;
+ sel.classList.add('fsj-compact-person-original');
+ let trigger=sel.parentElement.querySelector('.fsj-compact-person-trigger');
+ if(!trigger){trigger=document.createElement('button');trigger.type='button';trigger.className='fsj-compact-person-trigger';sel.after(trigger);}
+ const selected=sel.selectedOptions[0];trigger.textContent=selected?selected.textContent:'Todas as pessoas';
+ trigger.onclick=()=>{
+  const overlay=document.createElement('div');overlay.className='fsj-compact-person-overlay';overlay.setAttribute('role','presentation');
+  const panel=document.createElement('div');panel.className='fsj-compact-person-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Selecionar pessoa');
+  const heading=document.createElement('div');heading.className='fsj-compact-person-heading';heading.append(document.createTextNode('Selecionar pessoa'));
+  const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Fechar');close.onclick=()=>overlay.remove();heading.append(close);panel.append(heading);
+  const list=document.createElement('div');list.className='fsj-compact-person-options';
+  for(const option of sel.options){
+   const item=document.createElement('button');item.type='button';item.className='fsj-compact-person-option';item.setAttribute('aria-selected',String(option.value===sel.value));
+   const label=document.createElement('span');label.textContent=option.textContent;const mark=document.createElement('span');mark.textContent=option.value===sel.value?'◉':'○';mark.setAttribute('aria-hidden','true');item.append(label,mark);
+   item.onclick=()=>{sel.value=option.value;overlay.remove();sel.dispatchEvent(new Event('change',{bubbles:true}));};list.append(item);
+  }
+  panel.append(list);overlay.append(panel);overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});document.body.append(overlay);close.focus();
+ };
+}
+</script>
 </body></html>
