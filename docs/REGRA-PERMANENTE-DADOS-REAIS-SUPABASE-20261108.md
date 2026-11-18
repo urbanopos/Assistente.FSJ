@@ -91,3 +91,9 @@ Regras obrigatórias para Desktop e Celular, respeitando a interface própria de
 - A dupla correspondência cadastral **não é prova de posse** de telefone/e-mail nem substitui autenticação segura e autorização por perfil no servidor. Não presumir que a simples digitação de dois dados conhecidos autentica o usuário.
 - Revogam-se quaisquer critérios anteriores que aceitem somente telefone ou somente e-mail para identificação habilitadora.
 - **Status:** requisito documentado; não alterar autenticação em produção sem verificar fluxos atuais, integridade dos cadastros, mecanismos de comprovação de posse e caminhos de recuperação para não bloquear usuários legítimos.
+
+## Exceção expressa — Funcionários — 18/11/2026
+
+**Retificação posterior do Proprietário (prevalece sobre a regra de dupla identificação acima):** pessoas cadastradas com tipo **Funcionário** ficam **fora da exigência conjunta de telefone e e-mail**. Não exigir e-mail para habilitar o acesso do Funcionário; manter o mecanismo de identificação/autenticação já estabelecido para esse perfil, sujeito a validação de segurança. A dispensa não autoriza acesso sem identificação válida, cadastro ativo ou permissões pertinentes.
+
+A regra de telefone **E** e-mail permanece para os demais perfis. Em qualquer divergência entre as seções anteriores e esta exceção, **esta exceção prevalece**. Não aplicar mudanças disruptivas à autenticação em produção sem auditar fluxos, registros e mecanismos de segurança.
