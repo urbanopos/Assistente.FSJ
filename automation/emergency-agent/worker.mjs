@@ -5,7 +5,9 @@ import {connect,revoke} from '../wa.mjs';
 import {reconcileManual} from '../manual-history.mjs';
 import {normalizePhone,localDay} from '../core.mjs';
 import {identifyPrevious} from '../emergency-replacement.mjs';
-import {prepareEmergencyManual} from '../emergency-manual-preparation.mjs';
+import {replaceEmergency} from '../emergency-replacement.mjs';
+import wwebjs from 'whatsapp-web.js';
+import {access} from 'node:fs/promises';
 
 const dir=process.env.FSJ_EMERGENCY_STATE_DIR;
 const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -47,6 +49,12 @@ async function processJob(job){
   if(await post('rpc/fsj_pode_enviar',{p_pessoa:job.pessoa_id,p_dia:job.dia})!==true)throw Error('Envio bloqueado pelo calendário ou cadastro.');
  }
  await eligible();
+ const headerPath=process.env.FSJ_EMERGENCY_HEADER_PATH;
+ if(!headerPath)throw Error('Configure FSJ_EMERGENCY_HEADER_PATH com a imagem original da Fazenda São José.');
+ await access(headerPath);
+ const media=wwebjs.MessageMedia.fromFilePath(headerPath);
+ if(!media.mimetype.startsWith('image/'))throw Error('Cabeçalho não é uma imagem válida.');
+ if(!job.mensagem||job.mensagem.length>1024)throw Error('Legenda do cabeçalho indisponível ou longa demais.');
  const number=await client.getNumberId(job.phone);
  if(!number?._serialized)throw Error('Destinatário não localizado no WhatsApp.');
  const chatId=number._serialized;
@@ -66,9 +74,15 @@ async function processJob(job){
   state.eventIds ||= {};state.eventIds[type] ||= randomUUID();await persist(state);
   await db('mensagens_whatsapp?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:state.eventIds[type],pessoa_id:job.pessoa_id,direcao:'saida',tipo:type==='substituicao_emergencial'?'quadro_manual_identificado':type,conteudo:JSON.stringify({dia:job.dia,codigo_mensagem:job.codigo,...details}),whatsapp_message_id:details.messageId||null})});
  };
- await prepareEmergencyManual({state,previousMessageId:previous,chatId,persist,
- revoke:async(id,chat)=>{await eligible();return revoke(client,id,chat);},record});
- await patch('fsj_emergency_jobs?id=eq.'+job.id,{estado:'pronto_para_envio',finalizado_em:new Date().toISOString(),resultado:'Mensagem anterior apagada para todos. Abra a conversa do destinatário e envie a mensagem nova manualmente.'});
+ const result=await replaceEmergency({state,previousMessageId:previous,chatId,text:job.mensagem,persist,
+  revoke:async(id,chat)=>{await eligible();return revoke(client,id,chat);},
+  send:async(chat,caption)=>{
+   await eligible();
+   const sent=await client.sendMessage(chat,media,{caption,sendMediaAsDocument:false});
+   if(!sent?.id?._serialized)throw Error('WhatsApp não confirmou o identificador da mensagem com imagem.');
+   return {messageId:sent.id._serialized,ack:sent.ack||0};
+  },record});
+ await patch('fsj_emergency_jobs?id=eq.'+job.id,{estado:'enviado',whatsapp_message_id:result.messageId,finalizado_em:new Date().toISOString(),resultado:'Cabeçalho e legenda enviados em uma única mensagem pelo executor emergencial.'});
 }
 async function confirmManualJobs(){
  const jobs=await db('fsj_emergency_jobs?estado=eq.pronto_para_envio&dia=eq.'+localDay()+'&select=*&limit=20');
