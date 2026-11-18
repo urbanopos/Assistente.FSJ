@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261118-mobile-filtros-v06">
+<meta name="fsj-build" content="20261118-mobile-filtros-dom-v07">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -2345,6 +2345,26 @@ function fsjRenderTarefasEmExecucao(){
  if(desktop){
   const categoryBar=document.getElementById('fsjExecucaoCategorias');
   if(categoryBar.parentElement!==filters)filters.append(categoryBar);
+ }
+ // FSJ celular proprietario: ordenar e dimensionar diretamente os campos, sem depender da cascata CSS.
+ if(window.FSJ_PLATFORM?.platform==='celular'||window.matchMedia('(max-width:700px)').matches){
+  const pessoaLabel=filters.querySelector('label:has(#fsjArquivoPessoa)');
+  const grupoLabel=filters.querySelector('label:has(#fsjArquivoGrupo)');
+  const statusLabel=filters.querySelector('#fsjExecucaoStatusLabel');
+  const barra=filters.querySelector('#fsjExecucaoCategorias');
+  const important=(el,prop,val)=>{if(el)el.style.setProperty(prop,val,'important');};
+  important(filters,'display','grid');important(filters,'grid-template-columns','minmax(0,1fr) minmax(0,1fr)');important(filters,'gap','8px');important(filters,'align-items','end');
+  for(const [el,span] of [[pessoaLabel,'1 / -1'],[grupoLabel,'1'],[statusLabel,'2'],[barra,'1 / -1']]){
+   if(!el)continue;
+   important(el,'grid-column',span);important(el,'grid-row','auto');important(el,'min-width','0');important(el,'width','100%');
+  }
+  for(const el of [pessoaLabel,grupoLabel,statusLabel]){
+   if(!el)continue;
+   important(el,'display','flex');important(el,'flex-direction','column');important(el,'align-items','stretch');important(el,'justify-content','flex-end');important(el,'gap','4px');important(el,'margin','0');important(el,'min-height','0');
+   const select=el.querySelector('select');important(select,'width','100%');important(select,'max-width','none');important(select,'min-width','0');important(select,'height','40px');important(select,'margin','0');
+  }
+  // Ordem logica das linhas: pessoa inteira; grupo e situacao; botoes.
+  for(const el of [pessoaLabel,grupoLabel,statusLabel,barra])if(el)filters.append(el);
  }
  const psel=document.getElementById('fsjArquivoPessoa'),gsel=document.getElementById('fsjArquivoGrupo');
  const setOptions=(sel,values)=>{const prev=sel.value;sel.replaceChildren(...values.map(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;return o;}));sel.value=values.some(([v])=>v===prev)?prev:'';};
