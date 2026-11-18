@@ -79,3 +79,15 @@ Regras obrigatórias para Desktop e Celular, respeitando a interface própria de
 7. Para Gestor, permitir apenas as operações sobre registros operacionais autorizadas individualmente. Não permitir administração técnica, programação, arquitetura, integrações ou mudança de permissões de terceiros. Registros arquivados não podem ser editados ou excluídos pelo Gestor; a definição de arquivamento pelo Gestor permanece pendente e não deve ser presumida.
 
 **Implantação:** esta regra documenta o requisito obrigatório. A existência da documentação não comprova implementação das verificações de autorização no servidor; exigir auditoria, testes por perfil e homologação antes de declarar a proteção operacional concluída.
+
+## Identificação obrigatória conjunta — Telefone E E-mail — 18/11/2026
+
+**Decisão expressa do Proprietário:** a identificação cadastral exige **telefone E e-mail conjuntamente**, ambos vinculados à **mesma pessoa ativa** em Pessoas e Grupos. Nunca aceitar apenas um dos identificadores como suficiente para habilitar qualquer perfil, sessão, rotina ou operação.
+
+- Telefone: normalizar DDI/DDD e comparar com o telefone cadastrado.
+- E-mail: normalizar caixa e espaços e comparar com o e-mail cadastrado.
+- Ausência, divergência, duplicidade ou vínculo com pessoas distintas: negar habilitação até correção e validação.
+- Aplica-se a Proprietário, Gestor, Supervisor, Executor e Visitante, em Desktop e Celular.
+- A dupla correspondência cadastral **não é prova de posse** de telefone/e-mail nem substitui autenticação segura e autorização por perfil no servidor. Não presumir que a simples digitação de dois dados conhecidos autentica o usuário.
+- Revogam-se quaisquer critérios anteriores que aceitem somente telefone ou somente e-mail para identificação habilitadora.
+- **Status:** requisito documentado; não alterar autenticação em produção sem verificar fluxos atuais, integridade dos cadastros, mecanismos de comprovação de posse e caminhos de recuperação para não bloquear usuários legítimos.
