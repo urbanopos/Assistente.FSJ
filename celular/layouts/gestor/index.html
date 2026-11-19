@@ -22,7 +22,7 @@ const modules=[['Início','dashboard'],['Comunicação','comunicacao'],['Disparo
 const visible=modules.filter(([label])=>allowed.includes(label)&&!technical.test(label));
 panel.hidden=false;status.textContent='Perfil validado. '+visible.length+' área(s) operacional(is) autorizada(s).';
 if(!visible.length){buttons.textContent='Nenhuma área operacional habilitada.';return}
-for(const [label] of visible){const b=document.createElement('button');b.textContent=label;b.onclick=()=>{status.textContent='Área '+label+' autorizada no cadastro. A navegação operacional será disponibilizada após validação da autorização no servidor; nenhum acesso administrativo será concedido.'};buttons.appendChild(b)}
+for(const [label] of visible){const b=document.createElement('button');b.textContent=label;b.onclick=async()=>{if(label==='Vídeos e chamadas — TV FSJ'){b.disabled=true;status.textContent='Validando acesso à TV FSJ...';try{const result=await post('fsj-tv-espectador-acesso',{action:'issue',token});if(typeof result.code!=='string'||!/^[A-Za-z0-9_-]{42,640}$/.test(result.code))throw Error('Código de acesso indisponível');location.assign('https://168.196.84.147:9443/espectador#acesso='+encodeURIComponent(result.code));}catch(e){status.textContent='Não foi possível abrir a TV FSJ: '+e.message;b.disabled=false;}return;}status.textContent='Área '+label+' autorizada. O formulário ainda depende da integração segura com os registros operacionais; nenhuma operação foi liberada indevidamente.'};buttons.appendChild(b)}
 }catch(e){status.textContent='Acesso não liberado: '+e.message}
 })();
 </script></body></html>
