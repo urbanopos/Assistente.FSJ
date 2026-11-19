@@ -4357,4 +4357,44 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
 </script>
 
 
+<style id="fsjRemovePersonVoice20261119">
+@media(max-width:700px){
+ #cadPessoas #personBasicFields button[onclick*="listen"],
+ #cadPessoas #personBasicFields button[aria-label*="Voz"],
+ #cadPessoas #personBasicFields button[title*="Voz"],
+ #cadPessoas #personBasicFields .fsj-person-voice-hidden{display:none!important}
+ #cadPessoas #personBasicFields .person-fields input{flex:1 1 auto!important;width:100%!important;max-width:100%!important}
+}
+</style>
+<script id="fsjRemovePersonVoice20261119">
+(function(){
+ const ids=['pname','pnick','pphone','pemail'];
+ function apply(){
+  if(!window.matchMedia('(max-width:700px)').matches)return;
+  const root=document.getElementById('personBasicFields');if(!root)return;
+  for(const id of ids){
+   const field=document.getElementById(id);if(!field||!root.contains(field))continue;
+   const group=field.parentElement;
+   if(!group)continue;
+   const candidates=[...group.querySelectorAll('button'),...group.parentElement.querySelectorAll('button')];
+   for(const btn of candidates){
+    const t=(btn.textContent||'')+' '+(btn.getAttribute('aria-label')||'')+' '+(btn.getAttribute('title')||'');
+    if(/\\bvoz\\b|🎙|🎤/i.test(t)&&!btn.classList.contains('fsj-person-voice-hidden')){
+     btn.classList.add('fsj-person-voice-hidden');btn.hidden=true;btn.style.setProperty('display','none','important');
+    }
+   }
+   const wrap=field.parentElement;
+   if(wrap){wrap.style.minWidth='0';field.style.width='100%';}
+  }
+ }
+ function init(){
+  apply();
+  const root=document.getElementById('personBasicFields');if(!root)return;
+  const observer=new MutationObserver(apply);
+  observer.observe(root,{subtree:true,childList:true});
+  document.addEventListener('click',e=>{if(e.target.closest('#fsjHomePeopleButton'))setTimeout(apply,0)},true);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
 </body></html>
