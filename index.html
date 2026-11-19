@@ -4253,4 +4253,52 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 window.addEventListener('load',schedule);window.addEventListener('resize',schedule);
 })();
 </script>
+
+<!-- FSJ seletor paginado celular v1: apresentação somente, valores e eventos nativos preservados -->
+<style>
+#fsjPagedSelectBackdrop{position:fixed;inset:0;z-index:2147483000;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px}
+#fsjPagedSelectPanel{background:#fff;color:#172a23;width:min(100%,440px);max-height:calc(100dvh - 24px);border-radius:16px;padding:12px;display:flex;flex-direction:column;box-shadow:0 8px 28px #0004;font:14px system-ui,Arial,sans-serif}
+#fsjPagedSelectTitle{font-weight:700;font-size:15px;padding:4px 4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsjPagedOption{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;width:100%;padding:8px 10px;border:0;border-bottom:1px solid #e1e8e4;background:white;color:#182922;text-align:left;font:13px system-ui,Arial,sans-serif;overflow-wrap:anywhere}
+.fsjPagedOption[aria-checked=true]{background:#eaf5f0;color:#075d3b;font-weight:600}
+#fsjPagedSelectNav{display:flex;align-items:center;justify-content:center;gap:16px;padding-top:10px}
+#fsjPagedSelectNav button,#fsjPagedSelectClose{min-width:42px;min-height:36px;border:1px solid #b7cbc0;border-radius:8px;background:white;color:#164c39;font-size:16px}
+#fsjPagedSelectNav button:disabled{opacity:.3}
+</style>
+<script>
+(function(){'use strict';
+if(window.__fsjPagedSelectInstalled)return;window.__fsjPagedSelectInstalled=true;
+let overlay=null;
+function mobile(){return window.matchMedia('(max-width: 600px) and (pointer: coarse)').matches;}
+function close(){if(overlay){overlay.remove();overlay=null;}}
+function open(sel){
+close();const options=Array.from(sel.options).filter(o=>!o.hidden&&!o.disabled);if(!options.length)return;
+let page=Math.max(0,Math.floor(Math.max(0,options.findIndex(o=>o.selected))/5));const pages=Math.ceil(options.length/5);
+const backdrop=document.createElement('div');backdrop.id='fsjPagedSelectBackdrop';backdrop.setAttribute('role','presentation');
+const panel=document.createElement('div');panel.id='fsjPagedSelectPanel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Selecionar opção');
+const header=document.createElement('div');header.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px';
+const title=document.createElement('div');title.id='fsjPagedSelectTitle';title.textContent=sel.getAttribute('aria-label')||(sel.labels&&sel.labels[0]&&sel.labels[0].textContent.trim())||'Selecionar opção';
+const x=document.createElement('button');x.id='fsjPagedSelectClose';x.textContent='×';x.setAttribute('aria-label','Fechar');x.onclick=close;header.append(title,x);
+const items=document.createElement('div');items.style.cssText='min-height:0;overflow:hidden';
+const nav=document.createElement('div');nav.id='fsjPagedSelectNav';
+const prev=document.createElement('button');prev.textContent='‹';prev.setAttribute('aria-label','Página anterior');
+const count=document.createElement('span');count.style.fontWeight='600';
+const next=document.createElement('button');next.textContent='›';next.setAttribute('aria-label','Próxima página');
+prev.onclick=()=>{page--;render()};next.onclick=()=>{page++;render()};nav.append(prev,count,next);
+function render(){items.replaceChildren();options.slice(page*5,page*5+5).forEach(o=>{
+const b=document.createElement('button');b.type='button';b.className='fsjPagedOption';b.setAttribute('role','radio');b.setAttribute('aria-checked',String(o.selected));
+const label=document.createElement('span');label.textContent=o.textContent.trim();const dot=document.createElement('span');dot.textContent=o.selected?'◉':'◯';dot.style.fontSize='20px';b.append(label,dot);
+b.onclick=()=>{sel.value=o.value;sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}));close();};items.appendChild(b);
+});count.textContent=(page+1)+'/'+pages;prev.disabled=page===0;next.disabled=page===pages-1;}
+render();panel.append(header,items,nav);backdrop.append(panel);backdrop.addEventListener('click',e=>{if(e.target===backdrop)close()});
+overlay=backdrop;document.body.appendChild(backdrop);x.focus();
+}
+document.addEventListener('pointerdown',function(e){if(!mobile()||overlay)return;const sel=e.target.closest&&e.target.closest('select');if(!sel||sel.multiple||sel.size>1||sel.disabled||sel.closest('#fsjPagedSelectBackdrop'))return;
+// Intercept before the Android native picker opens, without changing the original select element.
+e.preventDefault();e.stopPropagation();open(sel);
+},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
+})();
+</script>
 </body></html>
