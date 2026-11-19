@@ -4208,6 +4208,9 @@ function fsjCompactOwnerPersonSelector(sel){
 <!-- FSJ: página inicial celular proprietário: ordem estável na origem -->
 <style id="fsj-owner-home-source-css">
 @media(max-width:700px){
+#dashboard #fsjOwnerHomeTop{display:flex!important;flex-direction:column!important;gap:7px!important;grid-column:1/-1!important;width:100%!important;order:-100!important;margin:0!important;padding:0!important}
+#dashboard #fsjOwnerHomeTop #fsjHomeTvButton{width:100%!important;flex:none!important}
+#dashboard #fsjOwnerHomeTop #fsjOwnerIndicatorsRow{width:100%!important;flex:none!important;order:0!important}
 #dashboard #fsjHomeTvButton{grid-column:1/-1!important;width:100%!important;order:-50!important}
 #dashboard #fsjOwnerIndicatorsRow{grid-column:1/-1!important;order:-40!important}
 #dashboard #fsjOwnerHomeMenuGrid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;grid-column:1/-1!important;order:-30!important}
@@ -4225,12 +4228,14 @@ const board=document.getElementById('dashboard'),tv=document.getElementById('fsj
 if(!board||!tv||!stats)return;
 locked=true;
 try{
-if(tv.parentElement!==board)board.prepend(tv);
-if(stats.parentElement!==board)tv.after(stats);
-if(tv.nextElementSibling!==stats)tv.after(stats);
+let top=document.getElementById('fsjOwnerHomeTop');
+if(!top){top=document.createElement('div');top.id='fsjOwnerHomeTop'}
+if(top.parentElement!==board)board.prepend(top);
+if(tv.parentElement!==top)top.appendChild(tv);
+if(stats.parentElement!==top||tv.nextElementSibling!==stats)tv.after(stats);
 let grid=document.getElementById('fsjOwnerHomeMenuGrid');
 if(!grid){grid=document.createElement('div');grid.id='fsjOwnerHomeMenuGrid'}
-if(grid.parentElement!==board||stats.nextElementSibling!==grid)stats.after(grid);
+if(grid.parentElement!==board||top.nextElementSibling!==grid)top.after(grid);
 const all=[...document.querySelectorAll('button')];
 const find=(re)=>all.find(b=>re.test(norm(b))&&!b.closest('dialog')&&b!==tv);
 const ids=['fsjHomeTaskRegisterButton','fsjHomeEmergencyButton','fsjHomePeopleButton','fsjHomeLeavesButton','fsjHomeRunningTasksButton'];
