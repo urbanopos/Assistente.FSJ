@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-folgas-ancorado-v26">
+<meta name="fsj-build" content="20261119-folgas-pagina-unica-v27">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -4015,53 +4015,20 @@ function fsjCompactOwnerPersonSelector(sel){
  #folgasGestor #folgasPessoaDados{order:6!important}
 }
 </style>
-<script id="fsjFolgasOwnerMobileFooterScriptV21">
-(function(){
- const root=document.getElementById('folgasGestor');if(!root)return;
- const left=document.getElementById('fsjFolgasPainelEsquerdo');
- const report=left?.querySelector('button[onclick="fsjAbrirRelatorioFolgas()"]');
- const updateRow=left?.querySelector('.row:has(button[onclick="carregarFolgas()"])');
- const update=updateRow?.querySelector('button');
- const status=document.getElementById('folgasStatus');
- const calendar=document.getElementById('fsjFolgasCalendarioLateral');
- if(!left||!report||!updateRow||!update||!status||!calendar)return;
- const footer=document.createElement('div');footer.className='fsj-folgas-footer-mobile';
- function sync(){
-  const mobile=window.matchMedia('(max-width:1000px) and (pointer:coarse)').matches;
-  if(mobile){
-   const legend=document.getElementById('fsjLegendaFeriadosDefault');
-   if(legend&&calendar.contains(legend))legend.after(footer);
-   else calendar.append(footer);
-   footer.append(report,update,status);
-  }else if(footer.isConnected){
-   left.insertBefore(report,left.firstChild);updateRow.append(update);left.insertBefore(status,left.querySelector('h3'));footer.remove();
-  }
- }
- sync();window.addEventListener('resize',sync);
- const observer=new MutationObserver(()=>{if(!window.matchMedia('(max-width:1000px) and (pointer:coarse)').matches)return;const legend=document.getElementById('fsjLegendaFeriadosDefault');if(legend&&calendar.contains(legend)&&legend.nextElementSibling!==footer)legend.after(footer);});
- observer.observe(calendar,{childList:true});
-})();
-</script>
 
-<style id="fsjFolgasOwnerMobileControlsAfterHolidaysV21">
-@media(max-width:1000px) and (pointer:coarse){
- #folgasGestor{padding-bottom:6px!important}
- #folgasGestor #fsjFolgasCalendarioLateral .fsj-folgas-footer-mobile{position:static!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;width:100%!important;margin:8px 0 0!important;padding:5px 0 0!important;border:0!important;border-top:1px solid #ddd!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
- #folgasGestor #fsjFolgasCalendarioLateral .fsj-folgas-footer-mobile>button{width:100%!important;min-width:0!important;min-height:36px!important;padding:5px 2px!important;font-size:11px!important;line-height:1.15!important;white-space:normal!important}
- #folgasGestor #fsjFolgasCalendarioLateral .fsj-folgas-footer-mobile>#folgasStatus{grid-column:1/-1!important;margin:0!important;font-size:10px!important;line-height:1.2!important}
-}
-</style>
 
-<style id="fsjFolgasPrimeiraPaginaPosicaoAbsolutaV26">
+
+
+
+<style id="fsjFolgasSinglePageV27">
 @media(max-width:1000px) and (pointer:coarse){
- #folgasGestor #fsjFolgasCalendarioLateral{position:relative!important;padding-bottom:74px!important;box-sizing:border-box!important}
- #folgasGestor #fsjLegendaFeriadosDefault #fsjFolgasBotoesNaLegenda{position:absolute!important;left:10px!important;right:10px!important;bottom:8px!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:0!important;padding:0!important;border:0!important;z-index:2!important}
- #folgasGestor #fsjFolgasBotoesNaLegenda button{display:block!important;visibility:visible!important;opacity:1!important;min-width:0!important;width:100%!important;min-height:40px!important;padding:6px 3px!important;line-height:1.1!important;font-size:12px!important;white-space:normal!important}
+ #folgasGestor #fsjFolgasCalendarioLateral{position:relative!important;box-sizing:border-box!important;padding:7px!important;margin:0!important;min-height:0!important}
+ #folgasGestor #fsjFolgasBotoesNaLegenda{position:absolute!important;left:10px!important;right:10px!important;bottom:10px!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:0!important;padding:0!important;border:0!important;background:white!important;z-index:3!important;break-inside:avoid!important}
+ #folgasGestor #fsjFolgasBotoesNaLegenda button{width:100%!important;min-width:0!important;min-height:39px!important;padding:5px 2px!important;font-size:12px!important;line-height:1.1!important;white-space:normal!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo>button[onclick="fsjAbrirRelatorioFolgas()"],#folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]),#folgasGestor #folgasStatus{display:none!important}
  #folgasGestor .fsj-folgas-footer-mobile{display:none!important}
- #folgasGestor #fsjFolgasPainelEsquerdo>button[onclick="fsjAbrirRelatorioFolgas()"],#folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]){display:none!important}
- #folgasGestor #fsjFolgasCalendarioLateral .row:has(#fsjMesFolgasTitulo){display:grid!important;grid-template-columns:48px minmax(0,1fr) 48px!important;gap:4px!important;width:100%!important;align-items:center!important}
- #folgasGestor #fsjFolgasCalendarioLateral .row:has(#fsjMesFolgasTitulo)>button{min-width:48px!important;width:48px!important;height:44px!important;margin:0!important;padding:4px!important}
- #folgasGestor #fsjMesFolgasTitulo{font-size:clamp(14px,4vw,20px)!important;text-align:center!important;white-space:nowrap!important}
+ #folgasGestor #fsjFolgasCalendarioLateral .row:has(#fsjMesFolgasTitulo){display:grid!important;grid-template-columns:48px minmax(0,1fr) 48px!important;gap:5px!important;width:100%!important;align-items:center!important}
+ #folgasGestor #fsjFolgasCalendarioLateral .row:has(#fsjMesFolgasTitulo)>button{width:48px!important;min-width:48px!important;height:44px!important;padding:3px!important;margin:0!important}
+ #folgasGestor #fsjMesFolgasTitulo{text-align:center!important;font-size:clamp(14px,4vw,20px)!important;white-space:nowrap!important}
 }
-</style>
-</body></html>
+</style></body></html>
