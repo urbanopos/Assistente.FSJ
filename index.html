@@ -4339,7 +4339,7 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
 <style id="fsjMobilePeopleConsult20261119">
 @media(max-width:1000px) and (pointer:coarse){
 #cadPessoas.fsj-mobile-consulta #personBasicHome,#cadPessoas.fsj-mobile-consulta #fsjOwnerAccessInPeople{display:none!important}
-#cadPessoas.fsj-mobile-consulta #fsjGruposNaPessoas{margin-top:12px!important}
+#cadPessoas #fsjGruposNaPessoas{display:none!important}
 #fsjMobilePeopleEntry{display:none}
 #cadPessoas.fsj-mobile-consulta #fsjMobilePeopleEntry{display:block}
 #fsjMobilePeopleEntry button{background:#185d3d;color:white;border:0;border-radius:9px;padding:11px 13px;font-size:14px}
@@ -4352,10 +4352,10 @@ function mobile(){return matchMedia('(max-width:1000px) and (pointer:coarse)').m
 function setup(){const card=document.getElementById('cadPessoas');const selector=document.getElementById('personSelect');if(!card||!selector||document.getElementById('fsjMobilePeopleEntry'))return;
 const entry=document.createElement('div');entry.id='fsjMobilePeopleEntry';const heading=document.createElement('div');heading.style.cssText='font-size:15px;font-weight:700;margin:12px 0 6px';heading.textContent='Consultar pessoa cadastrada';
 const place=document.createElement('div');place.id='fsjMobilePersonSelector';
-const actions=document.createElement('div');actions.className='fsj-person-actions';const novo=document.createElement('button');novo.type='button';novo.textContent='+ Nova pessoa';const grupos=document.createElement('button');grupos.type='button';grupos.textContent='Consultar grupos';
+const actions=document.createElement('div');actions.className='fsj-person-actions';const novo=document.createElement('button');novo.type='button';novo.textContent='+ Nova pessoa';
 novo.onclick=()=>{card.classList.remove('fsj-mobile-consulta');if(typeof clearPerson==='function')clearPerson();const field=document.getElementById('pname');if(field)field.focus();};
-grupos.onclick=()=>{document.getElementById('fsjGruposNaPessoas')?.scrollIntoView({block:'start'});};
-actions.append(novo,grupos);entry.append(heading,place,actions);card.querySelector('h2')?.after(entry);
+
+actions.append(novo);entry.append(heading,place,actions);card.querySelector('h2')?.after(entry);
 function sync(){if(!mobile())return;const current=typeof currentPage!=='undefined'?currentPage:'';if(current!=='cadPessoas')return;
 if(!document.getElementById('pid')?.value)card.classList.add('fsj-mobile-consulta');
 const original=selector.parentElement;if(original&&original!==place)place.appendChild(selector);
