@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-mobile-folgas-sem-titulo-v17">
+<meta name="fsj-build" content="20261119-mobile-folgas-rodape-v18">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -3993,6 +3993,48 @@ function fsjCompactOwnerPersonSelector(sel){
   let heading=panel.querySelector(':scope > h2.fsj-folgas-heading-desktop');
   if(desktop&&!heading){heading=document.createElement('h2');heading.className='fsj-folgas-heading-desktop';heading.textContent='Folgas e Férias';panel.prepend(heading);}
   else if(!desktop&&heading)heading.remove();
+ }
+ sync();window.addEventListener('resize',sync);
+})();
+</script>
+
+<style id="fsjFolgasOwnerMobileFooterV18">
+@media(max-width:700px){
+ #folgasGestor>h2,#folgasGestor .fsj-folgas-heading-desktop{display:none!important}
+ #folgasGestor{padding:8px 10px!important}
+ #folgasGestor .fsj-folgas-duas-colunas{display:flex!important;flex-direction:column!important;gap:5px!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo{display:contents!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo>h3{order:1!important;margin:0!important;font-size:20px!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo>div:has(#folgasPessoaSelect){order:2!important;margin:0!important}
+ #folgasGestor #fsjFolgasPerfilPessoa{order:3!important}
+ #folgasGestor #fsjFolgasCalendarioLateral{order:4!important;width:100%!important;padding:7px!important;box-sizing:border-box!important;margin:0!important}
+ #folgasGestor #fsjFolgasCalendarioLateral>h3{font-size:15px!important;margin:0 0 5px!important}
+ #folgasGestor .fsj-folgas-footer-mobile{order:5!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:5px!important;width:100%!important;margin:2px 0 0!important}
+ #folgasGestor .fsj-folgas-footer-mobile>button{font-size:12px!important;line-height:1.15!important;padding:6px 3px!important;min-height:38px!important;white-space:normal!important;width:100%!important;min-width:0!important}
+ #folgasGestor .fsj-folgas-footer-mobile>p{grid-column:1/-1!important;font-size:11px!important;margin:0!important;text-align:center!important;line-height:1.15!important}
+ #folgasGestor #folgasPessoaDados{order:6!important}
+}
+</style>
+<script id="fsjFolgasOwnerMobileFooterScriptV18">
+(function(){
+ const root=document.getElementById('folgasGestor');if(!root)return;
+ const left=document.getElementById('fsjFolgasPainelEsquerdo');
+ const report=left?.querySelector('button[onclick="fsjAbrirRelatorioFolgas()"]');
+ const updateRow=left?.querySelector('.row:has(button[onclick="carregarFolgas()"])');
+ const update=updateRow?.querySelector('button');
+ const status=document.getElementById('folgasStatus');
+ const calendar=document.getElementById('fsjFolgasCalendarioLateral');
+ if(!left||!report||!updateRow||!update||!status||!calendar)return;
+ const footer=document.createElement('div');footer.className='fsj-folgas-footer-mobile';
+ function sync(){
+  const mobile=window.matchMedia('(max-width:700px)').matches;
+  root.querySelectorAll(':scope > h2').forEach(h=>{if(mobile)h.remove()});
+  if(mobile){
+   if(!footer.isConnected)calendar.after(footer);
+   footer.append(report,update,status);
+  }else{
+   if(footer.isConnected){left.insertBefore(report,left.firstChild);updateRow.append(update);left.insertBefore(status,left.querySelector('h3'));footer.remove();}
+  }
  }
  sync();window.addEventListener('resize',sync);
 })();
