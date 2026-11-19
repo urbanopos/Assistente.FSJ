@@ -4205,169 +4205,57 @@ function fsjCompactOwnerPersonSelector(sel){
  document.addEventListener('click',()=>{if(active()&&!document.body.classList.contains('fsj-registro-proprietario'))setup();},true);
 })();
 </script>
-<!-- FSJ 2026-11-19: organização exclusiva da inicial Celular / Proprietário. -->
-<style>
+<!-- FSJ: layout inicial exclusivo do Proprietário celular, versão consolidada 20261119 -->
+<style id="fsj-owner-home-consolidated-css">
 @media(max-width:700px){
-html[data-fsj-platform="celular"] #dashboard #fsjOwnerBottomActions{
-grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-gap:8px!important;width:100%!important;margin:0!important;
-}
-html[data-fsj-platform="celular"] #dashboard #fsjOwnerBottomActions>button{
-width:100%!important;min-width:0!important;min-height:48px!important;
-margin:0!important;padding:10px 5px!important;border-radius:10px!important;
-white-space:normal!important;line-height:1.2!important;font-weight:700!important;
-background:#175b40!important;color:#fff!important;
-}
+#fsjPhoneOwnerMenu #fsjOwnerIndicatorsRow{grid-column:1/-1!important;width:100%!important}
+#fsjPhoneOwnerMenu #fsjHomeTvButton{grid-column:1/-1!important;width:100%!important}
+#fsjPhoneOwnerMenu #fsjOwnerHomeActions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;grid-column:1/-1!important;align-content:start!important;margin:0!important;padding:0!important}
+#fsjPhoneOwnerMenu #fsjOwnerHomeActions>button{width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;grid-column:auto!important;white-space:normal!important;line-height:1.2!important}
+#fsjPhoneOwnerMenu #fsjOwnerHomeActions>.fsj-owner-home-wrapper{display:contents!important}
+#fsjPhoneOwnerMenu #fsjOwnerHomeActions>.fsj-owner-home-wrapper>button{width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;grid-column:auto!important;white-space:normal!important;line-height:1.2!important}
+#fsjPhoneOwnerMenu #fsjHomeAvisosDiagnosticoRow{display:none!important}
 }
 </style>
-<script>
+<script id="fsj-owner-home-consolidated-js">
 (function(){
- const mobile=()=>window.matchMedia('(max-width:700px)').matches &&
-   document.documentElement.getAttribute('data-fsj-platform')==='celular';
- const saved=new Map();
- let busy=false;
- function relocate(){
-  if(busy)return;
-  const board=document.getElementById('dashboard');
-  if(!board)return;
-  busy=true;
+ let working=false, pending=false;
+ const label=e=>(e.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+ const isMobile=()=>matchMedia('(max-width:700px)').matches;
+ function apply(){
+  if(working||!isMobile())return;
+  const menu=document.getElementById('fsjPhoneOwnerMenu');
+  const indicators=document.getElementById('fsjOwnerIndicatorsRow');
+  const tv=document.getElementById('fsjHomeTvButton');
+  const dashboard=document.getElementById('dashboard');
+  if(!menu||!indicators||!tv||!dashboard)return;
+  working=true;
   try{
-   let row=document.getElementById('fsjOwnerBottomActions');
-   if(!mobile()){
-    for(const [node,marker] of saved){if(marker.parentNode)marker.parentNode.insertBefore(node,marker);marker.remove();}
-    saved.clear();if(row)row.remove();return;
-   }
-   const buttons=[...board.querySelectorAll('button')];
-   const normalize=b=>(b.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
-   const questions=buttons.find(b=>normalize(b)==='responder dúvidas e sugestões');
-   const returns=buttons.find(b=>/^avisos de devolução \(\d+\)$/.test(normalize(b)));
-   if(!questions||!returns)return;
-   if(!row){row=document.createElement('div');row.id='fsjOwnerBottomActions';}
-   const last=document.getElementById('fsjHomeAvisosDiagnosticoRow')||
-      document.getElementById('fsjHomeRunningTasksButton');
-   if(last&&last.parentElement===board)last.after(row);
-   else board.appendChild(row);
-   for(const button of [questions,returns]){
-    if(button.parentElement!==row){
-     const marker=document.createComment('FSJ posição original do botão');
-     button.parentNode.insertBefore(marker,button);
-     saved.set(button,marker);
-     row.appendChild(button);
-    }
-   }
-   const tv=document.getElementById('fsjHomeTvButton');
-   const indicators=document.getElementById('fsjOwnerIndicatorsRow');
-   if(tv&&indicators&&tv.parentElement===board&&indicators.parentElement===board&&
-      tv.compareDocumentPosition(indicators)&Node.DOCUMENT_POSITION_PRECEDING){
-     board.insertBefore(tv,indicators);
-   }
-  }finally{busy=false;}
+   // O menu real do Proprietário é a âncora. Preservar os elementos e seus eventos.
+   if(indicators.parentNode!==menu)menu.prepend(indicators);
+   if(tv.parentNode!==menu||tv.nextElementSibling!==indicators)menu.insertBefore(tv,indicators);
+   let grid=document.getElementById('fsjOwnerHomeActions');
+   if(!grid){grid=document.createElement('div');grid.id='fsjOwnerHomeActions'}
+   if(grid.parentNode!==menu)indicators.after(grid);
+   else if(indicators.nextElementSibling!==grid)indicators.after(grid);
+   const all=[...new Set([...menu.querySelectorAll('button'),...dashboard.querySelectorAll('button')])];
+   const find=re=>all.find(b=>re.test(label(b))&&b!==tv);
+   const pairs=[
+    [/^registro de tarefas$/,/^disparo emergencial$/],
+    [/^pessoas e grupos$/,/^folgas e feriados$/],
+    [/^tarefas em execução$/,/^tarefas não cumpridas$/],
+    [/^decidir folgas e envios nos feriados$/,/^responder dúvidas e sugestões$/],
+    [/^avisos de devolução/]
+   ];
+   const chosen=pairs.flatMap(pair=>pair.map(find).filter(Boolean));
+   for(const b of chosen){if(b.parentNode!==grid)grid.appendChild(b)}
+   // Não excluir nenhum comando: apenas ocultar a cópia de avisos sem contador.
+   const copy=document.getElementById('fsjHomeAvisosDiagnosticoRow');
+   if(copy&&chosen.some(b=>/^avisos de devolução/.test(label(b))&&!copy.contains(b)))copy.style.display='none';
+  }finally{working=false}
  }
- document.addEventListener('DOMContentLoaded',relocate);
- window.addEventListener('load',relocate);
- window.addEventListener('resize',relocate);
- const observer=new MutationObserver(()=>relocate());
- function start(){const b=document.getElementById('dashboard');if(b){observer.observe(b,{childList:true,subtree:true,characterData:true});relocate();}}
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
-})();
-</script>
-
-<!-- FSJ 2026-11-19 v2: posicionamento na tela efetiva do proprietário celular -->
-<style id="fsj-owner-home-order-v2">
-@media(max-width:700px){
-#fsjPhoneOwnerMenu .fsj-home-last-row,#fsjOwnerApprovedMenu .fsj-home-last-row,
-#dashboard .fsj-home-last-row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;width:100%!important;grid-column:1/-1!important}
-.fsj-home-last-row>button{width:100%!important;min-width:0!important;grid-column:auto!important;white-space:normal!important;font-size:clamp(11px,3vw,15px)!important}
-}
-</style>
-<script id="fsj-owner-home-order-v2-script">
-(function(){
- const original=new Map();let running=false;
- const norm=x=>(x.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
- function update(){
- if(running)return;running=true;
- try{
- const mobile=matchMedia('(max-width:700px)').matches;
- const root=document.getElementById('fsjPhoneOwnerMenu')||document.getElementById('fsjOwnerApprovedMenu')||document.getElementById('dashboard');
- const owner=!!root && (root.id==='fsjPhoneOwnerMenu'||root.id==='fsjOwnerApprovedMenu'||document.documentElement.dataset.fsjPlatform==='celular');
- if(!mobile||!owner){for(const [el,anchor] of original){if(anchor.parentNode)anchor.after(el);anchor.remove()}original.clear();document.querySelectorAll('.fsj-home-last-row').forEach(e=>e.remove());return}
- const buttons=[...root.querySelectorAll('button')];
- const tv=buttons.find(x=>/^((▶|►)\s*)?tv fsj\b/.test(norm(x)));
- const doubts=buttons.find(x=>/^(responder\s+)?dúvidas e sugestões/.test(norm(x)));
- const notices=buttons.find(x=>/^avisos de devolução/.test(norm(x)));
- const heading=document.getElementById('fsjOwnerIndicatorsRow');
- if(tv&&heading&&heading.parentElement===root&&tv.parentElement===root&&tv.nextElementSibling!==heading)root.insertBefore(tv,heading);
- if(!doubts||!notices)return;
- let row=root.querySelector(':scope > .fsj-home-last-row');
- if(!row){row=document.createElement('div');row.className='fsj-home-last-row';root.appendChild(row)}
- for(const b of [doubts,notices]){if(b.parentElement===row)continue;if(!original.has(b)){const anchor=document.createComment('FSJ posição original');b.before(anchor);original.set(b,anchor)}row.appendChild(b)}
- }finally{running=false}
- }
- let scheduled=false;function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update()})}
- document.addEventListener('DOMContentLoaded',()=>{update();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});});
- window.addEventListener('resize',schedule);
-})();
-</script>
-
-<!-- FSJ celular proprietário: correção definitiva da ordem visual, 19-11-2026 -->
-<style id="fsj-owner-home-v3-css">
-@media(max-width:700px){
-#fsjOwnerHomeV3Buttons{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;grid-column:1/-1!important;margin:0!important;padding:0!important;align-content:start!important}
-#fsjOwnerHomeV3Buttons>button{grid-column:auto!important;width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;white-space:normal!important;line-height:1.2!important}
-#fsjOwnerHomeV3Buttons>.fsj-owner-home-v3-inner{display:contents!important}
-#fsjOwnerHomeV3Buttons>.fsj-owner-home-v3-inner>button{width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;white-space:normal!important;line-height:1.2!important}
-#fsjOwnerHomeV3Tv{grid-column:1/-1!important;width:100%!important;min-height:48px!important;margin:0!important}
-#dashboard #fsjHomeAvisosDiagnosticoRow.fsj-owner-home-v3-duplicate{display:none!important}
-}
-</style>
-<script id="fsj-owner-home-v3-script">
-(function(){
- const marker='fsjOwnerHomeV3Buttons';let busy=false;
- const text=b=>(b.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
- const mobile=()=>matchMedia('(max-width:700px)').matches;
- function fix(){
- if(busy||!mobile())return;
- const dashboard=document.getElementById('dashboard');
- const menu=document.getElementById('fsjPhoneOwnerMenu');
- const approved=document.getElementById('fsjOwnerApprovedMenu');
- const indicator=document.getElementById('fsjOwnerIndicatorsRow');
- if(!dashboard||!indicator)return;
- const root=(menu&&menu.contains(indicator)?menu:dashboard);
- const tv=document.getElementById('fsjHomeTvButton');
- if(!tv)return;
- busy=true;
- try{
-  // A faixa numérica e a TV pertencem à mesma tela: TV imediatamente antes da faixa.
-  if(tv.parentNode!==root)root.insertBefore(tv,indicator);
-  else if(tv.nextElementSibling!==indicator)root.insertBefore(tv,indicator);
-  tv.id='fsjHomeTvButton';tv.classList.add('fsj-owner-home-v3-tv');
-  let grid=document.getElementById(marker);
-  if(!grid){grid=document.createElement('div');grid.id=marker}
-  const sources=[dashboard,menu,approved].filter(Boolean);
-  const all=[...new Set(sources.flatMap(x=>[...x.querySelectorAll('button')]))];
-  const by=(re)=>all.find(b=>re.test(text(b))&&b!==tv);
-  const names=[
-   [/^registro de tarefas$/,/^disparo emergencial$/],
-   [/^pessoas e grupos$/,/^folgas e feriados$/],
-   [/^tarefas em execução$/,/^tarefas não cumpridas$/],
-   [/^decidir folgas e envios nos feriados$/,/^responder dúvidas e sugestões$/],
-   [/^avisos de devolução/]
-  ];
-  const selected=names.flatMap(pair=>pair.map(by).filter(Boolean));
-  if(selected.length<6)return;
-  const duplicate=document.getElementById('fsjHomeAvisosDiagnosticoRow');
-  // A cópia sem contador é redundante somente quando o aviso original já existe.
-  const notices=selected.find(b=>/^avisos de devolução/.test(text(b)));
-  if(duplicate&&notices&&!duplicate.contains(notices))duplicate.classList.add('fsj-owner-home-v3-duplicate');
-  const after=indicator;
-  if(grid.parentNode!==root)after.after(grid);
-  else if(indicator.nextElementSibling!==grid)after.after(grid);
-  for(const b of selected){if(b.parentNode!==grid)grid.appendChild(b)}
- }finally{busy=false}
- }
- let queued=false;
- const schedule=()=>{if(queued)return;queued=true;setTimeout(()=>{queued=false;fix()},100)};
- function init(){fix();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});}
+ function schedule(){if(pending)return;pending=true;setTimeout(()=>{pending=false;apply()},80)}
+ function init(){apply();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
  window.addEventListener('load',schedule);window.addEventListener('resize',schedule);
 })();
