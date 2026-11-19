@@ -4271,4 +4271,41 @@ background:#175b40!important;color:#fff!important;
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 </script>
+
+<!-- FSJ 2026-11-19 v2: posicionamento na tela efetiva do proprietário celular -->
+<style id="fsj-owner-home-order-v2">
+@media(max-width:700px){
+#fsjPhoneOwnerMenu .fsj-home-last-row,#fsjOwnerApprovedMenu .fsj-home-last-row,
+#dashboard .fsj-home-last-row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;width:100%!important;grid-column:1/-1!important}
+.fsj-home-last-row>button{width:100%!important;min-width:0!important;grid-column:auto!important;white-space:normal!important;font-size:clamp(11px,3vw,15px)!important}
+}
+</style>
+<script id="fsj-owner-home-order-v2-script">
+(function(){
+ const original=new Map();let running=false;
+ const norm=x=>(x.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+ function update(){
+ if(running)return;running=true;
+ try{
+ const mobile=matchMedia('(max-width:700px)').matches;
+ const root=document.getElementById('fsjPhoneOwnerMenu')||document.getElementById('fsjOwnerApprovedMenu')||document.getElementById('dashboard');
+ const owner=!!root && (root.id==='fsjPhoneOwnerMenu'||root.id==='fsjOwnerApprovedMenu'||document.documentElement.dataset.fsjPlatform==='celular');
+ if(!mobile||!owner){for(const [el,anchor] of original){if(anchor.parentNode)anchor.after(el);anchor.remove()}original.clear();document.querySelectorAll('.fsj-home-last-row').forEach(e=>e.remove());return}
+ const buttons=[...root.querySelectorAll('button')];
+ const tv=buttons.find(x=>/^((▶|►)\s*)?tv fsj\b/.test(norm(x)));
+ const doubts=buttons.find(x=>/^(responder\s+)?dúvidas e sugestões/.test(norm(x)));
+ const notices=buttons.find(x=>/^avisos de devolução/.test(norm(x)));
+ const heading=document.getElementById('fsjOwnerIndicatorsRow');
+ if(tv&&heading&&heading.parentElement===root&&tv.parentElement===root&&tv.nextElementSibling!==heading)root.insertBefore(tv,heading);
+ if(!doubts||!notices)return;
+ let row=root.querySelector(':scope > .fsj-home-last-row');
+ if(!row){row=document.createElement('div');row.className='fsj-home-last-row';root.appendChild(row)}
+ for(const b of [doubts,notices]){if(b.parentElement===row)continue;if(!original.has(b)){const anchor=document.createComment('FSJ posição original');b.before(anchor);original.set(b,anchor)}row.appendChild(b)}
+ }finally{running=false}
+ }
+ let scheduled=false;function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update()})}
+ document.addEventListener('DOMContentLoaded',()=>{update();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});});
+ window.addEventListener('resize',schedule);
+})();
+</script>
 </body></html>
