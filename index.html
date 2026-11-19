@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-folgas-compacto-v30">
+<meta name="fsj-build" content="20261119-demandas-mobile-v34">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -4054,5 +4054,27 @@ function fsjCompactOwnerPersonSelector(sel){
  #folgasGestor #fsjFolgasBotoesNaLegenda{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;margin:6px 0 0!important;padding:5px 0 0!important;border-top:1px solid #ddd!important;break-inside:avoid!important}
  #folgasGestor #fsjFolgasBotoesNaLegenda button{min-height:36px!important;padding:3px 2px!important;font-size:11px!important}
  #folgasGestor #fsjFolgasCalendarioLateral{padding:6px!important}
+}
+</style><style id="fsjDemandasProprietarioCelularV34">
+@media(max-width:1000px) and (pointer:coarse){
+ /* Uma so barra: a paginacao propria da lista de demandas. */
+ #gestor #demandas>.fsj-page-navigation{display:none!important}
+ #gestor #demandas>.fsj-page-viewport{overflow-x:hidden!important}
+ #gestor #demandas #demandaTabela{overflow-x:hidden!important;width:100%!important;max-width:100%!important}
+ #gestor #demandas #demandaTabela table,
+ #gestor #demandas #demandaTabela tbody{display:block!important;width:100%!important;table-layout:auto!important}
+ #gestor #demandas #demandaTabela thead{display:none!important}
+ #gestor #demandas #taskRows>tr{display:flex!important;flex-direction:column!important;gap:5px!important;width:100%!important;max-width:100%!important;height:auto!important;min-width:0!important;box-sizing:border-box!important;padding:8px 5px!important;margin:0 0 7px!important;border:1px solid #d0dcd6!important;border-radius:10px!important;break-inside:avoid!important}
+ #gestor #demandas #taskRows>tr>td{display:none!important}
+ #gestor #demandas #taskRows>tr>td:first-child,
+ #gestor #demandas #taskRows>tr>td:last-child{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;padding:2px!important}
+ #gestor #demandas #taskRows>tr>td:first-child .fsj-task-number{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+ #gestor #demandas #taskRows>tr>td:last-child:before{content:none!important}
+ #gestor #demandas #taskRows>tr>td:last-child .actions{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important;gap:7px!important;min-width:0!important;width:100%!important}
+ #gestor #demandas #taskRows>tr>td:last-child .actions button{flex:0 1 auto!important;min-width:72px!important;min-height:36px!important;max-width:40%!important;box-sizing:border-box!important;white-space:normal!important}
+ #gestor #demandas #taskRows>tr>td:last-child .fsj-supervision-toggle{display:inline-flex!important;align-items:center!important;gap:4px!important;white-space:nowrap!important;max-width:100%!important}
+ #gestor #demandas #taskRows>tr>td:first-child .fsj-mobile-task-actions{display:none!important}
+ #gestor #demandas .fsj-page-nav-row{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;gap:12px!important}
+ #gestor #demandas .fsj-page-count{flex:1!important;text-align:center!important}
 }
 </style></body></html>
