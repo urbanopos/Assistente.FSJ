@@ -4238,9 +4238,9 @@ background:#175b40!important;color:#fff!important;
     saved.clear();if(row)row.remove();return;
    }
    const buttons=[...board.querySelectorAll('button')];
-   const normalize=b=>(b.textContent||'').replace(/\\s+/g,' ').trim().toLowerCase();
+   const normalize=b=>(b.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
    const questions=buttons.find(b=>normalize(b)==='responder dúvidas e sugestões');
-   const returns=buttons.find(b=>/^avisos de devolução \\(\\d+\\)$/.test(normalize(b)));
+   const returns=buttons.find(b=>/^avisos de devolução \(\d+\)$/.test(normalize(b)));
    if(!questions||!returns)return;
    if(!row){row=document.createElement('div');row.id='fsjOwnerBottomActions';}
    const last=document.getElementById('fsjHomeAvisosDiagnosticoRow')||
