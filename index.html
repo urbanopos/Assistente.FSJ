@@ -4204,4 +4204,71 @@ function fsjCompactOwnerPersonSelector(sel){
  window.addEventListener('load',install);
  document.addEventListener('click',()=>{if(active()&&!document.body.classList.contains('fsj-registro-proprietario'))setup();},true);
 })();
-</script></body></html>
+</script>
+<!-- FSJ 2026-11-19: organização exclusiva da inicial Celular / Proprietário. -->
+<style>
+@media(max-width:700px){
+html[data-fsj-platform="celular"] #dashboard #fsjOwnerBottomActions{
+grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+gap:8px!important;width:100%!important;margin:0!important;
+}
+html[data-fsj-platform="celular"] #dashboard #fsjOwnerBottomActions>button{
+width:100%!important;min-width:0!important;min-height:48px!important;
+margin:0!important;padding:10px 5px!important;border-radius:10px!important;
+white-space:normal!important;line-height:1.2!important;font-weight:700!important;
+background:#175b40!important;color:#fff!important;
+}
+}
+</style>
+<script>
+(function(){
+ const mobile=()=>window.matchMedia('(max-width:700px)').matches &&
+   document.documentElement.getAttribute('data-fsj-platform')==='celular';
+ const saved=new Map();
+ let busy=false;
+ function relocate(){
+  if(busy)return;
+  const board=document.getElementById('dashboard');
+  if(!board)return;
+  busy=true;
+  try{
+   let row=document.getElementById('fsjOwnerBottomActions');
+   if(!mobile()){
+    for(const [node,marker] of saved){if(marker.parentNode)marker.parentNode.insertBefore(node,marker);marker.remove();}
+    saved.clear();if(row)row.remove();return;
+   }
+   const buttons=[...board.querySelectorAll('button')];
+   const normalize=b=>(b.textContent||'').replace(/\\s+/g,' ').trim().toLowerCase();
+   const questions=buttons.find(b=>normalize(b)==='responder dúvidas e sugestões');
+   const returns=buttons.find(b=>/^avisos de devolução \\(\\d+\\)$/.test(normalize(b)));
+   if(!questions||!returns)return;
+   if(!row){row=document.createElement('div');row.id='fsjOwnerBottomActions';}
+   const last=document.getElementById('fsjHomeAvisosDiagnosticoRow')||
+      document.getElementById('fsjHomeRunningTasksButton');
+   if(last&&last.parentElement===board)last.after(row);
+   else board.appendChild(row);
+   for(const button of [questions,returns]){
+    if(button.parentElement!==row){
+     const marker=document.createComment('FSJ posição original do botão');
+     button.parentNode.insertBefore(marker,button);
+     saved.set(button,marker);
+     row.appendChild(button);
+    }
+   }
+   const tv=document.getElementById('fsjHomeTvButton');
+   const indicators=document.getElementById('fsjOwnerIndicatorsRow');
+   if(tv&&indicators&&tv.parentElement===board&&indicators.parentElement===board&&
+      tv.compareDocumentPosition(indicators)&Node.DOCUMENT_POSITION_PRECEDING){
+     board.insertBefore(tv,indicators);
+   }
+  }finally{busy=false;}
+ }
+ document.addEventListener('DOMContentLoaded',relocate);
+ window.addEventListener('load',relocate);
+ window.addEventListener('resize',relocate);
+ const observer=new MutationObserver(()=>relocate());
+ function start(){const b=document.getElementById('dashboard');if(b){observer.observe(b,{childList:true,subtree:true,characterData:true});relocate();}}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script>
+</body></html>
