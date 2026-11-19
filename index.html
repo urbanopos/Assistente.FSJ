@@ -3425,7 +3425,7 @@ if(!dlg){dlg=document.createElement('dialog');dlg.id='fsjRelatorioAcoesFallback'
 dlg.querySelector('iframe').srcdoc=html;dlg.showModal();
 };
 </script><script id="fsjOwnerIndicatorsIndexRouting">/* Index é a fonte da faixa de indicadores do Proprietário. */
-(function(){function position(){const menu=document.getElementById('fsjPhoneOwnerMenu'),row=document.getElementById('fsjOwnerIndicatorsRow');if(!menu||!row)return false;if(!menu.contains(row))menu.prepend(row);return true}if(!position()){const obs=new MutationObserver(()=>{if(position())obs.disconnect()});obs.observe(document.documentElement,{childList:true,subtree:true});document.addEventListener('DOMContentLoaded',position,{once:true})}})();
+(function(){function position(){const menu=document.getElementById('fsjPhoneOwnerMenu'),row=document.getElementById('fsjOwnerIndicatorsRow');if(!menu||!row)return false;const tv=document.getElementById('fsjHomeTvButton');if(tv&&tv.parentNode===menu){if(row.parentNode!==menu||tv.nextElementSibling!==row)tv.after(row)}else if(!menu.contains(row))menu.prepend(row);return true}if(!position()){const obs=new MutationObserver(()=>{if(position())obs.disconnect()});obs.observe(document.documentElement,{childList:true,subtree:true});document.addEventListener('DOMContentLoaded',position,{once:true})}})();
 </script>
 
 <style id="fsj-faixa-validacao-real">
@@ -4230,7 +4230,7 @@ if(stats.parentElement!==board)tv.after(stats);
 if(tv.nextElementSibling!==stats)tv.after(stats);
 let grid=document.getElementById('fsjOwnerHomeMenuGrid');
 if(!grid){grid=document.createElement('div');grid.id='fsjOwnerHomeMenuGrid'}
-if(grid.parentElement!==board)stats.after(grid);
+if(grid.parentElement!==board||stats.nextElementSibling!==grid)stats.after(grid);
 const all=[...document.querySelectorAll('button')];
 const find=(re)=>all.find(b=>re.test(norm(b))&&!b.closest('dialog')&&b!==tv);
 const ids=['fsjHomeTaskRegisterButton','fsjHomeEmergencyButton','fsjHomePeopleButton','fsjHomeLeavesButton','fsjHomeRunningTasksButton'];
