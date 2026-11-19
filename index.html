@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-folgas-pagina-unica-v27">
+<meta name="fsj-build" content="20261119-folgas-viewport-v28">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -4031,4 +4031,25 @@ function fsjCompactOwnerPersonSelector(sel){
  #folgasGestor #fsjFolgasCalendarioLateral .row:has(#fsjMesFolgasTitulo)>button{width:48px!important;min-width:48px!important;height:44px!important;padding:3px!important;margin:0!important}
  #folgasGestor #fsjMesFolgasTitulo{text-align:center!important;font-size:clamp(14px,4vw,20px)!important;white-space:nowrap!important}
 }
-</style></body></html>
+</style>
+<style id="fsjFolgasOverlayPaginaUmV28">
+@media(max-width:1000px) and (pointer:coarse){
+ #folgasGestor>.fsj-page-viewport{position:relative!important}
+ #folgasGestor>.fsj-page-viewport>#fsjFolgasControlesPaginaUm{position:absolute!important;left:18px!important;right:18px!important;bottom:12px!important;z-index:100!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;background:#fff!important;padding:8px 0!important}
+ #fsjFolgasControlesPaginaUm button{display:block!important;min-width:0!important;width:100%!important;min-height:40px!important;padding:6px 3px!important;font-size:12px!important;white-space:normal!important;line-height:1.15!important}
+ #folgasGestor #fsjFolgasBotoesNaLegenda{display:none!important}
+}
+@media(min-width:1001px),(pointer:fine){#fsjFolgasControlesPaginaUm{display:none!important}}
+</style>
+<script id="fsjFolgasOverlayPaginaUmScriptV28">
+(function(){
+ const root=document.getElementById('folgasGestor');if(!root)return;
+ const viewport=root.querySelector(':scope > .fsj-page-viewport');if(!viewport)return;
+ const bar=document.createElement('div');bar.id='fsjFolgasControlesPaginaUm';
+ const a=document.createElement('button');a.type='button';a.textContent='Consultar / Imprimir relatório';a.onclick=()=>fsjAbrirRelatorioFolgas();
+ const b=document.createElement('button');b.type='button';b.textContent='Atualizar calendário';b.onclick=()=>carregarFolgas();bar.append(a,b);viewport.append(bar);
+ const refresh=()=>{const mobile=window.matchMedia('(max-width:1000px) and (pointer:coarse)').matches;const pager=root.querySelector(':scope > .fsj-page-navigation');const label=pager?.querySelector('span');const page=label?.textContent||'1 / 1';bar.style.display=mobile&&/^\\s*1\\s*\\//.test(page)?'grid':'none';};
+ new MutationObserver(refresh).observe(root,{subtree:true,childList:true,characterData:true});refresh();
+})();
+</script>
+</body></html>
