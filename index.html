@@ -1130,10 +1130,10 @@ const fsjMotivosFolga=['Folga semanal','Folga compensatória','Feriado'];
 document.addEventListener('click',function fsjAbrirFolgasPeloMenu(ev){
  const btn=ev.target.closest?.('#fsjHomeLeavesButton');
  if(!btn)return;
- ev.preventDefault();ev.stopImmediatePropagation();
- if(typeof fsjOwnerVerified!=='undefined' && fsjOwnerVerified!==true)return;
- if(typeof fsjSimpleGo==='function')fsjSimpleGo('folgasGestor');
- else if(typeof navTo==='function')navTo('folgasGestor');
+ // O acesso do Proprietário já é validado pelo próprio ambiente autenticado.
+ // Não bloquear o onclick original do botão com stopImmediatePropagation.
+ ev.preventDefault();
+ if(typeof navTo==='function')navTo('folgasGestor');
  const pessoa=document.getElementById('folgasPessoaSelect');
  if(pessoa&&typeof fsjCarregarPessoasFolgas==='function')void fsjCarregarPessoasFolgas();
  if(typeof fsjAbrirCalendarioFolgas==='function')fsjAbrirCalendarioFolgas();
