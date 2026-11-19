@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-demandas-cores-v37">
+<meta name="fsj-build" content="20261119-prioridade-v38">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -2508,9 +2508,9 @@ async function fsjArquivarTarefaProprietario(t){
 function fsjExecucaoTexto(e){const who=person(e.pessoa_id).nick||person(e.pessoa_id).name,stamp=value=>value?fsjDataHora(new Date(value)):'';return who+' — '+(e.estado==='em_andamento'?'Em andamento • Início: '+stamp(e.iniciado_em)+(e.retomado_em!==e.iniciado_em?' • Retomada: '+stamp(e.retomado_em):''):e.estado==='suspensa'?'Suspensa em '+stamp(e.suspenso_em)+' • Início: '+stamp(e.iniciado_em):'Concluída em '+stamp(e.concluido_em));}
 function fsjExecucaoCelula(t){return fsjExecucoes.filter(e=>e.tarefa_id===t.id).map(e=>'<div class="muted">'+esc(fsjExecucaoTexto(e))+'</div>').join('');}
 function fsjCompareTaskPriority(a,b){const rank=t=>({urgente:0,prioritaria:1}[t.priority||t.prioridade]??2);return rank(a)-rank(b);}
-function fsjTaskClass(priority,status,running=false){if(status==='Arquivado'||status==='Arquivada')return 'fsj-task-archived';if(status==='Concluída')return 'fsj-task-completed';if(priority==='urgente')return 'fsj-priority fsj-urgent';if(priority==='prioritaria')return 'fsj-priority';if(status!=='Concluída'&&(running||status==='Em andamento'))return 'fsj-task-running';if(status==='Pendente')return 'fsj-task-pending';return 'fsj-task-open';}
+function fsjTaskClass(priority,status,running=false){const p=String(priority||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');const st=String(status||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(st==='arquivado'||st==='arquivada')return 'fsj-task-archived';if(st==='concluida')return 'fsj-task-completed';if(p==='urgente')return 'fsj-priority fsj-urgent';if(p==='prioritaria'||p==='prioritario')return 'fsj-priority';if(running||st==='em andamento'||st==='iniciada')return 'fsj-task-running';if(st==='pendente')return 'fsj-task-pending';return 'fsj-task-open';}
 function fsjApplyTaskColor(el,priority,status,running=false){if(!el)return;el.classList.remove('fsj-task-archived','fsj-task-completed','fsj-task-open','fsj-task-running','fsj-task-pending','fsj-priority','fsj-urgent');el.classList.add(...fsjTaskClass(priority,status,running).split(' '));}
-function fsjTaskName(t,employee=false){const running=fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento');return '<button type="button" class="fsj-task-number '+fsjTaskClass(t.priority,t.centralStatus==='Arquivado'||t.centralStatus==='Arquivada'?'Arquivado':t.status,running)+'" data-fsj-task-id="'+esc(t.id)+'"><strong>'+esc(fsjTaskListLabel(t.code,t.text,t.frequency))+'</strong></button>';}
+function fsjTaskName(t,employee=false){const running=fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento');return '<button type="button" class="fsj-task-number '+fsjTaskClass(t.priority||t.prioridade,t.centralStatus==='Arquivado'||t.centralStatus==='Arquivada'?'Arquivado':t.status,running)+'" data-fsj-task-id="'+esc(t.id)+'"><strong>'+esc(fsjTaskListLabel(t.code,t.text,t.frequency))+'</strong></button>';}
 document.addEventListener('click',event=>{
  const button=event.target.closest('[data-fsj-task-id]');if(!button)return;
  const t=S.tasks.find(t=>String(t.id)===String(button.dataset.fsjTaskId));if(!t)return;
@@ -3842,7 +3842,7 @@ function init(){
    if(!items.length){const p=document.createElement('p');p.textContent='Nenhum registro confirmado nesta categoria.';output.append(p);continue;}
    const list=document.createElement('ol');for(const task of items){
     const li=document.createElement('li');li.style.margin='10px 0';
-    const link=document.createElement('button');link.type='button';link.className='fsj-task-number '+(typeof fsjTaskClass==='function'?fsjTaskClass(t.priority,t.centralStatus||t.status,typeof fsjExecucoes!=='undefined'&&fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento')):'');
+    const link=document.createElement('button');link.type='button';link.className='fsj-task-number '+(typeof fsjTaskClass==='function'?fsjTaskClass(t.priority||t.prioridade,t.centralStatus||t.status,typeof fsjExecucoes!=='undefined'&&fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento')):'');
     link.dataset.fsjTaskId=String(task.id);
     link.textContent=typeof fsjTaskListLabel==='function'?fsjTaskListLabel(task.code,task.text,task.frequency):String(task.code||'Tarefa')+' — '+String(task.text||'Sem descrição');
     link.title='Abrir a tarefa e seus detalhes';
