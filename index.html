@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261118-mobile-seletor-compacto-v12">
+<meta name="fsj-build" content="20261119-mobile-folgas-reordenadas-v13">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -3965,4 +3965,24 @@ function fsjCompactOwnerPersonSelector(sel){
  };
 }
 </script>
+
+<style id="fsjOwnerMobileFolgasReorder20261119">
+@media(max-width:700px){
+ body:has(#gestor:not(.hidden)) #folgasGestor>h2{display:none!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor .fsj-folgas-duas-colunas{display:flex!important;flex-direction:column!important;gap:8px!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo{display:contents!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>h3{order:1!important;margin:0 0 4px!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>div:has(#folgasPessoaSelect){order:2!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPerfilPessoa{order:3!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasCalendarioLateral{order:4!important;width:100%!important;box-sizing:border-box!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>button[onclick="fsjAbrirRelatorioFolgas()"]{order:5!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]){order:6!important;margin:0!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>#folgasStatus{order:7!important;margin:0!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>#folgasPessoaDados{order:8!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>#folgasSemana{order:9!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>button[onclick="fsjAbrirRelatorioFolgas()"],
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]){width:100%!important}
+ body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]) button{width:100%!important}
+}
+</style>
 </body></html>
