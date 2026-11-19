@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-mobile-folgas-reordenadas-v14">
+<meta name="fsj-build" content="20261119-mobile-folgas-reordenadas-v15">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -3968,21 +3968,19 @@ function fsjCompactOwnerPersonSelector(sel){
 
 <style id="fsjOwnerMobileFolgasReorder20261119">
 @media(max-width:700px){
- body:has(#gestor:not(.hidden)) #folgasGestor>h2{display:none!important}
- body:has(#gestor:not(.hidden)) #folgasGestor .fsj-folgas-duas-colunas{display:flex!important;flex-direction:column!important;gap:8px!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo{display:contents!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>h3{grid-column:1/-1!important;order:1!important;margin:0 0 4px!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>div:has(#folgasPessoaSelect){grid-column:1/-1!important;order:2!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPerfilPessoa{grid-column:1/-1!important;order:3!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasCalendarioLateral{grid-column:1/-1!important;order:4!important;width:100%!important;box-sizing:border-box!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>button[onclick="fsjAbrirRelatorioFolgas()"]{order:5!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]){order:6!important;grid-column:2!important;margin:0!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>#folgasStatus{order:7!important;grid-column:3!important;margin:0!important;font-size:11px!important;line-height:1.2!important;overflow-wrap:anywhere}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>#folgasPessoaDados{grid-column:1/-1!important;order:8!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>#folgasSemana{order:9!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>button[onclick="fsjAbrirRelatorioFolgas()"],
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]){width:100%!important}
- body:has(#gestor:not(.hidden)) #folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]) button{width:100%!important;font-size:12px!important;padding:8px 3px!important;min-height:44px!important}
+ #folgasGestor>h2{display:none!important}
+ #folgasGestor .fsj-folgas-duas-colunas{display:grid!important;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;align-items:center!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo{display:contents!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo>h3{grid-column:1/-1!important;order:1!important;margin:0!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo>div:has(#folgasPessoaSelect){grid-column:1/-1!important;order:2!important}
+ #folgasGestor #fsjFolgasPerfilPessoa{grid-column:1/-1!important;order:3!important}
+ #folgasGestor #fsjFolgasCalendarioLateral{grid-column:1/-1!important;order:4!important;width:100%!important;box-sizing:border-box!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo>button[onclick="fsjAbrirRelatorioFolgas()"]{grid-column:1!important;order:5!important;width:100%!important;min-width:0!important;font-size:11px!important;padding:7px 2px!important;white-space:normal!important;min-height:42px!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]){grid-column:2!important;order:6!important;margin:0!important;width:100%!important;min-width:0!important}
+ #folgasGestor #fsjFolgasPainelEsquerdo>.row:has(button[onclick="carregarFolgas()"]) button{width:100%!important;min-width:0!important;font-size:11px!important;padding:7px 2px!important;white-space:normal!important;min-height:42px!important}
+ #folgasGestor #folgasStatus{grid-column:3!important;order:7!important;margin:0!important;font-size:10px!important;line-height:1.15!important;overflow-wrap:anywhere}
+ #folgasGestor #folgasPessoaDados{grid-column:1/-1!important;order:8!important}
+ #folgasGestor #folgasSemana{order:9!important}
 }
 </style>
 </body></html>
