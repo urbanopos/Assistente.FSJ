@@ -4138,4 +4138,70 @@ function fsjCompactOwnerPersonSelector(sel){
  #gestor #demandas #taskRows .fsj-task-number.fsj-urgent,
  #gestor #novaTarefa #fsjRegistroTarefasAbertas .fsj-urgent{animation:fsjUrgentPulse 1.8s ease-in-out infinite!important}
 }
-</style></body></html>
+</style><style id="fsjRegistroUnicoProprietarioV37">
+@media(max-width:1000px) and (pointer:coarse){
+ body.fsj-registro-proprietario #novaTarefa .fsj-task-legend,
+ body.fsj-registro-proprietario #novaTarefa>.muted,
+ body.fsj-registro-proprietario #targetBox>p.muted,
+ body.fsj-registro-proprietario #novaTarefa .fsj-timed-task small{display:none!important}
+ body.fsj-registro-proprietario #novaTarefa{padding:12px!important}
+ body.fsj-registro-proprietario #novaTarefa h2{text-align:center;margin:2px 0 8px!important}
+ body.fsj-registro-proprietario #novaTarefa label{margin:5px 0!important}
+ body.fsj-registro-proprietario #novaTarefa #execType{display:none!important}
+ body.fsj-registro-proprietario #novaTarefa .fsj-registro-tipos{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:5px 0 9px}
+ body.fsj-registro-proprietario #novaTarefa .fsj-registro-tipos button{min-height:42px;border:1px solid #aabdb4;border-radius:9px;background:#f6f7f7;color:#18352a;font-weight:700}
+ body.fsj-registro-proprietario #novaTarefa .fsj-registro-tipos button[aria-pressed=true]{background:#e1f5e5;border-color:#26914e}
+ body.fsj-registro-proprietario #novaTarefa #targetBox .checks{max-height:110px;overflow:auto}
+ body.fsj-registro-proprietario #novaTarefa #targetBox .fsj-registro-grupo-select{width:100%;min-height:43px}
+ body.fsj-registro-proprietario #novaTarefa textarea#taskText{min-height:76px!important;height:76px!important}
+ body.fsj-registro-proprietario #novaTarefa .fsj-task-form-actions{display:flex!important;flex-wrap:wrap;gap:7px}
+ body.fsj-registro-proprietario #novaTarefa #taskSaveBtn{order:2;flex:1 1 100%;background:#08633a!important;color:white!important;font-weight:700}
+ body.fsj-registro-proprietario #novaTarefa .fsj-timed-task{padding:7px!important;margin:6px 0!important}
+}
+</style>
+<script id="fsjRegistroUnicoProprietarioV37-script">
+(function(){
+ function active(){return window.FSJ_PLATFORM?.platform==='celular'&&window.fsjOwnerVerified===true;}
+ function setup(){
+  if(!active())return;
+  document.body.classList.add('fsj-registro-proprietario');
+  const form=document.getElementById('novaTarefa'),type=document.getElementById('execType'),target=document.getElementById('targetBox');
+  if(!form||!type||!target)return;
+  if(!document.getElementById('fsjRegistroTiposV37')){
+   const bar=document.createElement('div');bar.id='fsjRegistroTiposV37';bar.className='fsj-registro-tipos';
+   [['individual','Individual (pessoa)'],['group','Grupo (equipe)']].forEach(([v,label])=>{
+    const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.tipo=v;
+    b.onclick=()=>{type.value=v;type.dispatchEvent(new Event('change',{bubbles:true}));refresh();};
+    bar.appendChild(b);
+   });
+   type.before(bar);
+  }
+  refresh();
+ }
+ function refresh(){
+  if(!active())return;
+  const type=document.getElementById('execType'),target=document.getElementById('targetBox');
+  if(!type||!target)return;
+  document.querySelectorAll('#fsjRegistroTiposV37 button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tipo===type.value)));
+  if(type.value==='group'&&!target.querySelector('.fsj-registro-grupo-select')){
+   const radios=[...target.querySelectorAll('input.tg')];if(!radios.length)return;
+   const select=document.createElement('select');select.className='fsj-registro-grupo-select';
+   const first=document.createElement('option');first.value='';first.textContent='Selecione um grupo cadastrado';select.appendChild(first);
+   radios.forEach(r=>{const opt=document.createElement('option');opt.value=r.value;opt.textContent=r.closest('label')?.querySelector('b')?.textContent||r.value;select.appendChild(opt);});
+   select.value=radios.find(r=>r.checked)?.value||'';
+   select.onchange=()=>{radios.forEach(r=>r.checked=r.value===select.value);if(typeof guardarRascunhoTarefa==='function')guardarRascunhoTarefa();};
+   target.prepend(select);
+   const checks=target.querySelector('.checks');if(checks)checks.style.display='none';
+  }
+ }
+ function install(){
+  if(typeof window.renderTargets==='function'&&!window.renderTargets.__fsjV37){
+   const old=window.renderTargets;const wrapped=function(){const result=old.apply(this,arguments);refresh();return result;};wrapped.__fsjV37=true;window.renderTargets=wrapped;
+  }
+  setup();
+ }
+ document.addEventListener('DOMContentLoaded',install);
+ window.addEventListener('load',install);
+ document.addEventListener('click',()=>{if(active()&&!document.body.classList.contains('fsj-registro-proprietario'))setup();},true);
+})();
+</script></body></html>
