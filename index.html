@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-mobile-folgas-apos-feriados-v21">
+<meta name="fsj-build" content="20261119-mobile-folgas-inline-v25">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -1296,7 +1296,7 @@ async function fsjRenderCalendarioFeriadosDefault(){
   for(let i=0;i<primeiro.getDay();i++)html+='<span></span>';
   for(let i=1;i<=total;i++){const dia=mes+'-'+String(i).padStart(2,'0'),motivo=mapa.get(dia)||'';html+='<div class="fsj-dia-folga'+(motivo?' marcado':'')+'" style="cursor:default" title="'+esc(motivo)+'"><strong>'+i+'</strong>'+(motivo?'<small>Feriado</small>':'')+'</div>';}
   cal.innerHTML=html;
-  legenda.innerHTML='<strong>Feriados do mês</strong>'+(mapa.size?'<ul style="margin:6px 0;padding-left:20px">'+[...mapa].map(([dia,nome])=>'<li>'+esc(dia.slice(8,10)+'/'+dia.slice(5,7)+'/'+dia.slice(0,4))+' — '+esc(nome)+'</li>').join('')+'</ul>':'<p>Nenhum feriado cadastrado neste mês.</p>');
+  legenda.innerHTML='<strong>Feriados do mês</strong>'+(mapa.size?'<ul style="margin:6px 0;padding-left:20px">'+[...mapa].map(([dia,nome])=>'<li>'+esc(dia.slice(8,10)+'/'+dia.slice(5,7)+'/'+dia.slice(0,4))+' — '+esc(nome)+'</li>').join('')+'</ul>':'<p>Nenhum feriado cadastrado neste mês.</p>')+(window.matchMedia('(max-width:1000px) and (pointer:coarse)').matches?'<div id="fsjFolgasBotoesNaLegenda" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px;padding-top:8px;border-top:1px solid #d2dddd"><button type="button" onclick="fsjAbrirRelatorioFolgas()" style="min-width:0;width:100%;font-size:12px;padding:8px 3px;white-space:normal">Consultar / Imprimir relatório</button><button type="button" onclick="carregarFolgas()" style="min-width:0;width:100%;font-size:12px;padding:8px 3px;white-space:normal">Atualizar calendário</button></div>':'');
  }catch(e){if(seq!==fsjCalendarioDefaultConsulta)return;cal.replaceChildren();legenda.textContent='Não foi possível consultar os feriados da armazenagem central: '+e.message;}
 }
 let fsjCalendarioDefaultConsulta=0;
