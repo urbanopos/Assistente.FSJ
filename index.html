@@ -4205,59 +4205,63 @@ function fsjCompactOwnerPersonSelector(sel){
  document.addEventListener('click',()=>{if(active()&&!document.body.classList.contains('fsj-registro-proprietario'))setup();},true);
 })();
 </script>
-<!-- FSJ: layout inicial exclusivo do Proprietário celular, versão consolidada 20261119 -->
-<style id="fsj-owner-home-consolidated-css">
+<!-- FSJ celular proprietário: correção baseada nos botões visíveis da página -->
+<style id="fsj-home-mobile-final-style">
 @media(max-width:700px){
-#fsjPhoneOwnerMenu #fsjOwnerIndicatorsRow{grid-column:1/-1!important;width:100%!important}
-#fsjPhoneOwnerMenu #fsjHomeTvButton{grid-column:1/-1!important;width:100%!important}
-#fsjPhoneOwnerMenu #fsjOwnerHomeActions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;grid-column:1/-1!important;align-content:start!important;margin:0!important;padding:0!important}
-#fsjPhoneOwnerMenu #fsjOwnerHomeActions>button{width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;grid-column:auto!important;white-space:normal!important;line-height:1.2!important}
-#fsjPhoneOwnerMenu #fsjOwnerHomeActions>.fsj-owner-home-wrapper{display:contents!important}
-#fsjPhoneOwnerMenu #fsjOwnerHomeActions>.fsj-owner-home-wrapper>button{width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;grid-column:auto!important;white-space:normal!important;line-height:1.2!important}
-#fsjPhoneOwnerMenu #fsjHomeAvisosDiagnosticoRow{display:none!important}
+#dashboard #fsjMobileHomeGrid{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;margin:0!important;padding:0!important}
+#dashboard #fsjMobileHomeGrid>button{grid-column:auto!important;width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;white-space:normal!important;line-height:1.2!important;background:#175b40!important;color:white!important;border-radius:10px!important;font-weight:700!important}
+#dashboard #fsjHomeTvButton{grid-column:1/-1!important;width:100%!important}
+#dashboard #fsjHomeAvisosDiagnosticoRow.fsj-home-redundant{display:none!important}
 }
 </style>
-<script id="fsj-owner-home-consolidated-js">
+<script id="fsj-home-mobile-final-script">
 (function(){
- let working=false, pending=false;
- const label=e=>(e.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
- const isMobile=()=>matchMedia('(max-width:700px)').matches;
- function apply(){
-  if(working||!isMobile())return;
-  const menu=document.getElementById('fsjPhoneOwnerMenu');
-  const indicators=document.getElementById('fsjOwnerIndicatorsRow');
-  const tv=document.getElementById('fsjHomeTvButton');
-  const dashboard=document.getElementById('dashboard');
-  if(!menu||!indicators||!tv||!dashboard)return;
-  working=true;
-  try{
-   // O menu real do Proprietário é a âncora. Preservar os elementos e seus eventos.
-   if(indicators.parentNode!==menu)menu.prepend(indicators);
-   if(tv.parentNode!==menu||tv.nextElementSibling!==indicators)menu.insertBefore(tv,indicators);
-   let grid=document.getElementById('fsjOwnerHomeActions');
-   if(!grid){grid=document.createElement('div');grid.id='fsjOwnerHomeActions'}
-   if(grid.parentNode!==menu)indicators.after(grid);
-   else if(indicators.nextElementSibling!==grid)indicators.after(grid);
-   const all=[...new Set([...menu.querySelectorAll('button'),...dashboard.querySelectorAll('button')])];
-   const find=re=>all.find(b=>re.test(label(b))&&b!==tv);
-   const pairs=[
-    [/^registro de tarefas$/,/^disparo emergencial$/],
-    [/^pessoas e grupos$/,/^folgas e feriados$/],
-    [/^tarefas em execução$/,/^tarefas não cumpridas$/],
-    [/^decidir folgas e envios nos feriados$/,/^responder dúvidas e sugestões$/],
-    [/^avisos de devolução/]
-   ];
-   const chosen=pairs.flatMap(pair=>pair.map(find).filter(Boolean));
-   for(const b of chosen){if(b.parentNode!==grid)grid.appendChild(b)}
-   // Não excluir nenhum comando: apenas ocultar a cópia de avisos sem contador.
-   const copy=document.getElementById('fsjHomeAvisosDiagnosticoRow');
-   if(copy&&chosen.some(b=>/^avisos de devolução/.test(label(b))&&!copy.contains(b)))copy.style.display='none';
-  }finally{working=false}
- }
- function schedule(){if(pending)return;pending=true;setTimeout(()=>{pending=false;apply()},80)}
- function init(){apply();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});}
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- window.addEventListener('load',schedule);window.addEventListener('resize',schedule);
+let running=false,queued=false;
+const norm=b=>(b.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+function fix(){
+ if(running||!matchMedia('(max-width:700px)').matches)return;
+ const board=document.getElementById('dashboard');
+ const owner=document.getElementById('gestor');
+ const tv=document.getElementById('fsjHomeTvButton');
+ const stats=document.getElementById('fsjOwnerIndicatorsRow');
+ if(!board||!owner||owner.classList.contains('hidden')||!tv||!stats||board.classList.contains('hidden'))return;
+ running=true;
+ try{
+ // Colocar TV acima dos quatro números, sempre no contêiner efetivamente visível.
+ if(tv.parentNode!==board||stats.parentNode!==board){
+  if(stats.parentNode!==board)board.prepend(stats);
+  board.insertBefore(tv,stats);
+ }else if(tv.nextElementSibling!==stats)board.insertBefore(tv,stats);
+ let grid=document.getElementById('fsjMobileHomeGrid');
+ if(!grid){grid=document.createElement('div');grid.id='fsjMobileHomeGrid'}
+ if(grid.parentNode!==board||stats.nextElementSibling!==grid)stats.after(grid);
+ // Buscar botões existentes, inclusive os que foram inseridos fora do dashboard.
+ const all=[...document.querySelectorAll('button')];
+ const eligible=b=>b!==tv&&!b.disabled&&b.getClientRects().length>0&&
+  !b.closest('dialog,[hidden],.hidden,#fsjOwnerWorkspace,#fsjOwnerApprovedMenu');
+ const find=(pattern)=>all.find(b=>eligible(b)&&pattern.test(norm(b)));
+ const patterns=[
+  /^registro de tarefas$/,/^disparo emergencial$/,
+  /^pessoas e grupos$/,/^folgas e feriados$/,
+  /^tarefas em execução$/,/^tarefas não cumpridas$/,
+  /^decidir folgas e envios nos feriados$/,
+  /^responder dúvidas e sugestões$/,
+  /^avisos de devolução\s*\(\d+\)$/
+ ];
+ const buttons=patterns.map(find);
+ // Exigir todos os comandos essenciais antes de alterar a grade.
+ if(buttons.slice(0,8).some(x=>!x))return;
+ const notice=buttons[8]||find(/^avisos de devolução$/);
+ if(notice)buttons[8]=notice;
+ for(const b of buttons.filter(Boolean)){if(b.parentNode!==grid)grid.appendChild(b)}
+ const duplicate=document.getElementById('fsjHomeAvisosDiagnosticoRow');
+ if(duplicate&&notice&&!duplicate.contains(notice))duplicate.classList.add('fsj-home-redundant');
+ }finally{running=false}
+}
+function schedule(){if(queued)return;queued=true;setTimeout(()=>{queued=false;fix()},160)}
+function init(){fix();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+window.addEventListener('load',schedule);window.addEventListener('resize',schedule);
 })();
 </script>
 </body></html>
