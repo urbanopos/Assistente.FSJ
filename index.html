@@ -3943,6 +3943,18 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  .fsj-compact-person-option[aria-selected=true]{font-weight:700;background:#eef5ff}
 }
 </style>
+
+<style id="fsjCompactPersonPagination20261119">
+@media(max-width:1000px) and (pointer:coarse){
+.fsj-compact-person-panel{max-height:calc(100dvh - 32px)!important;width:min(100%,440px)!important}
+.fsj-compact-person-options{overflow:hidden!important;flex:0 1 auto!important}
+.fsj-compact-person-option{min-height:40px!important;padding:8px 12px!important;font-size:13px!important;line-height:1.2!important}
+.fsj-compact-person-heading{padding:10px 12px!important;font-size:15px!important}
+.fsj-compact-person-nav{display:flex;align-items:center;justify-content:center;gap:18px;padding:10px 8px;font-weight:700;font-size:14px;border-top:1px solid #e3e8e5}
+.fsj-compact-person-nav button{min-width:42px;min-height:36px;border:1px solid #b7cbc0;border-radius:8px;background:#fff;color:#164c39;font-size:20px}
+.fsj-compact-person-nav button:disabled{opacity:.3}
+}
+</style>
 <script id="fsjCompactOwnerPersonSelector20261118">
 function fsjCompactOwnerPersonSelector(sel){
  if(!sel||!sel.parentElement)return;
@@ -3956,12 +3968,26 @@ function fsjCompactOwnerPersonSelector(sel){
   const heading=document.createElement('div');heading.className='fsj-compact-person-heading';heading.append(document.createTextNode('Selecionar pessoa'));
   const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Fechar');close.onclick=()=>overlay.remove();heading.append(close);panel.append(heading);
   const list=document.createElement('div');list.className='fsj-compact-person-options';
-  for(const option of sel.options){
-   const item=document.createElement('button');item.type='button';item.className='fsj-compact-person-option';item.setAttribute('aria-selected',String(option.value===sel.value));
-   const label=document.createElement('span');label.textContent=option.textContent;const mark=document.createElement('span');mark.textContent=option.value===sel.value?'◉':'○';mark.setAttribute('aria-hidden','true');item.append(label,mark);
-   item.onclick=()=>{sel.value=option.value;overlay.remove();sel.dispatchEvent(new Event('change',{bubbles:true}));};list.append(item);
+  const options=Array.from(sel.options).filter(o=>!o.hidden&&!o.disabled);
+  let page=Math.max(0,Math.floor(Math.max(0,options.findIndex(o=>o.value===sel.value))/5));
+  const pages=Math.max(1,Math.ceil(options.length/5));
+  const nav=document.createElement('div');nav.className='fsj-compact-person-nav';
+  const prev=document.createElement('button');prev.type='button';prev.textContent='‹';prev.setAttribute('aria-label','Página anterior');
+  const counter=document.createElement('span');counter.setAttribute('aria-live','polite');
+  const next=document.createElement('button');next.type='button';next.textContent='›';next.setAttribute('aria-label','Próxima página');
+  function renderPage(){
+   list.replaceChildren();
+   for(const option of options.slice(page*5,page*5+5)){
+    const item=document.createElement('button');item.type='button';item.className='fsj-compact-person-option';item.setAttribute('aria-selected',String(option.value===sel.value));
+    const label=document.createElement('span');label.textContent=option.textContent;const mark=document.createElement('span');mark.textContent=option.value===sel.value?'◉':'○';mark.setAttribute('aria-hidden','true');item.append(label,mark);
+    item.onclick=()=>{sel.value=option.value;overlay.remove();sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}));};list.append(item);
+   }
+   counter.textContent=(page+1)+'/'+pages;prev.disabled=page===0;next.disabled=page===pages-1;
   }
-  panel.append(list);overlay.append(panel);overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});document.body.append(overlay);close.focus();
+  prev.onclick=()=>{if(page>0){page--;renderPage();}};
+  next.onclick=()=>{if(page<pages-1){page++;renderPage();}};
+  nav.append(prev,counter,next);renderPage();
+  panel.append(list,nav);overlay.append(panel);overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});document.body.append(overlay);close.focus();
  };
 }
 </script>
