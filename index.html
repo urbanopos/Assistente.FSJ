@@ -4308,4 +4308,68 @@ background:#175b40!important;color:#fff!important;
  window.addEventListener('resize',schedule);
 })();
 </script>
+
+<!-- FSJ celular proprietário: correção definitiva da ordem visual, 19-11-2026 -->
+<style id="fsj-owner-home-v3-css">
+@media(max-width:700px){
+#fsjOwnerHomeV3Buttons{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;grid-column:1/-1!important;margin:0!important;padding:0!important;align-content:start!important}
+#fsjOwnerHomeV3Buttons>button{grid-column:auto!important;width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;white-space:normal!important;line-height:1.2!important}
+#fsjOwnerHomeV3Buttons>.fsj-owner-home-v3-inner{display:contents!important}
+#fsjOwnerHomeV3Buttons>.fsj-owner-home-v3-inner>button{width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;white-space:normal!important;line-height:1.2!important}
+#fsjOwnerHomeV3Tv{grid-column:1/-1!important;width:100%!important;min-height:48px!important;margin:0!important}
+#dashboard #fsjHomeAvisosDiagnosticoRow.fsj-owner-home-v3-duplicate{display:none!important}
+}
+</style>
+<script id="fsj-owner-home-v3-script">
+(function(){
+ const marker='fsjOwnerHomeV3Buttons';let busy=false;
+ const text=b=>(b.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+ const mobile=()=>matchMedia('(max-width:700px)').matches;
+ function fix(){
+ if(busy||!mobile())return;
+ const dashboard=document.getElementById('dashboard');
+ const menu=document.getElementById('fsjPhoneOwnerMenu');
+ const approved=document.getElementById('fsjOwnerApprovedMenu');
+ const indicator=document.getElementById('fsjOwnerIndicatorsRow');
+ if(!dashboard||!indicator)return;
+ const root=(menu&&menu.contains(indicator)?menu:dashboard);
+ const tv=document.getElementById('fsjHomeTvButton');
+ if(!tv)return;
+ busy=true;
+ try{
+  // A faixa numérica e a TV pertencem à mesma tela: TV imediatamente antes da faixa.
+  if(tv.parentNode!==root)root.insertBefore(tv,indicator);
+  else if(tv.nextElementSibling!==indicator)root.insertBefore(tv,indicator);
+  tv.id='fsjHomeTvButton';tv.classList.add('fsj-owner-home-v3-tv');
+  let grid=document.getElementById(marker);
+  if(!grid){grid=document.createElement('div');grid.id=marker}
+  const sources=[dashboard,menu,approved].filter(Boolean);
+  const all=[...new Set(sources.flatMap(x=>[...x.querySelectorAll('button')]))];
+  const by=(re)=>all.find(b=>re.test(text(b))&&b!==tv);
+  const names=[
+   [/^registro de tarefas$/,/^disparo emergencial$/],
+   [/^pessoas e grupos$/,/^folgas e feriados$/],
+   [/^tarefas em execução$/,/^tarefas não cumpridas$/],
+   [/^decidir folgas e envios nos feriados$/,/^responder dúvidas e sugestões$/],
+   [/^avisos de devolução/]
+  ];
+  const selected=names.flatMap(pair=>pair.map(by).filter(Boolean));
+  if(selected.length<6)return;
+  const duplicate=document.getElementById('fsjHomeAvisosDiagnosticoRow');
+  // A cópia sem contador é redundante somente quando o aviso original já existe.
+  const notices=selected.find(b=>/^avisos de devolução/.test(text(b)));
+  if(duplicate&&notices&&!duplicate.contains(notices))duplicate.classList.add('fsj-owner-home-v3-duplicate');
+  const after=indicator;
+  if(grid.parentNode!==root)after.after(grid);
+  else if(indicator.nextElementSibling!==grid)after.after(grid);
+  for(const b of selected){if(b.parentNode!==grid)grid.appendChild(b)}
+ }finally{busy=false}
+ }
+ let queued=false;
+ const schedule=()=>{if(queued)return;queued=true;setTimeout(()=>{queued=false;fix()},100)};
+ function init(){fix();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ window.addEventListener('load',schedule);window.addEventListener('resize',schedule);
+})();
+</script>
 </body></html>
