@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-registro-abertas-v36">
+<meta name="fsj-build" content="20261119-demandas-cores-v37">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -3842,7 +3842,7 @@ function init(){
    if(!items.length){const p=document.createElement('p');p.textContent='Nenhum registro confirmado nesta categoria.';output.append(p);continue;}
    const list=document.createElement('ol');for(const task of items){
     const li=document.createElement('li');li.style.margin='10px 0';
-    const link=document.createElement('button');link.type='button';link.className='fsj-task-number';
+    const link=document.createElement('button');link.type='button';link.className='fsj-task-number '+(typeof fsjTaskClass==='function'?fsjTaskClass(t.priority,t.centralStatus||t.status,typeof fsjExecucoes!=='undefined'&&fsjExecucoes.some(e=>e.tarefa_id===t.id&&e.estado==='em_andamento')):'');
     link.dataset.fsjTaskId=String(task.id);
     link.textContent=typeof fsjTaskListLabel==='function'?fsjTaskListLabel(task.code,task.text,task.frequency):String(task.code||'Tarefa')+' — '+String(task.text||'Sem descrição');
     link.title='Abrir a tarefa e seus detalhes';
@@ -4120,5 +4120,22 @@ function fsjCompactOwnerPersonSelector(sel){
  #novaTarefa #fsjRegistroTarefasAbertas h3{font-size:15px;margin:2px 0 8px}
  #novaTarefa .fsj-registro-tarefa-aberta{margin:4px 0}
  #novaTarefa .fsj-registro-tarefa-aberta button{max-width:100%;width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere;padding:8px}
+}
+</style><style id="fsjDemandasCoresV37">
+@media(max-width:1000px) and (pointer:coarse){
+ #gestor #demandas #taskRows .fsj-task-number.fsj-task-open,
+ #gestor #novaTarefa #fsjRegistroTarefasAbertas .fsj-task-open{color:#000!important}
+ #gestor #demandas #taskRows .fsj-task-number.fsj-task-running,
+ #gestor #novaTarefa #fsjRegistroTarefasAbertas .fsj-task-running{color:#1565c0!important}
+ #gestor #demandas #taskRows .fsj-task-number.fsj-task-pending,
+ #gestor #novaTarefa #fsjRegistroTarefasAbertas .fsj-task-pending{color:#b58a00!important}
+ #gestor #demandas #taskRows .fsj-task-number.fsj-priority,
+ #gestor #novaTarefa #fsjRegistroTarefasAbertas .fsj-priority{color:#b91c1c!important;font-weight:800!important}
+ #gestor #demandas #taskRows .fsj-task-number.fsj-task-completed,
+ #gestor #novaTarefa #fsjRegistroTarefasAbertas .fsj-task-completed{color:#14532d!important}
+ #gestor #demandas #taskRows .fsj-task-number.fsj-task-archived{color:#fff!important}
+ #gestor #demandas #taskRows .fsj-task-number strong{color:inherit!important}
+ #gestor #demandas #taskRows .fsj-task-number.fsj-urgent,
+ #gestor #novaTarefa #fsjRegistroTarefasAbertas .fsj-urgent{animation:fsjUrgentPulse 1.8s ease-in-out infinite!important}
 }
 </style></body></html>
