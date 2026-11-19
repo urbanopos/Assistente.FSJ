@@ -37,6 +37,26 @@ button{padding:7px 10px;border:1px solid #b8c2ba;border-radius:8px;background:#f
 .table{overflow:auto}table{width:100%;border-collapse:collapse;min-width:800px}th,td{padding:8px;border-bottom:1px solid #e3e7e4;text-align:left;vertical-align:top}.hidden{display:none}.msg{white-space:pre-wrap;background:#f8faf8;border:1px solid var(--line);padding:10px;border-radius:8px}
 @media(max-width:700px){header{position:sticky;top:0}.topnav{top:72px}.grid{grid-template-columns:1fr 1fr}.actions button{padding:6px;font-size:12px}.topnav .inner{padding:6px 8px}}
 
+/* FSJ celular proprietário: formulário de pessoas compacto, sem controles de voz.
+   Somente apresentação; não modifica valores, validações nem cadastros. */
+@media(max-width:700px){
+ #cadPessoas #personBasicFields .person-fields{gap:5px!important;margin:0!important}
+ #cadPessoas #personBasicFields .person-fields>div{flex:1 1 100%!important;min-width:0!important;margin:0!important}
+ #cadPessoas #personBasicFields .person-fields button,
+ #cadPessoas #personBasicFields .person-fields [class*="voice"],
+ #cadPessoas #personBasicFields .person-fields [class*="voz"],
+ #cadPessoas #personBasicFields .person-fields [id*="voice"],
+ #cadPessoas #personBasicFields .person-fields [id*="voz"]{display:none!important}
+ #cadPessoas #personBasicFields .person-fields input,
+ #cadPessoas #personBasicFields .person-fields select{width:100%!important;max-width:100%!important;min-height:39px!important;height:39px!important;padding:7px 10px!important;box-sizing:border-box!important;margin:2px 0 0!important}
+ #cadPessoas #personBasicFields .person-fields label{display:block!important;margin:3px 0 0!important;font-size:13px!important;line-height:1.2!important}
+ #cadPessoas #fsjOwnerAccessInPeople{margin:4px 0 7px!important;gap:2px!important}
+ #cadPessoas #fsjOwnerAccessInPeople .muted{font-size:11px!important;line-height:1.2!important}
+ #cadPessoas #fsjNumeroUsuarioPessoa{font-size:11px!important;line-height:1.2!important;margin:4px 0!important}
+ #cadPessoas h2{font-size:19px!important;margin:0 0 5px!important}
+ #cadPessoas{padding:10px!important}
+}
+
 #personBasicFields .person-fields>div{min-width:0}
 @media(max-width:700px){#personBasicFields .person-fields>div{flex:1 1 100%!important}}
 
