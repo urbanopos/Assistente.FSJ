@@ -4338,31 +4338,45 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
 
 <style id="fsjMobilePeopleConsult20261119">
 @media(max-width:1000px) and (pointer:coarse){
-#cadPessoas.fsj-mobile-consulta #personBasicHome,#cadPessoas.fsj-mobile-consulta #fsjOwnerAccessInPeople{display:none!important}
 #cadPessoas #fsjGruposNaPessoas{display:none!important}
-#fsjMobilePeopleEntry{display:none}
-#cadPessoas.fsj-mobile-consulta #fsjMobilePeopleEntry{display:block}
-#fsjMobilePeopleEntry button{background:#185d3d;color:white;border:0;border-radius:9px;padding:11px 13px;font-size:14px}
-#fsjMobilePeopleEntry .fsj-person-actions{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+#fsjMobilePeopleEntry{display:block;margin:0 0 12px}
+#fsjMobilePeopleEntry .fsj-people-consult-btn{display:block;width:100%;background:#185d3d;color:white;border:0;border-radius:10px;padding:14px 10px;font-weight:700;font-size:15px;text-align:center}
+#fsjMobilePeopleEntry .fsj-people-form-title{font-size:18px;font-weight:700;margin:15px 0 8px}
+#fsjMobilePeopleEntry .fsj-people-picker{display:none;padding:10px 0}
+#cadPessoas.fsj-mobile-consulta #fsjMobilePeopleEntry .fsj-people-picker{display:block}
+#cadPessoas.fsj-mobile-consulta #personBasicHome,#cadPessoas.fsj-mobile-consulta #fsjOwnerAccessInPeople{display:none!important}
+#cadPessoas.fsj-mobile-consulta #fsjMobilePeopleEntry .fsj-people-form-title{display:none}
+#cadPessoas.fsj-mobile-consulta #fsjMobilePeopleEntry .fsj-people-consult-btn{background:#436e58}
+#fsjMobilePeopleEntry .fsj-people-new-btn{width:100%;background:#185d3d;color:white;border:0;border-radius:9px;padding:11px;margin-top:10px;font-size:14px}
 }
+@media(min-width:1001px){#fsjMobilePeopleEntry{display:none!important}}
 </style>
 <script id="fsjMobilePeopleConsult20261119">
 (function(){'use strict';
 function mobile(){return matchMedia('(max-width:1000px) and (pointer:coarse)').matches}
-function setup(){const card=document.getElementById('cadPessoas');const selector=document.getElementById('personSelect');if(!card||!selector||document.getElementById('fsjMobilePeopleEntry'))return;
-const entry=document.createElement('div');entry.id='fsjMobilePeopleEntry';const heading=document.createElement('div');heading.style.cssText='font-size:15px;font-weight:700;margin:12px 0 6px';heading.textContent='Consultar pessoa cadastrada';
-const place=document.createElement('div');place.id='fsjMobilePersonSelector';
-const actions=document.createElement('div');actions.className='fsj-person-actions';const novo=document.createElement('button');novo.type='button';novo.textContent='+ Nova pessoa';
-novo.onclick=()=>{card.classList.remove('fsj-mobile-consulta');if(typeof clearPerson==='function')clearPerson();const field=document.getElementById('pname');if(field)field.focus();};
-
-actions.append(novo);entry.append(heading,place,actions);card.querySelector('h2')?.after(entry);
-function sync(){if(!mobile())return;const current=typeof currentPage!=='undefined'?currentPage:'';if(current!=='cadPessoas')return;
-if(!document.getElementById('pid')?.value)card.classList.add('fsj-mobile-consulta');
-const original=selector.parentElement;if(original&&original!==place)place.appendChild(selector);
-}
-const originalSelect=window.selectPerson;window.selectPerson=function(id){if(typeof originalSelect==='function')originalSelect(id);};
-const originalNav=window.navTo;if(typeof originalNav==='function')window.navTo=function(id,...args){const result=originalNav.call(this,id,...args);if(id==='cadPessoas'&&mobile()){card.classList.add('fsj-mobile-consulta');setTimeout(sync,0);}return result;};
-const observer=new MutationObserver(()=>{if(mobile()&&typeof currentPage!=='undefined'&&currentPage==='cadPessoas'&&!card.classList.contains('hidden'))sync()});observer.observe(card,{attributes:true,attributeFilter:['class']});sync();
+function setup(){
+ const card=document.getElementById('cadPessoas'),selector=document.getElementById('personSelect');
+ if(!card||!selector||document.getElementById('fsjMobilePeopleEntry'))return;
+ const entry=document.createElement('div');entry.id='fsjMobilePeopleEntry';
+ const consult=document.createElement('button');consult.type='button';consult.className='fsj-people-consult-btn';consult.textContent='Consulta pessoas cadastradas';
+ const title=document.createElement('div');title.className='fsj-people-form-title';title.textContent='Cadastrar Pessoas';
+ const picker=document.createElement('div');picker.className='fsj-people-picker';
+ const label=document.createElement('label');label.textContent='Selecionar pessoa cadastrada';label.htmlFor='personSelect';
+ const slot=document.createElement('div');slot.id='fsjMobilePersonSelector';
+ const novo=document.createElement('button');novo.type='button';novo.className='fsj-people-new-btn';novo.textContent='+ Nova pessoa';
+ picker.append(label,slot,novo);entry.append(consult,title,picker);card.querySelector('h2')?.after(entry);
+ function form(){card.classList.remove('fsj-mobile-consulta');}
+ function openConsult(){card.classList.add('fsj-mobile-consulta');if(selector.parentElement!==slot)slot.appendChild(selector);}
+ consult.onclick=()=>{if(card.classList.contains('fsj-mobile-consulta'))form();else openConsult();};
+ novo.onclick=()=>{form();if(typeof clearPerson==='function')clearPerson();document.getElementById('pname')?.focus();};
+ const originalNav=window.navTo;
+ if(typeof originalNav==='function')window.navTo=function(id,...args){const result=originalNav.call(this,id,...args);if(id==='cadPessoas'&&mobile())form();return result;};
+ const originalSelect=window.selectPerson;
+ if(typeof originalSelect==='function')window.selectPerson=function(id){return originalSelect.call(this,id);};
+ // A consulta utiliza o seletor original e sua rotina de abertura da ficha.
+ const observer=new MutationObserver(()=>{if(mobile()&&card.classList.contains('fsj-mobile-consulta')&&selector.parentElement!==slot)slot.appendChild(selector)});
+ observer.observe(card,{attributes:true,attributeFilter:['class']});
+ form();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
