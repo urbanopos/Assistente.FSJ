@@ -3850,17 +3850,21 @@ function init(){
   if(mode==='daily')render();
  }
  function populatePeople(){if(!person)return;const previous=person.value;person.replaceChildren(new Option('Todas as pessoas',''));const people=typeof S!=='undefined'?(S.people||[]):[];for(const p of people){const id=p.id||p.pessoa_id;const label=p.name||p.nome;if(id&&label)person.add(new Option(label,String(id)))}if([...person.options].some(o=>o.value===previous))person.value=previous}
- function render(){
+ let renderSequence=0;
+ const localDay=value=>{if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return String(value).slice(0,10);return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(d)};
+ async function render(){
+  const seq=++renderSequence;
   populatePeople();
   const output=document.getElementById('fsjReportDailyResults');output.replaceChildren();
   const day=date.value;if(!day){output.textContent='Selecione uma data.';return;}
   const tasks=typeof S!=='undefined'?(S.tasks||[]):[];
-  const runs=typeof fsjTemposExecucoes!=='undefined'&&Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[];
+  let runs=typeof fsjTemposExecucoes!=='undefined'&&Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[];
+  if(typeof fsjLerExecucoesTempos==='function')try{runs=await fsjLerExecucoesTempos();if(seq!==renderSequence)return;}catch(e){if(!runs.length){output.textContent='Não foi possível consultar os registros atuais de conclusão.';return;}}
   const selected=person?.value||'';
   const categories=[['Tarefas concluídas na data',[]]];
   for(const task of tasks){
    const tr=runs.filter(e=>String(e.tarefa_id)===String(task.id)&&(!selected||String(e.pessoa_id)===selected));
-   if(!tr.some(e=>String(e.concluido_em||'').slice(0,10)===day))continue;
+   if(!tr.some(e=>localDay(e.concluido_em)===day))continue;
    categories[0][1].push(task);
   }
   for(const [title,items] of categories){
