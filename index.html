@@ -3856,18 +3856,15 @@ function init(){
   const day=date.value;if(!day){output.textContent='Selecione uma data.';return;}
   const tasks=typeof S!=='undefined'?(S.tasks||[]):[];
   const runs=typeof fsjTemposExecucoes!=='undefined'&&Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[];
-  const categories=[['Tarefas atribuídas',[]],['Em execução',[]],['Concluídas',[]],['Entregues',[]]];
+  const selected=person?.value||'';
+  const categories=[['Iniciadas ou em execução',[]],['Concluídas',[]]];
   for(const task of tasks){
-   const responsible=typeof ids==='function'?ids(task).map(String):[];const selected=person?.value||'';if(selected&&!responsible.includes(selected)){const group=typeof S!=='undefined'?(S.groups||[]).find(g=>String(g.id)===String(task.groupId||task.grupo_id)):null;const members=group?(group.members||group.integrantes||group.memberIds||[]):[];if(!members.some(m=>String(typeof m==='object'?(m.id||m.pessoa_id):m)===selected))continue;}
-   const tr=runs.filter(e=>String(e.tarefa_id)===String(task.id));
-   const occurred=tr.some(e=>String(e.dia||'')===day||String(e.iniciado_em||'').slice(0,10)===day||String(e.concluido_em||'').slice(0,10)===day);
-   const completion=tr.some(e=>String(e.concluido_em||'').slice(0,10)===day);
-   const delivered=String(task.deliveredAt||task.entregueEm||task.entregue_em||'').slice(0,10)===day;
-   const started=tr.some(e=>String(e.iniciado_em||'').slice(0,10)===day||String(e.dia||'')===day&&e.estado==='em_andamento');
-   categories[0][1].push(task);
-   if(started)categories[1][1].push(task);
-   if(completion||String(task.completedAt||task.completed_at||task.concluidoEm||'').slice(0,10)===day)categories[2][1].push(task);
-   if(delivered)categories[3][1].push(task);
+   const tr=runs.filter(e=>String(e.tarefa_id)===String(task.id)&&(!selected||String(e.pessoa_id)===selected));
+   const dated=tr.filter(e=>[e.iniciado_em,e.retomado_em,e.suspenso_em,e.concluido_em].some(v=>String(v||'').slice(0,10)===day));
+   if(!dated.length)continue;
+   const completed=dated.some(e=>String(e.concluido_em||'').slice(0,10)===day);
+   if(completed)categories[1][1].push(task);
+   else categories[0][1].push(task);
   }
   for(const [title,items] of categories){
    const heading=document.createElement('h3');heading.textContent=title+' ('+items.length+')';output.append(heading);
@@ -3894,12 +3891,12 @@ function init(){
     },true);
     const executor=document.createElement('span');executor.className='fsj-report-daily-executor';
     executor.style.cssText='display:inline-block;margin-left:12px;font-size:13px;font-weight:600;color:#234b3e';
-    const responsibleNames=typeof names==='function'?names(task):'';
+    const responsibleNames=selected?(person?.selectedOptions?.[0]?.textContent||''):(typeof names==='function'?names(task):'');
     executor.textContent='Responsável'+(responsibleNames.includes(' + ')?'is':'')+': '+(responsibleNames||'Não informado');
     li.append(link,executor);list.append(li);
    }output.append(list);
   }
-  const note=document.createElement('p');note.className='muted';note.textContent='O relatório considera apenas eventos com data identificável nos registros carregados; tarefas sem histórico datado não são presumidas concluídas ou entregues.';output.append(note);
+  const note=document.createElement('p');note.className='muted';note.textContent='Somente tarefas com início, retomada, suspensão ou conclusão registrados nesta data. A pessoa é identificada pelo executor do registro, não pela atribuição da tarefa. Registros sem data de evento não são contabilizados.';output.append(note);
  }
  m.addEventListener('click',()=>switchTo('monthly'));d.addEventListener('click',()=>switchTo('daily'));date.addEventListener('change',render);person?.addEventListener('change',render);
  document.addEventListener('fsj:owner-menu-first-page',e=>{if(e.detail?.section==='relatorios')switchTo('daily')});
