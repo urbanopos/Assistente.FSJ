@@ -19,7 +19,7 @@ if(!permissions||!Array.isArray(permissions.consulta)){status.textContent='Ident
 const allowed=permissions.consulta.filter(x=>typeof x==='string');
 const technical=/armazenagem|manuten|configura|administra|permiss|seguranca/i;
 const modules=[['Início','dashboard'],['Comunicação','comunicacao'],['Disparo Emergencial','disparoEmergencial'],['Folgas e feriados','folgasGestor'],['Minhas tarefas','minhasTarefas'],['Pessoas e Grupos','cadPessoas'],['Registrar tarefa','cadDemanda'],['Relatórios','relatorios'],['Tarefas em Execução','tarefasEmExecucao'],['Vídeos e chamadas — TV FSJ','tv']];
-const visible=modules.filter(([label])=>label==='Tarefas em Execução'&&allowed.includes(label));
+const visible=modules.filter(([label])=>(label==='Tarefas em Execução'||label==='Folgas e feriados')&&allowed.includes(label));
 const tvTop=document.getElementById('tvTop');
 panel.hidden=false;status.textContent='Perfil validado. '+visible.length+' área(s) operacional(is) autorizada(s).';
 if(!visible.length){buttons.textContent='Nenhuma área operacional habilitada.';return}
