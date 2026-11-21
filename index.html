@@ -4349,7 +4349,7 @@ b.onclick=()=>{sel.value=o.value;sel.dispatchEvent(new Event('input',{bubbles:tr
 render();panel.append(header,items,nav);backdrop.append(panel);backdrop.addEventListener('click',e=>{if(e.target===backdrop)close()});
 overlay=backdrop;document.body.appendChild(backdrop);x.focus();
 }
-document.addEventListener('pointerdown',function(e){if(!mobile()||overlay)return;const sel=e.target.closest&&e.target.closest('select');if(!sel||sel.id==='demandaFuncionario'||sel.multiple||sel.size>1||sel.disabled||sel.closest('#fsjPagedSelectBackdrop'))return;
+document.addEventListener('click',function(e){if(!mobile()||overlay)return;const sel=e.target.closest&&e.target.closest('select');if(!sel||sel.id==='demandaFuncionario'||sel.multiple||sel.size>1||sel.disabled||sel.closest('#fsjPagedSelectBackdrop'))return;
 // Intercept before the Android native picker opens, without changing the original select element.
 e.preventDefault();e.stopPropagation();open(sel);
 },true);
@@ -4572,17 +4572,13 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   if(person)new MutationObserver(sync).observe(person,{childList:true});
   window.fsjDemandasSyncMobileSelect=sync;
   const targets=new Set(fields.map(([id])=>id));
-  document.addEventListener('pointerdown',function(event){
+  document.addEventListener('click',function(event){
    const el=event.target.closest?.('select,input');
    if(!mobile()||!el||!targets.has(el.id))return;
    event.preventDefault();event.stopImmediatePropagation();
    open(el,fields.find(([id])=>id===el.id)[1],sync);
   },true);
-  document.addEventListener('click',function(event){
-   const el=event.target.closest?.('select,input');
-   if(!mobile()||!el||!targets.has(el.id))return;
-   event.preventDefault();event.stopImmediatePropagation();
-  },true);
+
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
