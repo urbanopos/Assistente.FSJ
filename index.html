@@ -4349,7 +4349,7 @@ b.onclick=()=>{sel.value=o.value;sel.dispatchEvent(new Event('input',{bubbles:tr
 render();panel.append(header,items,nav);backdrop.append(panel);backdrop.addEventListener('click',e=>{if(e.target===backdrop)close()});
 overlay=backdrop;document.body.appendChild(backdrop);x.focus();
 }
-document.addEventListener('pointerdown',function(e){if(!mobile()||overlay)return;const sel=e.target.closest&&e.target.closest('select');if(!sel||sel.multiple||sel.size>1||sel.disabled||sel.closest('#fsjPagedSelectBackdrop'))return;
+document.addEventListener('pointerdown',function(e){if(!mobile()||overlay)return;const sel=e.target.closest&&e.target.closest('select');if(!sel||sel.id==='demandaFuncionario'||sel.multiple||sel.size>1||sel.disabled||sel.closest('#fsjPagedSelectBackdrop'))return;
 // Intercept before the Android native picker opens, without changing the original select element.
 e.preventDefault();e.stopPropagation();open(sel);
 },true);
@@ -4454,8 +4454,8 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
 })();
 </script><style id="fsjDemandasPessoaPicker20261121">
 @media(max-width:1000px) and (pointer:coarse){
- #demandas #demandaFuncionario{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important}
- #demandas #fsjDemandasPessoaBotao{display:block!important;width:100%!important;text-align:left!important;min-height:56px!important;padding:12px 16px!important;background:#f0f0f0!important;color:#161616!important;border:1px solid #c8c8c8!important;border-radius:11px!important;font:inherit!important}
+ #demandas #demandaFuncionario{display:block!important;position:static!important;opacity:1!important;pointer-events:auto!important;width:100%!important;height:auto!important;min-height:56px!important}
+ #demandas #fsjDemandasPessoaBotao{display:none!important;width:100%!important;text-align:left!important;min-height:56px!important;padding:12px 16px!important;background:#f0f0f0!important;color:#161616!important;border:1px solid #c8c8c8!important;border-radius:11px!important;font:inherit!important}
 }
 #fsjDemandasPessoaBotao{display:none}
 #fsjDemandasPessoaModal{position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
@@ -4469,14 +4469,13 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
  const mobile=()=>matchMedia('(max-width:1000px) and (pointer:coarse)').matches;
  function init(){
   const sel=document.getElementById('demandaFuncionario');if(!sel||document.getElementById('fsjDemandasPessoaBotao'))return;
-  const btn=document.createElement('button');btn.type='button';btn.id='fsjDemandasPessoaBotao';
-  sel.insertAdjacentElement('afterend',btn);
-  function sync(){const option=sel.selectedOptions[0];btn.textContent=option&&option.value?option.textContent:'Selecione um funcionário';}
+  const btn=sel;
+  function sync(){}
   window.fsjDemandasSyncMobileSelect=sync;
   sync();sel.addEventListener('change',sync);
-  btn.addEventListener('click',function(e){
-   if(!mobile()){sel.focus();return}
-   e.preventDefault();e.stopPropagation();
+  btn.addEventListener('pointerdown',function(e){
+   if(!mobile())return;
+   e.preventDefault();e.stopImmediatePropagation();
    document.getElementById('fsjDemandasPessoaModal')?.remove();
    const opts=Array.from(sel.options).filter(o=>!o.disabled&&!o.hidden);
    let page=Math.max(0,Math.floor(Math.max(0,opts.findIndex(o=>o.value===sel.value))/5));
