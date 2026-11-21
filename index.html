@@ -1936,7 +1936,7 @@ function monthly(){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
 function employeeView(){let id=employee.value;if(!id){employeeTasks.innerHTML='<p class="muted">Cadastre um funcionário.</p>';return}let xs=S.tasks.filter(t=>ids(t).includes(id)&&(t.daily||t.status!=='Concluída'||(t.status==='Concluída'&&(t.created||'').slice(0,10)===dateKey()))).sort(fsjCompareTaskPriority);FSJDaily.ensure(null,id,employeeView);employeeTasks.innerHTML=xs.length?'<div class="table"><table><thead><tr><th>Atividade</th><th>Situação</th><th>Ação</th><th>Comunicação</th></tr></thead><tbody>'+xs.map(t=>'<tr><td><b>'+fsjTaskName(t,true)+'</b>'+(fsjFrequency(t)!=='pontual'?' <span class="pill">'+fsjFrequencyLabel(t)+'</span>':'')+'<br><span class="muted">'+esc(names(t))+'</span></td><td><span class="pill">'+esc(FSJDaily.ownerText(t,null,id))+'</span></td><td>'+(t.status==='Concluída'?'<button disabled>'+esc(FSJDaily.ownerText(t,null,id))+'</button>':'<button class="primary" onclick="act(\''+t.id+'\',\'done\')">Concluir</button>')+'</td><td><div class="actions">'+(t.status==='Concluída'?'':'<button onclick="act(\''+t.id+'\',\'why\')">Justificar</button><button onclick="act(\''+t.id+'\',\'ask\')">Perguntar à gestão</button>')+'<label style="margin:0"><span class="pill">📎 Foto/Vídeo</span><input type="file" accept="image/*,video/*" capture="environment" style="display:none" onchange="attach(\''+t.id+'\',this)"></label></div></td></tr>').join('')+'</tbody></table></div>':'<p class="muted">Nenhuma tarefa ativa.</p>'}
-function atualizarFiltroDemandas(){let filtro=document.getElementById('demandaFuncionario'),atual=filtro.value;filtro.innerHTML='<option value="">Selecione um funcionário</option>'+[...S.people].sort((a,b)=>(a.nick||a.name).localeCompare(b.nick||b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nick&&p.nick!==p.name?p.nick+' — '+p.name:p.name)+'</option>').join('');filtro.value=S.people.some(p=>p.id===atual)?atual:''}
+function atualizarFiltroDemandas(){let filtro=document.getElementById('demandaFuncionario'),atual=filtro.value;const ativos=S.people.filter(p=>p.active===true);filtro.innerHTML='<option value="">Selecione um funcionário</option>'+ativos.sort((a,b)=>(a.nick||a.name).localeCompare(b.nick||b.name,'pt-BR')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nick&&p.nick!==p.name?p.nick+' — '+p.name:p.name)+'</option>').join('');filtro.value=ativos.some(p=>p.id===atual)?atual:'';if(typeof window.fsjDemandasSyncMobileSelect==='function')window.fsjDemandasSyncMobileSelect();}
 function filtrarDemandas(tarefas,responsavel){const id=String(responsavel||'');return id?tarefas.filter(t=>ids(t).some(p=>String(p)===id)):[]}
 function filtrarDemandasGrupo(tarefas,grupo){const id=String(grupo||'');return id?tarefas.filter(t=>String(t.groupId||'')===id):[]}
 let fsjPerguntaIndice=0,fsjRespostasPerguntas=[];
@@ -4451,5 +4451,62 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   };
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+})();
+</script><style id="fsjDemandasPessoaPicker20261121">
+@media(max-width:1000px) and (pointer:coarse){
+ #demandas #demandaFuncionario{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important}
+ #demandas #fsjDemandasPessoaBotao{display:block!important;width:100%!important;text-align:left!important;min-height:56px!important;padding:12px 16px!important;background:#f0f0f0!important;color:#161616!important;border:1px solid #c8c8c8!important;border-radius:11px!important;font:inherit!important}
+}
+#fsjDemandasPessoaBotao{display:none}
+#fsjDemandasPessoaModal{position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+#fsjDemandasPessoaModal>section{width:min(100%,460px);max-height:85dvh;overflow:hidden;background:white;border-radius:14px;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px}
+#fsjDemandasPessoaModal .fsj-demanda-pessoa-option{display:block;width:100%;text-align:left;background:#f4f7f5;color:#163c2b;border:1px solid #ccd9d0;border-radius:9px;padding:12px;min-height:48px;font-size:16px}
+#fsjDemandasPessoaModal .fsj-demanda-pessoa-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#fsjDemandasPessoaModal .fsj-demanda-pessoa-nav button{background:#195e40;color:white;border:0;border-radius:9px;min-width:60px;min-height:44px}
+</style>
+<script id="fsjDemandasPessoaPicker20261121">
+(function(){
+ const mobile=()=>matchMedia('(max-width:1000px) and (pointer:coarse)').matches;
+ function init(){
+  const sel=document.getElementById('demandaFuncionario');if(!sel||document.getElementById('fsjDemandasPessoaBotao'))return;
+  const btn=document.createElement('button');btn.type='button';btn.id='fsjDemandasPessoaBotao';
+  sel.insertAdjacentElement('afterend',btn);
+  function sync(){const option=sel.selectedOptions[0];btn.textContent=option&&option.value?option.textContent:'Selecione um funcionário';}
+  window.fsjDemandasSyncMobileSelect=sync;
+  sync();sel.addEventListener('change',sync);
+  btn.addEventListener('click',function(e){
+   if(!mobile()){sel.focus();return}
+   e.preventDefault();e.stopPropagation();
+   document.getElementById('fsjDemandasPessoaModal')?.remove();
+   const opts=Array.from(sel.options).filter(o=>!o.disabled&&!o.hidden);
+   let page=Math.max(0,Math.floor(Math.max(0,opts.findIndex(o=>o.value===sel.value))/5));
+   const pages=Math.max(1,Math.ceil(opts.length/5));
+   const overlay=document.createElement('div');overlay.id='fsjDemandasPessoaModal';
+   const panel=document.createElement('section');panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Selecionar funcionário');
+   const header=document.createElement('div');header.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:12px';
+   const title=document.createElement('strong');title.textContent='Selecionar funcionário';
+   const close=document.createElement('button');close.type='button';close.textContent='Fechar';close.onclick=()=>overlay.remove();
+   header.append(title,close);
+   const items=document.createElement('div');items.style.cssText='display:flex;flex-direction:column;gap:7px;min-height:0;overflow:hidden';
+   const nav=document.createElement('div');nav.className='fsj-demanda-pessoa-nav';
+   const prev=document.createElement('button');prev.type='button';prev.textContent='←';
+   const count=document.createElement('span');
+   const next=document.createElement('button');next.type='button';next.textContent='→';
+   function draw(){
+    items.replaceChildren();
+    for(const opt of opts.slice(page*5,page*5+5)){
+     const b=document.createElement('button');b.type='button';b.className='fsj-demanda-pessoa-option';b.textContent=opt.textContent;
+     b.onclick=()=>{sel.value=opt.value;sel.dispatchEvent(new Event('change',{bubbles:true}));sync();overlay.remove();};
+     items.append(b);
+    }
+    count.textContent=(page+1)+' / '+pages;prev.disabled=page===0;next.disabled=page===pages-1;
+   }
+   prev.onclick=()=>{if(page>0){page--;draw()}};next.onclick=()=>{if(page<pages-1){page++;draw()}};
+   nav.append(prev,count,next);panel.append(header,items,nav);overlay.append(panel);
+   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});
+   document.body.append(overlay);draw();
+  });
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script></body></html>
