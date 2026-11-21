@@ -2598,7 +2598,7 @@ function fsjFiltroSituacaoDemanda(t,valor){
  if(valor==='Não cumprida')return t.status==='Não cumprida';
  return t.status===valor;
 }
-function renderDemandas(){let responsavel=document.getElementById('demandaFuncionario').value;document.getElementById('demandaTabela').hidden=!responsavel;document.getElementById('demandaEscolha').hidden=!!responsavel;if(!responsavel){document.getElementById('fsjPessoaGruposBloco').hidden=true;taskRows.innerHTML='';document.getElementById('demandaContagem').textContent='';return;}FSJDaily.ensure(null,responsavel,renderDemandas);const todas=filtrarDemandas(S.tasks,responsavel).filter(t=>!['Arquivado','Arquivada'].includes(t.centralStatus||t.status)||document.getElementById('demandaSituacao').value==='Arquivado');let tarefas=todas.filter(t=>!t.groupId&&fsjFiltroSituacaoDemanda(t,document.getElementById('demandaSituacao').value)).sort(fsjCompareTaskPriority);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+fsjFrequencyLabel(t)+(t.groupId?' / Grupo':'')+'</td><td>'+fsjSituacaoDemanda(t,responsavel)+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions">'+(t.status==='Concluída'?'<button type="button" data-fsj-archive="'+esc(t.id)+'">Aprovar e arquivar</button>':'')+(t.status==='Arquivado'?'Somente consulta':'<button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button><label class="fsj-supervision-toggle" title="Marcar esta tarefa para acompanhamento e fiscalização pelo supervisor"><input type="checkbox" data-fsj-supervision="'+esc(t.id)+'" '+(t.supervision?'checked':'')+'><span>Supervisão</span></label>')+'</div></td></tr>').join('');fsjPosicionarAcoesMobile(taskRows);document.getElementById('demandaContagem').textContent=tarefas.length+' tarefa(s) individual(is) de '+todas.filter(t=>!t.groupId).length+' · '+todas.filter(t=>t.groupId).length+' tarefa(s) de grupo';if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="9" class="muted">Nenhuma tarefa individual encontrada com estes filtros.</td></tr>';
+function renderDemandas(){let responsavel=document.getElementById('demandaFuncionario').value;document.getElementById('demandaTabela').hidden=!responsavel;document.getElementById('demandaEscolha').hidden=!!responsavel;if(!responsavel){document.getElementById('fsjPessoaGruposBloco').hidden=true;taskRows.innerHTML='';document.getElementById('demandaContagem').textContent='';if(typeof window.fsjRenderDemandasCards==='function')window.fsjRenderDemandasCards([],[],'');return;}FSJDaily.ensure(null,responsavel,renderDemandas);const todas=filtrarDemandas(S.tasks,responsavel).filter(t=>!['Arquivado','Arquivada'].includes(t.centralStatus||t.status)||document.getElementById('demandaSituacao').value==='Arquivado');let tarefas=todas.filter(t=>!t.groupId&&fsjFiltroSituacaoDemanda(t,document.getElementById('demandaSituacao').value)).sort(fsjCompareTaskPriority);taskRows.innerHTML=tarefas.map(t=>'<tr><td>'+fsjTaskName(t)+'</td><td>'+esc(names(t))+'</td><td>'+fsjFrequencyLabel(t)+(t.groupId?' / Grupo':'')+'</td><td>'+fsjSituacaoDemanda(t,responsavel)+fsjExecucaoCelula(t)+'</td><td>'+esc(t.response||t.question||'—')+'</td>'+fsjTempoCelulas(t,responsavel)+'<td>'+(t.completedBy?esc(person(t.completedBy).nick||person(t.completedBy).name):'—')+'</td><td><div class="actions">'+(t.status==='Concluída'?'<button type="button" data-fsj-archive="'+esc(t.id)+'">Aprovar e arquivar</button>':'')+(t.status==='Arquivado'?'Somente consulta':'<button onclick="editTask(\''+t.id+'\')">Editar</button><button class="danger" onclick="delTask(\''+t.id+'\')">Excluir</button><label class="fsj-supervision-toggle" title="Marcar esta tarefa para acompanhamento e fiscalização pelo supervisor"><input type="checkbox" data-fsj-supervision="'+esc(t.id)+'" '+(t.supervision?'checked':'')+'><span>Supervisão</span></label>')+'</div></td></tr>').join('');fsjPosicionarAcoesMobile(taskRows);document.getElementById('demandaContagem').textContent=tarefas.length+' tarefa(s) individual(is) de '+todas.filter(t=>!t.groupId).length+' · '+todas.filter(t=>t.groupId).length+' tarefa(s) de grupo';if(typeof window.fsjRenderDemandasCards==='function')window.fsjRenderDemandasCards(tarefas,todas.filter(t=>t.groupId&&fsjFiltroSituacaoDemanda(t,document.getElementById('demandaSituacao').value)),responsavel);if(!tarefas.length)taskRows.innerHTML='<tr><td colspan="9" class="muted">Nenhuma tarefa individual encontrada com estes filtros.</td></tr>';
 
 // As tarefas coletivas aparecem em quadro independente, sem duplicação na lista individual.
 const grupoRows=document.getElementById('fsjPessoaGruposRows');
@@ -4585,6 +4585,57 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   if(person)new MutationObserver(sync).observe(person,{childList:true,subtree:true});
   window.fsjDemandasSyncMobileSelect=sync;
  }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script><style id="fsjDemandasCardsMobile20261121">
+#fsjDemandasCardsMobile{display:none}
+@media(max-width:700px){
+ #gestor #demandas #fsjDemandasCardsMobile{display:block!important;column-span:all!important;break-inside:avoid!important;min-width:0!important}
+ #gestor #demandas #demandaTabela,#gestor #demandas #fsjPessoaGruposBloco{display:none!important}
+ #gestor #demandas #fsjDemandasCardsMobile .fsj-dm-card{border:1px solid #cbd9d1;border-radius:10px;padding:10px;margin:7px 0;background:#fff;break-inside:avoid}
+ #gestor #demandas #fsjDemandasCardsMobile .fsj-dm-card strong{font-size:15px}
+ #gestor #demandas #fsjDemandasCardsMobile .fsj-dm-card p{margin:5px 0;font-size:13px}
+ #gestor #demandas #fsjDemandasCardsMobile .fsj-dm-nav{display:flex;justify-content:center;align-items:center;gap:15px;margin:12px 0}
+ #gestor #demandas #fsjDemandasCardsMobile .fsj-dm-nav button{min-width:50px;min-height:42px;background:#195e40;color:white;border:0;border-radius:9px}
+}
+</style>
+<script id="fsjDemandasCardsMobile20261121">
+(function(){
+ let current=0,lastKey='',all=[];
+ function init(){
+  const root=document.getElementById('demandas'),table=document.getElementById('demandaTabela');
+  if(!root||!table)return null;
+  let box=document.getElementById('fsjDemandasCardsMobile');
+  if(!box){box=document.createElement('section');box.id='fsjDemandasCardsMobile';table.before(box);}
+  return box;
+ }
+ function render(){
+  const box=init();if(!box)return;
+  box.replaceChildren();
+  if(!document.getElementById('demandaFuncionario')?.value){box.textContent='Selecione um funcionário para consultar suas tarefas.';return;}
+  if(!all.length){box.textContent='Nenhuma tarefa encontrada para a pessoa e situação selecionadas.';return;}
+  const total=Math.ceil(all.length/5);current=Math.max(0,Math.min(current,total-1));
+  for(const task of all.slice(current*5,current*5+5)){
+   const article=document.createElement('article');article.className='fsj-dm-card';
+   const title=document.createElement('strong');title.textContent=(task.code||'Tarefa')+' — '+(task.text||task.description||task.descricao||'');
+   const meta=document.createElement('p');meta.textContent='Situação: '+(task.centralStatus||task.status||'Não informada')+' · '+(task.groupId?'Grupo':'Individual');
+   article.append(title,meta);
+   if(task.groupId){const p=document.createElement('p');p.textContent='Tarefa de grupo';article.append(p);}
+   box.append(article);
+  }
+  const nav=document.createElement('div');nav.className='fsj-dm-nav';
+  const prev=document.createElement('button');prev.type='button';prev.textContent='←';prev.disabled=current===0;
+  const count=document.createElement('span');count.textContent=(current+1)+' / '+total;
+  const next=document.createElement('button');next.type='button';next.textContent='→';next.disabled=current===total-1;
+  prev.onclick=()=>{current--;render()};next.onclick=()=>{current++;render()};
+  nav.append(prev,count,next);box.append(nav);
+ }
+ window.fsjRenderDemandasCards=function(individuais,grupos,responsavel){
+  const key=responsavel+'|'+(document.getElementById('demandaSituacao')?.value||'');
+  if(key!==lastKey){current=0;lastKey=key;}
+  all=[...(individuais||[]),...(grupos||[])];
+  render();
+ };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script></body></html>
