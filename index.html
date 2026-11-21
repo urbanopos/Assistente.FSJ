@@ -4505,8 +4505,8 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
 })();
 </script><style id="fsjDemandasSelectFix20261121">
 @media(max-width:1000px) and (pointer:coarse){
- #gestor #demandas select#demandaFuncionario,#gestor #demandas select#demandaSituacao,#gestor #demandas input#demandaMesAno{display:none!important}
- #gestor #demandas .fsj-demandas-select-btn{display:flex!important;align-items:center;justify-content:space-between;width:100%!important;min-height:54px!important;background:#f1f1f1!important;border:1px solid #bfcac5!important;border-radius:10px!important;padding:12px!important;text-align:left!important;color:#111!important;font:inherit!important}
+ #demandas select#demandaFuncionario,#demandas select#demandaSituacao,#demandas input#demandaMesAno{display:block!important;opacity:1!important;pointer-events:auto!important;width:100%!important;position:static!important}
+ #demandas .fsj-demandas-select-btn{display:none!important}
 }
 .fsj-demandas-select-btn{display:none}
 #fsjDemandasSelectDialog{position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box}
@@ -4571,6 +4571,18 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   const person=document.getElementById('demandaFuncionario');
   if(person)new MutationObserver(sync).observe(person,{childList:true});
   window.fsjDemandasSyncMobileSelect=sync;
+  const targets=new Set(fields.map(([id])=>id));
+  document.addEventListener('pointerdown',function(event){
+   const el=event.target.closest?.('select,input');
+   if(!mobile()||!el||!targets.has(el.id))return;
+   event.preventDefault();event.stopImmediatePropagation();
+   open(el,fields.find(([id])=>id===el.id)[1],sync);
+  },true);
+  document.addEventListener('click',function(event){
+   const el=event.target.closest?.('select,input');
+   if(!mobile()||!el||!targets.has(el.id))return;
+   event.preventDefault();event.stopImmediatePropagation();
+  },true);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
