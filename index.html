@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261122-demanda-v40">
+<meta name="fsj-build" content="20261122-demanda-v41">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -4889,6 +4889,38 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   schedule();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+<style id="fsj-demanda-teclado-visivel-v41">
+@media(max-width:1000px){
+ body.fsj-demanda-digitando #novaTarefa.fsj-page-shell{height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important}
+ body.fsj-demanda-digitando #novaTarefa.fsj-page-shell .fsj-page-viewport{height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important}
+ body.fsj-demanda-digitando #novaTarefa.fsj-page-shell .fsj-page-flow{height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;transform:none!important}
+ body.fsj-demanda-digitando #novaTarefa.fsj-page-shell .fsj-page-navigation{display:none!important}
+ body.fsj-demanda-digitando #novaTarefa #taskText{display:block!important;visibility:visible!important;min-height:112px!important;height:112px!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+}
+</style>
+<script id="fsj-demanda-teclado-visivel-v41">
+(function(){
+ const id='taskText';
+ function field(){return document.getElementById(id)}
+ function mobile(){return matchMedia('(max-width:1000px)').matches}
+ function move(){
+  const e=field();if(!e||document.activeElement!==e||!mobile())return;
+  const viewport=window.visualViewport;
+  const visibleBottom=viewport?viewport.offsetTop+viewport.height:window.innerHeight;
+  const rect=e.getBoundingClientRect();
+  if(rect.top<90||rect.bottom>visibleBottom-12){
+   e.scrollIntoView({block:'center',behavior:'instant'});
+  }
+ }
+ function onFocus(e){if(e.target?.id!==id||!mobile())return;document.body.classList.add('fsj-demanda-digitando');requestAnimationFrame(move)}
+ function onBlur(e){if(e.target?.id!==id)return;document.body.classList.remove('fsj-demanda-digitando')}
+ document.addEventListener('focusin',onFocus);
+ document.addEventListener('focusout',onBlur);
+ window.visualViewport?.addEventListener('resize',move);
+ window.visualViewport?.addEventListener('scroll',move);
 })();
 </script>
 </body></html>
