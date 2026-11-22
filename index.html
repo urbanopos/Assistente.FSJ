@@ -4257,19 +4257,17 @@ function fsjCompactOwnerPersonSelector(sel){
   form?.classList.toggle('fsj-individual-selected',individual&&selected>0);
   const openTasks=document.getElementById('fsjRegistroTarefasAbertas');
   if(openTasks)openTasks.hidden=true;
-  // Individual: after choosing one executor, show description on the same first page.
-  // Group: restore description to its original location and allow additional people only in group workflow.
+  // Keep the task description outside targetBox: renderTargets() replaces that box.
+  // The original description field must remain attached to the form for addTask().
+  const descriptionLabel=document.querySelector('#novaTarefa label[for="taskText"]');
   if(description){
-   let slot=document.getElementById('fsjIndividualDescriptionFirst');
-   if(!slot){slot=document.createElement('div');slot.id='fsjIndividualDescriptionFirst';slot.hidden=true;
-    const label=document.createElement('label');label.htmlFor='taskText';label.textContent='Descrição da tarefa';slot.append(label);}
-   if(individual&&selected>0){target.append(slot);slot.append(description);slot.hidden=false;}
-   else{slot.hidden=true;const original=document.getElementById('fsjTaskDescriptionOriginal');
-    if(original)original.append(description);}
+   const original=document.getElementById('fsjTaskDescriptionOriginal');
+   if(original&&description.parentElement!==original.parentElement)original.after(description);
+   const obsolete=document.getElementById('fsjIndividualDescriptionFirst');
+   if(obsolete)obsolete.remove();
   }
   const picker=target.querySelector('#taskPersonPicker');
   if(picker)picker.disabled=individual&&selected>0;
-
   if(type.value==='group'&&!target.querySelector('.fsj-registro-grupo-select')){
    const radios=[...target.querySelectorAll('input.tg')];if(!radios.length)return;
    const select=document.createElement('select');select.className='fsj-registro-grupo-select';
@@ -4623,4 +4621,13 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
-</script></body></html>
+</script><style id="fsjRegistroSaveFix20261122">
+@media(max-width:1000px) and (pointer:coarse){
+ body.fsj-registro-proprietario #novaTarefa .fsj-task-form-actions>button[onclick*="listen("]{display:none!important}
+ body.fsj-registro-proprietario #novaTarefa .fsj-task-form-actions>button[onclick*="listen"]{display:none!important}
+ body.fsj-registro-proprietario #novaTarefa>.muted:last-child{display:none!important}
+ body.fsj-registro-proprietario #novaTarefa #taskDraftStatus:empty{display:none!important}
+ body.fsj-registro-proprietario #novaTarefa.fsj-individual-selected #targetBox + #fsjRegistroTarefasAbertas + label{display:block!important}
+ body.fsj-registro-proprietario #novaTarefa #taskText{display:block!important;width:100%!important;box-sizing:border-box!important}
+}
+</style></body></html>
