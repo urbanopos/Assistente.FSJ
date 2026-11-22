@@ -952,3 +952,7 @@ Commit publicado: `1b2409d1dd2ac357535a32ffe8796823820de62f`. A rotina geral `fs
 
 ## VALIDAÇÃO DO PROPRIETÁRIO — 22/11/2026 — CONSULTA CELULAR
 O proprietário confirmou expressamente que a navegação duplicada foi corrigida e que a coloração das tarefas está correta. Considerar VALIDADA a tela Demandas e Retornos — Individuais no modo celular, perfil Proprietário, quanto à navegação única e cores. Versão-base de correção: commit `bf8b72e9c6b83d67650ebfa7855dfaf77593b539` em `index.html`, juntamente com as alterações anteriores de categorias e cartões. Não restaurar paginador geral de `taskRows` nesta tela, não alterar a navegação própria dos cartões nem as regras de cores. Preservar filtros, registros e isolamento entre desktop/celular. Quaisquer alterações futuras devem preservar esse comportamento aprovado e passar por teste antes de substituir a versão validada.
+
+
+## Compactação da consulta celular — 22/11/2026
+Commit `0f012b02fa2d07958a2873edd3686118e5be889b`: ocultada exclusivamente no celular proprietário a legenda explicativa das cores imediatamente abaixo do título Demandas e retornos — Individuais, liberando altura para os controles e cartões. As regras de cores continuam ativas; navegação, filtros e registros preservados. Teste visual pendente. A redução de quantidade de tarefas por página e a retirada de botão de voz não foram realizadas neste commit.
