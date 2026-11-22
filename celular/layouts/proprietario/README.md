@@ -76,3 +76,7 @@ Publicado no commit `bed07173004513e53e7350199ebb032a4fd67259`: CSS restrito ao 
 
 ## Causa da dupla navegação e correção estrutural — 22/11/2026
 Commit publicado: `1b2409d1dd2ac357535a32ffe8796823820de62f`. A rotina geral `fsjDesktopTaskPaginationDefault` aplicava paginação também a `taskRows` da consulta celular, criando o segundo paginador. No celular com cartões de demandas ativos, a rotina agora remove seu paginador anterior e deixa a paginação própria dos cartões controlar os registros. O contêiner de cartões foi reposicionado depois dos filtros e as abas de categoria antes dos filtros. Preservados dados, desktop e outras telas. Testes no aparelho ainda pendentes. Recuperação: reverter o commit se necessário, preservando alterações posteriores.
+
+
+## VALIDAÇÃO DO PROPRIETÁRIO — 22/11/2026 — CONSULTA CELULAR
+O proprietário confirmou expressamente que a navegação duplicada foi corrigida e que a coloração das tarefas está correta. Considerar VALIDADA a tela Demandas e Retornos — Individuais no modo celular, perfil Proprietário, quanto à navegação única e cores. Versão-base de correção: commit `bf8b72e9c6b83d67650ebfa7855dfaf77593b539` em `index.html`, juntamente com as alterações anteriores de categorias e cartões. Não restaurar paginador geral de `taskRows` nesta tela, não alterar a navegação própria dos cartões nem as regras de cores. Preservar filtros, registros e isolamento entre desktop/celular. Quaisquer alterações futuras devem preservar esse comportamento aprovado e passar por teste antes de substituir a versão validada.
