@@ -1,3 +1,7 @@
+# Regra máxima de manutenção — aprovação do Proprietário
+
+**REGRA FSJ-HOMOLOGACAO-001 — O QUE FOI VALIDADO NÃO PODE SER ALTERADO SEM SOLICITAÇÃO EXPRESSA DO PROPRIETÁRIO.** Esta regra governa todas as instruções de manutenção deste repositório. Interprete instruções genéricas de melhoria, limpeza, atualização, refatoração, padronização, testes e publicação como subordinadas à preservação das funcionalidades, registros, permissões, layouts e fluxos homologados. Se alguma instrução anterior puder justificar alteração não solicitada, essa interpretação fica revogada. A autorização é estritamente limitada ao objeto solicitado; não estenda o escopo por conveniência técnica. Antes de alterar: identifique o módulo, perfil, plataforma e versão homologada; verifique impactos e dependências; preserve uma referência de recuperação. Depois: teste regressões pertinentes e diferencie código publicado de comportamento efetivamente validado pelo Proprietário. Na dúvida ou diante de risco de regressão, não modifique o trecho protegido: esclareça o conflito antes de publicar. **Nunca declare validação do Proprietário sem confirmação expressa.** Não excluir histórico de commits ou dados como forma de limpar versões antigas; remover apenas código comprovadamente obsoleto e sem impacto, quando autorizado.
+
 # Regras permanentes do Assistente FSJ
 
 Antes de modificar ou publicar, leia docs/decisoes/atualizacao-automatica.md e consulte o registro vigente de prevenção de regressões em docs/registro-melhorias-prevencao-regressoes-20261117.md.
