@@ -4710,6 +4710,27 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
    const hint=[b.getAttribute('aria-label'),b.getAttribute('title'),b.getAttribute('onclick')].filter(Boolean).join(' ');
    if(/^([🎙🎤🎧\\s]*voz|ditar demanda|gravar voz)$/i.test(label)||/voz|microfone|ditar|listen\\(/i.test(hint))b.style.setProperty('display','none','important');
   }
+  // Ajuste específico do campo Demanda, em Individual e Grupo.
+  const demand=document.getElementById('taskText');
+  if(demand){
+   const parent=demand.parentElement;
+   if(parent){
+    parent.style.setProperty('display','block','important');
+    parent.style.setProperty('width','100%','important');
+    parent.style.setProperty('max-width','100%','important');
+    for(const child of [...parent.children]){
+     if(child===demand)continue;
+     if(child.matches('button,[role="button"]')||child.querySelector?.('button')){
+      const content=(child.textContent||'').normalize('NFKD').replace(/[^a-zA-Z]/g,'').toLowerCase();
+      if(content.includes('voz')||content.includes('microfone')||content.includes('ditar'))child.style.setProperty('display','none','important');
+     }
+    }
+   }
+   demand.style.setProperty('display','block','important');
+   demand.style.setProperty('width','100%','important');
+   demand.style.setProperty('max-width','100%','important');
+   demand.style.setProperty('box-sizing','border-box','important');
+  }
   const save=document.getElementById('taskSaveBtn');
   const actions=form.querySelector('.fsj-task-form-actions');
   if(save&&actions){
