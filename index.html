@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261119-prioridade-v38">
+<meta name="fsj-build" content="20261122-demanda-v39">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -4843,6 +4843,51 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   }
  }
  function init(){const form=document.getElementById('novaTarefa');if(!form)return;let busy=false;const schedule=()=>{if(busy)return;busy=true;requestAnimationFrame(()=>{busy=false;fix();});};new MutationObserver(schedule).observe(form,{childList:true,subtree:true});schedule();document.getElementById('execType')?.addEventListener('change',schedule);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+<style id="fsj-owner-demanda-campo-integral-v39">
+@media(max-width:1000px){
+ #gestor #novaTarefa #taskText{display:block!important;width:100%!important;min-width:100%!important;max-width:100%!important;flex:none!important;box-sizing:border-box!important;clear:both!important}
+ #gestor #novaTarefa .fsj-owner-text-voice:has(#taskText){display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;grid-template-columns:minmax(0,1fr)!important}
+ #gestor #novaTarefa .fsj-owner-text-voice:has(#taskText)>button{display:none!important}
+}
+</style>
+<script id="fsj-owner-demanda-campo-integral-v39">
+(function(){
+ const fieldId='taskText';
+ function apply(){
+  if(!window.matchMedia('(max-width:1000px)').matches)return;
+  const form=document.getElementById('novaTarefa'),field=document.getElementById(fieldId);
+  if(!form||!field)return;
+  const holder=field.parentElement;
+  if(holder&&holder!==form){
+   // Remove apenas os controles de voz que compartilham o campo Demanda.
+   for(const el of [...holder.children]){
+    if(el===field)continue;
+    const desc=[el.textContent,el.getAttribute('aria-label'),el.getAttribute('title'),el.getAttribute('onclick')].filter(Boolean).join(' ');
+    if(el.matches('button,[role="button"]')||/voz|microfone|ditar|🎙|🎤/i.test(desc))el.remove();
+   }
+   holder.style.setProperty('display','block','important');
+   holder.style.setProperty('width','100%','important');
+   holder.style.setProperty('max-width','100%','important');
+   holder.style.setProperty('min-width','0','important');
+  }
+  field.style.setProperty('width','100%','important');
+  field.style.setProperty('min-width','100%','important');
+  field.style.setProperty('max-width','100%','important');
+  field.style.setProperty('flex','none','important');
+  field.style.setProperty('box-sizing','border-box','important');
+ }
+ function init(){
+  const form=document.getElementById('novaTarefa');if(!form)return;
+  let pending=false;
+  const schedule=()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;apply()})};
+  new MutationObserver(schedule).observe(form,{childList:true,subtree:true});
+  document.getElementById('execType')?.addEventListener('change',schedule);
+  schedule();
+ }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
