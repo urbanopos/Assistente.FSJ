@@ -243,3 +243,13 @@
  #novaTarefa.fsj-page-shell .fsj-page-navigation{flex:none!important;position:relative!important}
  #novaTarefa.fsj-page-shell .fsj-page-count{white-space:nowrap!important}
 }
+
+/* Registro de demanda proprietário celular: retirar somente acionamento de voz. */
+@media(max-width:700px){
+ #novaTarefa.fsj-page-shell .fsj-owner-text-voice:has(#taskText)>button,
+ #novaTarefa.fsj-page-shell .fsj-owner-text-voice:has(#taskText) button,
+ #novaTarefa.fsj-page-shell button[onclick*="listen("],
+ #novaTarefa.fsj-page-shell button[onclick*="listen"]{display:none!important}
+ #novaTarefa.fsj-page-shell .fsj-owner-text-voice:has(#taskText){display:block!important;width:100%!important}
+ #novaTarefa.fsj-page-shell #taskText{display:block!important;width:100%!important;box-sizing:border-box!important}
+}
