@@ -144,3 +144,7 @@ Commit `e4483311865ff69a52b03469cf750ec234044683`: nos cartões de Demandas e Re
 
 ## Proteção obrigatória — FSJ-HOMOLOGACAO-001 (22/11/2026)
 A versão validada do celular Proprietário é imutável salvo solicitação expressa do Proprietário. Ajustes em outras telas, perfis, desktop, atualizações, CSS, JavaScript ou limpeza de versões antigas não podem modificar direta ou indiretamente esta interface homologada. Para qualquer solicitação, alterar exclusivamente o item nomeado; testar regressões pertinentes e só registrar nova validação após confirmação expressa. Em caso de dúvida, preservar o estado aprovado. Ver também AGENTS.md e REGRAS_PERMANENTES_FSJ.md.
+
+## Registro de demanda — página única (22/11/2026)
+
+Solicitação do Proprietário: no celular, perfil Proprietário, manter todas as opções de Registrar Demanda numa única página, com Adicionar/Salvar acessível e rodapé de navegação estável. Implementação publicada em `mobile-pages.js`, commit `09400be5b88cca5066feb5fd19925efdef508968`: o formulário `novaTarefa` usa fluxo vertical rolável e contador 1/1, sem modificar a versão Desktop ou a rotina de gravação. Publicado no repositório; testes na sessão real e validação expressa do Proprietário pendentes. Recuperação: reverter exclusivamente o commit mencionado, preservando dados e alterações posteriores.
