@@ -4262,7 +4262,7 @@ function fsjCompactOwnerPersonSelector(sel){
   const descriptionLabel=document.querySelector('#novaTarefa label[for="taskText"]');
   if(description){
    const original=document.getElementById('fsjTaskDescriptionOriginal');
-   if(original&&description.parentElement!==original.parentElement)original.after(description);
+   if(original&&description.parentElement!==original.parentElement){const label=original.nextElementSibling?.tagName==='LABEL'?original.nextElementSibling:null;(label||original).after(description);}
    const obsolete=document.getElementById('fsjIndividualDescriptionFirst');
    if(obsolete)obsolete.remove();
   }
