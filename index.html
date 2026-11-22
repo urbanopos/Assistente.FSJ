@@ -4553,8 +4553,10 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
 })();
 </script><style id="fsjDemandasSelectFix20261121">
 @media(max-width:1000px) and (pointer:coarse){
- #demandas select#demandaFuncionario,#demandas select#demandaSituacao,#demandas input#demandaMesAno{display:block!important;opacity:1!important;pointer-events:auto!important;width:100%!important;position:static!important}
- #demandas .fsj-demandas-select-btn{display:none!important}
+ body.fsj-registro-proprietario #demandas select#demandaFuncionario,
+ body.fsj-registro-proprietario #demandas select#demandaSituacao,
+ body.fsj-registro-proprietario #demandas input#demandaMesAno{display:none!important;pointer-events:none!important}
+ body.fsj-registro-proprietario #demandas .fsj-demandas-select-btn{display:flex!important;align-items:center;justify-content:space-between;width:100%!important;min-height:52px!important;padding:10px!important;background:#f0f0f0!important;border:1px solid #bfcac5!important;border-radius:10px!important;color:#111!important;font:inherit!important;text-align:left!important}
 }
 .fsj-demandas-select-btn{display:none}
 #fsjDemandasSelectDialog{position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box}
@@ -4619,13 +4621,7 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   const person=document.getElementById('demandaFuncionario');
   if(person)new MutationObserver(sync).observe(person,{childList:true});
   window.fsjDemandasSyncMobileSelect=sync;
-  const targets=new Set(fields.map(([id])=>id));
-  document.addEventListener('click',function(event){
-   const el=event.target.closest?.('select,input');
-   if(!mobile()||!el||!targets.has(el.id))return;
-   event.preventDefault();event.stopImmediatePropagation();
-   open(el,fields.find(([id])=>id===el.id)[1],sync);
-  },true);
+
 
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
@@ -4673,4 +4669,13 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
-</script></body></html>
+</script><style id="fsjDemandasResultsOwnerFix20261122">
+@media(max-width:1000px) and (pointer:coarse){
+ body.fsj-registro-proprietario #demandas #fsjDemandasCardsMobile{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;min-height:70px!important;width:100%!important}
+ body.fsj-registro-proprietario #demandas #fsjDemandasCardsMobile .fsj-dm-card{display:block!important;border:1px solid #cbd9d1;border-radius:10px;padding:12px;margin:8px 0;background:#fff}
+ body.fsj-registro-proprietario #demandas #demandaTabela,
+ body.fsj-registro-proprietario #demandas #fsjPessoaGruposBloco{display:none!important}
+ body.fsj-registro-proprietario #demandas #fsjDemandasCardsMobile .fsj-dm-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin:12px 0}
+ body.fsj-registro-proprietario #demandas #fsjDemandasCardsMobile .fsj-dm-nav button{background:#195e40;color:white;border:0;border-radius:8px;padding:10px 18px}
+}
+</style></body></html>
