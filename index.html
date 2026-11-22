@@ -4533,8 +4533,8 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   if(!document.getElementById('demandaFuncionario')?.value){return;}
   const visible=all.filter(t=>category==='grupo'?!!t.groupId:!t.groupId&&(category==='pontuais'?fsjFrequency(t)==='pontual':fsjFrequency(t)!=='pontual')).sort((a,b)=>{const rank=t=>{const p=String(t.priority||t.prioridade||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();const st=String(t.centralStatus||t.status||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return p==='urgente'?0:p==='prioritaria'||p==='prioritario'?1:st==='em andamento'||st==='iniciada'?2:3};return rank(a)-rank(b)});
   if(!visible.length){const p=document.createElement('p');p.textContent='Nenhuma tarefa encontrada nesta categoria para a pessoa e situação selecionadas.';box.append(p);return;}
-  const total=Math.ceil(visible.length/2);current=Math.max(0,Math.min(current,total-1));
-  for(const task of visible.slice(current*2,current*2+2)){
+  const total=visible.length;current=Math.max(0,Math.min(current,total-1));
+  for(const task of visible.slice(current,current+1)){
    const article=document.createElement('article');article.className='fsj-dm-card';if(typeof fsjApplyTaskColor==='function')fsjApplyTaskColor(article,task.priority||task.prioridade,task.centralStatus||task.status);
    const title=document.createElement('strong');title.textContent=(task.code||'Tarefa')+' — '+(task.text||task.description||task.descricao||'');
    const meta=document.createElement('p');meta.textContent='Situação: '+(task.centralStatus||task.status||'Não informada')+' · '+(task.groupId?'Grupo':'Individual');
