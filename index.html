@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261122-demanda-v41">
+<meta name="fsj-build" content="20261122-demanda-v42">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -4921,6 +4921,47 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
  document.addEventListener('focusout',onBlur);
  window.visualViewport?.addEventListener('resize',move);
  window.visualViewport?.addEventListener('scroll',move);
+})();
+</script>
+
+<style id="fsj-demanda-editor-teclado-v42">
+@media(max-width:1000px){
+ body.fsj-demanda-editando #novaTarefa #taskText{
+ position:fixed!important;top:var(--fsj-edit-top,12px)!important;left:12px!important;
+ width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;
+ height:var(--fsj-edit-height,110px)!important;min-height:72px!important;
+ display:block!important;visibility:visible!important;opacity:1!important;
+ background:#fff!important;color:#17251d!important;border:2px solid #17643e!important;
+ border-radius:10px!important;padding:12px!important;z-index:2147483000!important;
+ box-sizing:border-box!important;resize:none!important;overflow-y:auto!important;
+ }
+ body.fsj-demanda-editando #novaTarefa .fsj-page-navigation{visibility:hidden!important}
+}
+</style>
+<script id="fsj-demanda-editor-teclado-v42">
+(function(){
+ const fieldId='taskText',flag='fsj-demanda-editando';
+ function active(){return document.activeElement?.id===fieldId&&matchMedia('(max-width:1000px)').matches}
+ function position(){
+  if(!active())return;
+  const v=window.visualViewport;
+  const top=Math.max(8,(v?.offsetTop||0)+8);
+  const available=Math.max(75,(v?.height||innerHeight)-20);
+  document.body.style.setProperty('--fsj-edit-top',top+'px');
+  document.body.style.setProperty('--fsj-edit-height',Math.min(170,available)+'px');
+ }
+ document.addEventListener('focusin',e=>{
+  if(e.target?.id!==fieldId||!matchMedia('(max-width:1000px)').matches)return;
+  document.body.classList.add(flag);position();
+ });
+ document.addEventListener('focusout',e=>{
+  if(e.target?.id!==fieldId)return;
+  document.body.classList.remove(flag);
+  document.body.style.removeProperty('--fsj-edit-top');
+  document.body.style.removeProperty('--fsj-edit-height');
+ });
+ window.visualViewport?.addEventListener('resize',position);
+ window.visualViewport?.addEventListener('scroll',position);
 })();
 </script>
 </body></html>
