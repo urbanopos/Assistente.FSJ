@@ -57,3 +57,10 @@ Na tarefa diária, concluir o botão do dia marca apenas aquela ocorrência. O d
 ## Folgas e feriados nos calendários de tarefas
 
 Os calendários de consulta e de registro de tarefas usam as dispensas do calendário individual oficial antes de classificar atrasos. O botão-dia da tarefa em **Tarefas em Execução** leva a pessoa selecionada ao calendário. Folgas, férias e feriados gozados têm marcação própria e bloqueiam a conclusão naquele dia. O feriado trabalhado por autorização ou compensação é elegível, e a data da folga compensatória fica dispensada. Em consulta consolidada, o dia só é dispensado quando todos os responsáveis estão dispensados.
+
+
+## Ajuste de consulta de demandas no celular — 22/11/2026
+
+Solicitado: na tela Demandas e retornos — Individuais, perfil Proprietário no celular, exibir os botões Tarefas Periódicas, Tarefas Pontuais e Tarefas de Grupo acima do filtro de pessoa, remover aviso duplicado e corrigir a paginação.
+
+Publicado no GitHub: commit `3a090b3af67a5d38c0fb2a4291082b58717db283` em `index.html`. O componente de categorias foi reposicionado antes dos filtros; a chave de reinicialização da paginação considera pessoa, situação e mês/ano; a mensagem duplicada do componente foi removida. Os registros operacionais não foram alterados. Instalação no aparelho e validação funcional com registros reais: **pendentes**. É obrigatório verificar a consulta do José Carlos, as três categorias, os filtros e as setas antes de marcar como validado. Recuperação: reverter o commit identificado após preservar o estado vigente.
