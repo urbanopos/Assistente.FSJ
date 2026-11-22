@@ -4537,7 +4537,7 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   const total=Math.ceil(visible.length/pageSize);current=Math.max(0,Math.min(current,total-1));
   for(const task of visible.slice(current*pageSize,(current+1)*pageSize)){
    const article=document.createElement('article');article.className='fsj-dm-card';if(typeof fsjApplyTaskColor==='function')fsjApplyTaskColor(article,task.priority||task.prioridade,task.centralStatus||task.status);
-   const title=document.createElement('strong');title.textContent=(task.code||'Tarefa')+' — '+(task.text||task.description||task.descricao||'');
+   const title=document.createElement('strong');const frequencyCode=({pontual:'P',diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'E',anual:'A'})[fsjFrequency(task)]||'P';title.textContent=String(task.code||'Tarefa').replace(/\s+[PDSQMTEA]$/i,'')+' '+frequencyCode+' — '+(task.text||task.description||task.descricao||'');
    const meta=document.createElement('p');meta.textContent='Situação: '+(task.centralStatus||task.status||'Não informada')+' · '+(task.groupId?'Grupo':'Individual');
    article.append(title,meta);
    if(task.groupId){const p=document.createElement('p');p.textContent='Tarefa de grupo';article.append(p);}
