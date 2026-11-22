@@ -140,3 +140,7 @@ A pedido do proprietário, iniciou-se a remoção de regras antigas comprovadame
 
 ## Correção da codificação de periodicidade nos cartões — 22/11/2026 (aguardando validação)
 Commit `e4483311865ff69a52b03469cf750ec234044683`: nos cartões de Demandas e Retornos, celular Proprietário, o título passa a acrescentar o sufixo de periodicidade conforme `fsjFrequency(task)`: P pontual, D diária, S semanal, Q quinzenal, M mensal, T trimestral, E semestral, A anual. Evita duplicar sufixo já existente. Nenhuma outra característica homologada foi alterada. Aguardando confirmação visual do proprietário.
+
+
+## Proteção obrigatória — FSJ-HOMOLOGACAO-001 (22/11/2026)
+A versão validada do celular Proprietário é imutável salvo solicitação expressa do Proprietário. Ajustes em outras telas, perfis, desktop, atualizações, CSS, JavaScript ou limpeza de versões antigas não podem modificar direta ou indiretamente esta interface homologada. Para qualquer solicitação, alterar exclusivamente o item nomeado; testar regressões pertinentes e só registrar nova validação após confirmação expressa. Em caso de dúvida, preservar o estado aprovado. Ver também AGENTS.md e REGRAS_PERMANENTES_FSJ.md.
