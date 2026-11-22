@@ -3406,7 +3406,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function pageSize(){if(window.innerWidth<=700)return 5;const available=Math.max(200,window.innerHeight-340);return Math.max(2,Math.min(12,Math.floor(available/62)));}
  function apply(host){
   if(!host||!host.isConnected)return;
-  if(host.id==='taskRows'&&window.innerWidth<=1000&&document.getElementById('fsjDemandasCardsMobile')){const prior=states.get(host);if(prior?.bar)prior.bar.remove();for(const row of host.children){row.hidden=false;row.style.removeProperty('display');}return;}
+  if(host.id==='taskRows'&&window.innerWidth<=1000){const prior=states.get(host);if(prior?.bar)prior.bar.remove();document.querySelectorAll('#demandas .fsj-task-pagination').forEach(el=>el.remove());for(const row of host.children){row.hidden=false;row.style.removeProperty('display');}return;}
   const rows=[...host.children].filter(el=>el.matches('tr,article'));
   if(!rows.length&&!['taskRows','demandaGrupoRows'].includes(host.id))return;
   const table=host.closest('table');
@@ -4707,4 +4707,4 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
  body.fsj-registro-proprietario #gestor:has(#demandas:not(.hidden)) #demandas .fsj-dm-nav{display:flex!important}
  body.fsj-registro-proprietario #demandas .fsj-page-viewport{overflow-y:auto!important;overflow-x:hidden!important}
 }
-</style></body></html>
+</style><style id="fsjDemandasRemoveDesktopPager20261122">@media(max-width:1000px){#gestor #demandas .fsj-task-pagination,#gestor #demandas>.fsj-task-pagination,#demandas .fsj-page-navigation{display:none!important}#gestor #demandas #fsjDemandasCardsMobile .fsj-dm-nav{display:flex!important}}</style></body></html>
