@@ -260,3 +260,14 @@
  #novaTarefa.fsj-page-shell #targetBox:has(.fsj-registro-grupo-select) label:has(input.tg){display:none!important}
  #novaTarefa.fsj-page-shell #targetBox .fsj-registro-grupo-select{display:block!important;width:100%!important;min-height:44px!important}
 }
+
+/* Campo Demanda: botões de ditado externos não integram o registro móvel. */
+@media(max-width:700px){
+ #novaTarefa.fsj-page-shell .fsj-owner-text-voice button,
+ #novaTarefa.fsj-page-shell .fsj-owner-text-voice>button,
+ #novaTarefa.fsj-page-shell #taskText+button,
+ #novaTarefa.fsj-page-shell #taskText~button,
+ #novaTarefa.fsj-page-shell .fsj-owner-text-voice [role=button]{display:none!important}
+ #novaTarefa.fsj-page-shell #targetBox .checks:has(input.tg){display:none!important}
+ #novaTarefa.fsj-page-shell #targetBox .fsj-registro-grupo-select{display:block!important;width:100%!important}
+}
