@@ -88,3 +88,7 @@ Commit `0f012b02fa2d07958a2873edd3686118e5be889b`: ocultada exclusivamente no ce
 
 ## Altura uniforme dos filtros da consulta celular — 22/11/2026
 Commit `6cc772abcb6c7d0bc2bdcb4de88e8b0bd542661b`: no celular proprietário, tela Demandas e Retornos, os controles visuais de Pessoas, Situação e Mês/Ano e os botões Relatório de ações/Limpar seleção passam a ter 44 px de altura; espaçamento vertical dos filtros reduzido. Não modifica o funcionamento dos seletores, dados, cores ou navegação validada. Validação visual no aparelho pendente.
+
+
+## VALIDAÇÃO EXPRESSA — 22/11/2026 — ALTURA DOS FILTROS
+Proprietário validou a alteração do commit `e6731c3392d7481bb35f696bd39d0544485e207b`: na tela Demandas e Retornos, modo Celular, perfil Proprietário, os filtros Pessoas, Situação e Mês/Ano e botões Relatório de ações/Limpar seleção adotam altura uniforme de 40 px e espaçamento vertical compacto. Esta é a versão de referência APROVADA, substituindo a tentativa anterior de 44 px (`6cc772a`). Preservar a navegação única e o código de cores já validados, bem como os registros e as demais funcionalidades. Não restaurar estilos antigos sem autorização e nova validação.
