@@ -232,3 +232,14 @@
  #novaTarefa.fsj-owner-registration-single .fsj-page-navigation{position:relative!important;flex:none!important}
  #novaTarefa.fsj-owner-registration-single .fsj-page-count{white-space:nowrap!important;min-width:54px!important}
 }
+
+/* Registro de demanda: regra independente de classes aplicadas tardiamente pelo JS. */
+@media(max-width:700px){
+ #novaTarefa.fsj-page-shell .fsj-page-viewport{overflow-y:auto!important;overflow-x:hidden!important;scroll-snap-type:none!important}
+ #novaTarefa.fsj-page-shell .fsj-page-flow{columns:none!important;column-count:1!important;column-width:auto!important;column-fill:balance!important;display:flex!important;flex-direction:column!important;width:100%!important;height:max-content!important;min-height:0!important;gap:4px!important;transform:none!important}
+ #novaTarefa.fsj-page-shell .fsj-page-flow>.muted:not(#taskDraftStatus),#novaTarefa.fsj-page-shell #taskDraftStatus,#novaTarefa.fsj-page-shell .fsj-task-legend{display:none!important}
+ #novaTarefa.fsj-page-shell #taskSaveBtn{display:block!important;visibility:visible!important;opacity:1!important;order:0!important;min-height:48px!important;width:100%!important;background:#08633a!important;color:#fff!important}
+ #novaTarefa.fsj-page-shell .fsj-task-form-actions{display:flex!important;flex-direction:column!important;gap:6px!important}
+ #novaTarefa.fsj-page-shell .fsj-page-navigation{flex:none!important;position:relative!important}
+ #novaTarefa.fsj-page-shell .fsj-page-count{white-space:nowrap!important}
+}
