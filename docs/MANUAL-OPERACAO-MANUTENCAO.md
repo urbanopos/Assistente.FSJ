@@ -980,3 +980,7 @@ Commit `9e5c02522f22e87503f787668ee3205c64e49c30`: somente na rotina de cartões
 
 ## Paginação de duas tarefas por página — 22/11/2026 (aguardando validação)
 O proprietário confirmou que a versão anterior exibia uma tarefa por página e solicitou duas. Commit `6c9c99ce8adb357d9040dafab0aa7448bc1f905a` define `pageSize=2` na rotina de cartões de Demandas e Retornos, modo Celular, perfil Proprietário, independentemente da altura da janela. Preservados filtros, cores, ordenação, registros e navegação. Aguardando validação do proprietário.
+
+
+## Navegação fixa no rodapé — 22/11/2026 (aguardando validação)
+Commit `f43c43cc74a8f247132034de24ae8f165a118ed6`: na consulta Demandas e Retornos do celular proprietário, a barra de navegação `.fsj-dm-nav` foi fixada junto ao rodapé da janela, centralizada e independente da altura do texto dos cartões, com espaço reservado para não sobrepor conteúdo. Permanecem duas tarefas por página e todas as demais configurações validadas. Pendente de validação visual pelo proprietário.
