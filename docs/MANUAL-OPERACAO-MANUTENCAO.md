@@ -929,3 +929,10 @@ Build `20261115-minhas-tarefas-proprietario-01`. Em **Minhas Tarefas**, os botõ
 Testes locais em DOM com dados fictícios verificaram titularidade, escopo individual e coletivo, três categorias, ordem crescente, atualização e isolamento do Celular. O contrato de atualização automática passou. A versão web aplica a atualização ao abrir ou retomar quando seguro. A conferência na sessão real do titular fica pendente. Para recuperar a versão anterior, reverta o commit do build pelo histórico Git.
 
 No build `20261115-minhas-tarefas-pontuais-02`, a categoria **Tarefas Pontuais** de **Minhas Tarefas** usa, no Desktop do Proprietário, o formato oficial `Tar - 0000025 P` no link, seguido da descrição. Os códigos cadastrados são preservados. A atualização web é aplicada ao abrir ou retomar quando seguro. Validação local com dados fictícios e contrato de atualização automática. Recuperação pelo histórico Git, revertendo o commit deste build.
+
+
+## Ajuste de consulta de demandas no celular — 22/11/2026
+
+Solicitado: na tela Demandas e retornos — Individuais, perfil Proprietário no celular, exibir os botões Tarefas Periódicas, Tarefas Pontuais e Tarefas de Grupo acima do filtro de pessoa, remover aviso duplicado e corrigir a paginação.
+
+Publicado no GitHub: commit `3a090b3af67a5d38c0fb2a4291082b58717db283` em `index.html`. O componente de categorias foi reposicionado antes dos filtros; a chave de reinicialização da paginação considera pessoa, situação e mês/ano; a mensagem duplicada do componente foi removida. Os registros operacionais não foram alterados. Instalação no aparelho e validação funcional com registros reais: **pendentes**. É obrigatório verificar a consulta do José Carlos, as três categorias, os filtros e as setas antes de marcar como validado. Recuperação: reverter o commit identificado após preservar o estado vigente.
