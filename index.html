@@ -1491,21 +1491,30 @@ function renderTargets(){
  const selecionadosAntes=[...targetBox.querySelectorAll('.tm:checked')].map(x=>x.value);
  const grupoAntes=targetBox.querySelector('.tg:checked')?.value||'';
  if(execType.value==='group'){
- targetBox.innerHTML='<label>Responsável pela tarefa — grupo existente</label><div class="checks">'+(S.groups.some(g=>g.ativo!==false)?S.groups.filter(g=>g.ativo!==false).map(g=>'<label><input class="tg" type="radio" name="taskGroup" value="'+g.id+'"> <b>'+esc(g.name)+'</b> — '+esc(g.members.map(i=>person(i).nick||person(i).name).join(', '))+'</label>').join(''):'<span class="muted">Nenhum grupo cadastrado.</span>')+'</div>';if(grupoAntes){const radio=[...targetBox.querySelectorAll('.tg')].find(x=>x.value===grupoAntes);if(radio)radio.checked=true;}if(window.fsjOwnerVerified===true){const editar=document.createElement('button');editar.type='button';editar.textContent='Editar integrantes do grupo';editar.style.cssText='display:block;margin:10px 0';editar.addEventListener('click',fsjEditarIntegrantesDaTarefa);targetBox.append(editar);}
- // Celular Proprietário: somente um seletor visível, mantendo radios internos para gravação.
- if(window.FSJ_PLATFORM?.platform==='celular'&&window.fsjOwnerVerified===true){
-  const radios=[...targetBox.querySelectorAll('input.tg')];
-  const select=document.createElement('select');select.className='fsj-registro-grupo-select';
-  select.add(new Option('Selecione um grupo cadastrado',''));
-  for(const radio of radios){const row=radio.closest('label');select.add(new Option(row?.textContent?.trim()||radio.value,radio.value));}
-  select.value=radios.find(r=>r.checked)?.value||'';
-  select.addEventListener('change',()=>{for(const radio of radios)radio.checked=radio.value===select.value;guardarRascunhoTarefa();});
-  const checks=targetBox.querySelector('.checks');if(checks){checks.hidden=true;checks.style.setProperty('display','none','important');}
-  const caption=targetBox.querySelector(':scope > label');if(caption){caption.hidden=true;caption.style.setProperty('display','none','important');}
-  targetBox.prepend(select);
+  const mobileOwner=window.fsjOwnerVerified===true&&matchMedia('(max-width:700px)').matches;
+  const groups=S.groups.filter(g=>g.ativo!==false);
+  targetBox.replaceChildren();
+  const radios=document.createElement('div');radios.className='checks';
+  if(mobileOwner){radios.hidden=true;radios.style.setProperty('display','none','important');}
+  for(const g of groups){
+   const label=document.createElement('label');const radio=document.createElement('input');radio.type='radio';radio.className='tg';radio.name='taskGroup';radio.value=g.id;radio.checked=String(g.id)===String(grupoAntes);
+   const name=document.createElement('b');name.textContent=g.name;
+   label.append(radio,' ',name,' — ',g.members.map(i=>person(i).nick||person(i).name).join(', '));radios.append(label);
+  }
+  if(mobileOwner){
+   const select=document.createElement('select');select.className='fsj-registro-grupo-select';select.add(new Option('Selecione um grupo cadastrado',''));
+   for(const radio of radios.querySelectorAll('input.tg'))select.add(new Option(radio.closest('label').textContent.trim(),radio.value));
+   select.value=grupoAntes;
+   select.addEventListener('change',()=>{for(const radio of radios.querySelectorAll('input.tg'))radio.checked=radio.value===select.value;guardarRascunhoTarefa();});
+   targetBox.append(select);
+  }else{
+   const caption=document.createElement('label');caption.textContent='Responsável pela tarefa — grupo existente';targetBox.append(caption);
+  }
+  targetBox.append(radios);
+  if(window.fsjOwnerVerified===true){const editar=document.createElement('button');editar.type='button';editar.textContent='Editar integrantes do grupo';editar.style.cssText='display:block;margin:10px 0';editar.addEventListener('click',fsjEditarIntegrantesDaTarefa);targetBox.append(editar);}
+  return;
  }
- return;
- }
+
  targetBox.replaceChildren();const label=document.createElement('label');label.htmlFor='taskPersonPicker';label.textContent='Selecione responsáveis';
  const select=document.createElement('select');select.id='taskPersonPicker';const hidden=document.createElement('div');hidden.hidden=true;
  for(const p of S.people){const input=document.createElement('input');input.type='checkbox';input.className='tm';input.value=p.id;input.checked=selecionadosAntes.includes(p.id);hidden.append(input);}
