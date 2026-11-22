@@ -4528,7 +4528,7 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   const tabs=document.createElement('div');tabs.id='fsjDemandasTipoTabs';tabs.setAttribute('role','group');tabs.setAttribute('aria-label','Tipo de tarefa');
   for(const [key,label] of [['periodicas','Tarefas Periódicas'],['pontuais','Tarefas Pontuais'],['grupo','Tarefas de Grupo']]){const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.setAttribute('aria-pressed',String(category===key));btn.onclick=()=>{category=key;current=0;render()};tabs.append(btn)}
   box.append(tabs);
-  if(!document.getElementById('demandaFuncionario')?.value){box.textContent='Selecione um funcionário para consultar suas tarefas.';return;}
+  if(!document.getElementById('demandaFuncionario')?.value){const note=document.createElement('p');note.textContent='Selecione um funcionário para consultar suas tarefas.';box.append(note);return;}
   const visible=all.filter(t=>category==='grupo'?!!t.groupId:!t.groupId&&(category==='pontuais'?fsjFrequency(t)==='pontual':fsjFrequency(t)!=='pontual'));
   if(!visible.length){const p=document.createElement('p');p.textContent='Nenhuma tarefa encontrada nesta categoria para a pessoa e situação selecionadas.';box.append(p);return;}
   const total=Math.ceil(visible.length/5);current=Math.max(0,Math.min(current,total-1));
