@@ -104,3 +104,7 @@ O proprietário informou que a tentativa anterior de 2 tarefas por página (`433
 
 ## Paginação responsiva da consulta — 22/11/2026 (aguardando validação)
 Commit `9e5c02522f22e87503f787668ee3205c64e49c30`: somente na rotina de cartões de Demandas e Retornos do celular proprietário, a quantidade por página passa a depender da altura da janela: 1 tarefa para altura inferior a 950 px, 2 tarefas a partir de 950 px. O total de páginas e os índices das setas usam o mesmo limite. Não foram alterados filtros, cores, ordenação, layout aprovado ou registros. Confirmar no aparelho antes de marcar como validado; uma descrição extensa ainda pode exigir espaço vertical.
+
+
+## Paginação de duas tarefas por página — 22/11/2026 (aguardando validação)
+O proprietário confirmou que a versão anterior exibia uma tarefa por página e solicitou duas. Commit `6c9c99ce8adb357d9040dafab0aa7448bc1f905a` define `pageSize=2` na rotina de cartões de Demandas e Retornos, modo Celular, perfil Proprietário, independentemente da altura da janela. Preservados filtros, cores, ordenação, registros e navegação. Aguardando validação do proprietário.
