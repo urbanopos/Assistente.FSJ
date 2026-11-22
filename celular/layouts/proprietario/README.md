@@ -116,3 +116,7 @@ Commit `f43c43cc74a8f247132034de24ae8f165a118ed6`: na consulta Demandas e Retorn
 
 ## Limites visíveis da navegação fixa — 22/11/2026 (aguardando validação)
 Após aprovação da posição fixa dos botões, o proprietário solicitou apenas mantê-los integralmente dentro da área visível da tela. Commit `df9a30e100f2b1ea055ffb0f39803924ff5f9e06` aplica margens laterais de 12 px, distância inferior de 14 px mais safe-area do aparelho, largura limitada à viewport e centralização sem transformações. Duas tarefas por página e demais elementos já validados permanecem inalterados. Aguardando confirmação visual.
+
+
+## Correção da largura da numeração no rodapé — 22/11/2026 (aguardando validação)
+Commit `d644f31677767ccb90bc4a5d588bcf43cc0fdcf0`: corrige exclusivamente a barra fixa `.fsj-dm-nav` da consulta celular Proprietário para evitar compressão ou quebra da numeração de página. O contador passa a ter largura intrínseca (`max-content`), sem encolhimento e com algarismos tabulares; barra centralizada na viewport, setas com largura estável e sem quebra de linha. Mantidas duas tarefas por página e demais configurações aprovadas. Aguardando validação visual.
