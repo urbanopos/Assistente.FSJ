@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FSJ</title>
-<meta name="fsj-build" content="20261122-demanda-v42">
+<meta name="fsj-build" content="20261122-demanda-v43">
 <meta name="theme-color" content="#e2f6fc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FSJ">
@@ -4924,44 +4924,30 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
 })();
 </script>
 
-<style id="fsj-demanda-editor-teclado-v42">
+
+
+<style id="fsj-demanda-inline-teclado-v43">
 @media(max-width:1000px){
- body.fsj-demanda-editando #novaTarefa #taskText{
- position:fixed!important;top:var(--fsj-edit-top,12px)!important;left:12px!important;
- width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;
- height:var(--fsj-edit-height,110px)!important;min-height:72px!important;
- display:block!important;visibility:visible!important;opacity:1!important;
- background:#fff!important;color:#17251d!important;border:2px solid #17643e!important;
- border-radius:10px!important;padding:12px!important;z-index:2147483000!important;
- box-sizing:border-box!important;resize:none!important;overflow-y:auto!important;
- }
- body.fsj-demanda-editando #novaTarefa .fsj-page-navigation{visibility:hidden!important}
+ body.fsj-demanda-digitando #novaTarefa.fsj-page-shell{height:auto!important;max-height:none!important;overflow:visible!important}
+ body.fsj-demanda-digitando #novaTarefa.fsj-page-shell .fsj-page-viewport{height:auto!important;max-height:none!important;overflow:visible!important}
+ body.fsj-demanda-digitando #novaTarefa.fsj-page-shell .fsj-page-flow{height:auto!important;max-height:none!important;overflow:visible!important}
+ body.fsj-demanda-digitando #novaTarefa.fsj-page-shell .fsj-page-navigation{display:none!important}
+ body.fsj-demanda-digitando #novaTarefa #taskText{position:static!important;display:block!important;width:100%!important;max-width:100%!important;min-height:120px!important;height:120px!important;box-sizing:border-box!important;visibility:visible!important}
+ body.fsj-demanda-digitando #gestor{overflow-y:auto!important;max-height:none!important}
 }
 </style>
-<script id="fsj-demanda-editor-teclado-v42">
+<script id="fsj-demanda-inline-teclado-v43">
 (function(){
- const fieldId='taskText',flag='fsj-demanda-editando';
- function active(){return document.activeElement?.id===fieldId&&matchMedia('(max-width:1000px)').matches}
- function position(){
-  if(!active())return;
-  const v=window.visualViewport;
-  const top=Math.max(8,(v?.offsetTop||0)+8);
-  const available=Math.max(75,(v?.height||innerHeight)-20);
-  document.body.style.setProperty('--fsj-edit-top',top+'px');
-  document.body.style.setProperty('--fsj-edit-height',Math.min(170,available)+'px');
+ function adjust(){
+  const e=document.getElementById('taskText');
+  if(document.activeElement!==e||!matchMedia('(max-width:1000px)').matches)return;
+  const v=window.visualViewport,visible=(v?.offsetTop||0)+(v?.height||innerHeight);
+  const rect=e.getBoundingClientRect();
+  if(rect.bottom>visible-12)window.scrollBy({top:rect.bottom-visible+24,behavior:'instant'});
  }
- document.addEventListener('focusin',e=>{
-  if(e.target?.id!==fieldId||!matchMedia('(max-width:1000px)').matches)return;
-  document.body.classList.add(flag);position();
- });
- document.addEventListener('focusout',e=>{
-  if(e.target?.id!==fieldId)return;
-  document.body.classList.remove(flag);
-  document.body.style.removeProperty('--fsj-edit-top');
-  document.body.style.removeProperty('--fsj-edit-height');
- });
- window.visualViewport?.addEventListener('resize',position);
- window.visualViewport?.addEventListener('scroll',position);
+ document.addEventListener('focusin',e=>{if(e.target?.id!=='taskText')return;document.body.classList.add('fsj-demanda-digitando');requestAnimationFrame(adjust)});
+ document.addEventListener('focusout',e=>{if(e.target?.id==='taskText')document.body.classList.remove('fsj-demanda-digitando')});
+ window.visualViewport?.addEventListener('resize',adjust);
 })();
 </script>
 </body></html>
