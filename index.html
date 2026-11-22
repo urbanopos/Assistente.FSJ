@@ -4305,7 +4305,11 @@ function fsjCompactOwnerPersonSelector(sel){
    select.value=radios.find(r=>r.checked)?.value||'';
    select.onchange=()=>{radios.forEach(r=>r.checked=r.value===select.value);if(typeof guardarRascunhoTarefa==='function')guardarRascunhoTarefa();};
    target.prepend(select);
-   const checks=target.querySelector('.checks');if(checks)checks.style.display='none';
+   const checks=target.querySelector('.checks');if(checks)checks.style.setProperty('display','none','important');
+   // A lista de radios continua no DOM como fonte operacional, mas não é exibida.
+   for(const radio of radios){const row=radio.closest('label');if(row)row.style.setProperty('display','none','important');}
+   const caption=[...target.querySelectorAll('label,p,div')].find(el=>el.children.length===0&&/responsável pela tarefa\s*[—–-]\s*grupo existente/i.test(el.textContent||''));
+   if(caption)caption.style.setProperty('display','none','important');
   }
  }
  function install(){
