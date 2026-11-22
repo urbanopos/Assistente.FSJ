@@ -218,3 +218,17 @@
  .fsj-mobile body.fsj-task-board .fsj-page-nav-row>.fsj-nav-arrow:last-child{justify-self:end}
  .fsj-mobile body.fsj-task-board .fsj-page-nav-row>.fsj-page-count{justify-self:center}
 }
+
+/* Proprietário celular: Registrar Demanda não deve ser dividido em colunas/páginas. */
+@media(max-width:700px){
+ #novaTarefa.fsj-owner-registration-single .fsj-page-viewport{overflow-x:hidden!important;overflow-y:auto!important;min-height:0!important;scroll-snap-type:none!important}
+ #novaTarefa.fsj-owner-registration-single .fsj-page-flow{display:block!important;columns:none!important;column-width:auto!important;column-count:1!important;column-fill:auto!important;width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;overflow:visible!important;transform:none!important}
+ #novaTarefa.fsj-owner-registration-single .fsj-page-flow>*{break-before:auto!important;break-after:auto!important;break-inside:avoid-column!important}
+ #novaTarefa.fsj-owner-registration-single #taskSaveBtn{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;min-height:48px!important;background:#08633a!important;color:white!important}
+ #novaTarefa.fsj-owner-registration-single .fsj-task-form-actions{display:flex!important;flex-direction:column!important;gap:6px!important}
+ #novaTarefa.fsj-owner-registration-single .fsj-page-flow>.muted:not(#taskDraftStatus),
+ #novaTarefa.fsj-owner-registration-single #taskDraftStatus,
+ #novaTarefa.fsj-owner-registration-single .fsj-task-legend{display:none!important}
+ #novaTarefa.fsj-owner-registration-single .fsj-page-navigation{position:relative!important;flex:none!important}
+ #novaTarefa.fsj-owner-registration-single .fsj-page-count{white-space:nowrap!important;min-width:54px!important}
+}
