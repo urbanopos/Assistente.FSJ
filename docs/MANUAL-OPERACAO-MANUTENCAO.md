@@ -964,3 +964,7 @@ Commit `6cc772abcb6c7d0bc2bdcb4de88e8b0bd542661b`: no celular proprietário, tel
 
 ## VALIDAÇÃO EXPRESSA — 22/11/2026 — ALTURA DOS FILTROS
 Proprietário validou a alteração do commit `e6731c3392d7481bb35f696bd39d0544485e207b`: na tela Demandas e Retornos, modo Celular, perfil Proprietário, os filtros Pessoas, Situação e Mês/Ano e botões Relatório de ações/Limpar seleção adotam altura uniforme de 40 px e espaçamento vertical compacto. Esta é a versão de referência APROVADA, substituindo a tentativa anterior de 44 px (`6cc772a`). Preservar a navegação única e o código de cores já validados, bem como os registros e as demais funcionalidades. Não restaurar estilos antigos sem autorização e nova validação.
+
+
+## Ajuste de paginação da consulta celular — 22/11/2026 (aguardando validação)
+Commit `433b0bd2ba6c858d31f9e8d9b78c5fe2d57e76aa`: na consulta Demandas e Retornos, modo Celular, perfil Proprietário, limite de cartões reduzido de 5 para 2 por página para diminuir a rolagem vertical. A navegação por setas mantém acesso a todas as tarefas; cores, filtros, ordenação e registros não foram alterados. A ausência completa de rolagem ainda depende de teste visual, pois descrições podem ter comprimentos variados. Não marcar como validado antes da confirmação do proprietário.
