@@ -182,7 +182,21 @@
    state.flow.style.setProperty('--fsj-page-width',width+'px');
    state.flow.style.setProperty('--fsj-page-height',height+'px');
    state.stride=width+24;
-   state.count=(state.root.classList.contains('fsj-owner-single-page')||state.root.classList.contains('fsj-owner-execution-mobile'))?1:Math.max(1,Math.ceil((state.flow.scrollWidth+24-1)/state.stride));
+   // Registro do Proprietario celular: um formulario rolavel, sem fragmentar campos ou ocultar Salvar.
+   const ownerRegistration=state.root.id==='novaTarefa'&&window.FSJ_PLATFORM?.platform==='celular'&&window.fsjOwnerVerified===true;
+   state.root.classList.toggle('fsj-owner-registration-single',ownerRegistration);
+   if(ownerRegistration){
+    state.flow.style.setProperty('column-count','auto','important');
+    state.flow.style.setProperty('columns','auto','important');
+    state.flow.style.setProperty('display','block','important');
+    state.flow.style.setProperty('width','100%','important');
+    state.flow.style.setProperty('height','auto','important');
+    state.viewport.style.setProperty('overflow-y','auto','important');
+    state.viewport.style.setProperty('overflow-x','hidden','important');
+    state.viewport.scrollLeft=0;
+    state.flow.querySelector('#taskSaveBtn')?.style.setProperty('display','block','important');
+   }
+   state.count=ownerRegistration?1:(state.root.classList.contains('fsj-owner-single-page')||state.root.classList.contains('fsj-owner-execution-mobile'))?1:Math.max(1,Math.ceil((state.flow.scrollWidth+24-1)/state.stride));
    if(state.pendingIndex!==null&&state.flow.querySelector('#content')?.style.display==='block'){state.index=state.pendingIndex;state.pendingIndex=null;}
    turn(state,state.index);
    if(state.flow.contains(document.activeElement))reveal(state,document.activeElement);
