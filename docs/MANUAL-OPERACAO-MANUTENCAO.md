@@ -972,3 +972,7 @@ Commit `433b0bd2ba6c858d31f9e8d9b78c5fe2d57e76aa`: na consulta Demandas e Retorn
 
 ## Paginação celular — revisão 22/11/2026 (PENDENTE DE VALIDAÇÃO)
 O proprietário informou que a tentativa anterior de 2 tarefas por página (`433b0bd`) não eliminou a rolagem. Commit `8439b75cc9734e6afd023590d6a0d5865085138d` altera a rotina `fsjRenderDemandasCards` para exibir **1 tarefa por página** na consulta Demandas e Retornos do celular proprietário, preservando setas, cores, ordenação, filtros e registros. Não afirmar eliminação da rolagem até confirmação visual do proprietário.
+
+
+## Paginação responsiva da consulta — 22/11/2026 (aguardando validação)
+Commit `9e5c02522f22e87503f787668ee3205c64e49c30`: somente na rotina de cartões de Demandas e Retornos do celular proprietário, a quantidade por página passa a depender da altura da janela: 1 tarefa para altura inferior a 950 px, 2 tarefas a partir de 950 px. O total de páginas e os índices das setas usam o mesmo limite. Não foram alterados filtros, cores, ordenação, layout aprovado ou registros. Confirmar no aparelho antes de marcar como validado; uma descrição extensa ainda pode exigir espaço vertical.
