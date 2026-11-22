@@ -4519,7 +4519,7 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   const root=document.getElementById('demandas'),table=document.getElementById('demandaTabela');
   if(!root||!table)return null;
   let box=document.getElementById('fsjDemandasCardsMobile');
-  if(!box){box=document.createElement('section');box.id='fsjDemandasCardsMobile';table.before(box);}
+  if(!box){box=document.createElement('section');box.id='fsjDemandasCardsMobile';const filters=root.querySelector('.demandas-filtros');if(filters)filters.before(box);else table.before(box); }
   return box;
  }
  function render(){
@@ -4528,7 +4528,7 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   const tabs=document.createElement('div');tabs.id='fsjDemandasTipoTabs';tabs.setAttribute('role','group');tabs.setAttribute('aria-label','Tipo de tarefa');
   for(const [key,label] of [['periodicas','Tarefas Periódicas'],['pontuais','Tarefas Pontuais'],['grupo','Tarefas de Grupo']]){const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.setAttribute('aria-pressed',String(category===key));btn.onclick=()=>{category=key;current=0;render()};tabs.append(btn)}
   box.append(tabs);
-  if(!document.getElementById('demandaFuncionario')?.value){const note=document.createElement('p');note.textContent='Selecione um funcionário para consultar suas tarefas.';box.append(note);return;}
+  if(!document.getElementById('demandaFuncionario')?.value){return;}
   const visible=all.filter(t=>category==='grupo'?!!t.groupId:!t.groupId&&(category==='pontuais'?fsjFrequency(t)==='pontual':fsjFrequency(t)!=='pontual'));
   if(!visible.length){const p=document.createElement('p');p.textContent='Nenhuma tarefa encontrada nesta categoria para a pessoa e situação selecionadas.';box.append(p);return;}
   const total=Math.ceil(visible.length/5);current=Math.max(0,Math.min(current,total-1));
@@ -4548,7 +4548,7 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   nav.append(prev,count,next);box.append(nav);
  }
  window.fsjRenderDemandasCards=function(individuais,grupos,responsavel){
-  const key=responsavel+'|'+(document.getElementById('demandaSituacao')?.value||'');
+  const key=responsavel+'|'+(document.getElementById('demandaSituacao')?.value||'')+'|'+(document.getElementById('demandaMesAno')?.value||'');
   if(key!==lastKey){current=0;lastKey=key;}
   all=[...(individuais||[]),...(grupos||[])];
   render();
@@ -4699,4 +4699,4 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
  #demandas #fsjDemandasTipoTabs button{min-width:0!important;min-height:46px!important;padding:6px 3px!important;font-size:11px!important;line-height:1.15!important;white-space:normal!important;background:#19633e!important;color:#fff!important;border:1px solid #17603c!important;border-radius:7px!important}
  #demandas #fsjDemandasTipoTabs button[aria-pressed="true"]{background:#0b3f26!important;outline:2px solid #8cbba0!important;font-weight:700!important}
 }
-</style></body></html>
+</style><style id="fsjDemandasOwnerLayoutFix20261122b">@media(max-width:1000px) and (pointer:coarse){body.fsj-registro-proprietario #demandas #fsjDemandasCardsMobile{order:0!important;flex:0 0 auto!important;min-height:0!important}body.fsj-registro-proprietario #demandas #demandaEscolha{display:none!important}body.fsj-registro-proprietario #demandas .fsj-page-navigation{display:none!important}}</style></body></html>
