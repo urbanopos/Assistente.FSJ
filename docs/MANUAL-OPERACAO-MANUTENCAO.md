@@ -944,3 +944,7 @@ Publicado em `index.html` no commit `decab4852e68c4f900d9d12583c2e0580f2e120f`: 
 
 ## Supressão da navegação geral na consulta — 22/11/2026
 Publicado no commit `bed07173004513e53e7350199ebb032a4fd67259`: CSS restrito ao modo celular proprietário e à tela Demandas e Retornos ativa, ocultando a navegação geral `.fsj-page-navigation` e mantendo a navegação própria `.fsj-dm-nav`. Não altera registros, filtros nem desktop. Validação visual e funcional no celular pendente; conferir que resta um paginador e que as setas trocam os registros. Recuperação: reverter o commit mantendo histórico.
+
+
+## Causa da dupla navegação e correção estrutural — 22/11/2026
+Commit publicado: `1b2409d1dd2ac357535a32ffe8796823820de62f`. A rotina geral `fsjDesktopTaskPaginationDefault` aplicava paginação também a `taskRows` da consulta celular, criando o segundo paginador. No celular com cartões de demandas ativos, a rotina agora remove seu paginador anterior e deixa a paginação própria dos cartões controlar os registros. O contêiner de cartões foi reposicionado depois dos filtros e as abas de categoria antes dos filtros. Preservados dados, desktop e outras telas. Testes no aparelho ainda pendentes. Recuperação: reverter o commit se necessário, preservando alterações posteriores.
