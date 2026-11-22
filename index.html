@@ -3406,6 +3406,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function pageSize(){if(window.innerWidth<=700)return 5;const available=Math.max(200,window.innerHeight-340);return Math.max(2,Math.min(12,Math.floor(available/62)));}
  function apply(host){
   if(!host||!host.isConnected)return;
+  if(host.id==='taskRows'&&window.innerWidth<=1000&&document.getElementById('fsjDemandasCardsMobile')){const prior=states.get(host);if(prior?.bar)prior.bar.remove();for(const row of host.children){row.hidden=false;row.style.removeProperty('display');}return;}
   const rows=[...host.children].filter(el=>el.matches('tr,article'));
   if(!rows.length&&!['taskRows','demandaGrupoRows'].includes(host.id))return;
   const table=host.closest('table');
@@ -4519,15 +4520,16 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   const root=document.getElementById('demandas'),table=document.getElementById('demandaTabela');
   if(!root||!table)return null;
   let box=document.getElementById('fsjDemandasCardsMobile');
-  if(!box){box=document.createElement('section');box.id='fsjDemandasCardsMobile';const filters=root.querySelector('.demandas-filtros');if(filters)filters.before(box);else table.before(box); }
+  if(!box){box=document.createElement('section');box.id='fsjDemandasCardsMobile';table.before(box); }
   return box;
  }
  function render(){
   const box=init();if(!box)return;
   box.replaceChildren();
+  document.getElementById('fsjDemandasTipoTabs')?.remove();
   const tabs=document.createElement('div');tabs.id='fsjDemandasTipoTabs';tabs.setAttribute('role','group');tabs.setAttribute('aria-label','Tipo de tarefa');
   for(const [key,label] of [['periodicas','Tarefas Periódicas'],['pontuais','Tarefas Pontuais'],['grupo','Tarefas de Grupo']]){const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.setAttribute('aria-pressed',String(category===key));btn.onclick=()=>{category=key;current=0;render()};tabs.append(btn)}
-  box.append(tabs);
+  const filters=box.closest('#demandas')?.querySelector('.demandas-filtros');if(filters){filters.before(tabs);}else box.before(tabs);
   if(!document.getElementById('demandaFuncionario')?.value){return;}
   const visible=all.filter(t=>category==='grupo'?!!t.groupId:!t.groupId&&(category==='pontuais'?fsjFrequency(t)==='pontual':fsjFrequency(t)!=='pontual')).sort((a,b)=>{const rank=t=>{const p=String(t.priority||t.prioridade||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();const st=String(t.centralStatus||t.status||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return p==='urgente'?0:p==='prioritaria'||p==='prioritario'?1:st==='em andamento'||st==='iniciada'?2:3};return rank(a)-rank(b)});
   if(!visible.length){const p=document.createElement('p');p.textContent='Nenhuma tarefa encontrada nesta categoria para a pessoa e situação selecionadas.';box.append(p);return;}
