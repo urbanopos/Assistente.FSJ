@@ -940,3 +940,7 @@ Publicado no GitHub: commit `3a090b3af67a5d38c0fb2a4291082b58717db283` em `index
 
 ## Ajuste de cores, prioridade e navegação — 22/11/2026
 Publicado em `index.html` no commit `decab4852e68c4f900d9d12583c2e0580f2e120f`: cartões móveis de Demandas e Retornos passam a receber classes oficiais de cor; ordenação por urgentes, prioritárias, em andamento e demais; ocultação da paginação externa duplicada. Escopo: celular proprietário. Dados e desktop preservados. Teste visual e funcional no aparelho, inclusive navegação e classificação de José Carlos, ainda pendente. Recuperação por reversão do commit, preservando alterações posteriores.
+
+
+## Supressão da navegação geral na consulta — 22/11/2026
+Publicado no commit `bed07173004513e53e7350199ebb032a4fd67259`: CSS restrito ao modo celular proprietário e à tela Demandas e Retornos ativa, ocultando a navegação geral `.fsj-page-navigation` e mantendo a navegação própria `.fsj-dm-nav`. Não altera registros, filtros nem desktop. Validação visual e funcional no celular pendente; conferir que resta um paginador e que as setas trocam os registros. Recuperação: reverter o commit mantendo histórico.
