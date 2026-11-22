@@ -64,3 +64,7 @@ Os calendários de consulta e de registro de tarefas usam as dispensas do calend
 Solicitado: na tela Demandas e retornos — Individuais, perfil Proprietário no celular, exibir os botões Tarefas Periódicas, Tarefas Pontuais e Tarefas de Grupo acima do filtro de pessoa, remover aviso duplicado e corrigir a paginação.
 
 Publicado no GitHub: commit `3a090b3af67a5d38c0fb2a4291082b58717db283` em `index.html`. O componente de categorias foi reposicionado antes dos filtros; a chave de reinicialização da paginação considera pessoa, situação e mês/ano; a mensagem duplicada do componente foi removida. Os registros operacionais não foram alterados. Instalação no aparelho e validação funcional com registros reais: **pendentes**. É obrigatório verificar a consulta do José Carlos, as três categorias, os filtros e as setas antes de marcar como validado. Recuperação: reverter o commit identificado após preservar o estado vigente.
+
+
+## Ajuste de cores, prioridade e navegação — 22/11/2026
+Publicado em `index.html` no commit `decab4852e68c4f900d9d12583c2e0580f2e120f`: cartões móveis de Demandas e Retornos passam a receber classes oficiais de cor; ordenação por urgentes, prioritárias, em andamento e demais; ocultação da paginação externa duplicada. Escopo: celular proprietário. Dados e desktop preservados. Teste visual e funcional no aparelho, inclusive navegação e classificação de José Carlos, ainda pendente. Recuperação por reversão do commit, preservando alterações posteriores.
