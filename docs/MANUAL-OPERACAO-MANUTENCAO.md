@@ -984,3 +984,7 @@ O proprietário confirmou que a versão anterior exibia uma tarefa por página e
 
 ## Navegação fixa no rodapé — 22/11/2026 (aguardando validação)
 Commit `f43c43cc74a8f247132034de24ae8f165a118ed6`: na consulta Demandas e Retornos do celular proprietário, a barra de navegação `.fsj-dm-nav` foi fixada junto ao rodapé da janela, centralizada e independente da altura do texto dos cartões, com espaço reservado para não sobrepor conteúdo. Permanecem duas tarefas por página e todas as demais configurações validadas. Pendente de validação visual pelo proprietário.
+
+
+## Limites visíveis da navegação fixa — 22/11/2026 (aguardando validação)
+Após aprovação da posição fixa dos botões, o proprietário solicitou apenas mantê-los integralmente dentro da área visível da tela. Commit `df9a30e100f2b1ea055ffb0f39803924ff5f9e06` aplica margens laterais de 12 px, distância inferior de 14 px mais safe-area do aparelho, largura limitada à viewport e centralização sem transformações. Duas tarefas por página e demais elementos já validados permanecem inalterados. Aguardando confirmação visual.
