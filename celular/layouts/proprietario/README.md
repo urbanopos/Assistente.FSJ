@@ -96,3 +96,7 @@ Proprietário validou a alteração do commit `e6731c3392d7481bb35f696bd39d05444
 
 ## Ajuste de paginação da consulta celular — 22/11/2026 (aguardando validação)
 Commit `433b0bd2ba6c858d31f9e8d9b78c5fe2d57e76aa`: na consulta Demandas e Retornos, modo Celular, perfil Proprietário, limite de cartões reduzido de 5 para 2 por página para diminuir a rolagem vertical. A navegação por setas mantém acesso a todas as tarefas; cores, filtros, ordenação e registros não foram alterados. A ausência completa de rolagem ainda depende de teste visual, pois descrições podem ter comprimentos variados. Não marcar como validado antes da confirmação do proprietário.
+
+
+## Paginação celular — revisão 22/11/2026 (PENDENTE DE VALIDAÇÃO)
+O proprietário informou que a tentativa anterior de 2 tarefas por página (`433b0bd`) não eliminou a rolagem. Commit `8439b75cc9734e6afd023590d6a0d5865085138d` altera a rotina `fsjRenderDemandasCards` para exibir **1 tarefa por página** na consulta Demandas e Retornos do celular proprietário, preservando setas, cores, ordenação, filtros e registros. Não afirmar eliminação da rolagem até confirmação visual do proprietário.
