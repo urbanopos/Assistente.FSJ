@@ -4677,6 +4677,13 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
   const form=document.getElementById('novaTarefa');if(!form)return;
   const voice=document.getElementById('taskText')?.closest('.fsj-owner-text-voice');
   if(voice)for(const b of voice.querySelectorAll('button'))b.remove();
+  // A mesma exclusão vale ao alternar entre Individual e Grupo.
+  for(const b of form.querySelectorAll('button')){
+   if(b.id==='taskSaveBtn')continue;
+   const label=(b.textContent||'').trim();
+   const hint=[b.getAttribute('aria-label'),b.getAttribute('title'),b.getAttribute('onclick')].filter(Boolean).join(' ');
+   if(/^([🎙🎤🎧\\s]*voz|ditar demanda|gravar voz)$/i.test(label)||/voz|microfone|ditar|listen\\(/i.test(hint))b.style.setProperty('display','none','important');
+  }
   const save=document.getElementById('taskSaveBtn');
   const actions=form.querySelector('.fsj-task-form-actions');
   if(save&&actions){
