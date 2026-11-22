@@ -29,3 +29,8 @@ Este documento é referência normativa do projeto. Mudanças de interface, API,
 - Proprietário acessa com suas permissões, inclusive fora do expediente.
 
 **Governança:** toda mudança futura que contrarie esta norma exige autorização explícita do Proprietário e atualização deste documento. Testar antes de declarar implantado. O documento não substitui os controles executados pelo servidor e banco de dados.
+
+
+## FSJ-HOMOLOGACAO-001 — Preservação obrigatória do que foi validado
+
+**Decisão expressa do Proprietário em 22/11/2026: nenhuma parte validada do Assistente FSJ pode ser alterada sem solicitação expressa.** Toda instrução anterior, genérica ou específica, que permita mudança indireta de telas, regras, filtros, cores, paginação, navegação, permissões, dados ou serviços homologados fica subordinada a esta regra. Solicitações pontuais autorizam somente a intervenção descrita. É vedado usar refatoração, limpeza, atualização automática, correção de outra seção ou restauração de versões antigas para alterar comportamento aprovado. Antes da publicação, conferir o escopo por perfil e plataforma, preservar recuperação e testar regressões relacionadas; depois da publicação, aguardar confirmação do Proprietário para registrar nova homologação. Na dúvida, interromper a mudança e solicitar esclarecimento. O histórico Git permanece como mecanismo de auditoria, sem reativar soluções rejeitadas.
