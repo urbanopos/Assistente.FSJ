@@ -183,14 +183,18 @@
    state.flow.style.setProperty('--fsj-page-height',height+'px');
    state.stride=width+24;
    // Registro do Proprietario celular: um formulario rolavel, sem fragmentar campos ou ocultar Salvar.
-   const ownerRegistration=state.root.id==='novaTarefa'&&window.FSJ_PLATFORM?.platform==='celular'&&window.fsjOwnerVerified===true;
+   const ownerRegistration=state.root.id==='novaTarefa'&&!!document.getElementById('gestor');
    state.root.classList.toggle('fsj-owner-registration-single',ownerRegistration);
    if(ownerRegistration){
-    state.flow.style.setProperty('column-count','auto','important');
+    state.flow.style.setProperty('column-width','auto','important');
+    state.flow.style.setProperty('column-count','1','important');
     state.flow.style.setProperty('columns','auto','important');
     state.flow.style.setProperty('display','block','important');
     state.flow.style.setProperty('width','100%','important');
     state.flow.style.setProperty('height','auto','important');
+    state.flow.style.setProperty('column-fill','balance','important');
+    for(const el of state.flow.querySelectorAll(':scope > .muted'))if(el.id!=='taskDraftStatus')el.style.setProperty('display','none','important');
+    const status=state.flow.querySelector('#taskDraftStatus');if(status)status.style.setProperty('display','none','important');
     state.viewport.style.setProperty('overflow-y','auto','important');
     state.viewport.style.setProperty('overflow-x','hidden','important');
     state.viewport.scrollLeft=0;
