@@ -4286,6 +4286,16 @@ function fsjCompactOwnerPersonSelector(sel){
    const old=window.renderTargets;const wrapped=function(){const result=old.apply(this,arguments);refresh();return result;};wrapped.__fsjV37=true;window.renderTargets=wrapped;
   }
   setup();
+  const picker=document.getElementById('taskPersonPicker');
+  if(picker&&!picker.dataset.fsjIndividualChange){
+   picker.dataset.fsjIndividualChange='1';
+   picker.addEventListener('change',()=>queueMicrotask(refresh));
+  }
+  const target=document.getElementById('targetBox');
+  if(target&&!target.dataset.fsjIndividualWatch){
+   target.dataset.fsjIndividualWatch='1';
+   target.addEventListener('click',e=>{if(e.target.closest('#taskPeopleChosen button'))queueMicrotask(refresh)});
+  }
  }
  document.addEventListener('DOMContentLoaded',install);
  window.addEventListener('load',install);
