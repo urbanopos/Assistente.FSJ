@@ -136,3 +136,7 @@ O proprietário apresentou captura em que o contador do paginador fixo aparecia 
 
 ## Higienização conservadora de versões antigas — 22/11/2026
 A pedido do proprietário, iniciou-se a remoção de regras antigas comprovadamente substituídas, para evitar contaminação da versão homologada. Commit `02f548695812a7eb028c238c92725bb234cf67bf`: removida exclusivamente a regra CSS `fsjDemandasFilterHeightOwner20261122` (altura antiga de 44 px), superada pela regra homologada de 40 px `fsjDemandasFiltersCompactDefinitive20261122`. Não foram removidas rotinas ativas, commits históricos, dados ou funcionalidades. A seção homologada permanece protegida; outras regras antigas só poderão ser removidas após comprovação de que não afetam o comportamento validado. Verificação visual após a limpeza ainda pendente.
+
+
+## Correção da codificação de periodicidade nos cartões — 22/11/2026 (aguardando validação)
+Commit `e4483311865ff69a52b03469cf750ec234044683`: nos cartões de Demandas e Retornos, celular Proprietário, o título passa a acrescentar o sufixo de periodicidade conforme `fsjFrequency(task)`: P pontual, D diária, S semanal, Q quinzenal, M mensal, T trimestral, E semestral, A anual. Evita duplicar sufixo já existente. Nenhuma outra característica homologada foi alterada. Aguardando confirmação visual do proprietário.
