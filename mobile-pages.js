@@ -142,7 +142,7 @@
   state.viewport.scrollLeft=state.index*state.stride;
   state.viewport.scrollTop=0;
  }
- const hasTaskPager=root=>root.classList.contains('fsj-owner-open-tasks')||root.classList.contains('fsj-owner-missed-tasks');
+ const hasTaskPager=root=>root.classList.contains('fsj-owner-open-tasks')||root.classList.contains('fsj-owner-missed-tasks')||(root.id==='demandas'&&!!document.getElementById('gestor'));
  function reveal(state,target){
   if(hasTaskPager(state.root)||!state.stride||!target.getClientRects().length)return;
   const box=target.getBoundingClientRect(),base=state.viewport.getBoundingClientRect();
