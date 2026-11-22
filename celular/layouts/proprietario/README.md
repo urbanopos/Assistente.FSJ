@@ -84,3 +84,7 @@ O proprietário confirmou expressamente que a navegação duplicada foi corrigid
 
 ## Compactação da consulta celular — 22/11/2026
 Commit `0f012b02fa2d07958a2873edd3686118e5be889b`: ocultada exclusivamente no celular proprietário a legenda explicativa das cores imediatamente abaixo do título Demandas e retornos — Individuais, liberando altura para os controles e cartões. As regras de cores continuam ativas; navegação, filtros e registros preservados. Teste visual pendente. A redução de quantidade de tarefas por página e a retirada de botão de voz não foram realizadas neste commit.
+
+
+## Altura uniforme dos filtros da consulta celular — 22/11/2026
+Commit `6cc772abcb6c7d0bc2bdcb4de88e8b0bd542661b`: no celular proprietário, tela Demandas e Retornos, os controles visuais de Pessoas, Situação e Mês/Ano e os botões Relatório de ações/Limpar seleção passam a ter 44 px de altura; espaçamento vertical dos filtros reduzido. Não modifica o funcionamento dos seletores, dados, cores ou navegação validada. Validação visual no aparelho pendente.
