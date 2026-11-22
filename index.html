@@ -4819,4 +4819,31 @@ window.addEventListener('resize',()=>{if(overlay&&!mobile())close()});
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
+
+<style id="fsj-demanda-voz-final-20261122">
+@media(max-width:1000px){
+ #novaTarefa #taskText{width:100%!important;max-width:100%!important;flex:1 1 100%!important;box-sizing:border-box!important}
+ #novaTarefa #taskText:where(textarea){min-width:0!important}
+ #novaTarefa .fsj-owner-text-voice:has(#taskText){display:block!important;width:100%!important;max-width:100%!important}
+ #novaTarefa .fsj-owner-text-voice:has(#taskText)>:not(#taskText){display:none!important}
+ #novaTarefa #taskText + button,#novaTarefa #taskText ~ button{display:none!important}
+}
+</style>
+<script id="fsj-demanda-voz-final-js-20261122">
+(function(){
+ function fix(){
+  if(!matchMedia('(max-width:1000px)').matches)return;
+  const form=document.getElementById('novaTarefa'),field=document.getElementById('taskText');if(!form||!field)return;
+  const holder=field.parentElement;if(!holder)return;
+  field.style.setProperty('width','100%','important');field.style.setProperty('max-width','100%','important');field.style.setProperty('box-sizing','border-box','important');
+  for(const el of holder.children){if(el===field)continue;const t=(el.textContent||'').toLowerCase();if(/voz|🎙|🎤|microfone/.test(t))el.style.setProperty('display','none','important');}
+  for(const b of form.querySelectorAll('button,[role="button"]')){
+   const raw=(b.textContent||'')+' '+(b.getAttribute('aria-label')||'');
+   if(/voz|🎙|🎤|microfone/i.test(raw)&&!b.contains(field))b.style.setProperty('display','none','important');
+  }
+ }
+ function init(){const form=document.getElementById('novaTarefa');if(!form)return;let busy=false;const schedule=()=>{if(busy)return;busy=true;requestAnimationFrame(()=>{busy=false;fix();});};new MutationObserver(schedule).observe(form,{childList:true,subtree:true});schedule();document.getElementById('execType')?.addEventListener('change',schedule);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
 </body></html>
