@@ -1506,7 +1506,10 @@ function renderTargets(){
    for(const radio of radios.querySelectorAll('input.tg'))select.add(new Option(radio.closest('label').textContent.trim(),radio.value));
    select.value=grupoAntes;
    select.addEventListener('change',()=>{for(const radio of radios.querySelectorAll('input.tg'))radio.checked=radio.value===select.value;guardarRascunhoTarefa();});
-   targetBox.append(select);
+   const linha=document.createElement('div');linha.className='fsj-registro-grupo-linha';linha.style.cssText='display:flex;align-items:stretch;gap:8px;width:100%;min-width:0';select.style.cssText='flex:1 1 0;min-width:0;width:100%';
+   const novo=document.createElement('button');novo.type='button';novo.textContent='Novo grupo';novo.setAttribute('aria-label','Cadastrar novo grupo');novo.style.cssText='flex:0 0 auto;max-width:36%;padding:8px 10px;background:#087a45;color:white;border:0;border-radius:9px;font-weight:700;white-space:nowrap';
+   novo.addEventListener('click',()=>{guardarRascunhoTarefa();clearGroup();navTo('cadGrupos');});
+   linha.append(select,novo);targetBox.append(linha);
   }else{
    const caption=document.createElement('label');caption.textContent='Responsável pela tarefa — grupo existente';targetBox.append(caption);
   }
