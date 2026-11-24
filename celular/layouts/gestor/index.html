@@ -32,7 +32,7 @@ async function abrirConsulta(area){const view=document.getElementById('consulta'
  const full=String(t.descricao||'');const rawCode=String(t.codigo_tarefa||t.id);
  const suffix={pontual:'P',diaria:'D',semanal:'S',quinzenal:'Q',mensal:'M',trimestral:'T',semestral:'SM',anual:'A'}[String(t.periodicidade||'').toLowerCase()];
  const code=/^Tar\s*-\s*\d+/i.test(rawCode)?rawCode.replace(/^Tar\s*-\s*(\d+)/i,(_,n)=>'Tar - '+n.padStart(7,'0')):rawCode;
- const displayCode=suffix&&!new RegExp('(?:^|\\s)'+suffix+'
+ const displayCode=suffix&&!code.endsWith(' '+suffix)?code+' '+suffix:code;
  const item=document.createElement('button');item.type='button';item.setAttribute('aria-label','Consultar tarefa '+displayCode);
  item.style.cssText='display:block;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid #d9e6db;border-radius:0;padding:10px 0;color:'+color+';cursor:pointer';
  const title=document.createElement('strong');title.style.cssText='display:block;color:inherit;font-size:14px';title.textContent=displayCode+' — '+(t.situacao||'Em aberto');
