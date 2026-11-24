@@ -2225,13 +2225,14 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
  const who=document.createElement('p');const selectedPerson=(S.people||[]).find(p=>String(p.id)===String(pessoaId));who.textContent='Responsável: '+(selectedPerson?(selectedPerson.nick||selectedPerson.name):names(t))+' • Consulta do Proprietário';panel.append(who);
  const nav=document.createElement('div');nav.style.cssText='display:flex;align-items:center;gap:14px;margin:12px 0';
  const prev=document.createElement('button'),next=document.createElement('button'),month=document.createElement('strong');prev.textContent='←';next.textContent='→';
- const status=document.createElement('p');status.setAttribute('role','status');
+ const status=document.createElement('p');status.setAttribute('role','status');status.style.cssText='font-size:12px;line-height:1.4;margin:10px 0 0';
+ const periodLabel=document.createElement('p');periodLabel.style.cssText='font-weight:700;color:#194d35;margin:8px 0 10px';periodLabel.hidden=true;
  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';
  const mobileCalendar=(window.FSJ_PLATFORM?.platform==='celular'||window.matchMedia('(max-width:700px)').matches)&&!!pessoaId;
  if(mobileCalendar){
   // No celular, a grade dos dias deve vir imediatamente após o responsável.
   // Mês, setas e legenda ficam abaixo, sem modificar o calendário Desktop.
-  panel.append(grid);
+  panel.append(periodLabel,grid);
   nav.append(prev,month,next);
   nav.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 6px';
   month.style.cssText='text-align:center;flex:1';
@@ -2239,7 +2240,7 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
   status.style.cssText='font-size:0.85em;line-height:1.35;margin:6px 0 0';
   panel.append(status);
  }else{
-  nav.append(prev,month,next);panel.append(nav);panel.append(status);panel.append(grid);
+  nav.append(prev,month,next);panel.append(nav);panel.append(periodLabel);panel.append(grid);panel.append(status);
  }
  let cursor=mesInicial?new Date(mesInicial+'-01T12:00:00'):new Date();cursor=new Date(cursor.getFullYear(),cursor.getMonth(),1);
  const freq=fsjFrequency(t);
@@ -2260,7 +2261,7 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
  let drawSequence=0;
  async function draw(){
   const request=++drawSequence;
-  const y=cursor.getFullYear(),m=cursor.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0');const period=periodForMonth();prev.disabled=periodicNonDaily&&prefix<=start.slice(0,7);month.textContent=cursor.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});grid.replaceChildren();status.textContent='Consultando conclusões registradas…';
+  const y=cursor.getFullYear(),m=cursor.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0');const period=periodForMonth();const referenceDay=prefix===today.slice(0,7)?today:prefix+'-15';const shownPeriod=periodicNonDaily?FSJTaskPeriods.bounds(freq,t.created,referenceDay):null;periodLabel.hidden=!shownPeriod;const br=d=>d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4);if(shownPeriod)periodLabel.textContent='Período de execução: '+br(shownPeriod.start)+' a '+br(shownPeriod.end);prev.disabled=periodicNonDaily&&prefix<=start.slice(0,7);month.textContent=cursor.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});grid.replaceChildren();status.textContent='Consultando conclusões registradas…';
   for(const w of ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']){const e=document.createElement('b');e.textContent=w;e.style.textAlign='center';grid.append(e)}
   for(let k=0;k<new Date(y,m,1).getDay();k++)grid.append(document.createElement('span'));
   try{
@@ -2301,7 +2302,7 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
    if(!overlay.isConnected||request!==drawSequence)return;
    const done=new Set(validReturns.map(x=>x.dia_previsto||FSJTaskPeriods.date(x.criado_em)).filter(Boolean));
    const cycleDone=new Set([...done].filter(d=>d>=firstMandatory).map(d=>boundsForDay(d)?.cycle).filter(v=>v!==undefined));
-   status.textContent=(period?'Verde: período no prazo • Verde-escuro: concluído • Vermelho: período vencido sem conclusão no prazo • Cinza: fora do período':
+   status.textContent=(periodicNonDaily?'Preto: cadastro da tarefa • Verde-escuro: dia da execução • Azul: demais dias do período cumprido • Vermelho: período vencido sem execução • Verde-claro: período em andamento • Cinza: antes do início ou fora do período • Amarelo: feriado • Verde-claro com identificação: folga • Azul-claro: férias':
     'Verde: CONCLUÍDA • Vermelho: NÃO CONCLUÍDA (prazo vencido) • Verde claro: folga • Amarelo: feriado • Azul claro: férias • Cinza: sem vencimento ou futuro')
     +(pessoaId&&!somenteConsulta&&!archived?' • Toque em um dia habilitado para registrar a conclusão como Proprietário.':'');
    if(hiddenMonth&&!periodicNonDaily){status.textContent='Período concluído em '+completion.split('-').reverse().join('/')+'. Sem ocorrência neste mês.';return;}
