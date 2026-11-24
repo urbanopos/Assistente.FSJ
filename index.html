@@ -2259,8 +2259,10 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
  }
  let cursor=mesInicial?new Date(mesInicial+'-01T12:00:00'):new Date();cursor=new Date(cursor.getFullYear(),cursor.getMonth(),1);
  const freq=fsjFrequency(t);
+ const ownDates=fsjTarefaCalendarioProprio(t)?new Set(fsjDatasNormalizar(t.programDates)):null;
+ const extinctionDate=FSJTaskPeriods.date(t.periodicityExtinctAt);
  const today=fsjDia(new Date()),start=FSJTaskPeriods.date(t.created);
- const periodicNonDaily=!!FSJTaskPeriods.durations[freq];
+ const periodicNonDaily=!ownDates&&!!FSJTaskPeriods.durations[freq];
  const periodForMonth=()=>periodicNonDaily?FSJTaskPeriods.bounds(freq,t.created,cursor.getFullYear()+'-'+String(cursor.getMonth()+1).padStart(2,'0')+'-15'):null;
  const period=periodForMonth();
  const firstMandatory=periodicNonDaily?FSJTaskPeriods.firstMonday(t.created):'';
@@ -2323,21 +2325,22 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
    if(hiddenMonth&&!periodicNonDaily){status.textContent='Período concluído em '+completion.split('-').reverse().join('/')+'. Sem ocorrência neste mês.';return;}
    for(let day=1;day<=new Date(y,m+1,0).getDate();day++){
     const date=prefix+'-'+String(day).padStart(2,'0');
-    const dayPeriod=periodicNonDaily?boundsForDay(date):null;
+    const dayPeriod=!ownDates&&periodicNonDaily?boundsForDay(date):null;
     const dayCompleted=!!dayPeriod&&cycleDone.has(dayPeriod.cycle);
     const interval=FSJTaskPeriods.state(dayPeriod,date,today,{archived,archivedOn,completed:dayCompleted});
-    const eligibleDaily=freq==='diaria'&&!!start&&date>=start&&(!archived||(archivedOn&&date<=archivedOn));
-    const actualExecution=done.has(date);const completed=actualExecution;const covered=!!dayPeriod&&dayCompleted&&interval==='done'&&!actualExecution;const registered=periodicNonDaily&&date===start;
+    const eligibleDaily=ownDates?ownDates.has(date):freq==='diaria'&&!!start&&date>=start&&(!archived||(archivedOn&&date<=archivedOn));
+    const actualExecution=done.has(date);const completed=actualExecution;const covered=!!dayPeriod&&dayCompleted&&interval==='done'&&!actualExecution;const registered=!ownDates&&periodicNonDaily&&date===start;
+    const extinct=!!extinctionDate&&date===extinctionDate;
     const absence=absenceOn(date),reason=absence?.motivo||'';
-    const overdue=dayPeriod?interval==='late':absences.length>0&&!reason&&eligibleDaily&&date<today&&!completed;
-    const color=registered?'#111111':completed?'#167044':covered?'#dbeafe':overdue?'#b91c1c':reason?({vacation:'#c9dcfa',holiday:'#f9e3a9',leave:'#bde7c9'}[absence.tipo]||'#bde7c9'):
+    const overdue=ownDates?eligibleDaily&&!reason&&date<today&&!completed:dayPeriod?interval==='late':absences.length>0&&!reason&&eligibleDaily&&date<today&&!completed;
+    const color=extinct?'#111111':registered?'#111111':completed?'#167044':covered?'#dbeafe':overdue?'#b91c1c':reason?({vacation:'#c9dcfa',holiday:'#f9e3a9',leave:'#bde7c9'}[absence.tipo]||'#bde7c9'):
      overdue?'#b91c1c':interval==='active'?'#def4e4':'#edf0ed';
     const cell=document.createElement('div');
     cell.dataset.competencia=completed?'done':absence?absence.tipo:overdue?'late':interval==='active'?'active':'';
-    cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+color+';color:'+(registered||completed||overdue?'white':covered?'#185aa0':'#34483b');
-    if(pessoaId&&!somenteConsulta&&!archived&&(periodicNonDaily?!!interval&&!dayCompleted:eligibleDaily)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
+    cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+color+';color:'+(extinct||registered||completed||overdue?'white':covered?'#185aa0':'#34483b');
+    if(pessoaId&&!somenteConsulta&&!archived&&(ownDates?eligibleDaily:periodicNonDaily?!!interval&&!dayCompleted:eligibleDaily)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
 
-    const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=registered?'CADASTRO':covered?'CUMPRIDA':completed?'CONCLUÍDA'+(reason?' · '+reason:''):reason|| (overdue?'NÃO CONCLUÍDA':interval==='active'?'NO PRAZO':period&&date===period.start?'REGISTRO':'');if(reason)cell.title=date+' — '+reason;cell.append(n,label);grid.append(cell);
+    const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=extinct?'EXTINTA':registered?'CADASTRO':ownDates&&eligibleDaily&&!completed&&!overdue?'PROGRAMADA':covered?'CUMPRIDA':completed?'CONCLUÍDA'+(reason?' · '+reason:''):reason|| (overdue?'NÃO CONCLUÍDA':interval==='active'?'NO PRAZO':period&&date===period.start?'REGISTRO':'');if(reason)cell.title=date+' — '+reason;cell.append(n,label);grid.append(cell);
    }
   }catch(err){status.textContent='Não foi possível consultar os registros: '+err.message;}
  }
@@ -2628,7 +2631,7 @@ function fsjTaskName(t,employee=false){const running=fsjExecucoes.some(e=>e.tare
 document.addEventListener('click',event=>{
  const button=event.target.closest('[data-fsj-task-id]');if(!button)return;
  const t=S.tasks.find(t=>String(t.id)===String(button.dataset.fsjTaskId));if(!t)return;
- const periodic=fsjTarefaPeriodica(t)||/\\b[DS]\\b/i.test(String(t.code||''))||['Tar-000142','Tar-000150'].includes(String(t.code||'').replace(/\\s+[DS]$/i,''));
+ const periodic=fsjTarefaPeriodica(t)||fsjTarefaCalendarioProprio(t)||/\\b[DS]\\b/i.test(String(t.code||''))||['Tar-000142','Tar-000150'].includes(String(t.code||'').replace(/\\s+[DS]$/i,''));
  if(periodic){
   event.preventDefault();event.stopImmediatePropagation();
   const isGroup=!!t.groupId||!!button.closest('#demandaGrupoRows,#fsjPessoaGruposRows');
@@ -2668,8 +2671,9 @@ function fsjPosicionarAcoesMobile(rows){
 
 // O filtro de ocorrências não pode bloquear os demais filtros nem alterar a situação original.
 function fsjTarefaPeriodica(t){return fsjFrequency(t)!=='pontual';}
+function fsjTarefaCalendarioProprio(t){return fsjFrequency(t)==='pontual'&&Array.isArray(t.programDates)&&t.programDates.length>0;}
 function fsjSituacaoDemanda(t,responsavel){
- if(!fsjTarefaPeriodica(t))return esc(FSJDaily.ownerText(t,null,responsavel));
+ if(!fsjTarefaPeriodica(t)&&!fsjTarefaCalendarioProprio(t))return esc(FSJDaily.ownerText(t,null,responsavel));
  return 'Ver Calendário';
 }
 function fsjCalendarioSomenteLeitura(t,pid,ano,mes){
