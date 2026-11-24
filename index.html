@@ -2247,6 +2247,8 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
  const periodicNonDaily=!!FSJTaskPeriods.durations[freq];
  const periodForMonth=()=>periodicNonDaily?FSJTaskPeriods.bounds(freq,t.created,cursor.getFullYear()+'-'+String(cursor.getMonth()+1).padStart(2,'0')+'-15'):null;
  const period=periodForMonth();
+ const firstMandatory=periodicNonDaily?FSJTaskPeriods.firstMonday(t.created):'';
+ const boundsForDay=day=>periodicNonDaily&&day>=firstMandatory?FSJTaskPeriods.bounds(freq,t.created,day):null;
  const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status);
  let archivedOn=FSJTaskPeriods.date(t.archivedAt);
  if(archived&&!archivedOn){
@@ -2263,11 +2265,11 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
   for(let k=0;k<new Date(y,m,1).getDay();k++)grid.append(document.createElement('span'));
   try{
    const end=new Date(Date.UTC(y,m+1,1)).toISOString().slice(0,10);
-   const taskFilter='&tarefa_id=eq.'+encodeURIComponent(t.id)+(pessoaId&&!period&&!t.groupId?'&pessoa_id=eq.'+encodeURIComponent(pessoaId):'');
+   const taskFilter='&tarefa_id=eq.'+encodeURIComponent(t.id)+(pessoaId&&!t.groupId?'&pessoa_id=eq.'+encodeURIComponent(pessoaId):'');
    const monthStart=prefix+'-01';
    const intersects=period&&period.start<end&&period.end>=monthStart;
-   const from=intersects?period.start:monthStart,to=intersects?period.end:FSJTaskPeriods.offset(end,-1);
-   const rows=period&&!intersects?[]:await api('/rest/v1/retornos?select=dia_previsto,pessoa_id,criado_em,tipo,cancelado_por_revisao'+taskFilter+
+   const from=periodicNonDaily?(monthStart<firstMandatory?monthStart:FSJTaskPeriods.bounds(freq,t.created,monthStart).start):monthStart,to=periodicNonDaily?FSJTaskPeriods.bounds(freq,t.created,FSJTaskPeriods.offset(end,-1)).end:FSJTaskPeriods.offset(end,-1);
+   const rows=await api('/rest/v1/retornos?select=dia_previsto,pessoa_id,criado_em,tipo,cancelado_por_revisao'+taskFilter+
     (period?'&or=(and(dia_previsto.gte.'+from+',dia_previsto.lte.'+to+'),and(dia_previsto.is.null,criado_em.gte.'+from+'T03:00:00Z,criado_em.lt.'+FSJTaskPeriods.offset(to,1)+'T03:00:00Z))&tipo=in.(sim,sim_devolvido)':
     '&dia_previsto=gte.'+from+'&dia_previsto=lte.'+to+'&tipo=eq.sim&cancelado_por_revisao=is.null')+'&limit=1000');
    const isTimely=day=>day&&day>=from&&day<=to&&(!archivedOn||day<=archivedOn);
@@ -2298,23 +2300,26 @@ async function fsjCalendarioExecucaoDesktop(t,mesInicial,pessoaId,somenteConsult
    };
    if(!overlay.isConnected||request!==drawSequence)return;
    const done=new Set(validReturns.map(x=>x.dia_previsto||FSJTaskPeriods.date(x.criado_em)).filter(Boolean));
+   const cycleDone=new Set([...done].filter(d=>d>=firstMandatory).map(d=>boundsForDay(d)?.cycle).filter(v=>v!==undefined));
    status.textContent=(period?'Verde: período no prazo • Verde-escuro: concluído • Vermelho: período vencido sem conclusão no prazo • Cinza: fora do período':
     'Verde: CONCLUÍDA • Vermelho: NÃO CONCLUÍDA (prazo vencido) • Verde claro: folga • Amarelo: feriado • Azul claro: férias • Cinza: sem vencimento ou futuro')
     +(pessoaId&&!somenteConsulta&&!archived?' • Toque em um dia habilitado para registrar a conclusão como Proprietário.':'');
-   if(hiddenMonth){status.textContent='Período concluído em '+completion.split('-').reverse().join('/')+'. Sem ocorrência neste mês.';return;}
+   if(hiddenMonth&&!periodicNonDaily){status.textContent='Período concluído em '+completion.split('-').reverse().join('/')+'. Sem ocorrência neste mês.';return;}
    for(let day=1;day<=new Date(y,m+1,0).getDate();day++){
     const date=prefix+'-'+String(day).padStart(2,'0');
-    const interval=FSJTaskPeriods.state(period,date,today,{archived,archivedOn,completed:periodDone});
+    const dayPeriod=periodicNonDaily?boundsForDay(date):null;
+    const dayCompleted=!!dayPeriod&&cycleDone.has(dayPeriod.cycle);
+    const interval=FSJTaskPeriods.state(dayPeriod,date,today,{archived,archivedOn,completed:dayCompleted});
     const eligibleDaily=freq==='diaria'&&!!start&&date>=start&&(!archived||(archivedOn&&date<=archivedOn));
-    const actualExecution=done.has(date);const completed=period?actualExecution:done.has(date);const covered=!!period&&periodDone&&interval==='done'&&!actualExecution;const registered=periodicNonDaily&&date===start;
+    const actualExecution=done.has(date);const completed=actualExecution;const covered=!!dayPeriod&&dayCompleted&&interval==='done'&&!actualExecution;const registered=periodicNonDaily&&date===start;
     const absence=absenceOn(date),reason=absence?.motivo||'';
-    const overdue=period?interval==='late':absences.length>0&&!reason&&eligibleDaily&&date<today&&!completed;
+    const overdue=dayPeriod?interval==='late':absences.length>0&&!reason&&eligibleDaily&&date<today&&!completed;
     const color=registered?'#111111':completed?'#167044':covered?'#dbeafe':overdue?'#b91c1c':reason?({vacation:'#c9dcfa',holiday:'#f9e3a9',leave:'#bde7c9'}[absence.tipo]||'#bde7c9'):
      overdue?'#b91c1c':interval==='active'?'#def4e4':'#edf0ed';
     const cell=document.createElement('div');
     cell.dataset.competencia=completed?'done':absence?absence.tipo:overdue?'late':interval==='active'?'active':'';
     cell.style.cssText='min-height:58px;border-radius:7px;padding:5px 2px;text-align:center;border:1px solid #ccd5cf;background:'+color+';color:'+(registered||completed||overdue?'white':covered?'#185aa0':'#34483b');
-    if(pessoaId&&!somenteConsulta&&!archived&&(period?(!!interval||date===period.start)&&!hiddenMonth&&!validReturns.length&&!periodDone:eligibleDaily)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
+    if(pessoaId&&!somenteConsulta&&!archived&&(periodicNonDaily?!!interval&&!dayCompleted:eligibleDaily)&&!completed&&!reason&&date<=today){cell.setAttribute('role','button');cell.tabIndex=0;cell.title='Registrar conclusão de '+date+' como Proprietário';cell.style.cursor='pointer';const complete=async()=>{if(!confirm('Registrar conclusão de '+date.split('-').reverse().join('/')+' para '+(selectedPerson?.nick||selectedPerson?.name||'o executor')+'?'))return;cell.style.pointerEvents='none';status.textContent='Registrando conclusão autenticada…';try{const jwt=localStorage.getItem('fsj_access_token')||'';if(!jwt)throw Error('Sessão do Proprietário indisponível. Entre novamente.');const r=await fetch(ARMAZ_URL+'/functions/v1/fsj-calendario-proprietario',{method:'POST',headers:{'Content-Type':'application/json','apikey':ARMAZ_KEY,'Authorization':'Bearer '+jwt},body:JSON.stringify({tarefa_id:t.id,pessoa_id:pessoaId,dia:date})});const result=await r.json();if(!r.ok)throw Error(result.erro||'Não foi possível concluir');await draw();}catch(err){status.textContent='Falha no registro: '+err.message;cell.style.pointerEvents='';}};cell.onclick=complete;cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();complete()}};}
 
     const n=document.createElement('b');n.textContent=day;const label=document.createElement('small');label.style.cssText='display:block;font-size:9px;overflow-wrap:anywhere';label.textContent=registered?'CADASTRO':covered?'CUMPRIDA':completed?'CONCLUÍDA'+(reason?' · '+reason:''):reason|| (overdue?'NÃO CONCLUÍDA':interval==='active'?'NO PRAZO':period&&date===period.start?'REGISTRO':'');if(reason)cell.title=date+' — '+reason;cell.append(n,label);grid.append(cell);
    }
