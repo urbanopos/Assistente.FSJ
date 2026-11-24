@@ -75,7 +75,7 @@ async function abrirConsulta(area){const view=document.getElementById('consulta'
     const fmt=d=>parse(d).toLocaleDateString('pt-BR',{timeZone:'UTC'});
     calendar.replaceChildren();
     const bar=document.createElement('div');bar.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 8px';
-    const prev=document.createElement('button');prev.textContent='‹';prev.setAttribute('aria-label','Período anterior');prev.style.cssText='width:46px;padding:9px';prev.disabled=periodIndex<=-60;prev.onclick=()=>{periodIndex--;renderPeriod()};
+    const prev=document.createElement('button');prev.textContent='‹';prev.setAttribute('aria-label','Período anterior');prev.style.cssText='width:46px;padding:9px';prev.disabled=periodIndex<=-1;prev.onclick=()=>{periodIndex--;renderPeriod()};
     const label=document.createElement('strong');label.style.cssText='font-size:14px;text-align:center';label.textContent='Período: '+fmt(start)+' a '+fmt(end);
     const next=document.createElement('button');next.textContent='›';next.style.cssText='width:46px;padding:9px';next.onclick=()=>{periodIndex++;renderPeriod()};
     bar.append(prev,label,next);calendar.appendChild(bar);
@@ -88,13 +88,13 @@ async function abrirConsulta(area){const view=document.getElementById('consulta'
     const firstOffset=(parse(start).getUTCDay()+6)%7;
     for(let i=0;i<firstOffset;i++)grid.appendChild(document.createElement('span'));
     for(let i=0;i<days;i++){
-     const date=add(start,i),executed=!beforeStart&&executions.has(date);
-     const cell=document.createElement('span');cell.textContent=String(parse(date).getUTCDate());cell.title=fmt(date)+(executed?' — Executada':completed?' — Período cumprido':expired?' — Não cumprida':' — Aguardando');
-     cell.style.cssText='display:flex;align-items:center;justify-content:center;min-height:36px;border-radius:7px;font-weight:700;font-size:13px;background:'+(beforeStart?'#e2e2e2':executed?'#17663d':completed?'#dbeafe':expired?'#b91c1c':'#bde7c9')+';color:'+(beforeStart?'#666':executed||expired?'white':completed?'#185aa0':'#174b30');
+     const date=add(start,i),registered=date===created,executed=!beforeStart&&executions.has(date);
+     const cell=document.createElement('span');cell.textContent=String(parse(date).getUTCDate());cell.title=fmt(date)+(registered?' — Data de cadastro da tarefa':executed?' — Executada':completed?' — Período cumprido':expired?' — Não cumprida':' — Aguardando');
+     cell.style.cssText='display:flex;align-items:center;justify-content:center;min-height:36px;border-radius:7px;font-weight:700;font-size:13px;background:'+(registered?'#111111':beforeStart?'#e2e2e2':executed?'#17663d':completed?'#dbeafe':expired?'#b91c1c':'#bde7c9')+';color:'+(registered?'#ffffff':beforeStart?'#666':executed||expired?'white':completed?'#185aa0':'#174b30');
      grid.appendChild(cell);
     }
     calendar.appendChild(grid);
-    const note=document.createElement('p');note.style.cssText='font-size:12px;margin:9px 0';note.textContent=beforeStart?'Antes do início da tarefa: sem obrigação de execução.':completed?'Período cumprido. Verde: execução; azul: demais dias bloqueados.':expired?'Período vencido sem execução registrada.':'Período em andamento, aguardando execução.';
+    const note=document.createElement('p');note.style.cssText='font-size:12px;margin:9px 0';note.textContent=beforeStart?'Preto: data do cadastro da tarefa. Antes do primeiro período obrigatório, não há atraso.':completed?'Período cumprido. Verde: execução; azul: demais dias bloqueados.':expired?'Período vencido sem execução registrada.':'Período em andamento, aguardando execução.';
     calendar.appendChild(note);
    };
    renderPeriod();details.appendChild(calendar);
