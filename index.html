@@ -3800,7 +3800,8 @@ function records(id){
   if(statusFilter==='concluidas')return !archived&&completed;
   if(statusFilter==='andamento')return !archived&&!completed&&running;
   if(statusFilter==='pendentes')return !archived&&!completed&&pending;
-  if(statusFilter==='suspensas')return !archived&&!completed&&suspended;
+  // Interrupção definitiva é identificada pela data persistida, não pelo estado de execução suspensa.
+  if(statusFilter==='interrompidas')return !!t.interruptedOn;
   return !archived&&!completed&&!running&&!pending&&!suspended;
  };
  return filtered.filter(matchesStatus).sort((a,b)=>{
@@ -3849,7 +3850,12 @@ document.addEventListener('fsj:owner-menu-first-page',event=>{
  render();
 });
 panel.querySelectorAll('[data-fsj-owner-category]').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.fsjOwnerCategory;page=0;render()}));
-document.getElementById('fsjOwnerTaskStatus').addEventListener('change',event=>{statusFilter=event.target.value;page=0;render()});
+// Normalização defensiva de opções mantidas pelo navegador em sessões anteriores.
+const fsjOwnerStatusSelect=document.getElementById('fsjOwnerTaskStatus');
+for(const opt of [...fsjOwnerStatusSelect.options]){
+ if(opt.value==='suspensas'||opt.textContent.trim().toLowerCase()==='suspensas'){opt.value='interrompidas';opt.textContent='Interrompidas';}
+}
+fsjOwnerStatusSelect.addEventListener('change',event=>{statusFilter=event.target.value==='suspensas'?'interrompidas':event.target.value;page=0;render()});
 document.getElementById('fsjOwnerTaskRefresh').onclick=async event=>{
  const button=event.currentTarget;
  button.disabled=true;
