@@ -3948,16 +3948,48 @@ function init(){
   let runs=typeof fsjTemposExecucoes!=='undefined'&&Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[];
   if(typeof fsjLerExecucoesTempos==='function')try{runs=await fsjLerExecucoesTempos();if(seq!==renderSequence)return;}catch(e){if(!runs.length){output.textContent='Não foi possível consultar os registros atuais de conclusão.';return;}}
   const selected=person?.value||'';
-  const categories=[['Tarefas concluídas na data',[]]];
+  // O relatório considera a data efetiva da conclusão, inclusive retornos
+  // periódicos, pontuais e de grupo; não confunde dia previsto com dia concluído.
+  let returns=[];
+  try{
+   const startStamp=day+'T00:00:00-03:00';
+   const endDay=new Date(day+'T12:00:00Z');endDay.setUTCDate(endDay.getUTCDate()+1);
+   const next=endDay.toISOString().slice(0,10)+'T00:00:00-03:00';
+   for(let offset=0;;offset+=1000){
+    const page=await api('/rest/v1/retornos?select=tarefa_id,pessoa_id,tipo,criado_em,cancelado_por_revisao&tipo=eq.sim&cancelado_por_revisao=is.null&criado_em=gte.'+encodeURIComponent(startStamp)+'&criado_em=lt.'+encodeURIComponent(next)+'&limit=1000&offset='+offset);
+    returns.push(...page);
+    if(page.length<1000)break;
+   }
+  }catch(e){
+   output.textContent='Não foi possível consultar todas as conclusões registradas. Atualize e tente novamente.';
+   return;
+  }
+  if(seq!==renderSequence)return;
+  const completedByTask=new Map();
+  for(const run of runs){
+   if(!run.concluido_em||localDay(run.concluido_em)!==day||selected&&String(run.pessoa_id)!==selected)continue;
+   const id=String(run.tarefa_id);
+   if(!completedByTask.has(id))completedByTask.set(id,new Set());
+   completedByTask.get(id).add(String(run.pessoa_id));
+  }
+  for(const ret of returns){
+   if(localDay(ret.criado_em)!==day||selected&&String(ret.pessoa_id)!==selected)continue;
+   const id=String(ret.tarefa_id);
+   if(!completedByTask.has(id))completedByTask.set(id,new Set());
+   completedByTask.get(id).add(String(ret.pessoa_id));
+  }
+  const categories=[['Tarefas Periódicas',[]],['Tarefas Pontuais',[]],['Tarefas de Grupo',[]]];
   for(const task of tasks){
-   const tr=runs.filter(e=>String(e.tarefa_id)===String(task.id)&&(!selected||String(e.pessoa_id)===selected));
-   if(!tr.some(e=>localDay(e.concluido_em)===day))continue;
-   categories[0][1].push(task);
+   const executors=completedByTask.get(String(task.id));
+   if(!executors?.size)continue;
+   const frequency=String(task.frequency||'pontual').toLowerCase();
+   const index=task.groupId?2:frequency==='pontual'||frequency==='pontual_data'?1:0;
+   categories[index][1].push({task,executors});
   }
   for(const [title,items] of categories){
    const heading=document.createElement('h3');heading.textContent=title+' ('+items.length+')';output.append(heading);
    if(!items.length){const p=document.createElement('p');p.textContent='Nenhum registro confirmado nesta categoria.';output.append(p);continue;}
-   const list=document.createElement('ol');for(const task of items){
+   const list=document.createElement('ol');for(const {task,executors} of items){
     const li=document.createElement('li');li.style.margin='10px 0';
     const link=document.createElement('button');link.type='button';link.className='fsj-task-number '+(typeof fsjTaskClass==='function'?fsjTaskClass(task.priority||task.prioridade,task.centralStatus||task.status,typeof fsjExecucoes!=='undefined'&&fsjExecucoes.some(e=>e.tarefa_id===task.id&&e.estado==='em_andamento')):'');
     link.dataset.fsjTaskId=String(task.id);
@@ -3979,12 +4011,12 @@ function init(){
     },true);
     const executor=document.createElement('span');executor.className='fsj-report-daily-executor';
     executor.style.cssText='display:inline-block;margin-left:12px;font-size:13px;font-weight:600;color:#234b3e';
-    const responsibleNames=selected?(person?.selectedOptions?.[0]?.textContent||''):(typeof names==='function'?names(task):'');
+    const responsibleNames=[...executors].map(id=>{const p=(S.people||[]).find(p=>String(p.id)===id);return p?.nick||p?.name||p?.nome||id;}).join(' + ');
     executor.textContent='Responsável'+(responsibleNames.includes(' + ')?'is':'')+': '+(responsibleNames||'Não informado');
     li.append(link,executor);list.append(li);
    }output.append(list);
   }
-  const note=document.createElement('p');note.className='muted';note.textContent='Somente tarefas com conclusão registrada nesta data, vinculadas à pessoa que concluiu. Tarefas atribuídas, iniciadas ou em andamento não são contabilizadas.';output.append(note);
+  const note=document.createElement('p');note.className='muted';note.textContent='Conclusões efetivamente registradas na data, organizadas por tarefas periódicas, pontuais e de grupo. Cada tarefa aparece uma vez por categoria, mesmo com vários registros de execução.';output.append(note);
  }
  m.addEventListener('click',()=>switchTo('monthly'));d.addEventListener('click',()=>switchTo('daily'));date.addEventListener('change',render);person?.addEventListener('change',render);
  document.addEventListener('fsj:owner-menu-first-page',e=>{if(e.detail?.section==='relatorios')switchTo('daily')});
