@@ -183,6 +183,77 @@
     }
   }
 
+
+  // Conferência do Gestor: reutiliza a página individual existente, sem guardar
+  // o link/token na base ou no repositório. Ativado apenas para Proprietário Desktop.
+  const gestorMirror = document.createElement('section');
+  gestorMirror.id = 'fsjOwnerGestorMirror';
+  gestorMirror.hidden = true;
+  gestorMirror.style.cssText = 'width:100%;box-sizing:border-box;padding:8px;max-width:1200px;margin:0 auto';
+  gestorMirror.innerHTML = `
+    <div style="border:1px solid #cbdfe7;background:white;border-radius:12px;padding:16px;margin-bottom:10px">
+      <h2 style="margin:0 0 8px">Comunicação Gestor — Conferência</h2>
+      <p style="margin:0 0 10px">Esta área abre a mesma tela do link individual da Gestora. Somente consulta: não utilize controles que registrem ações. O link não será salvo neste aparelho nem no GitHub.</p>
+      <label for="fsjGestorLinkConferencia">Link individual recebido por WhatsApp</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:5px">
+        <input id="fsjGestorLinkConferencia" type="password" autocomplete="off" spellcheck="false"
+          placeholder="Cole o link individual da Gestora" style="flex:1 1 380px;min-width:0;min-height:42px;padding:9px;border:1px solid #a9cbd7;border-radius:8px">
+        <button type="button" id="fsjGestorAbrirConferencia" style="min-height:42px;background:#176341;color:#fff;border:0;border-radius:8px;padding:10px 16px">Visualizar tela da Gestora</button>
+        <button type="button" id="fsjGestorFecharConferencia" style="min-height:42px;background:#e5f2f7;border:1px solid #a9cbd7;border-radius:8px;padding:10px 16px">Encerrar conferência</button>
+      </div>
+      <p id="fsjGestorConferenciaStatus" role="status" style="font-size:13px;margin:8px 0 0"></p>
+    </div>
+    <iframe id="fsjGestorConferenciaFrame" title="Tela original do Gestor — conferência"
+      referrerpolicy="no-referrer" style="display:none;width:100%;height:min(75vh,800px);min-height:490px;border:1px solid #b8d3db;border-radius:10px;background:white"></iframe>`;
+  panel.append(gestorMirror);
+  const gestorLinkInput = gestorMirror.querySelector('#fsjGestorLinkConferencia');
+  const gestorFrame = gestorMirror.querySelector('#fsjGestorConferenciaFrame');
+  const gestorStatus = gestorMirror.querySelector('#fsjGestorConferenciaStatus');
+  function closeGestorMirror() {
+    gestorFrame.removeAttribute('src');
+    gestorFrame.style.display = 'none';
+    gestorLinkInput.value = '';
+    gestorStatus.textContent = '';
+    gestorMirror.hidden = true;
+    gestorMirror.classList.add('hidden');
+  }
+  function openGestorMirror() {
+    if (!eligible()) return;
+    closeMaintenance(); closeDiagnostic(); closeGestorMirror();
+    for (const child of panel.children) {
+      if (child !== gestorMirror) { child.hidden = true; child.classList.add('hidden'); }
+    }
+    gestorMirror.hidden = false;
+    gestorMirror.classList.remove('hidden');
+    sync();
+  }
+  gestorMirror.querySelector('#fsjGestorAbrirConferencia').addEventListener('click', () => {
+    if (!eligible() || gestorMirror.hidden) return;
+    try {
+      const raw = gestorLinkInput.value.trim();
+      const url = new URL(raw);
+      const token = new URLSearchParams(url.hash.replace(/^#/, '')).get('token');
+      if (url.origin !== 'https://urbanopos.github.io' ||
+          url.pathname !== '/Assistente.FSJ/celular/layouts/gestor/index.html' ||
+          !token || !/^[A-Za-z0-9._-]{20,640}$/.test(token)) {
+        throw new Error('Use exclusivamente o link individual da tela Gestor do Assistente FSJ.');
+      }
+      gestorFrame.src = url.href;
+      gestorFrame.style.display = 'block';
+      gestorStatus.textContent = 'Conferência aberta com a identidade e as permissões do destinatário. Os dados dependem da validação pelo serviço oficial.';
+      gestorLinkInput.value = '';
+    } catch (error) {
+      gestorStatus.textContent = error.message || 'Link inválido.';
+      gestorFrame.removeAttribute('src');
+      gestorFrame.style.display = 'none';
+    }
+  });
+  gestorMirror.querySelector('#fsjGestorFecharConferencia').addEventListener('click', () => {
+    if (!eligible()) return;
+    closeGestorMirror();
+    window.fsjSimpleSelectGo('dashboard');
+    sync();
+  });
   // Ponte única para todos os acessos (menu lateral, seletor e atalhos).
   window.fsjOwnerOpenEmbeddedModule = function(module) {
     if (!eligible() || !useSidebar) return false;
@@ -271,10 +342,13 @@
     const home = options.find(option => option.value === 'dashboard');
     const ordered = home ? [home, ...options.filter(option => option !== home)] : options;
     for (const { value, textContent } of ordered) {
-      const button = createButton(value === 'cadPessoas' ? 'Pessoas e Grupos' : textContent, '▸', () => {
+      const button = createButton(value === 'cadPessoas' ? 'Pessoas e Grupos' : (value === 'whatsapp' ? 'Comunicação Gestor' : textContent), '▸', () => {
         const option = [...menu.options].find(option => option.value === value);
         if (!eligible() || !useSidebar || !option || option.hidden || option.disabled || menu.disabled) return;
-        if (value === 'cadPessoas' && window.fsjOwnerPeopleGo) {
+        if (value !== 'whatsapp') closeGestorMirror();
+        if (value === 'whatsapp') {
+          openGestorMirror();
+        } else if (value === 'cadPessoas' && window.fsjOwnerPeopleGo) {
           closeDiagnostic(); closeMaintenance();
           window.fsjOwnerPeopleGo('edicao');
         } else if (value === '__diagnostico') {
@@ -338,7 +412,7 @@
     renderOptions(options);
     const page = typeof currentPage === 'undefined' ? menu.value : currentPage;
     const aliases = { fichaPessoa: 'cadPessoas', demandasGrupos: 'demandas', tarefasPorSituacao: 'demandas' };
-    const current = !maintenanceView.hidden ? '__manutencao' : (!diagnosticView.hidden ? '__diagnostico' : (aliases[page] || page));
+    const current = !gestorMirror.hidden ? 'whatsapp' : (!maintenanceView.hidden ? '__manutencao' : (!diagnosticView.hidden ? '__diagnostico' : (aliases[page] || page)));
     for (const option of options) {
       const button = pages.get(option.value);
       button.disabled = menu.disabled || option.disabled;
