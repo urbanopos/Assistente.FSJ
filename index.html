@@ -2041,7 +2041,7 @@ async function fsjAbrirPerguntas(){
  try{await Promise.all([fsjAtualizarRetornos(false),fsjCarregarRespostasPerguntas()]);fsjPerguntaIndice=0;fsjRenderPerguntas();}
  catch(e){status.textContent='Não foi possível carregar as perguntas. Confira a conexão e tente novamente.';}
 }
-async function abrirDemandasSituacao(situacao){if(!['Em aberto','Concluída','Pendente','Aguardando gestão'].includes(situacao))return;try{await fsjAtualizarRetornos();window.fsjFiltroResumoSituacao=situacao;navTo('tarefasPorSituacao');fsjRenderTarefasPorSituacao();}catch(e){alert('Não foi possível consultar os dados atuais do Supabase. Tente novamente.');}}
+async function abrirDemandasSituacao(situacao){if(!['Em aberto','Concluída','Pendente','Aguardando gestão','Interrompida'].includes(situacao))return;try{await fsjAtualizarRetornos();window.fsjFiltroResumoSituacao=situacao;navTo('tarefasPorSituacao');fsjRenderTarefasPorSituacao();}catch(e){alert('Não foi possível consultar os dados atuais do Supabase. Tente novamente.');}}
 let fsjExecucoes=[];
 let fsjTemposExecucoes=[];
 function fsjIntervaloHoras(start,end){if(!start||!end)return '—';const ms=new Date(end).getTime()-new Date(start).getTime();return Number.isFinite(ms)&&ms>=0?(ms/3600000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' h':'—';}
@@ -2080,7 +2080,7 @@ function fsjRenderTarefasPorSituacao(){
  let pager=document.getElementById('fsjOpenTasksPager');
  if(pager)pager.hidden=true;
  screen.querySelectorAll('[data-fsj-resumo-pager]').forEach(bar=>bar.remove());
- const labels={'Em aberto':'Em aberto','Concluída':'Concluídas','Pendente':'Pendentes','Aguardando gestão':'Perguntas'};
+ const labels={'Em aberto':'Em aberto','Concluída':'Concluídas','Pendente':'Pendentes','Aguardando gestão':'Perguntas','Interrompida':'Tarefas interrompidas'};
  title.textContent='Tarefas — '+(labels[status]||status);
  title.style.display=celularVisual?'none':'';
  box.replaceChildren();
@@ -2096,7 +2096,7 @@ function fsjRenderTarefasPorSituacao(){
  }
  // Filtro opcional: por padrão TODAS as tarefas do estado, inclusive coletivas.
  const oldPerson=filter.value;
- const allTasks=(S.tasks||[]).filter(t=>t.status===status);
+ const allTasks=(S.tasks||[]).filter(t=>status==='Interrompida'?!!t.interruptedOn:!t.interruptedOn&&t.status===status);
  const entries=completed?window.FSJOwnerCompleted.executors(allTasks,retornosDia||[],S.people||[],fsjDia(new Date()),fsjDia):[];
  const byTask=new Map(entries.map(entry=>[entry.task.id,entry]));
  const people=[...(S.people||[])].sort((a,b)=>(a.nick||a.name||'').localeCompare(b.nick||b.name||'','pt-BR'));
@@ -2433,7 +2433,7 @@ function fsjRenderTarefasEmExecucao(){
   if(!statusLabel){
    statusLabel=document.createElement('label');statusLabel.id='fsjExecucaoStatusLabel';statusLabel.textContent='Situação da tarefa ';
    const sel=document.createElement('select');sel.id='fsjExecucaoStatus';
-   [['Em aberto','Em aberto (padrão)'],['Em andamento','Em andamento'],['Pendente','Pendente'],['Concluída','Concluída'],['Arquivado','Arquivadas'],['Interrompida','Interrompidas'],['','Todas as situações']].forEach(([value,label])=>sel.add(new Option(label,value)));
+   [['Em aberto','Em aberto (padrão)'],['Em andamento','Em andamento'],['Pendente','Pendente'],['Concluída','Concluída'],['Arquivado','Arquivadas'],['Interrompida','Tarefas interrompidas'],['','Todas as situações']].forEach(([value,label])=>sel.add(new Option(label,value)));
    sel.addEventListener('change',()=>{
     const numero=document.getElementById('fsjExecucaoNumero');
     if(numero)numero.value='';
@@ -2506,7 +2506,7 @@ function fsjRenderTarefasEmExecucao(){
  const active=(Array.isArray(fsjTemposExecucoes)?fsjTemposExecucoes:[]).filter(e=>e.estado==='em_andamento'&&e.iniciado_em&&!e.concluido_em);
  const activeMap=new Map(active.map(e=>[String(e.tarefa_id),e]));
  const tasks=(S.tasks||[]).filter(t=>{
-  if(busca)return Boolean(numeroProcurado)&&normalizarNumero(t.code)===numeroProcurado;
+  if(busca)return Boolean(numeroProcurado)&&normalizarNumero(t.code)===numeroProcurado&&(document.getElementById('fsjExecucaoStatus')?.value==='Interrompida'||!t.interruptedOn);
   const archived=['Arquivado','Arquivada'].includes(t.centralStatus)||['Arquivado','Arquivada'].includes(t.status);
   const statusFiltro=desktop?document.getElementById('fsjExecucaoStatus')?.value??'Em aberto':'';
   const situacao=archived?'Arquivado':(activeMap.has(String(t.id))?'Em andamento':String(t.status||'Em aberto'));
@@ -2602,6 +2602,7 @@ async function fsjInterromperTarefaProprietario(t){
   t.interruptedOn=result.interrompida_em;
   await fsjAtualizarRetornos(false);
   fsjRenderTarefasEmExecucao();
+  if(typeof fsjRenderTarefasPorSituacao==='function'&&document.getElementById('tarefasPorSituacao')&&!document.getElementById('tarefasPorSituacao').classList.contains('hidden'))fsjRenderTarefasPorSituacao();
   alert('Periodicidade interrompida em '+result.interrompida_em.split('-').reverse().join('/')+'. Histórico preservado. Consulte pelo filtro Interrompidas.');
  }catch(e){alert('Interrupção não realizada: '+e.message);}
 }
