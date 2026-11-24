@@ -44,7 +44,48 @@ async function abrirConsulta(area){const view=document.getElementById('consulta'
   const heading=document.createElement('strong');heading.textContent=displayCode+' — '+(t.situacao||'Em aberto');heading.style.cssText='display:block;margin-bottom:8px';
   const description=document.createElement('p');description.textContent=full;description.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45;margin:0 0 10px';
   const metadata=document.createElement('p');metadata.style.cssText='font-size:13px;margin:0';metadata.textContent='Prioridade: '+(t.prioridade||'Normal')+' · Periodicidade: '+(t.periodicidade||'Pontual');
-  const frequency=String(t.periodicidade||'').toLowerCase();const days={semanal:7,quinzenal:14,mensal:30,trimestral:90,semestral:180,anual:365}[frequency];if(days&&t.criada_em){const created=new Date(t.criada_em);const base=new Date(created.toLocaleString('en-US',{timeZone:'America/Recife'}));if(!isNaN(base.getTime())){const first=new Date(Date.UTC(base.getFullYear(),base.getMonth(),base.getDate()));first.setUTCDate(first.getUTCDate()+((8-first.getUTCDay())%7||7));const today=new Date(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())+'T00:00:00Z');const elapsed=Math.max(0,Math.floor((today-first)/86400000));const start=new Date(first);start.setUTCDate(first.getUTCDate()+Math.floor(elapsed/days)*days);const end=new Date(start);end.setUTCDate(start.getUTCDate()+days-1);const fmt=d=>d.toLocaleDateString('pt-BR',{timeZone:'UTC'});const periodText=document.createElement('p');periodText.style.cssText='font-weight:700;color:#194d35';periodText.textContent='Período de execução: '+fmt(start)+' a '+fmt(end);details.append(periodText);}}details.append(heading,description,metadata);
+  const frequency=String(t.periodicidade||'').toLowerCase();
+  const days={semanal:7,quinzenal:14,mensal:30,trimestral:90,semestral:180,anual:365}[frequency];
+  details.append(heading,description,metadata);
+  if(days&&t.criada_em){
+   const local=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Recife'});
+   const created=local.format(new Date(t.criada_em));
+   const parse=d=>new Date(d+'T00:00:00Z');
+   const iso=d=>d.toISOString().slice(0,10);
+   const add=(d,n)=>new Date(parse(d).getTime()+n*86400000).toISOString().slice(0,10);
+   const first=add(created,(8-parse(created).getUTCDay())%7||7);
+   const today=local.format(new Date());
+   let periodIndex=today>=first?Math.floor((parse(today)-parse(first))/(days*86400000)):0;
+   const calendar=document.createElement('div');
+   const renderPeriod=()=>{
+    const start=add(first,periodIndex*days),end=add(start,days-1);
+    const fmt=d=>parse(d).toLocaleDateString('pt-BR',{timeZone:'UTC'});
+    calendar.replaceChildren();
+    const bar=document.createElement('div');bar.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 8px';
+    const prev=document.createElement('button');prev.textContent='‹';prev.style.cssText='width:46px;padding:9px';prev.disabled=periodIndex<=0;prev.onclick=()=>{periodIndex--;renderPeriod()};
+    const label=document.createElement('strong');label.style.cssText='font-size:14px;text-align:center';label.textContent='Período: '+fmt(start)+' a '+fmt(end);
+    const next=document.createElement('button');next.textContent='›';next.style.cssText='width:46px;padding:9px';next.onclick=()=>{periodIndex++;renderPeriod()};
+    bar.append(prev,label,next);calendar.appendChild(bar);
+    const chosen=personSelect.value;
+    const valid=(data.execucoes||[]).filter(r=>String(r.tarefa_id)===String(t.id)&&(!chosen||String(r.pessoa_id)===chosen)&&r.dia>=start&&r.dia<=end);
+    const completed=valid.length>0,expired=end<today;
+    const executions=new Set(valid.map(r=>r.dia));
+    const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px';
+    for(const name of ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom']){const head=document.createElement('span');head.textContent=name;head.style.cssText='font-size:11px;text-align:center';grid.appendChild(head)}
+    const firstOffset=(parse(start).getUTCDay()+6)%7;
+    for(let i=0;i<firstOffset;i++)grid.appendChild(document.createElement('span'));
+    for(let i=0;i<days;i++){
+     const date=add(start,i),executed=executions.has(date);
+     const cell=document.createElement('span');cell.textContent=String(parse(date).getUTCDate());cell.title=fmt(date)+(executed?' — Executada':completed?' — Período cumprido':expired?' — Não cumprida':' — Aguardando');
+     cell.style.cssText='display:flex;align-items:center;justify-content:center;min-height:36px;border-radius:7px;font-weight:700;font-size:13px;background:'+(executed?'#17663d':completed?'#dbeafe':expired?'#b91c1c':'#bde7c9')+';color:'+(executed||expired?'white':completed?'#185aa0':'#174b30');
+     grid.appendChild(cell);
+    }
+    calendar.appendChild(grid);
+    const note=document.createElement('p');note.style.cssText='font-size:12px;margin:9px 0';note.textContent=completed?'Período cumprido. Verde: execução; azul: demais dias bloqueados.':expired?'Período vencido sem execução registrada.':'Período em andamento, aguardando execução.';
+    calendar.appendChild(note);
+   };
+   renderPeriod();details.appendChild(calendar);
+  }
   const back=document.createElement('button');back.type='button';back.textContent='Voltar à lista';back.style.cssText='margin-top:8px';back.onclick=()=>paint(type,page);
   list.append(details,back);
  };
