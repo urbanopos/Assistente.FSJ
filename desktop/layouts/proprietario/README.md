@@ -75,3 +75,13 @@ Na tarefa diária, concluir o botão do dia marca apenas aquela ocorrência. O d
 ## Folgas e feriados nos calendários de tarefas
 
 Os calendários de consulta e de registro de tarefas usam as dispensas do calendário individual oficial antes de classificar atrasos. O botão-dia da tarefa em **Tarefas em Execução** leva a pessoa selecionada ao calendário. Folgas, férias e feriados gozados têm marcação própria e bloqueiam a conclusão naquele dia. O feriado trabalhado por autorização ou compensação é elegível, e a data da folga compensatória fica dispensada. Em consulta consolidada, o dia só é dispensado quando todos os responsáveis estão dispensados.
+
+
+## Comunicação Gestor — conferência (proposta em testes, 24/11/2026)
+- Item `Comunicação` do menu lateral Desktop do Proprietário passa a se chamar `Comunicação Gestor`, isoladamente nesta ramificação.
+- A tela utiliza um iframe da interface **existente** `celular/layouts/gestor/index.html`. Não cria um Desktop Gestor novo.
+- A conferência exige colar manualmente o link individual autorizado de Gestor, válido para `https://urbanopos.github.io/Assistente.FSJ/celular/layouts/gestor/index.html#token=...`; credenciais não são gravadas em código, armazenamento, banco ou logs pela área de conferência.
+- O serviço `fsj-index-identidade` continua responsável por validar o destinatário e suas permissões. Não existe substituição de identidade, promoção ou acesso técnico por este menu.
+- Ao sair da conferência, o iframe é descarregado e o campo de link é limpo. A navegação restante mantém os destinos anteriores.
+- **Limitação:** até existir uma API autenticada de conferência que emita credenciais delegadas específicas, o Proprietário precisa fornecer o link recebido. As operações da página individual continuam subordinadas às permissões daquele destinatário; não há garantia de somente leitura para ações que venham a ser acrescentadas futuramente à página do Gestor. Não utilizar para gravar ações em nome da Gestora.
+- Testar no Desktop proprietário real: menu, colagem de URL válida e inválida, abertura de tarefa/calendário, saída, retorno às outras telas, perfil não proprietário e navegador sem sessão do Proprietário. Não promover para produção sem teste de regressão.

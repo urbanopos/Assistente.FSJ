@@ -1016,3 +1016,12 @@ Commit `e4483311865ff69a52b03469cf750ec234044683`: nos cartões de Demandas e Re
 
 ## REGRA GERAL VINCULANTE — FSJ-HOMOLOGACAO-001 — 22/11/2026
 **Determinação do Proprietário:** tudo que já foi validado permanece intocável, exceto mediante pedido expresso do Proprietário. Toda orientação antiga ou futura do manual deve ser interpretada conforme esta norma; trechos que pareçam permitir melhorias implícitas, refatorações gerais, alterações por efeito colateral ou restauração de soluções rejeitadas não autorizam mudanças. O pedido define o escopo exato (seção, perfil, plataforma e função); preservar os demais módulos, dados, registros, cores, filtros, navegação e layout. Antes de publicar, verificar compatibilidade e riscos de regressão; manter capacidade de recuperação; testar o comportamento afetado sem modificar regras homologadas. Publicação de commit não equivale a validação no aparelho. Somente o Proprietário homologa. Limpeza de código antigo exige prova de obsolescência e ausência de efeitos colaterais, não apagamento indiscriminado de histórico ou registros. Em caso de conflito entre instruções operacionais do projeto, prevalece esta regra de preservação.
+
+
+## 24/11/2026 — Comunicação Gestor no Desktop Proprietário (ramificação de teste)
+- **Solicitado:** renomear Comunicação para Comunicação Gestor e permitir ao Proprietário conferir exatamente a interface já utilizada por Regina, Gestora ativa, sem ampliar suas permissões.
+- **Implementação de teste:** adaptador do menu `desktop/layouts/proprietario/menu-lateral.js` apresenta uma área de conferência com a interface individual `celular/layouts/gestor/index.html` carregada a partir do link do destinatário informado em campo protegido. A URL é validada por domínio e caminho.
+- **Segurança:** nenhuma credencial do destinatário é registrada no repositório; a entrada é validada pelo serviço oficial de identidade; ao fechar, limpa-se o campo e descarrega-se o iframe. Este recurso não é um mecanismo de delegação administrativa e não fornece automaticamente acesso de Gestor.
+- **Situação:** somente código proposto numa branch de testes; não publicado em produção, não instalado na VM e não validado pelo Proprietário.
+- **Não alterados:** item independente Disparo Emergencial, envios WhatsApp, sessões de login, banco Supabase, serviço da VM, perfis e permissões.
+- **Recuperação:** reverter o commit da ramificação ou descartar a branch preserva a versão operacional, sem migrações.

@@ -1,0 +1,20 @@
+name: Comunicação Gestor — conferência consultiva
+on:
+  pull_request:
+    paths:
+      - 'desktop/layouts/proprietario/menu-lateral.js'
+      - 'tests/comunicacao-gestor-conferencia.cjs'
+      - '.github/workflows/comunicacao-gestor-conferencia.yml'
+  push:
+    branches:
+      - 'feature/comunicacao-gestor-conferencia-20261124'
+jobs:
+  contrato-conferencia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar escopo do menu Gestor e segurança do link
+        run: node --test tests/comunicacao-gestor-conferencia.cjs
