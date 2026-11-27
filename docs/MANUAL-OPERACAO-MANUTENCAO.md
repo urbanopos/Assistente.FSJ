@@ -1024,3 +1024,7 @@ Commit `e4483311865ff69a52b03469cf750ec234044683`: nos cartões de Demandas e Re
 - Inclusão ou restauração de botão TV FSJ deve reutilizar a rotina homologada do perfil correspondente; para Gestor, reutilizar a rotina de espectador do Executor, sem privilégios de Proprietário. Gestor celular validado pelo Proprietário em 27/11/2026, commit 36f67a40095266ccb1f9387344fa429313affe5c.
 - Nenhuma atualização, refatoração, migração Supabase–Debian ou manutenção de outro módulo autoriza alterar a infraestrutura TV FSJ. Exigir autorização expressa e específica do Proprietário, backup recuperável e testes de acesso interno/externo e permissões antes de declarar homologação. Preservar a renovação automática já estabelecida.
 - Em caso de falha, diagnosticar primeiro sem modificar a configuração homologada; não substituir IPs, rotas, certificados ou mecanismos de segurança por tentativa. Alterações documentais não autorizam reiniciar serviços.
+
+## Gestor celular — botão Sair (27/11/2026)
+
+Publicado no commit 6b2ffd1e75a50379846298b8a7a2e84ec8c8bbc7: botão Sair no canto superior direito do cabeçalho de celular/layouts/gestor/index.html, com destino à tela fsj-encerrado.html sem token e substituição da entrada no histórico. Preserva acesso individual, registros, TV FSJ e demais perfis. Recuperação: reverter exclusivamente o commit indicado. Validação no aparelho pendente; não houve teste de navegador nesta entrega.
