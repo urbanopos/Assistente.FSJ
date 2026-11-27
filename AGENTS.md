@@ -37,3 +37,11 @@ Para mudanças no Desktop do Proprietário, confira o contrato em desktop/layout
 - O link individual mantém o destinatário, inclusive quando aberto pelo Proprietário para conferência. Sessão administrativa salva não substitui esse destinatário.
 - Usuário comum jamais recebe perfil ou privilégios de Proprietário por URL, link encaminhado, token isolado ou estado local. Exigir validação da identidade titular e autorização no servidor; falhar negando o privilégio.
 - Não confundir registro destes critérios com implantação integral. Preservar a distinção entre destinatário do link e identidade autenticada de quem o abre.
+
+
+## FSJ-TV-PROTECAO-001 — infraestrutura e acesso homologados (27/11/2026)
+
+- Preservar IPs internos e externos, portas, NAT, encaminhamentos, DNS quando aplicável, certificados HTTPS e renovação, autenticação, tokens, permissões, serviços Debian e rotas de acesso da TV FSJ. Não registrar segredos neste documento.
+- Inclusão ou restauração de botão TV FSJ deve reutilizar a rotina homologada do perfil correspondente; para Gestor, reutilizar a rotina de espectador do Executor, sem privilégios de Proprietário. Gestor celular validado pelo Proprietário em 27/11/2026, commit 36f67a40095266ccb1f9387344fa429313affe5c.
+- Nenhuma atualização, refatoração, migração Supabase–Debian ou manutenção de outro módulo autoriza alterar a infraestrutura TV FSJ. Exigir autorização expressa e específica do Proprietário, backup recuperável e testes de acesso interno/externo e permissões antes de declarar homologação. Preservar a renovação automática já estabelecida.
+- Em caso de falha, diagnosticar primeiro sem modificar a configuração homologada; não substituir IPs, rotas, certificados ou mecanismos de segurança por tentativa. Alterações documentais não autorizam reiniciar serviços.
