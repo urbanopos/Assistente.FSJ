@@ -1016,3 +1016,11 @@ Commit `e4483311865ff69a52b03469cf750ec234044683`: nos cartões de Demandas e Re
 
 ## REGRA GERAL VINCULANTE — FSJ-HOMOLOGACAO-001 — 22/11/2026
 **Determinação do Proprietário:** tudo que já foi validado permanece intocável, exceto mediante pedido expresso do Proprietário. Toda orientação antiga ou futura do manual deve ser interpretada conforme esta norma; trechos que pareçam permitir melhorias implícitas, refatorações gerais, alterações por efeito colateral ou restauração de soluções rejeitadas não autorizam mudanças. O pedido define o escopo exato (seção, perfil, plataforma e função); preservar os demais módulos, dados, registros, cores, filtros, navegação e layout. Antes de publicar, verificar compatibilidade e riscos de regressão; manter capacidade de recuperação; testar o comportamento afetado sem modificar regras homologadas. Publicação de commit não equivale a validação no aparelho. Somente o Proprietário homologa. Limpeza de código antigo exige prova de obsolescência e ausência de efeitos colaterais, não apagamento indiscriminado de histórico ou registros. Em caso de conflito entre instruções operacionais do projeto, prevalece esta regra de preservação.
+
+
+## FSJ-TV-PROTECAO-001 — infraestrutura e acesso homologados (27/11/2026)
+
+- Preservar IPs internos e externos, portas, NAT, encaminhamentos, DNS quando aplicável, certificados HTTPS e renovação, autenticação, tokens, permissões, serviços Debian e rotas de acesso da TV FSJ. Não registrar segredos neste documento.
+- Inclusão ou restauração de botão TV FSJ deve reutilizar a rotina homologada do perfil correspondente; para Gestor, reutilizar a rotina de espectador do Executor, sem privilégios de Proprietário. Gestor celular validado pelo Proprietário em 27/11/2026, commit 36f67a40095266ccb1f9387344fa429313affe5c.
+- Nenhuma atualização, refatoração, migração Supabase–Debian ou manutenção de outro módulo autoriza alterar a infraestrutura TV FSJ. Exigir autorização expressa e específica do Proprietário, backup recuperável e testes de acesso interno/externo e permissões antes de declarar homologação. Preservar a renovação automática já estabelecida.
+- Em caso de falha, diagnosticar primeiro sem modificar a configuração homologada; não substituir IPs, rotas, certificados ou mecanismos de segurança por tentativa. Alterações documentais não autorizam reiniciar serviços.
