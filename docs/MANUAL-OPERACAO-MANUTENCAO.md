@@ -1028,3 +1028,5 @@ Commit `e4483311865ff69a52b03469cf750ec234044683`: nos cartões de Demandas e Re
 ## Gestor celular — botão Sair (27/11/2026)
 
 Publicado no commit 6b2ffd1e75a50379846298b8a7a2e84ec8c8bbc7: botão Sair no canto superior direito do cabeçalho de celular/layouts/gestor/index.html, com destino à tela fsj-encerrado.html sem token e substituição da entrada no histórico. Preserva acesso individual, registros, TV FSJ e demais perfis. Recuperação: reverter exclusivamente o commit indicado. Validação no aparelho pendente; não houve teste de navegador nesta entrega.
+
+**Reversão em 27/11/2026:** a pedido do Proprietário, alteração do botão Sair revertida no commit a119ed5ac99459f1732fba4774aeb2ad75b19603 após relato de apresentação incorreta do perfil. Arquivo original restaurado integralmente; validação no aparelho pendente. A seção anterior é histórica, não vigente.
